@@ -40,7 +40,7 @@ let App = new Vue({
 		})
 		.on('drop', function (el, target, source, sibling) {
 			$(el).removeClass('draggable').removeClass('move')
-			$(target).html('Coming soon')
+			//$(target).html('Coming soon')
 		})
 	}
 })

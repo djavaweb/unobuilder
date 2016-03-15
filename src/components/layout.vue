@@ -1,7 +1,7 @@
 <template>
 <div class="uk-grid">
 	<div class="uk-width-7-10">
-		<div id="target" class="uk-flex uk-flex-wrap-space-around">
+		<div id="target">
 			Drop here
 		</div>
 	</div>
@@ -102,6 +102,10 @@ body {
     cursor: grabbing;
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
+}
+
+.draggable {
+	height: auto
 }
 
 .draggable .item {

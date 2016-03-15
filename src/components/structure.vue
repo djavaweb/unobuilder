@@ -45,8 +45,8 @@ export default {
 
 	.uk-panel {
 		padding: 10px;
+		margin: 0;
 		&:before {
-			margin: 5px;
 			background: #D3D3D3;
 			content: ' ';
 			display: block;
