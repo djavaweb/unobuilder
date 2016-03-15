@@ -1,1 +1,1 @@
-BitBuilder is Responsive and Flexible Drag and Drop Layout. Powered by Vue.
+BitBuilder is Responsive and Flexible Drag and Drop Layout Builder. Powered by Vue.
