@@ -1,0 +1,41 @@
+{
+	"name": "btbldr",
+	"version": "1.0.0",
+	"description": "Responsive and Flexible Drag and Drop Layout. Powered by VueJS.",
+	"scripts": {
+		"dev": "webpack-dev-server --inline --hot --no-info",
+		"build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/yoneth/btbldr.git"
+	},
+	"author": "DjavaWeb",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/yoneth/btbldr/issues"
+	},
+	"homepage": "https://github.com/yoneth/btbldr",
+	"devDependencies": {
+		"babel-core": "*",
+		"babel-loader": "*",
+		"babel-plugin-transform-runtime": "*",
+		"babel-preset-es2015": "*",
+		"babel-runtime": "*",
+		"less": "*",
+		"cross-env": "*",
+		"css-loader": "*",
+		"vue-hot-reload-api": "*",
+		"vue-html-loader": "*",
+		"vue-loader": "*",
+		"vue-style-loader": "*",
+		"webpack": "*",
+		"webpack-dev-server": "*"
+	},
+	"dependencies": {
+		"es6-promise": "*",
+		"firebase": "*",
+		"vue": "*",
+		"vue-router": "*"
+	}
+}
