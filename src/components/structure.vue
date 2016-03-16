@@ -1,5 +1,5 @@
 <template>
-<div class="draggable structure">
+<div class="draggable structure" data-width="{{width}}">
 	<div class="uk-grid uk-grid-collapse">
 		<div v-for="item in getWidth()" class="uk-width-{{item}}" track-by="$index">
 			<div class="uk-panel uk-panel-space uk-panel-box"></div>
@@ -22,7 +22,7 @@ export default {
 			columns = columns.map(item => item + '-' + suffix);
 			return columns
 		}
-	},
+	}
 }
 </script>
 
@@ -33,6 +33,14 @@ export default {
 	border: 1px solid #DDDDDD;
 	padding: 10px;
 	margin-bottom: 15px;
+	height: 42px;
+
+	&.move {
+		.uk-grid {
+			display: none
+		}
+	}
+
 	&:before {
 		content: ' ';
 		background: #E0E0E0;
