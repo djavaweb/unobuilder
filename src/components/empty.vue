@@ -8,6 +8,21 @@
 </div>
 </template>
 
+<style lang="less">
+@import "../css/vars.less";
+.empty.content {
+	color: #3498db;
+
+	p {
+		margin: 0;
+	}
+
+	.uk-panel {
+		border: 1px dashed @peterriver
+	}
+}
+</style>
+
 <script>
 export default {
 	name: 'Empty',

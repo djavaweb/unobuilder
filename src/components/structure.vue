@@ -35,10 +35,10 @@ export default {
 	margin-bottom: 15px;
 	height: 42px;
 
-	&.move {
-		.uk-grid {
-			display: none
-		}
+	&:hover {
+		border-color: #ffffff;
+	    box-shadow: 0 4px 15px 1px rgba(0, 0, 0, 0.3);
+	    border-radius: 5px;
 	}
 
 	&:before {

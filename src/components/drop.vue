@@ -1,16 +1,21 @@
 <template>
-<div class="dropable"></div>
+<div class="dropable" :class="[position]"></div>
 </template>
 
 <style lang="less">
-@peterriver: #3498db;
-
+@import "../css/vars.less";
 .dropable {
 	height: 5px;
-	margin-top: -5px;
-	position: relative;
-	z-index:999;
-	width: 100%;
+    position: absolute;
+    z-index: 999;
+    width: 100%;
+    left: 0;
+    top: 100%;
+
+    &.relative {
+    	position: relative;
+    }
+
 	&:after {
 		display: none;
 		content: 'Drag it here';
@@ -20,6 +25,8 @@
 		color: white;
 		height: 23px;
 		font-size: 12px;
+    	border-right: 2px solid #3498db;
+    	border-left: 2px solid #3498db;
 	}
 }
 
@@ -33,24 +40,13 @@
 		display: table;
 	}
 }
-
-.empty.content {
-	padding: 5px;
-	color: #3498db;
-
-	p {
-		margin: 0;
-	}
-	.uk-panel {
-		border: 1px dashed @peterriver
-	}
-}
 </style>
 
 <script>
 export default {
 	name: 'Drop',
-	ready: function () {
+	props: ['position'],
+	ready () {
 		this.$el.setAttribute('id', 'dropable-' + Date.now())
 	}
 }

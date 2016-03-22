@@ -8,8 +8,6 @@
 export default {
 	name: "Content",
 	props: ['width', 'label'],
-	data() {
-
-	}
+	data() {}
 }
 </script>
