@@ -1,6 +1,6 @@
 import Vue from "vue"
 
-/* Polyfill */
+/* Polyfill of classList */
 import classList from "./js/classlist.js"
 
 /* Vue Config */
