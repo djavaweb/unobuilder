@@ -33,7 +33,7 @@
 		</ul>
 		<ul class="row-tab uk-tab uk-tab-grid" data-tab-id="responsive" data-uk-switcher="{connect: '#properties-blank'}" :class="[propTabs.row.class]" v-show="propTabs.row.current===3">
 			<li class="uk-disabled">{{propTabs.responsive.label}} <info :text="propTabs.responsive.info"></info></li>
-			<li class="uk-width-1-6" v-for="tab in propTabs.responsive.items" track-by="$index" data-breakpoint="{{tab.id}}" data-index="{{$index}}" :class="{'uk-active': $index === propTabs.responsive.current}">
+			<li class="uk-width-1-6" v-for="tab in propTabs.responsive.items" track-by="$index" data-breakpoint="{{tab.id}}" data-index="{{$index}}" :class="{'uk-active': tab.id === current.selected}">
 				<a>{{tab.label}}</a>
 			</li>
 		</ul>
@@ -356,7 +356,7 @@ export default {
 			},
 			view: 'tab',
 			current: {
-				selected: null,
+				selected: 'large',
 				properties: {responsive:{}},
 				element: null
 			},
@@ -420,7 +420,6 @@ export default {
 				this.viewing('properties');
 			}
 
-			this.$set('current.selected', 'large');
 			this.$set('current.properties', element);
 		},
 
