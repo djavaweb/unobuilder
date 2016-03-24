@@ -9,4 +9,4 @@ Install dependencies using ``npm install``, then run with
 
 ## Build
 
-Use npm build command ``npm build``
+Use npm build command ``npm run build``
