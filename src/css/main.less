@@ -24,6 +24,7 @@ body {
 	overflow-y: auto;
 	width: auto;
 	height: 100%;
+	padding: 20px 0
 }
 
 #menu {
@@ -141,11 +142,54 @@ body {
 		.uk-flex-wrap;
 		.uk-flex-wrap-space-between;
 	}
-	.sortable {
+	.sortable-handler {
 		display: none;
 	}
-	&.selected .sortable, &:not(.normal):hover > .layout-row .sortable {
+	&.selected .sortable-handler, &:not(.normal):hover > .layout-row .sortable-handler {
 		display: block;
+	}
+	.layout-label {
+		position: absolute;
+		bottom: -22px;
+		right: -2px;
+		background: #3498db;
+		padding: 1px 15px;
+		font-size: 11px;
+		color: #ffffff;
+		display: none
+	}
+	.layout-tool {
+		display: none;
+		position: absolute;
+		top: 5px;
+		right: 5px;
+		z-index: 999;
+		a {
+			padding: 5px;
+			color: #ffffff;
+			background: #3498db;
+			&.delete:hover {
+				background: #c0392b
+			}
+		}
+	}
+	&:hover {
+		z-index: 999;
+		> .layout-label {
+			display: inline-block
+		}
+	}
+	&.selected {
+		.layout-tool {
+			display: inline-block;
+		}
+
+		&:hover {
+			z-index: 999;
+			> .layout-label {
+				display: none
+			}
+		}
 	}
 }
 .inspectable {

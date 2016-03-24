@@ -1,16 +1,12 @@
 <template>
-<div class="dropable" :class="[position]"></div>
+<div class="dropable" :class="[position, class]"></div>
 </template>
 
 <style lang="less">
 @import "../css/vars.less";
 .dropable {
 	height: 5px;
-	position: absolute;
-	z-index: 999;
-	width: 100%;
-	left: 0;
-	top: 100%;
+	position: relative;
 
 	&.relative {
 		position: relative;
@@ -20,22 +16,28 @@
 		content: ' ';
 		width: 100%;
 		position: absolute;
-		height: 200px;
-		top: -100px;
+		top: -30px;
 		display: none;
+		z-index: 1;
+		height: 35px;
+		border-bottom: 5px solid #3498db;
 	}
 
 	&:after {
 		display: none;
 		content: 'Drag it here';
-		padding: 0px 9px;
+		padding: 2px 15px;
 		background: #3498db;
-		margin: 5px auto 0;
+		margin: 0 auto;
 		color: white;
-		height: 23px;
 		font-size: 12px;
-    	border-right: 2px solid #3498db;
-    	border-left: 2px solid #3498db;
+		border-right: 2px solid #3498db;
+		border-left: 2px solid #3498db;
+		z-index: 2;
+		border-radius: 20px;
+		position: absolute;
+		top: -5px;
+		left: 47%;
 	}
 }
 
@@ -44,7 +46,6 @@
 }
 
 .drop-enter {
-	background-color: @peterriver;
 	&:after, &:before {
 		display: table;
 	}
@@ -55,7 +56,8 @@
 export default {
 	name: 'Drop',
 	props: {
-		position: {default: ''}
+		position: {default: ''},
+		class: {default: ''}
 	},
 	ready () {
 		let self = this, $el = $(self.$el)

@@ -53,7 +53,7 @@ export default {
 	},
 	ready () {
 		let self = this
-		this.$on('click', function (params) {
+		this.$on('clicked', function (params) {
 			let el = params.el
 			if (!el.classList.contains('cp')) self.close()
 		})

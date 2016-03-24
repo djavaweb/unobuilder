@@ -1,9 +1,9 @@
 <template>
-<div class="sortable uk-icon-arrows"></div>
+<div class="sortable-handler uk-icon-arrows" :class="[class]"></div>
 </template>
 
 <style lang="less">
-.sortable {
+.sortable-handler {
 	background: #3498db;
 	color: #ffffff;
     z-index: 99;
@@ -20,6 +20,7 @@
 
 <script>
 export default {
-	name: "sortableHandler"
+	name: "sortableHandler",
+	props: ['class']
 }
 </script>

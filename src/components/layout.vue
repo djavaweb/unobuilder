@@ -1,5 +1,5 @@
 <template>
-<div id="menu">
+<div id="menu" @mouseover="editProperties=true" @mouseleave="editProperties=false">
 	<ul id="menu-tab" class="uk-tab uk-tab-grid" data-uk-switcher="{connect:'#tab'}" @click="viewing('tab')">
 		<li class="uk-width-1-4" v-for="tab in tabs" track-by="$index" :class="{'uk-active': $index === 1}">
 			<a><i class="uk-icon-{{tab.icon}}"></i> {{tab.label}}</a>
@@ -222,7 +222,7 @@
 <div id="layout-wrapper">
 	<device :enable="device.enable" :style="device.style" :rotate="device.rotate">
 		<div id="layout">
-			<drop position="relative"></drop>
+			<drop class="layout-dropable" position="relative"></drop>
 			<div id="{{element.id}}" class="layout-item inspectable" v-for="element in elements" @click="setProperties(element)" :class="{'selected': element.id === current.element}" track-by="$index" data-uk-grid-match>
 				<div class="layout-wrap">
 					<div class="layout-row" :style="style(element)">
@@ -232,15 +232,20 @@
 								@click="setProperties(container)"
 								@mouseenter.self="inspect($event, true)"
 								@mouseleave.self="inspect($event, false)"
-								class="uk-width-{{container.width}} uk-grid-match">
+								class="layout-container uk-width-{{container.width}} uk-grid-match">
 
-								<empty v-if="empty(container.items)"></empty>
+								<empty class="layout-empty" v-if="empty(container.items)"></empty>
 							</div>
 						</div>
 					</div>
-					<sortable-handler></sortable-handler>
+					<sortable-handler class="layout-sortable"></sortable-handler>
 				</div>
-				<drop v-if="!empty(element.containers)"></drop>
+				<div class="layout-tool">
+					<a class="layout delete uk-icon-trash"></a>
+					<a class="layout copy uk-icon-copy"></a>
+				</div>
+				<div class="layout-label">{{element.label}}</div>
+				<drop class="layout-dropable" v-if="!empty(element.containers)"></drop>
 			</div>
 		</div>
 	</device>
@@ -258,6 +263,7 @@
 <script>
 /* Dependencies */
 import Drag from "interact.js"
+import Sortable from "../js/sortable.min.js"
 import _ from "underscore"
 
 /* Content */
@@ -365,6 +371,7 @@ export default {
 				style: 'iphone6',
 				rotate: ''
 			},
+			editProperties: false,
 			bgType: BackgroundType
 		}
 	},
@@ -420,6 +427,7 @@ export default {
 				this.viewing('properties');
 			}
 
+			$('#menu-tab').data().switcher.show(1);
 			this.$set('current.properties', element);
 		},
 
@@ -545,6 +553,14 @@ export default {
 				}
 			}
 		});
+
+		/* Hide selected layout when onclick outside */
+		self.$on('click', function (params) {
+			let el = params.el
+			if (! el.className.includes('layout') && ! self.editProperties) {
+				self.viewing('tab')
+			}
+		})
 
 
 		/* Watch cached */
@@ -864,6 +880,7 @@ export default {
 					let element = $.extend(true, {}, defaultProps)
 					element.id = elementId
 					element.attribute.id.value = elementId
+					element.label = 'Structure'
 
 					/**
 					* Copy element properties into responsive
@@ -952,6 +969,7 @@ export default {
 			}
 		})
 
+		/* Draggable */
 		const drag = Drag('.draggable').draggable({
 			inertia: false,
 			autoScroll: false,
@@ -990,6 +1008,20 @@ export default {
 				if (interaction.start && event.interactable) {
 					interaction.start({ name: 'drag' }, event.interactable, clone);
 				}
+			}
+		})
+
+		/* Sortable */
+		const sortable = new Sortable(document.querySelector('#layout'), {
+			filter: '.dropable',
+			handle: '.sortable-handler',
+			onSort: function (e) {
+				let newIndex = e.newIndex - 1,
+				oldIndex = e.oldIndex - 1;
+				
+				let cache = self.elements[newIndex]
+				self.elements.$set(newIndex, self.elements[oldIndex])
+				self.elements.$set(oldIndex, cache)
 			}
 		})
 	}

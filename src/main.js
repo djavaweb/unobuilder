@@ -25,6 +25,9 @@ const App = new Vue({
 			self.$broadcast('click', {
 				el: e.target
 			})
+			self.$broadcast('clicked', {
+				el: e.target
+			})
 		})
 	}
 })
