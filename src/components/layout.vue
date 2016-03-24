@@ -183,6 +183,7 @@
 							<div class="uk-width-4-5" transition="fade">
 								<label><input type="radio" name="background-type" v-model="attr.value" value="img"> Image</label>
 								<label><input type="radio" name="background-type" v-model="attr.value" value="color"> Color</label>
+								<label><input type="radio" name="background-type" v-model="attr.value" value="video"> Video</label>
 							</div>
 						</div>
 					</div>
@@ -204,7 +205,7 @@
 					</div>
 					<div class="properties attribute" v-if="name==='style' && properties.background.type.value==='img'">
 						<div class="uk-grid uk-grid-small">
-							<label class="uk-width-1-5 uk-text-right">{{properties.background.image.label}}</label>
+							<label class="uk-width-1-5 uk-text-right">{{properties.background.style.label}}</label>
 							<div class="uk-width-4-5">
 								<select v-model="attr.value">
 									<option v-for="type in bgType" :value="type.value">{{type.label}}</option>
@@ -493,6 +494,7 @@ export default {
 				if (id === 'row' && index !== 3) {
 					// Set to default breakpoint
 					self.$set('current.selected', 'large')
+					self.$set('device.enable', false)
 
 					// Set current tab
 					self.propTabs[id].current = index
@@ -536,10 +538,8 @@ export default {
 
 							self.$set('current.selected', breakpoint)
 						} else {
-							// Save current properties, put into cache
-							/*self.$set('current._propertiesCache', self.current.properties)
-							self.$set('current.properties', self.current.properties.responsive[breakpoint])*/
 							self.propTabs[id].current = index
+							self.$set('current.selected', 'large')
 							$('[data-tab-id="responsiveProps"]').data().switcher.show(1)
 						}
 					}
@@ -726,6 +726,108 @@ export default {
 			})
 		})
 
+		/**
+		 * Define properties for multiple purpose
+		 * @type {Object}
+		 */
+		let defaultProps = {
+			id: null,
+			containers: [],
+			type: 'row',
+			layout: {
+				margin: {
+					label: 'Margin',
+					_: {type: 'inherit', unit: 'px', all: true, allValue: 15},
+					include: {t: true, b: true, l: true, r: true},
+					styles: [15, 15, 15, 15]
+				},
+				padding: {
+					label: 'Padding',
+					_: {all: true, allValue: 10, unit: 'px'},
+					styles: [10, 10, 10, 10]
+				},
+				border: {
+					label: 'Border',
+					_: {
+						all: true,
+						allValue: {
+							width: 0,
+							color: '#cccccc',
+							style: 'solid'
+						},
+						unit: 'px'
+					},
+					styles: {
+						width: [0, 0, 0, 0],
+						color: ['#cccccc', '#cccccc', '#cccccc', '#cccccc'],
+						style: ['solid', 'solid', 'solid', 'solid']
+					}
+				},
+				width: {
+					label: 'Full Width',
+					_: {type: 'bg'}
+				}
+			},
+			attribute: {
+				class: {
+					label: 'CSS Class',
+					value: 'custom-class'
+				},
+				id: {
+					label: 'ID',
+					value: null
+				},
+				css: {
+					label: 'Inline CSS',
+					value: '',
+					styles: {}
+				}
+			},
+			background: {
+				type: {
+					label: 'Type',
+					value: 'img',
+				},
+				image: {
+					label: 'Image',
+					value: ''
+				},
+				color: {
+					label: 'Color',
+					value: '#ffffff'
+				},
+				video: {
+					label: 'Video',
+					value: ''
+				},
+				style: {
+					label: 'Style',
+					value: 'parallax'
+				}
+			},
+			animation: {
+				reveal: {
+					label: 'Reveal',
+					value: false
+				},
+				transition: {
+					label: 'Type',
+					value: 'fadeIn'
+				},
+				offset: {
+					label: 'Top Offset',
+					value: 0
+				},
+				delay: {
+					label: 'Delay',
+					value: 1000
+				},
+				repeat: {
+					label: 'Repeat',
+					value: true
+				}
+			}
+		};
 
 		/* Drop handler */
 		const target = Drag('.dropable').dropzone({
@@ -744,111 +846,7 @@ export default {
 			ondropdeactivate (event) {
 				if (self.dropElement) {
 					let source = event.relatedTarget,
-
 					elementId = 'el-' + Date.now(),
-
-					/**
-					 * Define element properties
-					 * @type {Object}
-					 */
-					element = {
-						id: elementId,
-						containers: [],
-						type: 'row',
-						layout: {
-							margin: {
-								label: 'Margin',
-								_: {type: 'inherit', unit: 'px', all: true, allValue: 15},
-								include: {t: true, b: true, l: true, r: true},
-								styles: [15, 15, 15, 15]
-							},
-							padding: {
-								label: 'Padding',
-								_: {all: true, allValue: 10, unit: 'px'},
-								styles: [10, 10, 10, 10]
-							},
-							border: {
-								label: 'Border',
-								_: {
-									all: true,
-									allValue: {
-										width: 0,
-										color: '#cccccc',
-										style: 'solid'
-									},
-									unit: 'px'
-								},
-								styles: {
-									width: [0, 0, 0, 0],
-									color: ['#cccccc', '#cccccc', '#cccccc', '#cccccc'],
-									style: ['solid', 'solid', 'solid', 'solid']
-								}
-							},
-							width: {
-								label: 'Full Width',
-								_: {type: 'bg'}
-							}
-						},
-						attribute: {
-							class: {
-								label: 'CSS Class',
-								value: 'custom-class'
-							},
-							id: {
-								label: 'ID',
-								value: elementId
-							},
-							css: {
-								label: 'Inline CSS',
-								value: '',
-								styles: {}
-							}
-						},
-						background: {
-							type: {
-								label: 'Type',
-								value: 'img',
-							},
-							image: {
-								label: 'Image',
-								value: ''
-							},
-							color: {
-								label: 'Color',
-								value: '#ffffff'
-							},
-							video: {
-								label: 'Video',
-								value: ''
-							},
-							style: {
-								label: 'Style',
-								value: 'parallax'
-							}
-						}/*,
-						animation: {
-							reveal: {
-								label: 'Reveal',
-								value: false
-							},
-							transition: {
-								label: 'Type',
-								value: 'fadeIn'
-							},
-							offset: {
-								label: 'Top Offset',
-								value: 0
-							},
-							delay: {
-								label: 'Delay',
-								value: 1000
-							},
-							repeat: {
-								label: 'Repeat',
-								value: true
-							}
-						}*/
-					},
 
 					/* Create Flex Element */
 					columns = source.getAttribute('data-width').split('-').filter(n => parseInt(n, 10)),
@@ -863,27 +861,31 @@ export default {
 					size = self.elements.length;
 
 
+					// Set current element id
+					let element = $.extend(true, {}, defaultProps)
+					element.id = elementId
+					element.attribute.id.value = elementId
+
 					/**
 					* Copy element properties into responsive
 					*/
 					let responsive = $.extend(true, {}, element)
 
 					/* Delete unnecessary properties after cloned */
-					delete element.layout
-					delete element.background
-					delete element.attribute
+					let dumpProps = ['layout', 'background', 'attribute', 'animation']
+					for (let i in dumpProps) delete dumpProps[i];
 
 					/* Delete unnecessary cloned properties */
-					delete responsive.id
-					delete responsive.containers
-					delete responsive.type
+					dumpProps = ['id', 'containers', 'type']
+					for (let i in dumpProps) delete dumpProps[i];
 
+					// Define responsive breakpoints
 					let defaultBreakpoint = $.extend(true, {}, responsive)
 					element.layout = defaultBreakpoint.layout
 					element.background = defaultBreakpoint.background
 					element.attribute = defaultBreakpoint.attribute
 
-					/* Set breakpoints */
+					// Set breakpoints
 					element.responsive = {
 						mini: $.extend(true, {}, responsive),
 						small: $.extend(true, {}, responsive),
@@ -937,7 +939,7 @@ export default {
 						} else self.elements.$set(0, element)
 					}, 10);
 
-					/* Finally, remove the source element */
+					// Finally, remove the source element
 					source.remove();
 				}
 

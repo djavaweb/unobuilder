@@ -54,8 +54,13 @@
 <script>
 export default {
 	name: 'Drop',
-	props: ['position'],
+	props: {
+		position: {default: ''}
+	},
 	ready () {
+		let self = this, $el = $(self.$el)
+
+		/* Set id */
 		this.$el.setAttribute('id', 'dropable-' + Date.now())
 	}
 }

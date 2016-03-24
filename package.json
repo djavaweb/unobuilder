@@ -1,5 +1,5 @@
 {
-  "name": "btbldr",
+  "name": "unobuilder",
   "version": "1.0.0",
   "description": "Responsive and Flexible Drag and Drop Layout. Powered by VueJS.",
   "scripts": {
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yoneth/btbldr.git"
+    "url": "https://github.com/djavaweb/unobuilder"
   },
   "author": "DjavaWeb",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yoneth/btbldr/issues"
+    "url": "https://github.com/djavaweb/unobuilder/issues"
   },
-  "homepage": "https://github.com/yoneth/btbldr",
+  "homepage": "https://github.com/djavaweb/unobuilder",
   "devDependencies": {
     "babel-core": "^6.7.2",
     "babel-loader": "^6.2.4",
