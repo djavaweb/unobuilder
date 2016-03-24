@@ -1,0 +1,8 @@
+[
+	{"label": "Parallax", "value": "parallax"},
+	{"label": "Cover", "value": "cover"},
+	{"label": "Contain", "value": "contain"},
+	{"label": "Repeat", "value": "repeat"},
+	{"label": "No Repeat", "value": "no-repeat"},
+	{"label": "Fixed", "value": "fixed"}
+]

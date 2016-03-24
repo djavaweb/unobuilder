@@ -1,29 +1,29 @@
 <template>
-	<div class="color-picker-toggler">
-		<a class="picker" @click="toggle()" :style="bgColor"></a>
-		<div class="color-picker" v-if="show">
-			<div class="_variations" :style="variations">
-				<div class="_whites">
-					<div class="_blacks">
-						<div class="_cursor" v-if="cursor" :style="colorCursor"></div>
-						<div class="_mouse-trap" @mousedown="drag($event, 'color')"></div>
+	<div class="cp color-picker-toggler">
+		<a class="cp picker" @click="toggle()" :style="bgColor"></a><span class="hex" v-if="showHex">#{{hexColor}}</span>
+		<div class="cp color-picker" v-if="show" :class="[position]">
+			<div class="cp _variations" :style="variations">
+				<div class="cp _whites">
+					<div class="cp _blacks">
+						<div class="cp _cursor" v-if="cursor" :style="colorCursor"></div>
+						<div class="cp _mouse-trap" @mousedown="drag($event, 'color')"></div>
 					</div>
 				</div>
 			</div>
-			<div class="_hues">
-				<div class="_ie-1"></div>
-				<div class="_ie-2"></div>
-				<div class="_ie-3"></div>
-				<div class="_ie-4"></div>
-				<div class="_ie-5"></div>
-				<div class="_ie-6"></div>
-				<div class="_cursor" :style="hueCursor"></div>
-				<div class="_mouse-trap" @mousedown="drag($event, 'hue')"></div>
+			<div class="cp _hues">
+				<div class="cp _ie-1"></div>
+				<div class="cp _ie-2"></div>
+				<div class="cp _ie-3"></div>
+				<div class="cp _ie-4"></div>
+				<div class="cp _ie-5"></div>
+				<div class="cp _ie-6"></div>
+				<div class="cp _cursor" :style="hueCursor"></div>
+				<div class="cp _mouse-trap" @mousedown="drag($event, 'hue')"></div>
 			</div>
 
-			<div class="value">
-				<label><input class="hex" v-model="hexColor" maxlength="6"></label>
-				<div>RGB <input v-model="R"> <input v-model="G"> <input v-model="B"></div>
+			<div class="cp value">
+				<label class="cp"><input class="hex cp" v-model="hexColor" maxlength="6"></label>
+				<div class="cp">RGB <input v-model="R" class="cp"> <input v-model="G" class="cp"> <input v-model="B" class="cp"></div>
 			</div>
 		</div>
 	</div>
@@ -32,7 +32,12 @@
 <script>
 export default {
 	name: 'colorPicker',
-	props: ['enable', 'color'],
+	props: {
+		enable: {default: true},
+		color: {default: '#ffffff'},
+		position: {default: 'left'},
+		showHex: {default: false}
+	},
 	data() {
 		return {
 			show: false,
@@ -46,6 +51,13 @@ export default {
 			rgbRegex: /^([0-9]{1,3})$/
 		}
 	},
+	ready () {
+		let self = this
+		this.$on('click', function (params) {
+			let el = params.el
+			if (!el.classList.contains('cp')) self.close()
+		})
+	},
 	computed: {
 		rgb () {
 			return this.HSVtoRGB(this.hsv.h, this.hsv.s, this.hsv.v, true);
@@ -54,7 +66,7 @@ export default {
 		bgColor () {
 			let self = this;
 			return {
-				backgroundColor: self.color
+				backgroundColor: '#' + self.hexColor
 			}
 		},
 
@@ -125,6 +137,10 @@ export default {
 	methods: {
 		toggle () {
 			if (this.enable) this.$set('show', !this.show)
+		},
+
+		close () {
+			this.$set('show', false)
 		},
 
 		RenderRGBCursor (r, g, b) {
@@ -321,6 +337,10 @@ export default {
 		display: inline-block;
 		border: 1px solid #c0c0c0;
 	}
+	.hex {
+		vertical-align: top;
+		margin-left: 5px;
+	}
 }
 .color-picker {
 	position: absolute;
@@ -328,9 +348,11 @@ export default {
 	border:1px solid #dddddd;
 	padding:5px;
 	display:inline-block;
-	left: -230px;
 	top: 30px;
 	z-index: 999;
+	&.left {
+		left: -230px;
+	}
 	.value {
 		margin-top: 10px;
 		div {

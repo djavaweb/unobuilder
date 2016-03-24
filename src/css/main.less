@@ -31,7 +31,7 @@ body {
 	border: 1px solid #ddd;
 	border-left: 1px solid #c7c7c7;
 	background: #F9F9F9;
-	width: 415px;
+	width: 420px;
 	float: right;
 	height: 100%;
 }
@@ -134,7 +134,6 @@ body {
 	.layout-row {
 		overflow: hidden;
 		position: relative;
-		padding: 10px;
 		z-index: 1;
 	}
 	.layout-columns {
@@ -153,25 +152,32 @@ body {
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-	border: 2px solid white;
+	outline: 2px solid white;
 	pointer-events:none;
 	* {
 		pointer-events:all;
 	}
 	&.normal:hover {
-		border: 2px solid white;
+		outline: 2px solid white;
 	}
 	&.selected, &:hover {
-		border: 2px solid #3498db
+		outline: 2px solid #3498db
+	}
+	&.selected {
+		z-index: 10
+	}
+	&:hover {
+		z-index: 11
 	}
 }
 
 #properties-view {
 	height: 100%;
-	overflow: auto
+	overflow: auto;
+	background-color: #F1F1F1
 }
 
-#row-tab {
+.row-tab.uk-tab {
 	background: white;
 	margin: 1px 0 0;
 	&.uk-tab-grid:before {
@@ -181,28 +187,36 @@ body {
 		width: auto;
 		float: none;
 		display: inline-block;
+		font-size: 11px; 
+		&.uk-disabled {
+			margin-right: 3px;
+			margin-left: 5px;
+			text-transform: uppercase;
+			font-weight: bold;
+		}
 		&.uk-active {
 			border-top: 2px solid @peterriver;
 			background: #F1F1F1;
-			a {
+			> a {
 				padding: 10px 7px;
 			}
 		}
 	}
-	a {
+	> li > a {
 		color: black;
 		background: none;
-		padding: 10px 4px;
+		padding: 10px 3px;
 		font-size: 12px;
 		margin: 0;
 		border: none;
+		background: none
 	}
 }
 
-#row-properties {
+.properties-wrapper {
 	font-size: 12px;
 	.tab-content {
-		padding: 35px 10px;
+		padding: 20px 10px;
 	}
 
 	label.block {
@@ -218,10 +232,7 @@ body {
 
 .properties {
 	padding: 10px 0;
-	border-bottom: 1px solid #BCBCBC;
-	.switch {
-		float: right;
-	}
+	border-bottom: 1px solid #dfdfdf;
 	&:after {
 		content: ' ';
 		display: block;
@@ -231,143 +242,13 @@ body {
 	.uk-grid + .uk-grid {
 		margin-top: 5px;
 	}
-}
-
-
-/* Switch from foundation */
-.switch {
-	-moz-user-select: none;
-	-ms-user-select: none;
-	-webkit-user-select: none;
-	color: @fefefe;
-	font-size: 0.875rem;
-	font-weight: bold;
-	margin-bottom: 1rem;
-	outline: 0;
-	position: relative;
-	user-select: none;
-}
-.switch-input {
-	opacity: 0;
-	position: absolute;
-}
-.switch-paddle {
-	background: #ffffff;
-	border-radius: 100px;
-	color: inherit;
-	cursor: pointer;
-	display: block;
-	font-weight: inherit;
-	height: 17px;
-	position: relative;
-	transition: all 0.25s ease-out;
-	border: 1px solid #C0C0C0;
-	width: 3rem;
-	&::after {
-		-webkit-transform: translate3d(0, 0, 0);
-		background: #c0c0c0;
-		border-radius: 100px;
-		content: '';
-		display: block;
-		height: 12px;
-		left: 0.25rem;
-		position: absolute;
-		top: 3px;
-		transform: translate3d(0, 0, 0);
-		transition: all 0.25s ease-out;
-		width: 12px;
-	}
-}
-input+.switch-paddle {
-	margin: 0;
-}
-input {
-	&:checked+label>.switch-active {
-		display: block;
-	}
-	&:checked+label>.switch-inactive {
-		display: none;
-	}
-}
-input:checked~.switch-paddle {
-	&::after {
-		left: 2rem;
-		background: #2199e8;
-	}
-}
-[data-whatinput='mouse']input {
-	&:focus~.switch-paddle {
-		outline: 0;
-	}
-}
-.switch-active {
-	-ms-transform: translateY(-50%);
-	-webkit-transform: translateY(-50%);
-	display: none;
-	left: 8%;
-	position: absolute;
-	top: 50%;
-	transform: translateY(-50%);
-}
-.switch-inactive {
-	-ms-transform: translateY(-50%);
-	-webkit-transform: translateY(-50%);
-	position: absolute;
-	right: 15%;
-	top: 50%;
-	transform: translateY(-50%);
-}
-.switch.tiny {
-	.switch-paddle {
-		font-size: 0.625rem;
-		height: 1.3rem;
-		width: 3rem;
-		&::after {
-			height: 1rem;
-			width: 1rem;
+	&.attribute {
+		input[type="text"] {
+			padding: 3px;
+			width: 50%;
 		}
-	}
-	input {
-		&:checked~.switch-paddle {
-			after {
-				left: 1.75rem;
-			}
-		}
-	}
-}
-.switch.small {
-	.switch-paddle {
-		font-size: 0.75rem;
-		height: 1.75rem;
-		width: 3.5rem;
-		&::after {
-			height: 1.25rem;
-			width: 1.25rem;
-		}
-	}
-	input {
-		&:checked~.switch-paddle {
-			after {
-				left: 2rem;
-			}
-		}
-	}
-}
-.switch.large {
-	.switch-paddle {
-		font-size: 1rem;
-		height: 2.5rem;
-		width: 5rem;
-		&::after {
-			height: @height1-5rem;
-			width: 2rem;
-		}
-	}
-	input {
-		&:checked~.switch-paddle {
-			after {
-				left: 2.75rem;
-			}
+		textarea {
+			border: 1px solid #cccccc
 		}
 	}
 }

@@ -1,5 +1,5 @@
 <template>
-<div class="input-number" :class="{disabled: !enable}"><a class="uk-icon-minus" @click="minus()"></a><input type="text" v-model="value" @focus="blur($event)"><a class="uk-icon-plus" @click="add()"></a> <span>{{label}}</span>
+<div class="input-number" :class="{disabled: !enable}"><span v-if="suffix" class="suffix">{{label}}</span><a class="uk-icon-minus" @click="minus()"></a><input type="text" v-model="value" @focus="blur($event)"><a class="uk-icon-plus" @click="add()"></a> <span v-if="prefix" class="prefix">{{label}}</span>
 </div>
 </template>
 
@@ -19,7 +19,7 @@
 		float: right
 	}
 
-	span {
+	.prefix {
 		margin-right: 5px;
 		padding: 2px;
 		display: inline-block;
@@ -27,11 +27,15 @@
 		text-align: right;
 	}
 
+	.suffix {
+		margin-left: 5px;
+	}
+
 	input {
-		width: 40px;
+		width: 40px !important;
 		border: none;
 		color: #4E4E4E;
-		padding: 4px 2px;
+		padding: 5px 2px !important;
 		text-align: center;
 	}
 
@@ -54,7 +58,16 @@
 <script>
 export default {
 	name: 'Number',
-	props: ['enable', 'value', 'label', 'min', 'max'],
+	props: {
+		enable: {default: true},
+		value: {default: 0},
+		label: {default: 'Label'},
+		prefix: {default: true},
+		suffix: {default: false},
+		min: {default: 0},
+		max: {default: 100},
+		step: {default: 1}
+	},
 	methods: {
 		blur (e) {
 			e.target.blur()
@@ -63,7 +76,7 @@ export default {
 		minus () {
 			if (this.enable) {
 				let min = (this.min)? this.min: 0
-				this.value -= 1
+				this.value -= this.step
 				if (this.value < min) this.value = min
 			}
 		},
@@ -71,7 +84,7 @@ export default {
 		add () {
 			if (this.enable) {
 				let max = (this.max)? this.max: 100
-				this.value += 1
+				this.value += this.step
 				if (this.value > max) this.value = max
 			}
 		}

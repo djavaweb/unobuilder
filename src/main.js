@@ -17,6 +17,14 @@ import Layout from "./components/layout.vue"
 
 /* Main app */
 const App = new Vue({
-	el: '#app',
-	components: {Layout}
+	el: 'body',
+	components: {Layout},
+	ready () {
+		let self = this
+		document.addEventListener('click', function (e) {
+			self.$broadcast('click', {
+				el: e.target
+			})
+		})
+	}
 })

@@ -6,15 +6,24 @@
 @import "../css/vars.less";
 .dropable {
 	height: 5px;
-    position: absolute;
-    z-index: 999;
-    width: 100%;
-    left: 0;
-    top: 100%;
+	position: absolute;
+	z-index: 999;
+	width: 100%;
+	left: 0;
+	top: 100%;
 
-    &.relative {
-    	position: relative;
-    }
+	&.relative {
+		position: relative;
+	}
+
+	&:before {
+		content: ' ';
+		width: 100%;
+		position: absolute;
+		height: 200px;
+		top: -100px;
+		display: none;
+	}
 
 	&:after {
 		display: none;
@@ -36,7 +45,7 @@
 
 .drop-enter {
 	background-color: @peterriver;
-	&:after {
+	&:after, &:before {
 		display: table;
 	}
 }

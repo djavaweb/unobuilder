@@ -29,6 +29,7 @@
     "script-loader": "*",
     "css-loader": "*",
     "less-loader": "*",
+    "json-loader": "*",
     "invariant": "*",
     "url-loader": "*",
     "vue-hot-reload-api": "^1.2.0",
@@ -42,6 +43,6 @@
   },
   "dependencies": {
     "es6-promise": "*",
-    "vue": "*"
+    "vue": "1.0.17"
   }
 }

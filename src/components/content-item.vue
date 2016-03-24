@@ -6,8 +6,7 @@
 
 <script>
 export default {
-	name: "Content",
-	props: ['width', 'label'],
-	data() {}
+	name: 'contentItem',
+	props: ['width', 'label']
 }
 </script>

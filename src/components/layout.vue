@@ -10,7 +10,7 @@
 		<li class="tab-content">
 			<div class="source contents">
 				<div class="uk-grid uk-grid-small" v-for="content in contents">
-					<content v-for="element in content" width="1-3" :label="element"></content>
+					<content-item v-for="element in content" width="1-3" :label="element">{{element}}</content-item>
 				</div>
 			</div>
 		</li>
@@ -25,45 +25,55 @@
 	</ul>
 
 	<div id="properties-view" v-show="isView('properties')" class="animated" transition="appear">
-		<ul id="row-tab" class="uk-tab uk-tab-grid" data-uk-switcher="{connect: '#row-properties'}">
-			<li class="uk-width-1-6" v-for="tab in rowTabs" track-by="$index" :class="{'uk-active': $index === 0}">
+		<ul class="row-tab uk-tab uk-tab-grid" data-tab-id="row" data-uk-switcher="{connect: '#properties'}" :class="[propTabs.row.class]">
+			<li class="uk-disabled">{{propTabs.row.label}}</li>
+			<li class="uk-width-1-6" v-for="tab in propTabs.row.items" track-by="$index" data-index="{{$index}}" :class="{'uk-active': $index === propTabs.row.current}">
+				<a>{{tab.label}}</a>
+			</li>
+		</ul>
+		<ul class="row-tab uk-tab uk-tab-grid" data-tab-id="responsive" data-uk-switcher="{connect: '#properties-blank'}" :class="[propTabs.row.class]" v-show="propTabs.row.current===3">
+			<li class="uk-disabled">{{propTabs.responsive.label}} <info :text="propTabs.responsive.info"></info></li>
+			<li class="uk-width-1-6" v-for="tab in propTabs.responsive.items" track-by="$index" data-breakpoint="{{tab.id}}" data-index="{{$index}}" :class="{'uk-active': $index === propTabs.responsive.current}">
+				<a>{{tab.label}}</a>
+			</li>
+		</ul>
+		<ul class="row-tab uk-tab uk-tab-grid" data-tab-id="responsiveProps" data-uk-switcher="{connect: '#properties'}" :class="[propTabs.row.class]" v-show="propTabs.row.current===3">
+			<li class="uk-disabled">{{propTabs.responsiveProps.label}}</li>
+			<li class="uk-width-1-6" v-for="tab in propTabs.responsiveProps.items" track-by="$index" data-index="{{$index}}" :class="{'uk-active': $index === propTabs.responsiveProps.current}">
 				<a>{{tab.label}}</a>
 			</li>
 		</ul>
 
-		<ul id="row-properties" class="uk-switcher">
+		<ul id="properties-blank" class="k-switcher"></ul>
+		<ul id="properties" class="properties-wrapper uk-switcher">
+			<li></li>
 			<li class="tab-content">
-				<div class="properties" v-for="(prop, value) in current.properties.layout">
+				<div class="properties" v-for="(prop, value) in properties.layout">
 					<div class="uk-grid uk-grid-small">
-						<label class="uk-width-1-5 uk-text-right">{{prop|capitalize}}</label>
+						<label class="uk-width-1-5 uk-text-right">{{value.label}}</label>
 
 						<div class="uk-width-4-5" transition="fade">
 							<div v-if="prop==='margin'">
-								<label><input type="radio" name="margin-mode" value="inherit" v-model="value._.mode"> Inherited from customizer</label>
-								<label class="block br"><input type="radio" name="margin-mode" value="custom" v-model="value._.mode"> Custom</label>
+								<label><input type="radio" name="margin-type" value="inherit" v-model="value._.type"> Inherited from <a href="#customizer">customizer</a></label>
+								<label class="block br"><input type="radio" name="margin-type" value="custom" v-model="value._.type"> Custom</label>
 
 								<label><input type="radio" name="margin-size" value="15" v-model="value._.allValue"> Standard:15px</label>
 								<label><input type="radio" name="margin-size" value="25" v-model="value._.allValue"> Larger:25px</label>
 								<label class="block br"><input type="radio" name="margin-size" value="10" v-model="value._.allValue"> Smaller:10px</label>
 
-								<label class="block"><input type="checkbox" v-model="value._.all" :checked="value.include.t&&value.include.b" v-bind:on.checked> Margin top + bottom</label>
+								<label class="block"><input type="checkbox" v-model="value._.all"> Margin top + bottom</label>
 								<label class="block"><input type="checkbox" :disabled="value._.all" v-model="value.include.t"> Margin top</label>
 								<label class="block"><input type="checkbox" :disabled="value._.all" v-model="value.include.b"> Margin bottom</label>
 								<label class="block"><input type="checkbox" v-model="value.include.l"> Margin left</label>
 								<label class="block"><input type="checkbox" v-model="value.include.r"> Margin right</label>
 							</div>
-
 							<div v-if="prop==='padding'">
 								<div class="uk-grid">
 									<div class="uk-width-3-5">
 										<number :enable="value._.all" :value.sync="value._.allValue" label="All Sides"></number>
 									</div>
 									<div class="uk-width-2-5">
-										<div class="switch">
-											<input class="switch-input" id="padding-all-side" type="checkbox" v-model="value._.all">
-											<label class="switch-paddle" for="padding-all-side">
-											</label>
-										</div>
+										<switch :value.sync="value._.all"></switch>
 									</div>
 								</div>
 
@@ -85,7 +95,6 @@
 									</div>
 								</div>
 							</div>
-
 							<div v-if="prop==='border'">
 								<div class="uk-grid uk-grid-collapse">
 									<div class="uk-width-3-6">
@@ -96,11 +105,7 @@
 										<color-picker :enable="value._.all" :color.sync="value._.allValue.color"></color-picker>
 									</div>
 									<div class="uk-width-1-6">
-										<div class="switch">
-											<input class="switch-input" id="border-all-side" type="checkbox" v-model="value._.all">
-											<label class="switch-paddle" for="border-all-side">
-											</label>
-										</div>
+										<switch :value.sync="value._.all"></switch>
 									</div>
 								</div>
 
@@ -144,8 +149,68 @@
 									</div>
 								</div>
 							</div>
-						
-						{{value|json}}
+							<div v-if="prop==='width'">
+								<label class="block"><input type="radio" name="width-type" value="bg" v-model="value._.type"> Background <a href="#" style="margin-left:15px">Goto Background Settings</a></label>
+								<label><input type="radio" name="width-type" value="content" v-model="value._.type"> Content</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</li>
+			<li class="tab-content">
+				<div class="properties attribute" v-for="(name, attr) in properties.attribute">
+					<div class="uk-grid uk-grid-small">
+						<label class="uk-width-1-5 uk-text-right">{{attr.label}}</label>
+						<div class="uk-width-4-5" transition="fade">
+							<div v-if="name==='class'">
+								<input v-model="attr.value" type="text">
+							</div>
+							<div v-if="name==='id'">
+								<input v-model="attr.value" type="text">
+							</div>
+							<div v-if="name==='css'">
+								<textarea v-model="attr.value" cols="40" rows="10"></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+			</li>
+			<li class="tab-content">
+				<div v-for="(name, attr) in properties.background">
+					<div class="properties attribute" v-if="name==='type'">
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-1-5 uk-text-right">{{attr.label}}</label>
+							<div class="uk-width-4-5" transition="fade">
+								<label><input type="radio" name="background-type" v-model="attr.value" value="img"> Image</label>
+								<label><input type="radio" name="background-type" v-model="attr.value" value="color"> Color</label>
+							</div>
+						</div>
+					</div>
+					<div class="properties attribute" v-if="name==='image' && properties.background.type.value==='img'">
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-1-5 uk-text-right">{{properties.background.image.label}}</label>
+							<div class="uk-width-4-5" transition="fade">
+								<a>Add Image</a>
+							</div>
+						</div>
+					</div>
+					<div class="properties attribute" v-if="name=='color' && properties.background.type.value==='color'">
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-1-5 uk-text-right">{{attr.label}}</label>
+							<div class="uk-width-4-5" transition="fade">
+								<color-picker :color.sync="attr.value" position="right" :show-hex="true"></color-picker>
+							</div>
+						</div>
+					</div>
+					<div class="properties attribute" v-if="name==='style' && properties.background.type.value==='img'">
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-1-5 uk-text-right">{{properties.background.image.label}}</label>
+							<div class="uk-width-4-5">
+								<select v-model="attr.value">
+									<option v-for="type in bgType" :value="type.value">{{type.label}}</option>
+								</select>
+							</div>
+						</div>
 					</div>
 				</div>
 			</li>
@@ -154,34 +219,35 @@
 </div>
 
 <div id="layout-wrapper">
-	<div id="layout">
-		<drop position="relative"></drop>
+	<device :enable="device.enable" :style="device.style" :rotate="device.rotate">
+		<div id="layout">
+			<drop position="relative"></drop>
+			<div id="{{element.id}}" class="layout-item inspectable" v-for="element in elements" @click="setProperties(element)" :class="{'selected': element.id === current.element}" track-by="$index" data-uk-grid-match>
+				<div class="layout-wrap">
+					<div class="layout-row" :style="style(element)">
+						<div class="layout-columns uk-grid-match uk-grid-small">
+							<div
+								v-for="container in element.containers" track-by="$index"
+								@click="setProperties(container)"
+								@mouseenter.self="inspect($event, true)"
+								@mouseleave.self="inspect($event, false)"
+								class="uk-width-{{container.width}} uk-grid-match">
 
-		<div id="{{element.id}}" class="layout-item inspectable" v-for="element in elements" @click="properties(element)" :class="{'selected': element.id === current.element}" track-by="$index" data-uk-grid-match>
-			<div class="layout-wrap">
-				<div class="layout-row" :style="style(element)">
-					<div class="layout-columns uk-grid-match uk-grid-small">
-						<div
-							v-for="container in element.containers" track-by="$index"
-							@click="properties(container)"
-							@mouseenter.self="inspect($event, true)"
-							@mouseleave.self="inspect($event, false)"
-							class="uk-width-{{container.width}} uk-grid-match">
-
-
-							<empty v-if="empty(container.items)"></empty>
+								<empty v-if="empty(container.items)"></empty>
+							</div>
 						</div>
 					</div>
+					<sortable-handler></sortable-handler>
 				</div>
-				<sortable-handler></sortable-handler>
+				<drop v-if="!empty(element.containers)"></drop>
 			</div>
-			<drop v-if="!empty(element.containers)"></drop>
 		</div>
-	</div>
+	</device>
 </div>
 </template>
 
 <style lang="less">
+@import "../css/balloon.min.css";
 @import "../css/animate.css";
 @import "../css/uikit.less";
 @import "../css/vars.less";
@@ -194,7 +260,7 @@ import Drag from "interact.js"
 import _ from "underscore"
 
 /* Content */
-import Content from "./content.vue"
+import contentItem from "./content-item.vue"
 
 /* Content */
 import Structure from "./structure.vue"
@@ -205,6 +271,9 @@ import Empty from './empty.vue';
 /* Dropable */
 import Drop from './drop.vue';
 
+/* Color Picker */
+import Switch from './switch.vue';
+
 /* Sortable Handler */
 import sortableHandler from './sortable-handler.vue';
 
@@ -214,13 +283,25 @@ import borderStyle from './border-style.vue';
 /* Color Picker */
 import colorPicker from './color-picker.vue';
 
+/* Info */
+import Info from './info.vue';
+
 /* Dropable */
 import Number from './number.vue';
 
+/* Device */
+import Device from './device.vue';
+
+/* JSON Data */
+import Animation from '../data/animation.json';
+import BackgroundType from '../data/bgtype.json';
+
 export default {
 	name: 'Layout',
-	components: {Content, Structure, Empty, Drop, sortableHandler, Number, borderStyle, colorPicker},
+	components: {contentItem, Structure, Empty, Drop, Switch, sortableHandler, Number, borderStyle, colorPicker, Info, Device},
 	data() {
+		let self = this
+
 		return {
 			dropElement: null,
 			elements: [],
@@ -234,22 +315,73 @@ export default {
 				{id: 'body', label: 'Body', icon: 'wrench'},
 				{id: 'css', label: 'Custom CSS', icon: 'code'}
 			],
-			rowTabs: [
-				{id: 'layout', label: 'Layout'},
-				{id: 'attribute', label: 'Attribute'},
-				{id: 'bg', label: 'Bakground'},
-				{id: 'animation', label: 'Animation'},
-				{id: 'Responsive', label: 'Responsive'}
-			],
+			propTabs: {
+				row: {
+					label: 'Row Properties',
+					current: 0,
+					class: '',
+					items: [
+						{id: 'layout', label: 'Layout'},
+						{id: 'attribute', label: 'Attributes'},
+						{id: 'bg', label: 'Background'},
+						{id: 'Responsive', label: 'Responsive'}
+					]
+				},
+
+				responsive: {
+					label: 'Breakpoints',
+					info: 'Breakpoints Help',
+					current: 3,
+					class: '',
+					items: [
+						{id: 'mini', label: 'Mini'},
+						{id: 'small', label: 'Small'},
+						{id: 'medium', label: 'Medium'},
+						{id: 'large', label: 'Large'},
+						{id: 'xlarge', label: 'XLarge'}
+					]
+				},
+
+				responsiveProps: {
+					label: 'Row Properties',
+					current: 0,
+					class: '',
+					items: [
+						{id: 'layout', label: 'Layout'},
+						{id: 'attribute', label: 'Attributes'},
+						{id: 'bg', label: 'Background'}
+					]
+				}
+			},
 			view: 'tab',
 			current: {
-				properties: {},
+				selected: null,
+				properties: {responsive:{}},
 				element: null
+			},
+			device: {
+				enable: false,
+				style: 'iphone6',
+				rotate: ''
+			},
+			bgType: BackgroundType
+		}
+	},
+	computed: {
+		properties: {
+			get () {
+				if (this.validProperties()) {
+					return this.current.properties.responsive[this.current.selected];
+				}
+				return {}
 			}
 		}
 	},
-	computed: {},
 	methods: {
+		validProperties () {
+			return this.current.selected && this.current.properties.responsive !== undefined && this.current.properties.responsive[this.current.selected]
+		},
+
 		object (name) {
 			return JSON.parse(JSON.stringify(this[name]));
 		},
@@ -277,7 +409,7 @@ export default {
 		},
 
 		/* Show properties selected */
-		properties (element) {
+		setProperties (element) {
 			if (element.type === 'row' && element.containers.length > 0) {
 				this.$set('current.element', element.id);
 				this.viewing('properties');
@@ -287,45 +419,50 @@ export default {
 				this.viewing('properties');
 			}
 
+			this.$set('current.selected', 'large');
 			this.$set('current.properties', element);
 		},
 
 		/* Render Style */
 		style (element) {
 			/* Layout Styles */
-			let styles = {}, layout = element.layout;
-			
-			/* Apply CSS style */
-			_.each(layout, function (value, prop) {
-				if (_.isArray(value.styles)) {
-					styles[prop] = value.styles.map((style) => {
-						let int = parseInt(style)
-						return (! isNaN(int)) ? int + value._.unit: style
-					}).join(' ')
-				}
-				else if (_.isObject(value.styles)) {
-					let settings = value._, styleName = prop;
+			let styles = {}
 
-					_.each (value.styles, function (value, prop) {
-						//console.log(value, prop);
-						let css = null;
+			let breakpoint = this.current.selected || 'large'
+			let properties = element.responsive[breakpoint]
 
-						if (_.isArray(value)) {
-							css = value.map((style) => {
+			/* Apply CSS style if there is styles object */
+			_.each(properties, function (element, index) {
+				_.each(element, function (value, prop) {
+					if (value.styles) {
+						if (_.isArray(value.styles)) {
+							styles[prop] = value.styles.map((style) => {
 								let int = parseInt(style)
-								return (! isNaN(int)) ? int + settings.unit: style
+								return (! isNaN(int)) ? int + value._.unit: style
 							}).join(' ')
-						} else {
-							css = value;
 						}
+						else if (_.isObject(value.styles)) {
+							let settings = value._,	styleName = prop;
 
-						styles[styleName + '-' + prop] = css;
-					})
-				}
-			})
+							_.each(value.styles, function (value, prop) {
 
-			console.log(styles)
+								if (_.isArray(value)) {
+									styles[styleName + '-' + prop] = value.map((style) => {
+										let int = parseInt(style)
+										return (! isNaN(int)) ? int + settings.unit: style
+									}).join(' ')
+								} else {
+									styles[prop] = value
+								}
+								
+							})
+						}
+					}
+				})
+			})			
 
+			//console.log(styles)
+			delete styles['']
 			return styles;
 		},
 
@@ -342,139 +479,253 @@ export default {
 			height: $(window).height()
 		});*/
 
+		/* Row tab access item */
+		$('[data-uk-switcher]').on('show.uk.switcher', function(event, el){
+			let element = el[0],
+			id = element.parentElement.getAttribute('data-tab-id'), 
+			index = parseInt(element.getAttribute('data-index'));
+
+			if (id) {
+				/**
+				* If user click on layout tab in main properties tab
+				* Set current.properties into default, it's from cache
+				*/
+				if (id === 'row' && index !== 3) {
+					// Set to default breakpoint
+					self.$set('current.selected', 'large')
+
+					// Set current tab
+					self.propTabs[id].current = index
+				}
+
+				/**
+				* If user click on responsive tab
+				* Set current.properties from current breakpoint
+				*
+				* If user change breakpoint, change current.properties too
+				*/
+				else if ((id === 'row' && index === 3) || id === 'responsive') {
+					let breakpoint;
+
+					if (id === 'responsive') {
+						breakpoint = el[0].getAttribute('data-breakpoint')
+					} else {
+						let responsiveEl = $('[data-tab-id="responsive"]')
+						breakpoint = responsiveEl.children().eq(responsiveEl.data().switcher.index).attr('data-breakpoint')
+					}
+
+					if (breakpoint) {
+						// Show layout tab
+						if (id === 'responsive') {
+							if (['mini', 'small', 'medium'].includes(breakpoint)) {
+								let style = 'iphone6', rotate = ''
+
+								if (breakpoint === 'medium') {
+									style = 'ipad'
+									rotate = 'landscape'
+								}
+
+								self.$set('device', {
+									style: style,
+									rotate: rotate,
+									enable: true
+								})
+							} else {
+								self.$set('device.enable', false)
+							}
+
+							self.$set('current.selected', breakpoint)
+						} else {
+							// Save current properties, put into cache
+							/*self.$set('current._propertiesCache', self.current.properties)
+							self.$set('current.properties', self.current.properties.responsive[breakpoint])*/
+							self.propTabs[id].current = index
+							$('[data-tab-id="responsiveProps"]').data().switcher.show(1)
+						}
+					}
+				}
+			}
+		});
+
 
 		/* Watch cached */
 		let oldVal = {
-			margin: null,
-			padding: null
-		};
+			margin: [],
+			padding: [],
+			border: [],
+			css: []
+		},
+		breakpoints = {mini: {}, small: {}, medium: {}, large: {}, xlarge: {}};
 
 		/* Watcher for margin $set all */
 		self.$watch(function () {
 			return self.elements.map(function (element, index) {
-				let margin =  element.layout.margin
-				return {
-					index: index,
-					topBottom: margin._.all,
-					mode: margin._.mode,
-					include: margin.include,
-					value: parseInt(margin._.allValue)
+				if (self.validProperties()) {
+					return _.map(element.responsive, function (responsive, breakpoint) {
+						let margin = responsive.layout.margin
+						return {
+							index: index,
+							breakpoint: breakpoint,
+							topBottom: margin._.all,
+							type: margin._.type,
+							include: {t: margin.include.t, r: margin.include.r, b: margin.include.b, l: margin.include.l},
+							value: parseInt(margin._.allValue)
+						}
+					})
 				}
+				return {}
 			})
 		}, function (val) {
-			_.each(val, function (prop, index) {
-				/* If same with old value */
-				if (oldVal.margin && (_.isEqual(prop, oldVal.margin[index]))) return
+			_.each(val, function (breakpoint, index) {
+				_.each(breakpoint, function (prop, index) {
+					// Cancel, if old margin has the same value with old value
+					if (! oldVal.margin[prop.index]) oldVal.margin[prop.index] = $.extend(true, {}, breakpoints)
+					if (_.isEqual(prop, oldVal.margin[prop.index][prop.breakpoint])) return
 
-				/* Get actual margin */
-				let margin = self.elements[prop.index].layout.margin
+					// Get actual margin
+					let margin = self.elements[prop.index].responsive[prop.breakpoint].layout.margin
 
-				/* Only set if mode is custom */
-				if (prop.mode !== 'custom') {
-					for (let i in margin.styles) {
-						let index = parseInt(i), value, top = 0, bottom = 0;
-
-						/* If top & bottom checked, set top and bottom as true */
-						if (!prop.topBottom) {
-							if (prop.include.t) {
-								prop.include.t = false
-								top = prop.value
+					// Only set if mode is custom
+					if (prop.type !== 'custom') {
+						for (let i in margin.styles) {
+							if (prop.topBottom) {
+								prop.include.t = prop.include.b = true
+								margin.include.t = margin.include.b = true
 							}
-							if (prop.include.b) {
-								prop.include.b = false
-								bottom = prop.value
-							}
-							console.log(prop.include.t, prop.topBottom);
-						} else {
-							prop.include.t = prop.include.b = prop.topBottom
-							top = bottom = prop.value
-						}
 
-						/**
-						 * Set position based CSS margin rule, clockwise
-						 */
-						switch (index) {
-							case 0: value = top; break;
-							case 1: value = (prop.include.r)? prop.value: 0; break;
-							case 2: value = bottom; break;
-							case 3: value = (prop.include.l)? prop.value: 0; break;
+							let index = parseInt(i), value
+
+							switch (index) {
+								case 0: value = (prop.include.t)? prop.value: 0; break;
+								case 1: value = (prop.include.r)? prop.value: 0; break;
+								case 2: value = (prop.include.b)? prop.value: 0; break;
+								case 3: value = (prop.include.l)? prop.value: 0; break;
+							}
+
+							margin.styles.$set(index, value)
 						}
-						
-						/* Set the margin styles */
-						margin.styles.$set(index, value)
 					}
-				}
-			})
 
-			/* Caching oldValue, vuejs doesn't support this, so I added it manually */
-			oldVal.margin = val;
+					// Caching oldValue, vuejs doesn't support this, so I added it manually
+					oldVal.margin[prop.index][prop.breakpoint] = prop;
+				})
+			})
 		}, {deep: true})
 
 
 		/* Watcher for padding $set all */
 		self.$watch(function () {
 			return self.elements.map(function (element, index) {
-				let padding =  element.layout.padding
-				return {
-					index: index,
-					all: padding._.all,
-					value: parseInt(padding._.allValue)
+				if (self.validProperties()) {
+					return _.map(element.responsive, function (responsive, breakpoint) {
+						let padding = responsive.layout.padding
+						return {
+							index: index,
+							breakpoint: breakpoint,
+							all: padding._.all,
+							value: parseInt(padding._.allValue)
+						}
+					})
 				}
+				return {}
 			})
 		}, function (val) {
-			_.each(val, function (prop, index) {
-				/* If same with old value */
-				if (oldVal.padding && _.isEqual(prop, oldVal.padding[index])) return
+			_.each(val, function (breakpoint, index) {
+				_.each(breakpoint, function (prop, index) {
+					// Cancel, if old padding has the same value with old value
+					if (! oldVal.padding[prop.index]) oldVal.padding[prop.index] = $.extend(true, {}, breakpoints)
+					if (_.isEqual(prop, oldVal.padding[prop.index][prop.breakpoint])) return
 
-				/* Get actual margin */
-				let padding = self.elements[prop.index].layout.padding
+					// Get actual padding
+					let padding = self.elements[prop.index].responsive[prop.breakpoint].layout.padding
 
-				if (prop.all) {
-					for (let i in padding.styles) {
-						padding.styles.$set(i, prop.value)
+					if (prop.all) {
+						for (let i in padding.styles) {
+							padding.styles.$set(i, prop.value)
+						}
 					}
-				}
-			})
 
-			oldVal.padding = val;
+					// Caching
+					oldVal.padding[prop.index][prop.breakpoint] = prop;
+				})
+			})
 		}, {deep: true})
 
 		/* Watcher for border $set all */
 		self.$watch(function () {
 			return self.elements.map(function (element, index) {
-				let border =  element.layout.border
-				return {
-					index: index,
-					all: border._.all,
-					style: border._.allValue.style,
-					width: border._.allValue.width,
-					color: border._.allValue.color
-				}
-			})
-		}, function (val) {
-			_.each(val, function (prop, index) {
-				/* If same with old value */
-				if (oldVal.border && _.isEqual(prop, oldVal.border[index])) return
-
-				/* Get actual margin */
-				let border = self.elements[prop.index].layout.border
-
-				if (prop.all) {
-					/*_.each(border.styles, function (values, propName) {
-						for (let i in values) {
-							console.log(`border.styles.${propName}.$set(${i}, ${values[i]})`)
+				if (self.validProperties()) {
+					return _.map(element.responsive, function (responsive, breakpoint) {
+						let border = responsive.layout.border
+						return {
+							index: index,
+							breakpoint: breakpoint,
+							all: border._.all,
+							style: border._.allValue.style,
+							width: border._.allValue.width,
+							color: border._.allValue.color
 						}
-					})*/
-					_.each(border.styles, function (values, propName) {
-						_.each(values, function (item, index) {
-							border.styles[propName].$set(index, prop[propName])
-						})
 					})
 				}
+				return {}
 			})
+		}, function (val) {
+			_.each(val, function (breakpoint, index) {
+				_.each(breakpoint, function (prop, index) {
+					// Cancel, if old border has the same value with old value
+					if (! oldVal.border[prop.index]) oldVal.border[prop.index] = $.extend(true, {}, breakpoints)
+					if (_.isEqual(prop, oldVal.border[prop.index][prop.breakpoint])) return
 
-			oldVal.border = val;
+					// Get actual margin
+					let border = self.elements[prop.index].responsive[prop.breakpoint].layout.border
+
+					if (prop.all) {
+						_.each(border.styles, function (values, propName) {
+							_.each(values, function (item, index) {
+								border.styles[propName].$set(index, prop[propName])
+							})
+						})
+					}
+
+					// Caching
+					oldVal.border[prop.index][prop.breakpoint] = prop;
+				})
+			})
 		}, {deep: true})
+
+
+		/* Watcher for attribute.css */
+		self.$watch(function () {
+			return self.elements.map(function (element, index) {
+				if (self.validProperties()) {
+					return _.map(element.responsive, function (responsive, breakpoint) {
+						return {
+							index: index,
+							breakpoint: breakpoint,
+							css: responsive.attribute.css.value
+						}
+					})
+				}
+				return {}
+			})
+		}, function (val) {
+			_.each(val, function (breakpoint, index) {
+				_.each(breakpoint, function (prop, index) {
+					// Get css attribute
+					let cssAttr = self.elements[prop.index].responsive[prop.breakpoint].attribute.css
+
+					// Parsing css
+					let inlineCSS = {}, css = prop.css.replace(/(?:\r\n|\r|\n)/g, '').split(';').map((item) => item.split(':'))
+
+					for (let i in css) {
+						inlineCSS[css[i][0]] = css[i][1]
+					}
+
+					cssAttr.styles = inlineCSS
+				})
+			})
+		})
+
 
 		/* Drop handler */
 		const target = Drag('.dropable').dropzone({
@@ -494,25 +745,30 @@ export default {
 				if (self.dropElement) {
 					let source = event.relatedTarget,
 
+					elementId = 'el-' + Date.now(),
+
 					/**
 					 * Define element properties
 					 * @type {Object}
 					 */
 					element = {
-						id: 'el-' + Date.now(),
+						id: elementId,
 						containers: [],
 						type: 'row',
 						layout: {
 							margin: {
-								_: {mode: 'inherit', unit: 'px', all: true, allValue: 15},
+								label: 'Margin',
+								_: {type: 'inherit', unit: 'px', all: true, allValue: 15},
 								include: {t: true, b: true, l: true, r: true},
 								styles: [15, 15, 15, 15]
 							},
 							padding: {
+								label: 'Padding',
 								_: {all: true, allValue: 10, unit: 'px'},
 								styles: [10, 10, 10, 10]
 							},
 							border: {
+								label: 'Border',
 								_: {
 									all: true,
 									allValue: {
@@ -528,11 +784,70 @@ export default {
 									style: ['solid', 'solid', 'solid', 'solid']
 								}
 							},
-							background: {
-								_: {},
-								styles: ['#ffffff']
+							width: {
+								label: 'Full Width',
+								_: {type: 'bg'}
 							}
-						}
+						},
+						attribute: {
+							class: {
+								label: 'CSS Class',
+								value: 'custom-class'
+							},
+							id: {
+								label: 'ID',
+								value: elementId
+							},
+							css: {
+								label: 'Inline CSS',
+								value: '',
+								styles: {}
+							}
+						},
+						background: {
+							type: {
+								label: 'Type',
+								value: 'img',
+							},
+							image: {
+								label: 'Image',
+								value: ''
+							},
+							color: {
+								label: 'Color',
+								value: '#ffffff'
+							},
+							video: {
+								label: 'Video',
+								value: ''
+							},
+							style: {
+								label: 'Style',
+								value: 'parallax'
+							}
+						}/*,
+						animation: {
+							reveal: {
+								label: 'Reveal',
+								value: false
+							},
+							transition: {
+								label: 'Type',
+								value: 'fadeIn'
+							},
+							offset: {
+								label: 'Top Offset',
+								value: 0
+							},
+							delay: {
+								label: 'Delay',
+								value: 1000
+							},
+							repeat: {
+								label: 'Repeat',
+								value: true
+							}
+						}*/
 					},
 
 					/* Create Flex Element */
@@ -545,9 +860,41 @@ export default {
 					index = 0,
 
 					/* Elements' Size */
-					size = self.elements.length
-					;
-					
+					size = self.elements.length;
+
+
+					/**
+					* Copy element properties into responsive
+					*/
+					let responsive = $.extend(true, {}, element)
+
+					/* Delete unnecessary properties after cloned */
+					delete element.layout
+					delete element.background
+					delete element.attribute
+
+					/* Delete unnecessary cloned properties */
+					delete responsive.id
+					delete responsive.containers
+					delete responsive.type
+
+					let defaultBreakpoint = $.extend(true, {}, responsive)
+					element.layout = defaultBreakpoint.layout
+					element.background = defaultBreakpoint.background
+					element.attribute = defaultBreakpoint.attribute
+
+					/* Set breakpoints */
+					element.responsive = {
+						mini: $.extend(true, {}, responsive),
+						small: $.extend(true, {}, responsive),
+						medium: $.extend(true, {}, responsive),
+						large: defaultBreakpoint,
+						xlarge: $.extend(true, {}, responsive)
+					}
+
+					/**
+					* Make containers only 1 item if width is 1-1
+					*/
 					if (columns[0] === columns[1] && columns[0] < 5) {
 						element.containers.push({
 							id: id,
@@ -585,7 +932,7 @@ export default {
 							let elements = self.object('elements');
 							if (elements.length === size) {
 								elements.splice(index, 0, element)
-								self.$set('elements', elements);
+								self.$set('elements', elements)
 							}
 						} else self.elements.$set(0, element)
 					}, 10);

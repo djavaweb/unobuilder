@@ -22,6 +22,7 @@ module.exports = {
             test: /\.vue$/,
             loader: 'vue'
         },
+        { test: /\.json$/, loader: 'json' },
         {
             test: /\.js$/,
             exclude: /node_modules|vue\/dist|vue-router\/|vue-loader\/|vue-hot-reload-api\//,
