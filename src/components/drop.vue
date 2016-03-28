@@ -6,6 +6,7 @@
 @import "../css/vars.less";
 .dropable {
 	height: 5px;
+	margin-top: -5px;
 	position: relative;
 
 	&.relative {

@@ -10,7 +10,7 @@
 		<li class="tab-content">
 			<div class="source contents">
 				<div class="uk-grid uk-grid-small" v-for="content in contents">
-					<content-item v-for="element in content" width="1-3" :label="element">{{element}}</content-item>
+					<content-item v-for="element in content" width="1-3" :icon="element.icon">{{element.label}}</content-item>
 				</div>
 			</div>
 		</li>
@@ -223,27 +223,25 @@
 	<device :enable="device.enable" :style="device.style" :rotate="device.rotate">
 		<div id="layout">
 			<drop class="layout-dropable" position="relative"></drop>
-			<div id="{{element.id}}" class="layout-item inspectable" v-for="element in elements" @click="setProperties(element)" :class="{'selected': element.id === current.element}" track-by="$index" data-uk-grid-match>
+			<div id="{{element.id}}" class="layout-item inspectable" v-for="element in elements" @click="setProperties(element)" @mouseenter.capture="inspect($event, true)" @mouseleave.capture="inspect($event, false)" :class="{'selected': element.id === current.element}" track-by="$index" data-uk-grid-match>
 				<div class="layout-wrap">
 					<div class="layout-row" :style="style(element)">
-						<div class="layout-columns uk-grid-match uk-grid-small">
-							<div
-								v-for="container in element.containers" track-by="$index"
-								@click="setProperties(container)"
-								@mouseenter.self="inspect($event, true)"
-								@mouseleave.self="inspect($event, false)"
-								class="layout-container uk-width-{{container.width}} uk-grid-match">
-
-								<empty class="layout-empty" v-if="empty(container.items)"></empty>
+						<div class="layout-wrapper">
+							<div class="layout-columns uk-grid uk-grid-small uk-grid-match">
+								<div class="layout-column uk-width-{{container.width}} uk-grid-match" v-for="container in element.containers" track-by="$index" @click="setProperties(container)">
+									<empty class="layout-column-item" v-if="empty(container.items)"></empty>
+								</div>
 							</div>
 						</div>
 					</div>
 					<sortable-handler class="layout-sortable"></sortable-handler>
 				</div>
+
 				<div class="layout-tool">
-					<a class="layout delete uk-icon-trash"></a>
-					<a class="layout copy uk-icon-copy"></a>
+					<a @click="remove(element)" class="layout delete uk-icon-trash"></a>
+					<a @click="duplicate($index, element)"  class="layout copy uk-icon-copy"></a>
 				</div>
+
 				<div class="layout-label">{{element.label}}</div>
 				<drop class="layout-dropable" v-if="!empty(element.containers)"></drop>
 			</div>
@@ -258,6 +256,7 @@
 @import "../css/uikit.less";
 @import "../css/vars.less";
 @import "../css/main.less";
+@import "../../node_modules/sweetalert/dist/sweetalert.css";
 </style>
 
 <script>
@@ -265,6 +264,7 @@
 import Drag from "interact.js"
 import Sortable from "../js/sortable.min.js"
 import _ from "underscore"
+import MsgBox from "sweetalert"
 
 /* Content */
 import contentItem from "./content-item.vue"
@@ -311,10 +311,11 @@ export default {
 
 		return {
 			dropElement: null,
+			body: {},
 			elements: [],
 			structures: ['1-1', '5-5', '3-7', '7-3', '2-8', '8-2', '6-4', '4-6'],
 			contents: [
-				['Text', 'Image', 'Button']
+				[{icon: 'font', label: 'Text'}, {icon: 'image', label: 'Image'}, {icon: 'hand-pointer-o', label: 'Button'}]
 			],
 			tabs: [
 				{id: 'content', label: 'Content', icon: 'th'},
@@ -372,16 +373,15 @@ export default {
 				rotate: ''
 			},
 			editProperties: false,
-			bgType: BackgroundType
+			bgType: BackgroundType,
+			sortable: null
 		}
 	},
 	computed: {
 		properties: {
 			get () {
-				if (this.validProperties()) {
-					return this.current.properties.responsive[this.current.selected];
-				}
-				return {}
+				if (! this.validProperties()) return {}
+				return this.current.properties.responsive[this.current.selected]
 			}
 		}
 	},
@@ -396,13 +396,14 @@ export default {
 
 		/* Show inspector when mouse over */
 		inspect (e, hover) {
-			/*let parent = e.target.parentElement;
-
-			if (hover && parent.classList.contains('inspectable'))  {
-				parent.classList.add('normal');
-			} else {
-				parent.classList.remove('normal');
-			}*/
+			let el = e.target
+			if (el.classList.contains('layout-column-item') && !el.classList.contains('layout-column-item-child')) {
+				if (hover) {
+					el.classList.add('inspectable')
+				} else {
+					el.classList.remove('inspectable')
+				}
+			}
 		},
 
 		/* Check current view */
@@ -418,6 +419,8 @@ export default {
 
 		/* Show properties selected */
 		setProperties (element) {
+			this.$set('current.properties', element);
+
 			if (element.type === 'row' && element.containers.length > 0) {
 				this.$set('current.element', element.id);
 				this.viewing('properties');
@@ -428,7 +431,6 @@ export default {
 			}
 
 			$('#menu-tab').data().switcher.show(1);
-			this.$set('current.properties', element);
 		},
 
 		/* Render Style */
@@ -477,6 +479,59 @@ export default {
 		/* Check if item is empty */
 		empty (item) {
 			return item.length === 0
+		},
+
+		/* Delete and duplicate elements */
+		remove (element) {
+			let self = this
+
+			MsgBox({
+				title: "Are you sure?",
+				text: "This action cannot be undone. We are working on an UNDO feature, but it is not available yet.",
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: "#c0392b",
+				confirmButtonText: "Delete!",
+				cancelButtonText: "Cancel",
+				closeOnConfirm: false
+			}, function (isConfirm) {
+				if (isConfirm && self.elements.$remove(element)) {
+					self.viewing('tab')
+					MsgBox.close()
+				}
+			})
+		},
+
+		duplicate (index, element) {
+			let newElement = $.extend(true, {}, element), newId = 'el-' + Date.now()
+			newElement.id = newId
+			_.map(newElement.responsive, function (breakpoint, index) {
+				breakpoint.id = breakpoint.attribute.id.value = newId
+				return breakpoint
+			})
+			this.elements.splice(index, 0, newElement)
+		},
+
+		/* Enable sortabe every breakpoints changes */
+		enableSortable () {
+			if (this.sortable) this.sortable.destroy()
+			let self = this, sortable = new Sortable(document.querySelector('#layout'), {
+				filter: '.dropable',
+				handle: '.sortable-handler',
+				ghostClass: 'sorting',
+				chosenClass: 'sorting',
+				onSort: function (e) {
+					let newIndex = e.newIndex - 1,
+					oldIndex = e.oldIndex - 1;
+
+					if (self.elements) {
+						let cache = self.elements[newIndex]
+						self.elements.$set(newIndex, self.elements[oldIndex])
+						self.elements.$set(oldIndex, cache)
+					}
+				}
+			})
+			this.$set('sortable', sortable)
 		}
 	},
 	ready () {
@@ -539,6 +594,7 @@ export default {
 									rotate: rotate,
 									enable: true
 								})
+
 							} else {
 								self.$set('device.enable', false)
 							}
@@ -554,10 +610,18 @@ export default {
 			}
 		});
 
+
+		/* On device enable re enable sortable */
+		self.$watch('device.enable', function () {
+			self.enableSortable();
+		})
+
+
 		/* Hide selected layout when onclick outside */
 		self.$on('click', function (params) {
 			let el = params.el
 			if (! el.className.includes('layout') && ! self.editProperties) {
+				self.$set('device.enabled', false)
 				self.viewing('tab')
 			}
 		})
@@ -568,6 +632,7 @@ export default {
 			margin: [],
 			padding: [],
 			border: [],
+			background: [],
 			css: []
 		},
 		breakpoints = {mini: {}, small: {}, medium: {}, large: {}, xlarge: {}};
@@ -575,20 +640,18 @@ export default {
 		/* Watcher for margin $set all */
 		self.$watch(function () {
 			return self.elements.map(function (element, index) {
-				if (self.validProperties()) {
-					return _.map(element.responsive, function (responsive, breakpoint) {
-						let margin = responsive.layout.margin
-						return {
-							index: index,
-							breakpoint: breakpoint,
-							topBottom: margin._.all,
-							type: margin._.type,
-							include: {t: margin.include.t, r: margin.include.r, b: margin.include.b, l: margin.include.l},
-							value: parseInt(margin._.allValue)
-						}
-					})
-				}
-				return {}
+				if (! self.validProperties()) return {}
+				return _.map(element.responsive, function (responsive, breakpoint) {
+					let margin = responsive.layout.margin
+					return {
+						index: index,
+						breakpoint: breakpoint,
+						topBottom: margin._.all,
+						type: margin._.type,
+						include: {t: margin.include.t, r: margin.include.r, b: margin.include.b, l: margin.include.l},
+						value: parseInt(margin._.allValue)
+					}
+				})
 			})
 		}, function (val) {
 			_.each(val, function (breakpoint, index) {
@@ -631,18 +694,16 @@ export default {
 		/* Watcher for padding $set all */
 		self.$watch(function () {
 			return self.elements.map(function (element, index) {
-				if (self.validProperties()) {
-					return _.map(element.responsive, function (responsive, breakpoint) {
-						let padding = responsive.layout.padding
-						return {
-							index: index,
-							breakpoint: breakpoint,
-							all: padding._.all,
-							value: parseInt(padding._.allValue)
-						}
-					})
-				}
-				return {}
+				if (!self.validProperties()) return {}
+				return _.map(element.responsive, function (responsive, breakpoint) {
+					let padding = responsive.layout.padding
+					return {
+						index: index,
+						breakpoint: breakpoint,
+						all: padding._.all,
+						value: parseInt(padding._.allValue)
+					}
+				})
 			})
 		}, function (val) {
 			_.each(val, function (breakpoint, index) {
@@ -669,20 +730,18 @@ export default {
 		/* Watcher for border $set all */
 		self.$watch(function () {
 			return self.elements.map(function (element, index) {
-				if (self.validProperties()) {
-					return _.map(element.responsive, function (responsive, breakpoint) {
-						let border = responsive.layout.border
-						return {
-							index: index,
-							breakpoint: breakpoint,
-							all: border._.all,
-							style: border._.allValue.style,
-							width: border._.allValue.width,
-							color: border._.allValue.color
-						}
-					})
-				}
-				return {}
+				if (! self.validProperties()) return {}
+				return _.map(element.responsive, function (responsive, breakpoint) {
+					let border = responsive.layout.border
+					return {
+						index: index,
+						breakpoint: breakpoint,
+						all: border._.all,
+						style: border._.allValue.style,
+						width: border._.allValue.width,
+						color: border._.allValue.color
+					}
+				})
 			})
 		}, function (val) {
 			_.each(val, function (breakpoint, index) {
@@ -712,16 +771,14 @@ export default {
 		/* Watcher for attribute.css */
 		self.$watch(function () {
 			return self.elements.map(function (element, index) {
-				if (self.validProperties()) {
-					return _.map(element.responsive, function (responsive, breakpoint) {
-						return {
-							index: index,
-							breakpoint: breakpoint,
-							css: responsive.attribute.css.value
-						}
-					})
-				}
-				return {}
+				if (! self.validProperties()) return {}
+				return _.map(element.responsive, function (responsive, breakpoint) {
+					return {
+						index: index,
+						breakpoint: breakpoint,
+						css: responsive.attribute.css.value
+					}
+				})
 			})
 		}, function (val) {
 			_.each(val, function (breakpoint, index) {
@@ -741,6 +798,56 @@ export default {
 			})
 		})
 
+
+		/** Background properties watcher */
+		self.$watch(function () {
+			return self.elements.map(function (element, index) {
+				if (! self.validProperties()) return {}
+				return _.map(element.responsive, function (responsive, breakpoint) {
+					let background = responsive.background
+					return {
+						index: index,
+						breakpoint: breakpoint,
+						bgType: background.type.value,
+						bgColor: background.color.value,
+						bgImage: background.image.value,
+						bgVideo: background.video.value,
+						bgStyle: background.video.style
+					}
+				})
+			})
+		}, function (val) {
+			_.each(val, function (breakpoint, index) {
+				_.each(breakpoint, function (prop, index) {
+					// Cancel, if old background has the same value with old value
+					if (! oldVal.background[prop.index]) oldVal.background[prop.index] = $.extend(true, {}, breakpoints)
+					if (_.isEqual(prop, oldVal.background[prop.index][prop.breakpoint])) return
+
+					// Get background properties
+					let styles = {}, background = self.elements[prop.index].responsive[prop.breakpoint].background
+
+					switch (prop.bgType) {
+						case 'img':
+
+						break;
+
+						case 'color':
+							if (prop.bgColor) styles.backgroundColor = prop.bgColor
+						break;
+					}
+
+					background.color.styles = styles
+
+					// Caching
+					oldVal.background[prop.index][prop.breakpoint] = prop;
+				})
+			})
+		})
+
+
+
+
+
 		/**
 		 * Define properties for multiple purpose
 		 * @type {Object}
@@ -752,9 +859,9 @@ export default {
 			layout: {
 				margin: {
 					label: 'Margin',
-					_: {type: 'inherit', unit: 'px', all: true, allValue: 15},
+					_: {type: 'inherit', unit: 'px', all: true, allValue: 0},
 					include: {t: true, b: true, l: true, r: true},
-					styles: [15, 15, 15, 15]
+					styles: [0, 0, 0, 0]
 				},
 				padding: {
 					label: 'Padding',
@@ -801,7 +908,7 @@ export default {
 			background: {
 				type: {
 					label: 'Type',
-					value: 'img',
+					value: 'color'
 				},
 				image: {
 					label: 'Image',
@@ -809,7 +916,8 @@ export default {
 				},
 				color: {
 					label: 'Color',
-					value: '#ffffff'
+					value: '#ffffff',
+					styles: {}
 				},
 				video: {
 					label: 'Video',
@@ -1012,18 +1120,7 @@ export default {
 		})
 
 		/* Sortable */
-		const sortable = new Sortable(document.querySelector('#layout'), {
-			filter: '.dropable',
-			handle: '.sortable-handler',
-			onSort: function (e) {
-				let newIndex = e.newIndex - 1,
-				oldIndex = e.oldIndex - 1;
-				
-				let cache = self.elements[newIndex]
-				self.elements.$set(newIndex, self.elements[oldIndex])
-				self.elements.$set(oldIndex, cache)
-			}
-		})
+		this.enableSortable()
 	}
 }
 </script>

@@ -1,8 +1,8 @@
 <template>
-<div class="empty content uk-text-center" :class="[class]">
+<div class="empty uk-text-center" :class="[class]">
 	<div class="uk-width-1-1 uk-panel uk-panel-box uk-panel-box-primary uk-vertical-align" :class="[class]">
-		<div class="uk-vertical-align-middle" :class="[class]">
-			<p :class="[class]">No content here. Drag new from 'Content' panel.</p>
+		<div class="uk-vertical-align-middle" :class="[class, itemClass]">
+			<p :class="[class, itemClass]">No content here. Drag new from 'Content' panel.</p>
 		</div>
 	</div>
 </div>
@@ -10,7 +10,7 @@
 
 <style lang="less">
 @import "../css/vars.less";
-.empty.content {
+.empty {
 	color: #3498db;
 
 	p {
@@ -18,7 +18,10 @@
 	}
 
 	.uk-panel {
-		border: 1px dashed @peterriver
+		border: 1px dashed @peterriver;
+		&.uk-panel-box-primary {
+			background: rgba(235, 247, 253, 0.8)
+		}
 	}
 }
 </style>
@@ -27,6 +30,12 @@
 export default {
 	name: 'Empty',
 	props: ['class'],
-	data() {}
+	computed: {
+		itemClass: {
+			get() {
+				return this.class + '-child'
+			}
+		}
+	}
 }
 </script>

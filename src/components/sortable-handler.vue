@@ -4,6 +4,7 @@
 
 <style lang="less">
 .sortable-handler {
+	cursor: move;
 	background: #3498db;
 	color: #ffffff;
     z-index: 99;

@@ -1,5 +1,6 @@
 <template>
 	<div class="cp color-picker-toggler">
+		<div class="cp color-transparent" @click="transparent()"></div>
 		<a class="cp picker" @click="toggle()" :style="bgColor"></a><span class="hex" v-if="showHex">#{{hexColor}}</span>
 		<div class="cp color-picker" v-if="show" :class="[position]">
 			<div class="cp _variations" :style="variations">
@@ -125,7 +126,7 @@ export default {
 			set (val) {
 				if (! this.hexRegex.test(val)) return false;
 				let hsv = this.RGBtoHSV(val), self = this;
-				this.$set('color', val)
+				this.$set('color', '#' + val)
 				this.$set('hsv', hsv)
 				this.$set('cursor', {
 					x: hsv.v * 200,
@@ -141,6 +142,10 @@ export default {
 
 		close () {
 			this.$set('show', false)
+		},
+
+		transparent () {
+			this.$set('color', 'transparent')
 		},
 
 		RenderRGBCursor (r, g, b) {
@@ -328,6 +333,15 @@ export default {
 </script>
 
 <style lang="less">
+.color-transparent {
+	background: url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSgBBwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKP/AABEIAAwADAMBEQACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/APpQkksS2524dx92Rf7q/wC1QB8wftsE48GDI2D7aFQ/eUfuODQAH9q3k7fBmEx8ijVOFb+9/qaAPL/jZ8Vh8ThoudF/sx9O87c32rz/ADvM8v8A2Fxjy/fOfagD/9k=");
+	width: 8px;
+	height: 8px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	border: 1px solid #cccccc;
+}
 .color-picker-toggler {
 	display: inline-block;
 	position: relative;

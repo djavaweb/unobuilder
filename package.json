@@ -39,7 +39,8 @@
     "webpack": "^1.12.2",
     "webpack-dev-server": "^1.12.0",
     "interact.js": "*",
-    "underscore": "*"
+    "underscore": "*",
+    "sweetalert": "*"
   },
   "dependencies": {
     "es6-promise": "*",
