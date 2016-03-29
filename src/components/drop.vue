@@ -1,5 +1,5 @@
 <template>
-<div class="dropable" :class="[position, class]"></div>
+<div class="dropable" :class="[position, class]" data-accept="{{accept}}"></div>
 </template>
 
 <style lang="less">
@@ -12,6 +12,37 @@
 	&.relative {
 		position: relative;
 	}
+
+	&.left, &.right {
+		position: absolute;
+		height: 100%;
+		width: 15px;
+		top: 0;
+		&:before {
+			border: none;
+			top: 5px;
+			left: -5px;
+			height: 100%;
+		}
+		&:after {
+			content: '';
+		}
+	}
+
+	&.left {
+		left: 0;
+		&:before {
+			border-right: 5px solid #3498db;
+		}
+	}
+
+	&.right {
+		right: 0;
+		&:before {
+			border-right: 5px solid #3498db;
+		}
+	}
+			
 
 	&:before {
 		content: ' ';
@@ -27,7 +58,7 @@
 	&:after {
 		display: none;
 		content: 'Drag it here';
-		padding: 2px 15px;
+		padding: 0 10px;
 		background: #3498db;
 		margin: 0 auto;
 		color: white;
@@ -35,7 +66,7 @@
 		border-right: 2px solid #3498db;
 		border-left: 2px solid #3498db;
 		z-index: 2;
-		border-radius: 20px;
+		border-radius: 100px;
 		position: absolute;
 		top: -5px;
 		left: 47%;
@@ -58,7 +89,8 @@ export default {
 	name: 'Drop',
 	props: {
 		position: {default: ''},
-		class: {default: ''}
+		class: {default: ''},
+		accept: {default: ''}
 	},
 	ready () {
 		let self = this, $el = $(self.$el)

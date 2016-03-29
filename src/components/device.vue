@@ -1,6 +1,6 @@
 <template>
 	<div class="uk-container-center uk-margin-large-top uk-margin-large-bottom" v-if="enable" :style="width">
-		<div class="marvel-device" v-if="style==='iphone6'" :class="[style, skin, rotate]">
+		<div class="marvel-device" v-if="style==='iphone6' || style==='iphone4s'" :class="[style, skin, rotate]">
 			<div class="top-bar"></div>
 			<div class="sleep"></div>
 			<div class="volume"></div>
@@ -45,11 +45,11 @@ export default {
 			let self = this, width = 425
 			if (self.style === 'ipad') {
 				width = (self.rotate === 'landscape')? 948: 626
+			} else if (self.style === 'iphone4s') {
+				width = 345
 			}
 
-			return {
-				width: width + 'px'
-			}
+			return {width: width + 'px'}
 		}
 	}
 }

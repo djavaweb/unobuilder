@@ -10,11 +10,34 @@ body {
 #app {
 	color: @bluegray;
 	height: 100%;
+	overflow: hidden;
 	&:after {
 		content: ' ';
 		clear: both;
 		width: 100%;
 		display: block;
+	}
+}
+
+#responsive-switcher {
+	position: absolute;
+	bottom: 50px;
+	right: 20px;
+	padding: 5px 10px;
+	background: #E4E4E4;
+	border-radius: 5px;
+	z-index: 999;
+	a {
+		font-size: 20px;
+		vertical-align: middle;
+		padding: 5px 10px;
+		color: #c0c0c0;
+		&.mini {
+			font-size: 14px
+		}
+		&.selected {
+			color: #3498db
+		}
 	}
 }
 
@@ -24,15 +47,16 @@ body {
 	overflow-y: auto;
 	width: auto;
 	height: 100%;
-	padding: 20px 0
+	padding: 20px 0;
+	position: relative
 }
 
 #menu {
-	overflow: hidden;
+	overflow: auto;
 	border: 1px solid #ddd;
 	border-left: 1px solid #c7c7c7;
 	background: #F9F9F9;
-	width: 420px;
+	width: 450px;
 	float: right;
 	height: 100%;
 }
@@ -98,9 +122,13 @@ body {
 		z-index: 9999;
 		position: relative;
 		opacity: 0.65;
+
+		&.item {
+			width: 120px
+		}
 	}
 
-	.item {
+	&.item .content {
 		border: 1px solid #cccccc;
 		&:hover {
 			box-shadow: 0 5px 12px 3px rgba(0, 0, 0, 0.2);
@@ -191,6 +219,10 @@ body {
 			}
 		}
 	}
+
+	.layout-column {
+		position: relative
+	}
 }
 div.inspectable {
 	box-sizing: border-box;
@@ -215,12 +247,37 @@ div.inspectable {
 #properties-view {
 	height: 100%;
 	overflow: auto;
-	background-color: #F1F1F1
+	background-color: #F1F1F1;
 }
 
-.row-tab.uk-tab {
-	background: white;
-	margin: 1px 0 0;
+.prop-tab.uk-tab {
+	padding-left: 5px;
+
+	&.first {
+		background: white;
+	}
+
+	&.second {
+		background: #ededed;
+		.uk-active {
+			background: #e0e0e0
+		}
+	}
+
+	&.third {
+		background: #e0e0e0;
+		.uk-active {
+			background: #d5d5d5
+		}
+	}
+
+	&.fourth {
+		background: #d5d5d5;
+		.uk-active {
+			background: #c9c9c9
+		}
+	}
+
 	&.uk-tab-grid:before {
 		border: none;
 	}
@@ -256,6 +313,7 @@ div.inspectable {
 
 .properties-wrapper {
 	font-size: 12px;
+	padding-bottom: 40px;
 	.tab-content {
 		padding: 20px 10px;
 	}
@@ -269,11 +327,39 @@ div.inspectable {
 			margin-bottom: 5px;
 		}
 	}
+	&.second {
+		background-color: #e0e0e0;
+		.properties {
+			border-top-color: #E6E6E6;
+    		border-bottom-color: #D0D0D0;
+		}
+	}
+	&.third {
+		background-color: #d5d5d5;
+		.properties {
+		    border-top-color: #DEDEDE;
+			border-bottom-color: #C3C3C3;
+		}
+	}
+	&.fourth {
+		background-color: #c9c9c9;
+		.properties {
+			border-top-color: #D4D4D4;
+			border-bottom-color: #aeaeae
+		}
+	}
 }
 
 .properties {
 	padding: 10px 0;
+	border-top: 1px solid #ffffff;
 	border-bottom: 1px solid #dfdfdf;
+	&:first-child {
+		border-top: none
+	}
+	&:last-child {
+		border-bottom: none
+	}
 	&:after {
 		content: ' ';
 		display: block;
