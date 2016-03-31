@@ -20,9 +20,9 @@ body {
 }
 
 #responsive-switcher {
-	position: absolute;
-	bottom: 50px;
-	right: 20px;
+	position: fixed;
+	bottom: 20px;
+	right: 465px;
 	padding: 5px 10px;
 	background: #E4E4E4;
 	border-radius: 5px;
@@ -48,7 +48,7 @@ body {
 	width: auto;
 	height: 100%;
 	padding: 20px 0;
-	position: relative
+	position: relative;
 }
 
 #menu {
@@ -59,6 +59,7 @@ body {
 	width: 450px;
 	float: right;
 	height: 100%;
+	z-index: 999
 }
 
 #menu-tab {
@@ -93,6 +94,8 @@ body {
 	min-height: 200px;
 	height: auto;
 	position: relative;
+	z-index: 999;
+	background: white;
 }
 
 #tab {
@@ -157,11 +160,10 @@ body {
 		height: 100%;
 	}
 	.layout-wrap {
-		overflow: hidden;
 		position: relative;
+		overflow-x: hidden;
 	}
 	.layout-row {
-		overflow: hidden;
 		position: relative;
 		z-index: 1;
 	}
@@ -173,13 +175,14 @@ body {
 	}
 	.layout-label {
 		position: absolute;
-		bottom: -22px;
+		bottom: -20px;
 		right: -2px;
 		background: #3498db;
-		padding: 1px 15px;
+		padding: 0 15px;
 		font-size: 11px;
 		color: #ffffff;
-		display: none
+		display: none;
+		width: auto
 	}
 	.layout-tool {
 		display: none;
@@ -212,6 +215,10 @@ body {
 			display: inline-block;
 		}
 
+		&:hover .resizer {
+			display: inline-block
+		}
+
 		&:hover {
 			z-index: 999;
 			> .layout-label {
@@ -221,14 +228,28 @@ body {
 	}
 
 	.layout-column {
-		position: relative
+		position: relative;
+		&:hover .layout-label {
+			display: inline-block
+		}
 	}
 }
+
+.layout-overlay {
+	background: rgba(0,0,0,0.5);
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	display: none
+}
+
 div.inspectable {
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-	outline: 2px solid white;
+	outline: 2px solid transparent;
 	pointer-events:none;
 	* {
 		pointer-events:all;
@@ -377,5 +398,9 @@ div.inspectable {
 		textarea {
 			border: 1px solid #cccccc
 		}
+	}
+	input[type="number"] {
+		width: 30px;
+		padding: 2px;
 	}
 }

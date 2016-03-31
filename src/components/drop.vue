@@ -8,6 +8,7 @@
 	height: 5px;
 	margin-top: -5px;
 	position: relative;
+	z-index: 999;
 
 	&.relative {
 		position: relative;
@@ -16,7 +17,7 @@
 	&.left, &.right {
 		position: absolute;
 		height: 100%;
-		width: 15px;
+		width: 5px;
 		top: 0;
 		&:before {
 			border: none;
@@ -30,7 +31,7 @@
 	}
 
 	&.left {
-		left: 0;
+		left: 5px;
 		&:before {
 			border-right: 5px solid #3498db;
 		}

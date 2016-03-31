@@ -1,9 +1,11 @@
 <template>
-<div class="empty uk-text-center" :class="[class, selectedClass]">
-	<div class="uk-width-1-1 uk-panel uk-panel-box uk-panel-box-primary uk-vertical-align" :class="[class]">
+<div class="parent empty uk-text-center" :class="[class, selectedClass]">
+	<div :style="[styles]" :class="[class]">
+	<div class="uk-width-1-1 uk-panel uk-panel-box uk-panel-box-primary uk-vertical-align" :class="[class, itemClass]">
 		<div class="uk-vertical-align-middle" :class="[class, itemClass]">
 			<p :class="[class, itemClass]">No content here. Drag new from 'Content' panel.</p>
 		</div>
+	</div>
 	</div>
 </div>
 </template>
@@ -31,7 +33,8 @@ export default {
 	name: 'Empty',
 	props: {
 		class: {default: ''},
-		selected: {default: false}
+		selected: {default: false},
+		styles: {default: ''}
 	},
 	computed: {
 		selectedClass: {

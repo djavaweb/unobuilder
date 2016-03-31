@@ -4,6 +4,9 @@
 		<label class="uk-width-1-5 uk-text-right">{{value.label}}</label>
 
 		<div class="uk-width-4-5" transition="fade">
+			<div v-if="prop==='grid'">
+				<input type="number" min="1" max="6" step="1" v-model="value.value[0]"> / 6 <info :text="value.help"></info>
+			</div>
 			<div v-if="prop==='margin'">
 				<label><input type="radio" name="{{name}}-margin-type" value="inherit" v-model="value._.type"> Inherited from <a href="#customizer">customizer</a></label>
 				<label class="block br"><input type="radio" name="{{name}}-margin-type" value="custom" v-model="value._.type"> Custom</label>
@@ -208,9 +211,12 @@ import colorPicker from './color-picker.vue';
 /* Dropable */
 import Number from './number.vue';
 
+/* Info */
+import Info from './info.vue';
+
 export default {
 	name: 'Properties',
-	components: {Switch, borderStyle, colorPicker, Number},
+	components: {Switch, borderStyle, colorPicker, Number, Info},
 	props: {
 		type: {default: ''},
 		name: {default: ''},

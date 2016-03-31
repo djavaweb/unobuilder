@@ -32,7 +32,7 @@
 	}
 
 	input {
-		width: 40px !important;
+		width: 55px !important;
 		border: none;
 		color: #4E4E4E;
 		padding: 5px 2px !important;

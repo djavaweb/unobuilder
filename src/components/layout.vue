@@ -105,6 +105,7 @@
 </div>
 
 <div id="layout-wrapper">
+	<div class="layout-overlay"></div>
 	<device :enable="device.enable" :style="device.style" :rotate="device.rotate">
 		<div id="layout">
 			<drop class="layout-dropable" accept="structure" position="relative"></drop>
@@ -113,12 +114,13 @@
 					<div class="layout-row" :style="style(row)">
 						<div class="layout-wrapper">
 							<div class="layout-columns uk-grid uk-grid-small uk-grid-match">
-								<div class="layout-column uk-grid-match uk-width-{{column.width[0]}}-{{column.width[1]}}" v-for="column in row.columns" id="{{column.id}}" track-by="$index" @click="setProperties(column, row, $index)">
+								<div class="layout-column uk-grid-match" v-for="column in row.columns" id="{{column.id}}" track-by="$index" @click="setProperties(column, row, $index)" :class="columnWidth(column)">
 									<drop class="layout-dropable" accept="item" position="left"></drop>
 									<drop class="layout-dropable" accept="item" position="right"></drop>
 									<drop class="layout-dropable" accept="item"></drop>
-									<empty class="layout-column-item" v-if="empty(column.items)" :selected="current.column === column.id"></empty>
+									<empty class="layout-column-item" v-if="empty(column.items)" :selected="current.column === column.id" :styles="style(column)"></empty>
 									<drop class="layout-dropable" accept="item"></drop>
+									<div class="layout-label">{{column.label}}</div>
 								</div>
 							</div>
 						</div>
@@ -200,9 +202,10 @@ export default {
 		return {
 			droprow: null,
 			draggableMove: false,
+			resizeData: '',
 			body: {},
 			rows: [],
-			structures: ['1-1', '5-5', '3-7', '7-3', '2-8', '8-2', '6-4', '4-6'],
+			structures: [['6-6'], ['2-6', '2-6', '2-6'], ['4-6', '2-6'], ['2-6', '4-6'], ['1-6', '5-6'], ['5-6', '1-6']],
 			contents: [
 				[{icon: 'font', label: 'Text'}, {icon: 'image', label: 'Image'}, {icon: 'hand-pointer-o', label: 'Button'}]
 			],
@@ -378,23 +381,32 @@ export default {
 				this.$set('current.column', item.id)
 				this.$set('current.row', parent.id)
 				this.$set('current.columnsSize', parent.columns.length)
+				this.$set('propTabs.columns.current', index)
 			}
 
 			this.viewing('properties');
 			$('#menu-tab').data().switcher.show(1);
 		},
 
+		/* Render column width */
+		columnWidth (column) {
+			let gridClass = {}, responsive = column.responsive[this.current.selected].layout.grid.value
+			gridClass['uk-width-'.concat(responsive[0], '-', responsive[1])] = true
+			
+			return gridClass
+		},
+
 		/* Render Style */
-		style (row) {
+		style (element) {
 			/* Layout Styles */
 			let styles = {}
 
 			let breakpoint = this.current.selected || 'large'
-			let properties = row.responsive[breakpoint]
+			let properties = element.responsive[breakpoint]
 
 			/* Apply CSS style if there is styles object */
-			_.each(properties, function (row, index) {
-				_.each(row, function (value, prop) {
+			_.each(properties, function (element, index) {
+				_.each(element, function (value, prop) {
 					if (value.styles) {
 						if (_.isArray(value.styles)) {
 							styles[prop] = value.styles.map((style) => {
@@ -422,7 +434,7 @@ export default {
 				})
 			})			
 
-			//console.log(styles)
+			//console.log(JSON.stringify(styles))
 			delete styles['']
 			return styles;
 		},
@@ -454,11 +466,16 @@ export default {
 		},
 
 		duplicate (index, row) {
-			let newrow = $.extend(true, {}, row), newId = 'el-' + Date.now()
+			let self = this, newrow = $.extend(true, {}, row), newId = self.generateId('el')
 			newrow.id = newId
+
 			_.map(newrow.responsive, function (breakpoint, index) {
 				breakpoint.id = breakpoint.attribute.id.value = newId
 				return breakpoint
+			})
+			_.map(newrow.columns, function (column, columnIndex) {
+				column.id = self.generateId('column')
+				return column
 			})
 			this.rows.splice(index, 0, newrow)
 		},
@@ -520,6 +537,11 @@ export default {
 
 			self.$set('current.selected', breakpoint)
 			self.$set('current.column', self.current.column)
+		},
+
+
+		generateId (prefix) {
+			return prefix + '-' + Date.now() + Math.floor(Math.random() * (1000 - 10 + 1)) + 10
 		}
 	},
 	ready () {
@@ -583,6 +605,11 @@ export default {
 						}
 					}
 				}
+				else if (id === 'columns') {
+					if (self.validProperties()) {
+						self.setProperties(self.current.properties.columns[index], self.current.properties, index)
+					}
+				}
 			}
 		});
 
@@ -604,22 +631,83 @@ export default {
 
 		/* Watch cached */
 		let oldVal = {
-			margin: [],
-			padding: [],
-			border: [],
-			background: [],
+			marginrow: [],
+			margincolumn: [],
+			paddingrow: [],
+			paddingcolumn: [],
+			borderrow: [],
+			bordercolumn: [],
+			grid: [],
+			backgroundrow: [],
+			backgroundcolumn: [],
 			css: []
 		},
 		breakpoints = {mini: {}, small: {}, medium: {}, large: {}, xlarge: {}};
 
 		/* Watcher for margin $set all */
-		self.$watch(function () {
-			return self.rows.map(function (row, index) {
-				if (! self.validProperties()) return {}
-				return _.map(row.responsive, function (responsive, breakpoint) {
+		let marginWatcher = {
+			watcher (val) {
+				_.each(val, function (breakpoint, index) {
+					_.each(breakpoint, function (prop, index) {
+						// Cancel, if old margin has the same value with old value
+						if (! oldVal['margin' + prop.itemType][prop.id]) oldVal['margin' + prop.itemType][prop.id] = $.extend(true, {}, breakpoints)
+						if (_.isEqual(prop, oldVal['margin' + prop.itemType][prop.id][prop.breakpoint])) return
+
+						// Get actual margin
+						let margin = null
+
+						if (prop.itemType === 'row') {
+							let row = _.findWhere(self.rows, {id: prop.id})
+							if (row) margin = row.responsive[prop.breakpoint].layout.margin
+						} else {
+							_.each(self.rows, function (row) {
+								_.each(row.columns, function (column) {
+									if (column.id === prop.id) margin = column.responsive[prop.breakpoint].layout.margin
+								})
+							})
+						}
+
+						if (margin) {
+							if (prop.type === 'inherit') {
+								for (let i in margin.styles) {
+									if (prop.topBottom) {
+										prop.include.t = prop.include.b = margin.include.t = margin.include.b = true
+										prop.include.l = prop.include .l = margin.include.l = margin.include.r = false
+									}
+
+									let index = parseInt(i), value
+
+									switch (index) {
+										case 0: value = (prop.include.t)? prop.tbValue: 0; break;
+										case 1: value = (prop.include.r)? prop.tbValue: 0; break;
+										case 2: value = (prop.include.b)? prop.tbValue: 0; break;
+										case 3: value = (prop.include.l)? prop.tbValue: 0; break;
+									}
+
+									margin.styles.$set(index, value)
+								}
+							} else {
+								if (prop.all) {
+									for (let i in margin.styles) {
+										margin.styles.$set(i, prop.value)
+									}
+								}
+							}
+
+							// Caching oldValue, vuejs doesn't support this, so I added it manually
+							oldVal['margin' + prop.itemType][prop.id][prop.breakpoint] = prop;
+						}
+					})
+				})
+			},
+
+			map (item, index) {
+				if ((item.type === 'row' && ! self.validProperties()) || item.type === 'column' && ! self.validProperties(true)) return {}
+				return _.map(item.responsive, function (responsive, breakpoint) {
 					let margin = responsive.layout.margin
 					return {
-						index: index,
+						id: item.id,
+						itemType: item.type,
 						breakpoint: breakpoint,
 						topBottom: margin._.tb,
 						tbValue: parseInt(margin._.tbValue),
@@ -629,94 +717,123 @@ export default {
 						value: parseInt(margin._.allValue)
 					}
 				})
-			})
-		}, function (val) {
-			_.each(val, function (breakpoint, index) {
-				_.each(breakpoint, function (prop, index) {
-					// Cancel, if old margin has the same value with old value
-					if (! oldVal.margin[prop.index]) oldVal.margin[prop.index] = $.extend(true, {}, breakpoints)
-					if (_.isEqual(prop, oldVal.margin[prop.index][prop.breakpoint])) return
+			}
+		}
 
-					// Get actual margin
-					let margin = self.rows[prop.index].responsive[prop.breakpoint].layout.margin
-
-					if (prop.type === 'inherit') {
-						for (let i in margin.styles) {
-							if (prop.topBottom) {
-								prop.include.t = prop.include.b = margin.include.t = margin.include.b = true
-								prop.include.l = prop.include .l = margin.include.l = margin.include.r = false
-							}
-
-							let index = parseInt(i), value
-
-							switch (index) {
-								case 0: value = (prop.include.t)? prop.tbValue: 0; break;
-								case 1: value = (prop.include.r)? prop.tbValue: 0; break;
-								case 2: value = (prop.include.b)? prop.tbValue: 0; break;
-								case 3: value = (prop.include.l)? prop.tbValue: 0; break;
-							}
-
-							margin.styles.$set(index, value)
-						}
-					} else {
-						if (prop.all) {
-							for (let i in margin.styles) {
-								margin.styles.$set(i, prop.value)
-							}
-						}
-					}
-
-					// Caching oldValue, vuejs doesn't support this, so I added it manually
-					oldVal.margin[prop.index][prop.breakpoint] = prop;
-				})
-			})
+		// Rows and Columns Margin Watcher
+		self.$watch(function () { return self.rows.map(marginWatcher.map) }, marginWatcher.watcher, {deep: true})
+		self.$watch(function () { return self.rows.map(function (item) {
+			return item.columns.map(marginWatcher.map)
+		})}, function (val) {
+			_.each(val, marginWatcher.watcher)
 		}, {deep: true})
 
 
 		/* Watcher for padding $set all */
-		self.$watch(function () {
-			return self.rows.map(function (row, index) {
+		let paddingWatcher = {
+			watcher (val) {
+				_.each(val, function (breakpoint, index) {
+					_.each(breakpoint, function (prop, index) {
+						// Cancel, if old padding has the same value with old value
+						if (! oldVal['padding' + prop.itemType][prop.id]) oldVal['padding' + prop.itemType][prop.id] = $.extend(true, {}, breakpoints)
+						if (_.isEqual(prop, oldVal['padding' + prop.itemType][prop.id][prop.breakpoint])) return
+
+						// Get actual padding
+						let padding = null
+						if (prop.itemType === 'row') {
+							let row = _.findWhere(self.rows, {id: prop.id})
+							if (row) padding = row.responsive[prop.breakpoint].layout.padding
+						} else {
+							_.each(self.rows, function (row) {
+								_.each(row.columns, function (column) {
+									if (column.id === prop.id) padding = column.responsive[prop.breakpoint].layout.padding
+								})
+							})
+						}
+
+						if (padding) {
+							if (prop.all) {
+								for (let i in padding.styles) {
+									padding.styles.$set(i, prop.value)
+								}
+							}
+
+							// Caching
+							oldVal['padding' + prop.itemType][prop.id][prop.breakpoint] = prop;
+						}
+					})
+				})
+			},
+
+			map (item, index) {
 				if (!self.validProperties()) return {}
-				return _.map(row.responsive, function (responsive, breakpoint) {
+				return _.map(item.responsive, function (responsive, breakpoint) {
 					let padding = responsive.layout.padding
 					return {
-						index: index,
+						id: item.id,
+						itemType: item.type,
 						breakpoint: breakpoint,
 						all: padding._.all,
 						value: parseInt(padding._.allValue)
 					}
 				})
-			})
-		}, function (val) {
-			_.each(val, function (breakpoint, index) {
-				_.each(breakpoint, function (prop, index) {
-					// Cancel, if old padding has the same value with old value
-					if (! oldVal.padding[prop.index]) oldVal.padding[prop.index] = $.extend(true, {}, breakpoints)
-					if (_.isEqual(prop, oldVal.padding[prop.index][prop.breakpoint])) return
+			}
+		}
 
-					// Get actual padding
-					let padding = self.rows[prop.index].responsive[prop.breakpoint].layout.padding
-
-					if (prop.all) {
-						for (let i in padding.styles) {
-							padding.styles.$set(i, prop.value)
-						}
-					}
-
-					// Caching
-					oldVal.padding[prop.index][prop.breakpoint] = prop;
-				})
-			})
+		// Rows and Column Padding
+		self.$watch(function () { return self.rows.map(paddingWatcher.map) }, paddingWatcher.watcher, {deep: true})
+		self.$watch(function () { return self.rows.map(function (item) {
+			return item.columns.map(paddingWatcher.map)
+		})}, function (val) {
+			_.each(val, paddingWatcher.watcher)
 		}, {deep: true})
 
+
 		/* Watcher for border $set all */
-		self.$watch(function () {
-			return self.rows.map(function (row, index) {
+		let borderWatcher = {
+			watcher (val) {
+				_.each(val, function (breakpoint, index) {
+					_.each(breakpoint, function (prop, index) {
+						// Cancel, if old border has the same value with old value
+						if (! oldVal['border' + prop.itemType][prop.id]) oldVal['border' + prop.itemType][prop.id] = $.extend(true, {}, breakpoints)
+						if (_.isEqual(prop, oldVal['border' + prop.itemType][prop.id][prop.breakpoint])) return
+
+						// Get actual margin
+						let border = null
+						if (prop.itemType === 'row') {
+							let row = _.findWhere(self.rows, {id: prop.id})
+							if (row) border = row.responsive[prop.breakpoint].layout.border
+						} else {
+							_.each(self.rows, function (row) {
+								_.each(row.columns, function (column) {
+									if (column.id === prop.id) border = column.responsive[prop.breakpoint].layout.border
+								})
+							})
+						}
+
+						if (border) {
+							if (prop.all) {
+								_.each(border.styles, function (values, propName) {
+									_.each(values, function (item, index) {
+										border.styles[propName].$set(index, prop[propName])
+									})
+								})
+							}
+
+							// Caching
+							oldVal['border' + prop.itemType][prop.id][prop.breakpoint] = prop;
+						}
+					})
+				})
+			},
+
+			map (item, index) {
 				if (! self.validProperties()) return {}
-				return _.map(row.responsive, function (responsive, breakpoint) {
+				return _.map(item.responsive, function (responsive, breakpoint) {
 					let border = responsive.layout.border
 					return {
-						index: index,
+						id: item.id,
+						itemType: item.type,
 						breakpoint: breakpoint,
 						all: border._.all,
 						style: border._.allValue.style,
@@ -724,29 +841,15 @@ export default {
 						color: border._.allValue.color
 					}
 				})
-			})
-		}, function (val) {
-			_.each(val, function (breakpoint, index) {
-				_.each(breakpoint, function (prop, index) {
-					// Cancel, if old border has the same value with old value
-					if (! oldVal.border[prop.index]) oldVal.border[prop.index] = $.extend(true, {}, breakpoints)
-					if (_.isEqual(prop, oldVal.border[prop.index][prop.breakpoint])) return
+			}
+		}
 
-					// Get actual margin
-					let border = self.rows[prop.index].responsive[prop.breakpoint].layout.border
-
-					if (prop.all) {
-						_.each(border.styles, function (values, propName) {
-							_.each(values, function (item, index) {
-								border.styles[propName].$set(index, prop[propName])
-							})
-						})
-					}
-
-					// Caching
-					oldVal.border[prop.index][prop.breakpoint] = prop;
-				})
-			})
+		// Rows and Columns Border Watcher
+		self.$watch(function () { return self.rows.map(borderWatcher.map) }, borderWatcher.watcher, {deep: true})
+		self.$watch(function () { return self.rows.map(function (item) {
+			return item.columns.map(borderWatcher.map)
+		})}, function (val) {
+			_.each(val, borderWatcher.watcher)
 		}, {deep: true})
 
 
@@ -782,13 +885,57 @@ export default {
 
 
 		/** Background properties watcher */
-		self.$watch(function () {
-			return self.rows.map(function (row, index) {
+		let bgWatcher = {
+			watcher (val) {
+				_.each(val, function (breakpoint, index) {
+					_.each(breakpoint, function (prop, index) {
+						// Cancel, if old background has the same value with old value
+						if (! oldVal['background' + prop.itemType][prop.id]) oldVal['background' + prop.itemType][prop.id] = $.extend(true, {}, breakpoints)
+						if (_.isEqual(prop, oldVal['background' + prop.itemType][prop.id][prop.breakpoint])) return
+
+
+						let background = null
+						if (prop.itemType === 'row') {
+							let row = _.findWhere(self.rows, {id: prop.id})
+							if (row) background = row.responsive[prop.breakpoint].background
+						} else {
+							_.each(self.rows, function (row) {
+								_.each(row.columns, function (column) {
+									if (column.id === prop.id) background = column.responsive[prop.breakpoint].background
+								})
+							})
+						}
+
+						if (background) {
+							
+							let styles = {}
+
+							switch (prop.bgType) {
+								case 'img':
+								break;
+
+								case 'color':
+									if (prop.bgColor) styles.backgroundColor = prop.bgColor
+								break;
+							}
+
+							background.color.styles = styles
+
+							// Caching
+							oldVal['background' + prop.itemType][prop.id][prop.breakpoint] = prop;
+						}
+					})
+				})
+			},
+
+			map (item, index) {
 				if (! self.validProperties()) return {}
-				return _.map(row.responsive, function (responsive, breakpoint) {
+				return _.map(item.responsive, function (responsive, breakpoint) {
 					let background = responsive.background
+
 					return {
-						index: index,
+						id: item.id,
+						itemType: item.type,
 						breakpoint: breakpoint,
 						bgType: background.type.value,
 						bgColor: background.color.value,
@@ -797,35 +944,62 @@ export default {
 						bgStyle: background.video.style
 					}
 				})
-			})
-		}, function (val) {
-			_.each(val, function (breakpoint, index) {
-				_.each(breakpoint, function (prop, index) {
-					// Cancel, if old background has the same value with old value
-					if (! oldVal.background[prop.index]) oldVal.background[prop.index] = $.extend(true, {}, breakpoints)
-					if (_.isEqual(prop, oldVal.background[prop.index][prop.breakpoint])) return
+			}
+		}
 
-					// Get background properties
-					let styles = {}, background = self.rows[prop.index].responsive[prop.breakpoint].background
+		self.$watch(function () { return self.rows.map(bgWatcher.map) }, bgWatcher.watcher, {deep: true})
+		self.$watch(function () { return self.rows.map(function (item) {
+			return item.columns.map(bgWatcher.map)
+		})}, function (val) {
+			_.each(val, bgWatcher.watcher)
+		}, {deep: true})
 
-					switch (prop.bgType) {
-						case 'img':
-						break;
 
-						case 'color':
-							if (prop.bgColor) styles.backgroundColor = prop.bgColor
-						break;
-					}
 
-					background.color.styles = styles
+		/* Grid watcher */
+		let gridWatcher = {
+			watcher (val) {
+				_.each(val, function (breakpoint, index) {
+					_.each(breakpoint, function (prop, index) {
+						if (! oldVal.grid[prop.id]) oldVal.grid[prop.id] = $.extend(true, {}, breakpoints)
+						if (_.isEqual(prop, oldVal.grid[prop.id][prop.breakpoint])) return
 
-					// Caching
-					oldVal.background[prop.index][prop.breakpoint] = prop;
+						// Get actual padding
+						let grid = null
+						_.each(self.rows, function (row) {
+							let column = _.findWhere(row.columns, {id: prop.id})
+							if (column) grid = column.responsive[prop.breakpoint].layout.grid
+						})
+
+						if (grid) {
+							grid.value = prop.value
+
+							// Caching
+							oldVal.grid[prop.id][prop.breakpoint] = prop;
+						}
+					})
 				})
-			})
-		})
+			},
 
+			map (item, index) {
+				if (! self.validProperties()) return {}
+				return _.map(item.responsive, function (responsive, breakpoint) {
+					let grid = responsive.layout.grid
+					return {
+						id: item.id,
+						itemType: item.type,
+						breakpoint: breakpoint,
+						value: grid.value.map((n) => parseInt(n))
+					}
+				})
+			}
+		}
 
+		self.$watch(function () { return self.rows.map(function (item) {
+			return item.columns.map(gridWatcher.map)
+		})}, function (val) {
+			_.each(val, gridWatcher.watcher)
+		}, {deep: true})
 
 
 
@@ -838,6 +1012,12 @@ export default {
 			columns: [],
 			type: 'row',
 			layout: {
+				grid: {
+					label: 'Column Width',
+					help: 'Column width help',
+					value: []
+				},
+
 				margin: {
 					label: 'Margin',
 					_: {type: 'custom', unit: 'px', tb: false, tbValue: 10, all: true, allValue: 10},
@@ -938,6 +1118,7 @@ export default {
 			ondropactivate (event) {
 				self.droprow = null;
 				$('.dropable').removeClass('drop-enter');
+				$('.layout-overlay').show()
 			},
 
 			ondragenter (event) {
@@ -946,24 +1127,23 @@ export default {
 				self.droprow.classList.add('drop-enter');
 			},
 
-			ondrop (event) {},
+			ondrop (event) {
+				$('.layout-overlay').hide()
+			},
 			ondropdeactivate (event) {
 				if (self.droprow) {
 					let accepting = self.droprow.getAttribute('data-accept'),
-					source = event.relatedTarget,
-					randomInt = function () {
-						return Math.floor(Math.random() * (1000 - 10 + 1)) + 10
-					}
+					source = event.relatedTarget
 					
 
 					/**
 					* Structure dropable
 					*/
 					if (accepting === 'structure') {
-						let rowId = 'el-' + Date.now() + randomInt(),
+						let rowId = self.generateId('el'),
 
 						// Create Flex Columns
-						columns = source.getAttribute('data-width').split('-').filter(n => parseInt(n, 10)),
+						columns = source.getAttribute('data-width').split(','),
 
 						// Dropable index
 						index = 0,
@@ -989,6 +1169,7 @@ export default {
 
 						// Define responsive breakpoints
 						let defaultBreakpoint = $.extend(true, {}, responsive)
+						delete defaultBreakpoint.layout.grid
 						row.layout = defaultBreakpoint.layout
 						row.background = defaultBreakpoint.background
 						row.attribute = defaultBreakpoint.attribute
@@ -1006,57 +1187,62 @@ export default {
 						let column = $.extend(true, {}, defaultProps)
 						column.type = 'column'
 						column.label = "Column"
+						column.layout.margin._.allValue = 0
+						column.layout.margin.styles = [0, 0, 0, 0]
 
-						// Copy row properties into responsive breakpoints
-						let columnResponsive = $.extend(true, {}, row)
+						// Column items is blank
+						column.items = []
 
-						// Delete unnecessary properties after cloned 
-						for (let i in dumpProps) delete column[dumpProps[i]];
-
-						// Delete unnecessary cloned properties
-						let dumpColumnProps = ['id', 'columns', 'type']
-						for (let i in dumpRowProps) delete columnResponsive[dumpColumnProps[i]];
-
-						// Define responsive breakpoints
-						let defaultColumnBreakpoint = $.extend(true, {}, columnResponsive)
-						column.layout = defaultColumnBreakpoint.layout
-						column.background = defaultColumnBreakpoint.background
-						column.attribute = defaultColumnBreakpoint.attribute
-
-						// Set breakpoints
-						column.responsive = {
-							mini: $.extend(true, {}, columnResponsive),
-							small: $.extend(true, {}, columnResponsive),
-							medium: $.extend(true, {}, columnResponsive),
-							large: defaultColumnBreakpoint,
-							xlarge: $.extend(true, {}, columnResponsive)
-						}
+						let dumpColumnProps = ['layout', 'background', 'attribute', 'animation', 'columns'],
+						dumpColumnPropsResponsive = ['id', 'columns', 'type']
 
 
 						/**
-						* Make columns only 1 item if width is 1-1
+						* Get columns width and push columns to rows based on columns structure
 						*/
-						if (columns[0] === columns[1] && columns[0] < 5) {
-							column.id = column.attribute.id.value = 'column-' + Date.now() + randomInt()
-							row.columns.push($.extend(true, {
-								width: [1, 1],
-								items: []
-							}, column))
-						} else {
-							for (let i in columns) {
-								let columnIndex = columns[i];
-								column.id = column.attribute.id.value = 'column-' + Date.now() + randomInt()
-								row.columns.push($.extend(true, {
-									width: [columnIndex, 10],
-									items: []
-								}, column))
+						for (let i in columns) {
+							let grid = columns[i].split('-'),
+							copyColumn = $.extend(true, {}, column)
+
+							// Copy row properties into responsive breakpoints
+							let columnResponsive = $.extend(true, {}, copyColumn)
+
+							// Delete unnecessary properties after cloned
+							for (let i in dumpColumnProps) delete copyColumn[dumpColumnProps[i]];
+
+							// Delete unnecessary cloned properties
+							for (let i in dumpColumnPropsResponsive) delete columnResponsive[dumpColumnPropsResponsive[i]];
+
+							// Define responsive breakpoints
+							let defaultColumnBreakpoint = $.extend(true, {}, columnResponsive)
+							copyColumn.layout = defaultColumnBreakpoint.layout
+							copyColumn.background = defaultColumnBreakpoint.background
+							copyColumn.attribute = defaultColumnBreakpoint.attribute
+
+							// Set breakpoints
+							copyColumn.responsive = {
+								mini: $.extend(true, {}, columnResponsive),
+								small: $.extend(true, {}, columnResponsive),
+								medium: $.extend(true, {}, columnResponsive),
+								large: defaultColumnBreakpoint,
+								xlarge: $.extend(true, {}, columnResponsive)
 							}
+
+							copyColumn.id = copyColumn.attribute.id.value = self.generateId('column')
+							copyColumn.layout.grid.value = grid
+
+							_.each(copyColumn.responsive, function (item, breakpoint) {
+								item.layout.grid.value = grid
+							})
+
+							row.columns.push(copyColumn)
 						}
+
 
 						/**
 						 * Drop row in the latest mouseenter action
 						 */
-						$('.dropable').each(function (i, el) {
+						$('.dropable[data-accept="structure"]').each(function (i, el) {
 							if (el.getAttribute('id') === self.droprow.getAttribute('id')) {
 								index = i;
 							}
@@ -1089,6 +1275,7 @@ export default {
 
 				// Remove Active Class
 				$('.dropable').removeClass('drop-enter');
+				$('.layout-overlay').hide()
 			},
 			ondragleave (event) {
 				// Remove Active Class

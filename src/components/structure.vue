@@ -1,7 +1,7 @@
 <template>
-<div class="draggable structure" data-width="{{width}}">
+<div class="draggable structure" data-width="{{joinWidth()}}">
 	<div class="uk-grid uk-grid-collapse">
-		<div v-for="item in getWidth()" class="uk-width-{{item}}" track-by="$index">
+		<div v-for="item in width" class="uk-width-{{item}}" track-by="$index">
 			<div class="uk-panel uk-panel-space uk-panel-box"></div>
 		</div>
 	</div>
@@ -13,14 +13,8 @@ export default {
 	name: "Structure",
 	props: ['width'],
 	methods: {
-		getWidth: function () {
-			let columns = this.width.split('-'), suffix = '10'
-			if (columns[0] === columns[1] && columns[0] < 5) {
-				columns = [columns[0]]
-				suffix = columns[0]
-			}
-			columns = columns.map(item => item + '-' + suffix);
-			return columns
+		joinWidth () {
+			return this.width.join(',')
 		}
 	}
 }

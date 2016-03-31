@@ -7,6 +7,7 @@
 <style lang="less">
 .select {
 	height: 23px;
+	width: 85px;
 	outline: none;
 	vertical-align: top
 }
