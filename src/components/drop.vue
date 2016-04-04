@@ -1,11 +1,10 @@
 <template>
-<div class="dropable" :class="[position, class]" data-accept="{{accept}}"></div>
+<div class="dropable" :class="[position, class]" data-accept="{{accept}}" data-position="{{position}}" data-index="{{index}}"></div>
 </template>
 
 <style lang="less">
 @import "../css/vars.less";
 .dropable {
-	height: 5px;
 	margin-top: -5px;
 	position: relative;
 	z-index: 999;
@@ -43,6 +42,10 @@
 			border-right: 5px solid #3498db;
 		}
 	}
+
+	&.bottom {
+		margin-top: -10px;
+	}
 			
 
 	&:before {
@@ -54,6 +57,9 @@
 		z-index: 1;
 		height: 35px;
 		border-bottom: 5px solid #3498db;
+		left: -2px;
+		right: 0;
+		padding: 0 2px 0 3px;
 	}
 
 	&:after {
@@ -70,7 +76,7 @@
 		border-radius: 100px;
 		position: absolute;
 		top: -5px;
-		left: 47%;
+		left: 42.5%;
 	}
 }
 
@@ -91,7 +97,8 @@ export default {
 	props: {
 		position: {default: ''},
 		class: {default: ''},
-		accept: {default: ''}
+		accept: {default: ''},
+		index: {default: 0}
 	},
 	ready () {
 		let self = this, $el = $(self.$el)

@@ -10,7 +10,7 @@
 		<li class="tab-content">
 			<div class="source contents">
 				<div class="uk-grid uk-grid-small" v-for="content in contents">
-					<content-item v-for="row in content" width="1-3" :icon="row.icon">{{row.label}}</content-item>
+					<content-item v-for="item in content" width="1-3" :icon="item.icon" :type="item.type">{{item.label}}</content-item>
 				</div>
 			</div>
 		</li>
@@ -108,19 +108,23 @@
 	<div class="layout-overlay"></div>
 	<device :enable="device.enable" :style="device.style" :rotate="device.rotate">
 		<div id="layout">
-			<drop class="layout-dropable" accept="structure" position="relative"></drop>
-			<div id="{{row.id}}" class="layout-item inspectable" v-for="row in rows" @click.capture="setProperties(row)" @mouseenter.capture="inspect($event, true)" @mouseleave.capture="inspect($event, false)" :class="{'selected': row.id === current.row}" track-by="$index" data-uk-grid-match>
+			<drop class="layout-dropable" accept="structure" position="relative" index="-1"></drop>
+			<div id="{{row.id}}" class="layout-item inspectable" v-for="row in rows" track-by="$index" @click.capture="setProperties(row)" @mouseenter.capture="inspect($event, true)" @mouseleave.capture="inspect($event, false)" :class="{'selected': row.id === current.row}" data-uk-grid-match>
 				<div class="layout-wrap">
 					<div class="layout-row" :style="style(row)">
 						<div class="layout-wrapper">
 							<div class="layout-columns uk-grid uk-grid-small uk-grid-match">
-								<div class="layout-column uk-grid-match" v-for="column in row.columns" id="{{column.id}}" track-by="$index" @click="setProperties(column, row, $index)" :class="columnWidth(column)">
-									<drop class="layout-dropable" accept="item" position="left"></drop>
-									<drop class="layout-dropable" accept="item" position="right"></drop>
-									<drop class="layout-dropable" accept="item"></drop>
+								<div class="layout-column uk-height-1-1 uk-grid-match" v-for="column in row.columns" id="{{column.id}}" @click="setProperties(column, row, $index)" :class="columnWidth(column)">
+									<drop class="layout-dropable" accept="item" position="left" :index="$index"></drop>
+									<drop class="layout-dropable" accept="item" position="right" :index="$index"></drop>
+									<drop class="layout-dropable" accept="item" position="top" :index="$index"></drop>
+
 									<empty class="layout-column-item" v-if="empty(column.items)" :selected="current.column === column.id" :styles="style(column)"></empty>
-									<drop class="layout-dropable" accept="item"></drop>
-									<div class="layout-label">{{column.label}}</div>
+									<div class="layout-column-item-wrapper" v-for="element in column.items" track-by="$index">
+										<text v-if="element.elementType==='text'" class="layout-column-item" :data.sync="element" :selected="current.column === column.id" :styles="style(column)" @click="setProperties(element)"></text>
+									</div>
+
+									<drop class="layout-dropable" accept="item" position="bottom" :index="$index"></drop>
 								</div>
 							</div>
 						</div>
@@ -134,7 +138,7 @@
 				</div>
 
 				<div class="layout-label">{{row.label}}</div>
-				<drop class="layout-dropable" accept="structure" v-if="!empty(row.columns)"></drop>
+				<drop class="layout-dropable" accept="structure" :index="$index"></drop>
 			</div>
 		</div>
 	</device>
@@ -164,9 +168,10 @@ import Sortable from "../js/sortable.min.js"
 import _ from "underscore"
 import MsgBox from "sweetalert"
 
+
 /* JSON Data */
-import Animation from '../data/animation.json';
 import BackgroundType from '../data/bgtype.json';
+import Items from '../data/items.json';
 
 /* Content */
 import contentItem from "./content-item.vue"
@@ -176,9 +181,6 @@ import Structure from "./structure.vue"
 
 /* Properties */
 import Properties from './properties.vue';
-
-/* Empty content */
-import Empty from './empty.vue';
 
 /* Dropable */
 import Drop from './drop.vue';
@@ -192,22 +194,48 @@ import Info from './info.vue';
 /* Device */
 import Device from './device.vue';
 
+/* Elements */
+import Empty from './elements/empty.vue';
+import Text from './elements/text.vue';
+
+
+/* Additional Underscores Mixins */
+_.mixin({
+	move (array, fromIndex, toIndex) {
+		array.splice(toIndex, 0, array.splice(fromIndex, 1)[0]);
+		return array;
+	},
+
+	insertAt (array, item, at) {
+		if (_.isArray(array)) return false;
+		if (at >= array.length) at = array.length
+		array.splice(at, 0, item);
+		return array;
+	}
+});
+
 
 export default {
 	name: 'Layout',
-	components: {contentItem, Structure, Properties, Empty, Drop, sortableHandler, Info, Device},
+	components: {
+		/* Dependencies components */
+		contentItem, Structure, Properties, Drop, sortableHandler, Info, Device,
+
+		/* Elements */
+		Empty, Text
+	},
 	data() {
 		let self = this
 
 		return {
-			droprow: null,
+			dropElement: null,
 			draggableMove: false,
 			resizeData: '',
 			body: {},
 			rows: [],
 			structures: [['6-6'], ['2-6', '2-6', '2-6'], ['4-6', '2-6'], ['2-6', '4-6'], ['1-6', '5-6'], ['5-6', '1-6']],
 			contents: [
-				[{icon: 'font', label: 'Text'}, {icon: 'image', label: 'Image'}, {icon: 'hand-pointer-o', label: 'Button'}]
+				[{icon: 'font', label: 'Text', type: 'text'}, {icon: 'image', label: 'Image'}, {icon: 'hand-pointer-o', label: 'Button'}]
 			],
 			tabs: [
 				{id: 'content', label: 'Content', icon: 'th'},
@@ -341,8 +369,8 @@ export default {
 
 		/* Show inspector when mouse over */
 		inspect (e, hover) {
-			let el = e.target
-			if (el.classList.contains('layout-column-item') && !el.classList.contains('layout-column-item-child')) {
+			let el = e.target, excludeTags = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'i', 'b', 'em', 'strong']
+			if (el.classList.contains('layout-column-item') && !el.classList.contains('layout-column-item-child') || excludeTags.includes[el.tagName.toLowerCase()]) {
 				if (hover) {
 					el.classList.add('inspectable')
 				} else {
@@ -368,11 +396,14 @@ export default {
 		/* Show properties selected */
 		setProperties (item, parent, index) {
 			if (item.type === 'row' && item.columns.length > 0) {
+				let index = 0, column = item.columns[index]
 				this.$set('current.properties', item)
-				this.$set('current.selectedColumn', -1)
-				this.$set('current.column', '')
+				this.$set('current.columnProperties', column)
+				this.$set('current.selectedColumn', index)
+				this.$set('current.column', column.id)
 				this.$set('current.row', item.id)
 				this.$set('current.columnsSize', item.columns.length)
+				this.$set('propTabs.columns.current', index)
 			}
 			else if (item.type === 'column') {
 				this.$set('current.properties', parent)
@@ -382,6 +413,9 @@ export default {
 				this.$set('current.row', parent.id)
 				this.$set('current.columnsSize', parent.columns.length)
 				this.$set('propTabs.columns.current', index)
+			}
+			else if (item.type === 'element') {
+				console.log(item)
 			}
 
 			this.viewing('properties');
@@ -466,7 +500,7 @@ export default {
 		},
 
 		duplicate (index, row) {
-			let self = this, newrow = $.extend(true, {}, row), newId = self.generateId('el')
+			let self = this, newrow = $.extend(true, {}, row), newId = self.$root.generateId('el')
 			newrow.id = newId
 
 			_.map(newrow.responsive, function (breakpoint, index) {
@@ -474,7 +508,7 @@ export default {
 				return breakpoint
 			})
 			_.map(newrow.columns, function (column, columnIndex) {
-				column.id = self.generateId('column')
+				column.id = self.$root.generateId('column')
 				return column
 			})
 			this.rows.splice(index, 0, newrow)
@@ -483,19 +517,22 @@ export default {
 		/* Enable sortabe every breakpoints changes */
 		enableSortable () {
 			if (this.sortable) this.sortable.destroy()
-			let self = this, sortable = new Sortable(document.querySelector('#layout'), {
+
+			let self = this,
+			sortable = new Sortable(document.querySelector('#layout'), {
 				filter: '.dropable',
 				handle: '.sortable-handler',
 				ghostClass: 'sorting',
 				chosenClass: 'sorting',
-				onSort: function (e) {
+				onEnd (e) {
 					let newIndex = e.newIndex - 1,
 					oldIndex = e.oldIndex - 1;
 
 					if (self.rows) {
-						let cache = self.rows[newIndex]
-						self.rows.$set(newIndex, self.rows[oldIndex])
-						self.rows.$set(oldIndex, cache)
+						let newRow = $.extend(true, {}, self.rows[newIndex]),
+						oldRow = $.extend(true, {}, self.rows[oldIndex])
+						_.move(self.rows, oldIndex, newIndex)
+						$('.inspectable').not('.selected').addClass('inactive')
 					}
 				}
 			})
@@ -539,13 +576,26 @@ export default {
 			self.$set('current.column', self.current.column)
 		},
 
+		findColumn (id) {
+			let column
 
-		generateId (prefix) {
-			return prefix + '-' + Date.now() + Math.floor(Math.random() * (1000 - 10 + 1)) + 10
+			_.each(this.rows, function (row, rowIndex) {
+				_.each(row.columns, function (_column, columnIndex) {
+					if (_column.id === id) column = {
+						column: _column,
+						index: columnIndex,
+						parent: row,
+						parentIndex: rowIndex
+					}
+				})
+			})
+
+			return column
 		}
 	},
 	ready () {
 		let self = this;
+		
 
 		/* Set menu height */
 		/*$('#tab').css({
@@ -1116,37 +1166,94 @@ export default {
 		/* Drop handler */
 		let dropzone = {
 			ondropactivate (event) {
-				self.droprow = null;
+				self.dropElement = null;
 				$('.dropable').removeClass('drop-enter');
 				$('.layout-overlay').show()
 			},
 
 			ondragenter (event) {
 				$('.dropable').removeClass('drop-enter');
-				self.droprow = event.target;
-				self.droprow.classList.add('drop-enter');
+				self.dropElement = event.target;
+				self.dropElement.classList.add('drop-enter');
 			},
 
-			ondrop (event) {
-				$('.layout-overlay').hide()
-			},
 			ondropdeactivate (event) {
-				if (self.droprow) {
-					let accepting = self.droprow.getAttribute('data-accept'),
+				$('.layout-overlay').hide()
+				$('.dropable').removeClass('drop-enter');
+				self.dropElement = null
+			},
+			ondrop (event) {
+				if (self.dropElement) {
+					let accepting = self.dropElement.getAttribute('data-accept'),
 					source = event.relatedTarget
-					
 
+					/* Column */
+					let column = $.extend(true, {}, defaultProps)
+					column.type = 'column'
+					column.label = "Column"
+					column.layout.margin._.allValue = 0
+					column.layout.margin.styles = [0, 0, 0, 0]
+					column.items = []
+
+					let dumpColumnProps = ['layout', 'background', 'attribute', 'animation', 'columns'],
+					dumpColumnPropsResponsive = ['id', 'columns', 'type']
+
+
+					/* Column generator */
+					let generateColumn = function (options, callback) {
+						let copyColumn = $.extend(true, {}, column)
+
+						// Copy row properties into responsive breakpoints
+						let columnResponsive = $.extend(true, {}, copyColumn)
+
+						// Delete unnecessary properties after cloned
+						for (let i in dumpColumnProps) delete copyColumn[dumpColumnProps[i]];
+
+						// Delete unnecessary cloned properties
+						for (let i in dumpColumnPropsResponsive) delete columnResponsive[dumpColumnPropsResponsive[i]];
+
+						// Define responsive breakpoints
+						let defaultColumnBreakpoint = $.extend(true, {}, columnResponsive)
+						copyColumn.layout = defaultColumnBreakpoint.layout
+						copyColumn.background = defaultColumnBreakpoint.background
+						copyColumn.attribute = defaultColumnBreakpoint.attribute
+
+						// Set breakpoints
+						copyColumn.responsive = {
+							mini: $.extend(true, {}, columnResponsive),
+							small: $.extend(true, {}, columnResponsive),
+							medium: $.extend(true, {}, columnResponsive),
+							large: defaultColumnBreakpoint,
+							xlarge: $.extend(true, {}, columnResponsive)
+						}
+
+						// Set column and attr ID
+						copyColumn.id = copyColumn.attribute.id.value = self.$root.generateId('column')
+
+						// Set grid column width
+						if (options.grid) {
+							copyColumn.layout.grid.value = options.grid
+							_.each(copyColumn.responsive, function (item, breakpoint) {
+								item.layout.grid.value = options.grid
+							})
+						}
+
+						// Push to rows element
+						if (options.parent) options.parent.columns.push(copyColumn)
+
+						// Callback
+						callback && callback(copyColumn)
+					}
+
+					
 					/**
 					* Structure dropable
 					*/
 					if (accepting === 'structure') {
-						let rowId = self.generateId('el'),
+						let rowId = self.$root.generateId('el'),
 
 						// Create Flex Columns
 						columns = source.getAttribute('data-width').split(','),
-
-						// Dropable index
-						index = 0,
 
 						// rows Size
 						size = self.rows.length;
@@ -1158,6 +1265,7 @@ export default {
 
 						// Copy row properties into responsive breakpoints
 						let responsive = $.extend(true, {}, row)
+						delete responsive.layout.grid
 
 						/* Delete unnecessary properties after cloned */
 						let dumpProps = ['layout', 'background', 'attribute', 'animation']
@@ -1183,90 +1291,61 @@ export default {
 							xlarge: $.extend(true, {}, responsive)
 						}
 
-						// Column properties
-						let column = $.extend(true, {}, defaultProps)
-						column.type = 'column'
-						column.label = "Column"
-						column.layout.margin._.allValue = 0
-						column.layout.margin.styles = [0, 0, 0, 0]
-
-						// Column items is blank
-						column.items = []
-
-						let dumpColumnProps = ['layout', 'background', 'attribute', 'animation', 'columns'],
-						dumpColumnPropsResponsive = ['id', 'columns', 'type']
-
 
 						/**
 						* Get columns width and push columns to rows based on columns structure
 						*/
 						for (let i in columns) {
-							let grid = columns[i].split('-'),
-							copyColumn = $.extend(true, {}, column)
-
-							// Copy row properties into responsive breakpoints
-							let columnResponsive = $.extend(true, {}, copyColumn)
-
-							// Delete unnecessary properties after cloned
-							for (let i in dumpColumnProps) delete copyColumn[dumpColumnProps[i]];
-
-							// Delete unnecessary cloned properties
-							for (let i in dumpColumnPropsResponsive) delete columnResponsive[dumpColumnPropsResponsive[i]];
-
-							// Define responsive breakpoints
-							let defaultColumnBreakpoint = $.extend(true, {}, columnResponsive)
-							copyColumn.layout = defaultColumnBreakpoint.layout
-							copyColumn.background = defaultColumnBreakpoint.background
-							copyColumn.attribute = defaultColumnBreakpoint.attribute
-
-							// Set breakpoints
-							copyColumn.responsive = {
-								mini: $.extend(true, {}, columnResponsive),
-								small: $.extend(true, {}, columnResponsive),
-								medium: $.extend(true, {}, columnResponsive),
-								large: defaultColumnBreakpoint,
-								xlarge: $.extend(true, {}, columnResponsive)
-							}
-
-							copyColumn.id = copyColumn.attribute.id.value = self.generateId('column')
-							copyColumn.layout.grid.value = grid
-
-							_.each(copyColumn.responsive, function (item, breakpoint) {
-								item.layout.grid.value = grid
+							let grid = columns[i].split('-');
+							generateColumn({
+								grid: grid,
+								parent: row
 							})
-
-							row.columns.push(copyColumn)
 						}
 
 
 						/**
 						 * Drop row in the latest mouseenter action
 						 */
-						$('.dropable[data-accept="structure"]').each(function (i, el) {
-							if (el.getAttribute('id') === self.droprow.getAttribute('id')) {
+						let index = parseInt(self.dropElement.getAttribute('data-index')) + 1
+						/*$('.dropable[data-accept="structure"]').each(function (i, el) {
+							if (el.getAttribute('id') === self.dropElement.getAttribute('id')) {
 								index = i;
 							}
-						});
+						});*/
 
-						/**
-						 * We need to set timeout to prevent duplicate by vuejs
-						 */
-						setTimeout(function () {
-							if (size > 0) {
-								let rows = self.object('rows');
-								if (rows.length === size) {
-									rows.splice(index, 0, row)
-									self.$set('rows', rows)
-								}
-							} else self.rows.$set(0, row)
-						}, 10);
+						// Insert to layout
+						if (size > 0) self.rows.splice(index, 0, row)
+						else self.rows.$set(0, row)
 					}
 
 					/**
 					* Item dropable
 					*/
 					else {
+						let item = _.findWhere(Items, {elementType: source.getAttribute('type') }),
+						dropPos = self.dropElement.getAttribute('data-position'),
+						columnId = self.dropElement.parentElement.getAttribute('id'),
+						search = self.findColumn(columnId)
 
+						switch (dropPos) {
+							case 'left':
+							case 'right':
+								if (search.parent.columns.length < 6) {
+									generateColumn({
+										grid: search.column.layout.grid.value
+									}, function (column) {
+										let index = (dropPos === 'right')? search.index + 1: search.index - 1;
+										column.items.push($.extend(true, {}, item))
+										search.parent.columns.splice(index, 0, column)
+									})
+								}
+							break;
+							case 'top':
+							case 'bottom':
+								search.column.items.push($.extend(true, {}, item))
+							break;
+						}
 					}
 
 					// Finally, remove the source row
@@ -1276,11 +1355,13 @@ export default {
 				// Remove Active Class
 				$('.dropable').removeClass('drop-enter');
 				$('.layout-overlay').hide()
+				self.dropElement = null
 			},
 			ondragleave (event) {
 				// Remove Active Class
 				$('.dropable').removeClass('drop-enter');
-				self.droprow.classList.add('drop-enter');
+				self.dropElement.classList.add('drop-enter');
+				self.dropElement = null
 			}
 		};
 
@@ -1295,9 +1376,16 @@ export default {
 		}, dropzone))
 
 		/* Draggable */
+		/* Prevent Text selection in major browser */
+		Drag(document).on('down', function (e) {
+			if (e.interaction.pointerWasMoved) {
+				e.preventDefault();
+			}
+		});
+
+		/* Our draggable */
 		const drag = Drag('.draggable').draggable({
-			inertia: false,
-			autoScroll: false,
+			manualStart: true,
 			onmove (event) {
 				let target = event.target,
 				rect = target.getBoundingClientRect(),
@@ -1323,14 +1411,16 @@ export default {
 			}
 
 		})
+		.on('down', function () {
+			event.preventDefault()
+		})
 		.on('move', function (event) {
 			let interaction = event.interaction;
 			if (interaction.pointerIsDown && !interaction.interacting())
 			{
-				let original = event.currentTarget;
-				let clone = original.cloneNode(true);
+				let original = event.currentTarget, clone = original.cloneNode(true);
 				clone.classList.add('moving')
-				document.querySelector('#layout').appendChild(clone)
+				document.body.appendChild(clone)
 
 				if (interaction.start && event.interactable) {
 					interaction.start({ name: 'drag' }, event.interactable, clone);

@@ -1,18 +1,18 @@
 <template>
-<div class="parent empty uk-text-center" :class="[class, selectedClass]">
-	<div :style="[styles]" :class="[class]">
-	<div class="uk-width-1-1 uk-panel uk-panel-box uk-panel-box-primary uk-vertical-align" :class="[class, itemClass]">
-		<div class="uk-vertical-align-middle" :class="[class, itemClass]">
-			<p :class="[class, itemClass]">No content here. Drag new from 'Content' panel.</p>
+<div class="parent element-empty uk-text-center uk-grid-match" :class="[class, selectedClass]">
+	<div :style="[styles]" :class="[class, classStyle]">
+		<div class="uk-width-1-1 uk-panel uk-panel-box uk-panel-box-primary uk-vertical-align" :class="[class, itemClass]">
+			<div class="uk-vertical-align-middle" :class="[class, itemClass]">
+				<p :class="[class, itemClass]">No content here. Drag new from 'Content' panel.</p>
+			</div>
 		</div>
-	</div>
 	</div>
 </div>
 </template>
 
 <style lang="less">
-@import "../css/vars.less";
-.empty {
+@import "../../css/vars.less";
+.element-empty {
 	color: #3498db;
 
 	p {
@@ -40,6 +40,11 @@ export default {
 		selectedClass: {
 			get () {
 				return (this.selected)? 'selected': ''
+			}
+		},
+		classStyle: {
+			get () {
+				return this.class + '-style'
 			}
 		},
 		itemClass: {

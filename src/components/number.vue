@@ -1,5 +1,5 @@
 <template>
-<div class="input-number" :class="{disabled: !enable}"><span v-if="suffix" class="suffix">{{label}}</span><a class="uk-icon-minus" @click="minus()"></a><input type="text" v-model="value" @focus="blur($event)"><a class="uk-icon-plus" @click="add()"></a> <span v-if="prefix" class="prefix">{{label}}</span>
+<div class="input-number" :class="{disabled: !enable}"><span v-if="suffix" class="suffix">{{label}}</span><a class="uk-icon-minus" @click="minus()" @mousedown="minus(true)" @mouseup="nothing()"></a><input type="text" v-model="value" @focus="blur($event)"><a class="uk-icon-plus" @click="add()" @mousedown="add(true)" @mouseup="nothing()"></a> <span v-if="prefix" class="prefix">{{label}}</span>
 </div>
 </template>
 
@@ -68,24 +68,56 @@ export default {
 		max: {default: 100},
 		step: {default: 1}
 	},
+	data () {
+		return {interval: null, isMouseDown: false}
+	},
 	methods: {
 		blur (e) {
 			e.target.blur()
 		},
 
-		minus () {
-			if (this.enable) {
-				let min = (this.min)? this.min: 0
-				this.value -= this.step
-				if (this.value < min) this.value = min
+		nothing () {
+			clearInterval(this.interval)
+			this.$set('isMouseDown', false)
+		},
+
+		minus (spin) {
+			if (this.enable && !this.isMouseDown) {
+				let self = this,
+				minus = function () {
+					let min = (self.min)? self.min: 0
+					self.value -= self.step
+					if (self.value < min) self.value = min
+				}
+
+				if (spin) {
+					self.$set('isMouseDown', true)
+					self.interval = setInterval(function () {
+						minus()
+					}, 100)
+				} else {
+					minus()
+				}
 			}
 		},
 
-		add () {
-			if (this.enable) {
-				let max = (this.max)? this.max: 100
-				this.value += this.step
-				if (this.value > max) this.value = max
+		add (spin) {
+			if (this.enable && !this.isMouseDown) {
+				let self = this,
+				add = function () {
+					let max = (self.max)? self.max: 100
+					self.value += self.step
+					if (self.value > max) self.value = max
+				}
+				
+				if (spin) {
+					self.$set('isMouseDown', true)
+					self.interval = setInterval(function () {
+						add()
+					}, 100)
+				} else {
+					add()
+				}
 			}
 		}
 	}

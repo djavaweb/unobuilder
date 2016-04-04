@@ -32,7 +32,6 @@ export default {
 	color: @fefefe;
 	font-size: 0.875rem;
 	font-weight: bold;
-	margin-bottom: 1rem;
 	outline: 0;
 	position: relative;
 	user-select: none;

@@ -19,6 +19,11 @@ import Layout from "./components/layout.vue"
 const App = new Vue({
 	el: 'body',
 	components: {Layout},
+	methods: {
+		generateId (prefix) {
+			return prefix + '-' + Date.now() + Math.floor(Math.random() * (1000 - 10 + 1)) + 10
+		}
+	},
 	ready () {
 		let self = this
 		document.addEventListener('click', function (e) {
