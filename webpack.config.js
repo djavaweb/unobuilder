@@ -37,20 +37,19 @@ module.exports = {
 }
 
 if (process.env.NODE_ENV === 'production') {
+    var WebpackShellPlugin = require('./webpack.shell.js')
+
     module.exports.plugins = [
-    new webpack.DefinePlugin({
-        'process.env': {
-            NODE_ENV: '"production"'
-        }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-        compress: {
-            warnings: false,
-            sourceMap: false,
-            mangle: false
-        }
-    }),
-    new webpack.optimize.OccurenceOrderPlugin()
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: '"production"'
+            }
+        }),
+        new webpack.optimize.OccurenceOrderPlugin(),
+        new WebpackShellPlugin({
+                onBuildStart: ['echo "Start Build"'], 
+                onBuildEnd: ['./postbuild.sh']
+        })
     ]
 } else {
     module.exports.devtool = '#source-map'
