@@ -4,8 +4,8 @@ module.exports = {
     entry: './src/main.js',
     output: {
         path: './dist',
-        publicPath: '/dist/',
-        filename: 'btbldr.js'
+        publicPath: 'dist/',
+        filename: 'unobuilder.js'
     },
     module: {
         noParse: /es6-promise\.js$/,
@@ -36,7 +36,7 @@ module.exports = {
     }
 }
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'productiond') {
     module.exports.plugins = [
     new webpack.DefinePlugin({
         'process.env': {
@@ -45,7 +45,9 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.optimize.UglifyJsPlugin({
         compress: {
-            warnings: false
+            warnings: false,
+            sourceMap: false,
+            mangle: false
         }
     }),
     new webpack.optimize.OccurenceOrderPlugin()
