@@ -21,6 +21,7 @@ export default {
 </script>
 
 <style lang="less">
+@import "../css/vars.less";
 @fefefe: #fefefe;
 @height1-5rem: 1.5rem;
 @height2rem: 2rem;
@@ -35,6 +36,10 @@ export default {
 	outline: 0;
 	position: relative;
 	user-select: none;
+	display: inline-block;
+	width: auto;
+	vertical-align: middle;
+	margin-top: 2px;
 	&.right {
 		float: right;
 	}
@@ -46,30 +51,30 @@ export default {
 	position: absolute;
 }
 .switch-paddle {
-	background: #ffffff;
+	background: @greyish-brown-three;
+	border: 1px solid @greyish-brown-three;
 	border-radius: 100px;
 	color: inherit;
 	cursor: pointer;
 	display: block;
 	font-weight: inherit;
-	height: 17px;
+	height: 13px;
 	position: relative;
 	transition: all 0.25s ease-out;
-	border: 1px solid #C0C0C0;
-	width: 3rem;
+	width: 32px;
 	&::after {
 		-webkit-transform: translate3d(0, 0, 0);
-		background: #c0c0c0;
+		background: @greyish-three;
 		border-radius: 100px;
 		content: '';
 		display: block;
-		height: 12px;
-		left: 0.25rem;
+		height: 9px;
+		width: 9px;
 		position: absolute;
-		top: 3px;
+		left: 3px;
+		top: 2px;
 		transform: translate3d(0, 0, 0);
 		transition: all 0.25s ease-out;
-		width: 12px;
 	}
 }
 input+.switch-paddle {
@@ -85,8 +90,8 @@ input {
 }
 input:checked~.switch-paddle {
 	&::after {
-		left: 2rem;
-		background: #2199e8;
+		left: 20px;
+		background: @manilla;
 	}
 }
 [data-whatinput='mouse']input {

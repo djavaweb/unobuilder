@@ -32,14 +32,14 @@
 	&.left {
 		left: 5px;
 		&:before {
-			border-right: 5px solid #3498db;
+			border-right: 5px solid @dark-sky-blue;
 		}
 	}
 
 	&.right {
 		right: 0;
 		&:before {
-			border-right: 5px solid #3498db;
+			border-right: 5px solid @dark-sky-blue;
 		}
 	}
 
@@ -56,27 +56,21 @@
 		display: none;
 		z-index: 1;
 		height: 35px;
-		border-bottom: 5px solid #3498db;
-		left: -2px;
-		right: 0;
-		padding: 0 2px 0 3px;
+		border-bottom: 5px solid @dark-sky-blue;
 	}
 
 	&:after {
 		display: none;
 		content: 'Drag it here';
 		padding: 0 10px;
-		background: #3498db;
+		background: @dark-sky-blue;
 		margin: 0 auto;
 		color: white;
 		font-size: 12px;
-		border-right: 2px solid #3498db;
-		border-left: 2px solid #3498db;
 		z-index: 2;
-		border-radius: 100px;
-		position: absolute;
-		top: -5px;
-		left: 42.5%;
+		border-radius: 4px;
+		position: relative;
+		margin-bottom: -10px;
 	}
 }
 
@@ -85,6 +79,10 @@
 }
 
 .drop-enter {
+	margin-bottom: -20px;
+	&.relative {
+		margin-bottom: -10px;
+	}
 	&:after, &:before {
 		display: table;
 	}

@@ -3182,6 +3182,7 @@
 .slideInRight {
   -webkit-animation-name: slideInRight;
   animation-name: slideInRight;
+  animation-duration: 0.3s;
 }
 
 @-webkit-keyframes slideInUp {
@@ -3306,6 +3307,7 @@
 .slideOutRight {
   -webkit-animation-name: slideOutRight;
   animation-name: slideOutRight;
+  animation-duration: 0.3s;
 }
 
 @-webkit-keyframes slideOutUp {

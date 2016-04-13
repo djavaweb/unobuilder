@@ -1,15 +1,20 @@
 <template>
-<div class="input-number" :class="{disabled: !enable}"><span v-if="suffix" class="suffix">{{label}}</span><a class="uk-icon-minus" @click="minus()" @mousedown="minus(true)" @mouseup="nothing()"></a><input type="text" v-model="value" @focus="blur($event)"><a class="uk-icon-plus" @click="add()" @mousedown="add(true)" @mouseup="nothing()"></a> <span v-if="prefix" class="prefix">{{label}}</span>
+<div class="input-number" :class="{disabled: !enable, inline: inline}"><span v-if="suffix" class="suffix">{{label}}</span><a class="uk-icon-plus" @click="add()" @mousedown="add(true)" @mouseup="nothing()"></a><input type="text" v-model="value" :disabled="!enable"><a class="uk-icon-minus" @click="minus()" @mousedown="minus(true)" @mouseup="nothing()"></a> <span v-if="prefix" class="prefix" :style="prefixWidth">{{label}}</span>
 </div>
 </template>
 
 <style lang="less">
+@import "../css/vars.less";
 @import "../css/mixins.less";
 
 .input-number {
-	display: inline-block;
 	color: #5A5A5A;
 	font-size: 11px;
+	overflow: hidden;
+
+	&.inline {
+		display: inline-block;
+	}
 
 	&.disabled, &.disabled input, &.disabled a {
 		color: #A8A8A8
@@ -20,30 +25,45 @@
 	}
 
 	.prefix {
-		margin-right: 5px;
-		padding: 2px;
+		margin-right: 4px;
+		padding: 1px;
 		display: inline-block;
-		width: 45px;
 		text-align: right;
+		.small-label-white;
 	}
 
 	.suffix {
 		margin-left: 5px;
+		.small-label-white;
 	}
 
 	input {
-		width: 55px !important;
+		width: 23px !important;
 		border: none;
-		color: #4E4E4E;
-		padding: 5px 2px !important;
+		padding: 3px 0 !important;
 		text-align: center;
 	}
 
 	a {
-		.gradient(#E4E4E4,#D8D8D8,#F6F6F6);
-		padding: 5px 7px;
-		border: 1px solid #C1C1C1;
-		color: #5A5A5A;
+		padding: 4px 6px;
+		border: 1px solid @greyish-two;
+		background-color: @greyish-two;
+		color: @white;
+		font-size: 9px;
+
+		&:hover, &:active, &:focus {
+			background-color: @warm-grey-four;
+		}
+
+		&.uk-icon-minus {
+			border-top-left-radius: 2px;
+			border-bottom-left-radius: 2px;
+		}
+
+		&.uk-icon-plus {
+			border-top-right-radius: 2px;
+			border-bottom-right-radius: 2px;
+		}
 	}
 
 	&:after {
@@ -66,14 +86,25 @@ export default {
 		suffix: {default: false},
 		min: {default: 0},
 		max: {default: 100},
-		step: {default: 1}
+		step: {default: 1},
+		inline: {default: false},
+		labelWidth: {default: null}
 	},
 	data () {
 		return {interval: null, isMouseDown: false}
 	},
+	computed: {
+		prefixWidth () {
+			let newStyle = {}
+			if (this.labelWidth) {
+				newStyle.width = this.labelWidth + 'px'
+			}
+			return newStyle
+		}
+	},
 	methods: {
 		blur (e) {
-			e.target.blur()
+			if (!this.enable) e.target.blur()
 		},
 
 		nothing () {
@@ -94,7 +125,7 @@ export default {
 					self.$set('isMouseDown', true)
 					self.interval = setInterval(function () {
 						minus()
-					}, 100)
+					}, 250)
 				} else {
 					minus()
 				}
@@ -114,7 +145,7 @@ export default {
 					self.$set('isMouseDown', true)
 					self.interval = setInterval(function () {
 						add()
-					}, 100)
+					}, 250)
 				} else {
 					add()
 				}

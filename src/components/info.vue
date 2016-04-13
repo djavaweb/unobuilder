@@ -9,6 +9,8 @@
     background: #4a4a4a;
     color: #ffffff;
     font-size: 10px;
+    vertical-align: middle;
+    margin-left: 3px;
     &:hover {
     	background: #3498db;
     }

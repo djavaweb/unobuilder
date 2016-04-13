@@ -1,8 +1,8 @@
 <template>
 <div class="draggable structure" data-width="{{joinWidth()}}">
-	<div class="uk-grid uk-grid-collapse">
+	<div class="uk-grid uk-grid-small">
 		<div v-for="item in width" class="uk-width-{{item}}" track-by="$index">
-			<div class="uk-panel uk-panel-space uk-panel-box"></div>
+			<div class="uk-panel uk-panel-space uk-panel-box">{{dividedWidth($index)}}</div>
 		</div>
 	</div>
 </div>
@@ -15,24 +15,27 @@ export default {
 	methods: {
 		joinWidth () {
 			return this.width.join(',')
+		},
+		dividedWidth (index) {
+			let width = this.width[index]
+			return width
 		}
 	}
 }
 </script>
 
 <style lang="less">
+@import "../css/vars.less";
+
 .structure {
 	display: block;
-	background: #FFFFFF;
-	border: 1px solid #DDDDDD;
+	background: @warm-grey-six;
 	padding: 10px;
 	margin-bottom: 15px;
-	height: 42px;
 
 	&:hover {
 		border-color: #ffffff;
 	    box-shadow: 0 4px 15px 1px rgba(0, 0, 0, 0.3);
-	    border-radius: 5px;
 	}
 
 	&:before {
@@ -46,15 +49,21 @@ export default {
 	}
 
 	.uk-panel {
-		padding: 10px;
+		padding: 5px;
 		margin: 0;
-		&:before {
-			background: #D3D3D3;
-			content: ' ';
-			display: block;
-			position: relative;
-			height: 20px;
-			border: 1px dashed #BEBEBE;
+		background: @white;
+		display: block;
+		position: relative;
+		border: none;
+		text-align: center;
+		font-size: 12px;
+		font-weight: bold;
+	}
+
+	.uk-grid-small {
+		margin-left: -6px;
+		> * {
+			padding-left: 6px;
 		}
 	}
 }

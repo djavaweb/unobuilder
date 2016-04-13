@@ -12,6 +12,11 @@ Vue.transition('appear', {
 	leaveClass: 'fadeOutDown'
 })
 
+Vue.transition('slidex', {
+	enterClass: 'slideInRight',
+	leaveClass: 'slideOutRight'
+})
+
 /* Main Layout */
 import Layout from "./components/layout.vue"
 

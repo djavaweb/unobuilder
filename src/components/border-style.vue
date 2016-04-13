@@ -5,11 +5,12 @@
 </template>
 
 <style lang="less">
+@import "../css/vars.less";
+
 .select {
-	height: 23px;
-	width: 85px;
-	outline: none;
-	vertical-align: top
+	.select;
+	width: 80px;
+	vertical-align: top;
 }
 </style>
 
