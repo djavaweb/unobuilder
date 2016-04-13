@@ -15,6 +15,7 @@ cd dist
 sudo rm -rf *.woff
 sudo rm -rf *.ttf
 sudo rm -rf *.woff2
+sudo rm -rf *.svg
 sudo rm -rf unobuilder.js
 
 # Okay, done
