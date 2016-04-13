@@ -112,7 +112,7 @@
 	</div>
 </div>
 
-<button class="unhide panel-button" @click="togglePanel()" v-show="!showPanel"><i class="expand-reverse"></i><i class="expand"></i></button>
+<button class="unhide panel-button" @click="togglePanel()" v-show="!showPanel"><i class="expand-reverse" v-show="showPanel"></i><i class="expand" v-show="!showPanel"></i></button>
 
 <div id="layout-wrapper">
 	<device :enable="device.enable" :style="device.style" :rotate="device.rotate">
@@ -156,12 +156,12 @@
 		</div>
 	</device>
 
-	<div id="responsive-switcher">
+	<!--<div id="responsive-switcher">
 		<a data-balloon="Mini Screen on Small Mobile Phones" data-balloon-pos="up" @click="setDevice('mini')" class="mini" :class="{selected: current.selected === 'mini'}"><i class="uk-icon-mobile"></i></a>
 		<a data-balloon="Small Screen on Mobile Phones" data-balloon-pos="up" @click="setDevice('small')" :class="{selected: current.selected === 'small'}"><i class="uk-icon-mobile"></i></a>
 		<a data-balloon="Medium Screen on Tablets" @click="setDevice('medium')" :class="{selected: current.selected === 'medium'}"><i class="uk-icon-tablet"></i></a>
 		<a data-balloon="Large Screen on Laptops / TV" @click="setDevice('large')" :class="{selected: current.selected === 'large' || current.selected === 'xlarge'}"><i class="uk-icon-laptop"></i></a>
-	</div>
+	</div>-->
 </div>
 </template>
 
