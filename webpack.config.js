@@ -1,11 +1,15 @@
-var webpack = require('webpack')
+var webpack = require('webpack'),
+path = require('path')
 
 module.exports = {
-    entry: './src/main.js',
+    entry: {
+        unobuilder: './src/js/app.js',
+        'unobuilder.viewer': './src/js/viewer.js'
+    },
     output: {
         path: './dist',
-        publicPath: 'dist/',
-        filename: 'unobuilder.js'
+        publicPath: 'dist/js/',
+        filename: "[name].js"
     },
     module: {
         noParse: /es6-promise\.js$/,

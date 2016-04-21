@@ -3120,6 +3120,7 @@
 .slideInDown {
   -webkit-animation-name: slideInDown;
   animation-name: slideInDown;
+  animation-duration: 0.3s;
 }
 
 @-webkit-keyframes slideInLeft {
@@ -3151,6 +3152,7 @@
 .slideInLeft {
   -webkit-animation-name: slideInLeft;
   animation-name: slideInLeft;
+  animation-duration: 0.3s;
 }
 
 @-webkit-keyframes slideInRight {
@@ -3276,6 +3278,7 @@
 .slideOutLeft {
   -webkit-animation-name: slideOutLeft;
   animation-name: slideOutLeft;
+  animation-duration: 0.3s;
 }
 
 @-webkit-keyframes slideOutRight {
@@ -3339,4 +3342,5 @@
 .slideOutUp {
   -webkit-animation-name: slideOutUp;
   animation-name: slideOutUp;
+  animation-duration: 0.5s;
 }
