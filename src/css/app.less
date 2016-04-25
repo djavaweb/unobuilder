@@ -69,6 +69,25 @@ html, body, #app {
 .canvas-builder {
     height: 100vh;
     position: relative;
+    background: #cccccc;
+
+    .tools, iframe {
+        &.medium, &.small, &.mini {
+            flex-grow: 0;
+        }
+
+        &.medium {
+            width: 728px;
+        }
+
+        &.small {
+            width: 600px;
+        }
+
+        &.mini {
+            width: 480px;
+        }
+    }
 
     .tools {
         position: absolute;
@@ -79,12 +98,16 @@ html, body, #app {
         pointer-events: none;
         overflow: visible;
         line-height: 12px;
+        margin: 0 auto;
     }
 
     iframe {
-        width: 100%;
         flex-grow: 1;
         position: relative;
+        margin: 0 auto;
+        &.large {
+            width: 100%;
+        }
         &.disable {
             pointer-events: none
         }

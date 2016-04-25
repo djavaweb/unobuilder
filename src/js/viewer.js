@@ -31,12 +31,16 @@ const App = new Vue({
 			clone: null,
 
 			/* Main Object */
-			selectedProperties: null,
 			body: {
 				id: 'body',
 				breadcrumb: 'body',
 				elements: [],
 				props: {}
+			},
+
+			selected: {
+				properties: null,
+				element: null
 			},
 
 			/* Default Properties */
@@ -116,7 +120,7 @@ const App = new Vue({
 		 * @param {String|Number|Object|Array} value  [Properties Value]
 		 */
 		setProperties (breakpoint, prop, value) {
-			dot.set(`${breakpoint}.${prop}`, value, this.selectedProperties)
+			dot.set(`${breakpoint}.${prop}`, value, this.selected.properties)
 		},
 
 
@@ -261,7 +265,11 @@ const App = new Vue({
 					delete css.$top
 
 					// Notify parent to select the element
-					self.$set('selectedProperties', properties)
+					self.$set('selected', {
+						properties: properties,
+						element: element.self.id
+					})
+
 					self.getBreadcrumbs(target, true, function (breadcrumbs) {
 						self.parent().$broadcast('elementSelect', {
 							css: css,
@@ -688,7 +696,21 @@ const App = new Vue({
 		})
 
 
+		/**
+		 * On change responsive size / breakpoint
+		 */
+		self.$on('changeScreenView', function () {
+			self.$nextTick(function () {
+				self.eventFire(self.activeElement(self.selected.element), 'click')
+			})
+		})
 
+
+		/**
+		 * On dragging element from left panel
+		 * @param  {Boolean} drag
+		 * @param  {String} element
+		 */
 		self.$on('dragstart', function (drag, element) {
 			if (drag) {
 				// Set ghost element
@@ -703,6 +725,10 @@ const App = new Vue({
 			}
 		})
 
+
+		/**
+		 * On drag move and drag end
+		 */
 		self.$on('dragmove', self.dragmove)
 		self.$on('dragend', self.dragend)
 	}

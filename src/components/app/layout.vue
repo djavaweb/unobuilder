@@ -25,7 +25,7 @@
 		</div>
 
 		<div class="canvas-builder">
-			<div class="tools" :style="layoutScroll">
+			<div class="tools" :style="layoutScroll" :class="breakPointClass">
 				<div class="outline-wrapper">
 					<div class="outline-tools hovered" :style="outline.hovered.css">
 						<div class="breadcrumbs hover" v-if="outline.hovered.breadcrumbs" :class="hoveredOutlineClass">
@@ -38,7 +38,7 @@
 						<div class="breadcrumbs" v-if="outline.selected.breadcrumbs" :class="selectedOutlineClass">
 							<div class="edit-tools">
 								<div class="selector">
-									<a v-for="breadcrumb in outline.selected.breadcrumbs"
+									<a v-for="breadcrumb in outline.selected.breadcrumbs|limit 3"
 									track-by="$index"
 									:class="{active: $index===0||outline.selected.showBreadcrumbs}"
 									@mouseover="showHoveredBreadcrumbs(breadcrumb,$index,true)"
@@ -56,7 +56,7 @@
 					</div>
 				</div>
 			</div>
-			<iframe data-layout-viewer src="viewer.html" :class="{'display-block-panel': displayBlockPanel, disable: dragging}"></iframe>
+			<iframe data-layout-viewer src="viewer.html" :class="iframeClass"></iframe>
 		</div>
 	</div>
 
@@ -272,11 +272,29 @@ import elementItem from './element-item.vue'
 export default {
 	name: 'layout',
 
+	/**
+	 * Init Components
+	 * @type {Object}
+	 */
 	components: {
 		accordionItem, accordionItemView, accordionExpandView,
 		elementItem, rectButton
 	},
 
+	/**
+	 * Custom Filters
+	 * @type {Object}
+	 */
+	filters: {
+		limit: function(arr, limit) {
+			return arr.slice(0, limit)
+		}
+	},
+
+	/**
+	 * Unobuilder layout selector data
+	 * @return {Object}
+	 */
 	data () {
 		return {
 			layout: null,
@@ -290,7 +308,7 @@ export default {
 					{label: '1 Columns', icon: 'column-1', type: 'grid', kind: 'column', width: '1-1'},
 					{label: '2 Columns', icon: 'column-2', type: 'grid', kind: 'column', width: '1-2,1-2'},
 					{label: '3 Columns', icon: 'column-3', type: 'grid', kind: 'column', width: '2-6,2-6,2-6'},
-					{label: '4 Columns', icon: 'column-4', type: 'grid', kind: 'column', width: '1-4'},
+					{label: '4 Columns', icon: 'column-4', type: 'grid', kind: 'column', width: '1-4,1-4,1-4,1-4'},
 					{label: '5 Columns', icon: 'column-5', type: 'grid', kind: 'column', width: '1-5,1-5,1-5,1-5,1-5'},
 					{label: '6 Columns', icon: 'column-6', type: 'grid', kind: 'column', width: '1-6,1-6,1-6,1-6,1-6,1-6'}
 				],
@@ -355,6 +373,21 @@ export default {
 			}
 
 			return cssClass
+		},
+
+
+		// When change breakpoints
+		// Change the canvas class
+		breakPointClass () {
+			let cssClass = {}
+			cssClass[this.screenView] = true
+			return cssClass;
+		},
+
+		iframeClass () {
+			let cssClass = {'display-block-panel': this.displayBlockPanel, disable: this.dragging}
+			cssClass[this.screenView] = true
+			return cssClass;
 		}
 	},
 
@@ -417,6 +450,7 @@ export default {
 		 */
 		setScreenView (breakpoint) {
 			this.$set('screenView', breakpoint)
+			this.layout.$emit('changeScreenView')
 		},
 
 

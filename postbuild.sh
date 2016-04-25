@@ -3,7 +3,8 @@
 ####### Modify this script depends on your environment #######
 
 # Why we not using webpack uglifyjs plugin? I don't know, compiled version not running when I was trying to run it
-sudo uglifyjs dist/unobuilder.js -o dist/unobuilder.js
+sudo uglifyjs dist/js/unobuilder.js -o dist/js/unobuilder.js
+sudo uglifyjs dist/js/viewer.js -o dist/js/viewer.js
 
 # Copy distribution into github pages
 sudo mkdir -p ../unobuilder-page/unobuilder/dist/
