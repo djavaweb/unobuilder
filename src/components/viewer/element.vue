@@ -2,7 +2,7 @@
 <div v-if="isType('section')" :class="classList" data-id="{{data.id}}" data-index="{{index}}">
 	<slot></slot>
 	<element v-if="isKind('section')" v-for="element in data.elements" :data="element" :index="$index"></element>
-	<div v-if="isKind('container')" class="element uk-container uk-container-center" data-kind="true" data-index="{{index}}" data-id="{{data.id}}">
+	<div v-if="isKind('container')" class="element uk-container uk-container-center" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}">
 		<element v-for="element in data.elements" :data="element" :index="$index"></element>
 	</div>
 </div>
@@ -12,7 +12,7 @@
 </div>
 
 <div v-if="isType('grid') && isKind('column')" :class="classList" data-id="{{data.id}}" data-index="{{index}}">
-	<div class="element" data-kind="true" data-index="{{index}}" data-id="{{data.id}}"></div>
+	<div class="element" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}"></div>
 </div>
 </template>
 

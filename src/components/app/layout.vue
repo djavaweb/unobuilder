@@ -65,7 +65,7 @@
 			<a class="edit" @click="setRightBarView('edit')" :class="{active: isRightBarView('edit')}"></a><a @click="setRightBarView('settings')" class="settings" :class="{active: isRightBarView('settings')}"></a><a @click="setRightBarView('style')" class="style" :class="{active: isRightBarView('style')}"></a>
 		</div>
 
-		<div class="right-panel-container" v-if="isRightBarView('edit')" v-if="validProps()">
+		<div class="right-panel-container" v-show="isRightBarView('edit')" v-if="validProps()">
 			<!-- properties.display -->
 			<div class="accordion-panel uk-accordion" data-uk-accordion v-show="validProps()">
 				<accordion-item title="Position" :with-switcher="true" :switcher="true" switcher-label="Advanced">
@@ -257,6 +257,7 @@
 <script>
 // Modules
 import dot from 'dot-object'
+import Mousetrap from '../../js/mousetrap.min.js'
 
 // Import child components
 import accordionItem from '../accordion/item.vue'
@@ -661,6 +662,23 @@ export default {
 				top: value + 'px'
 			})
 		})
+
+
+		// Keyboard Event Binding using Mousetrap
+		// Copy element
+		Mousetrap.bind(['ctrl+c', 'command+c'], function () {
+			self.layout.$emit('keyCapture', 'copy')
+		});
+
+		// Paste element
+		Mousetrap.bind(['ctrl+v', 'command+v'], function () {
+			self.layout.$emit('keyCapture', 'paste')
+		});
+
+		// Delete element
+		Mousetrap.bind('del', function () {
+			self.layout.$emit('keyCapture', 'delete')
+		});
 	}
 }
 </script>

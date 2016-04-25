@@ -20,7 +20,6 @@ Vue.transition('slideleft', {
 	leaveClass: 'slideOutLeft'
 })
 
-
 /* Main app */
 const App = new Vue({
 	el: '#app',

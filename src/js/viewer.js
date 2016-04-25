@@ -2,6 +2,7 @@
 import Vue from 'vue'
 import dot from 'dot-object'
 import _ from 'underscore'
+import Mousetrap from './mousetrap.min.js'
 
 // Main Layout
 import layout from '../components/viewer/layout.vue'
@@ -42,6 +43,8 @@ const App = new Vue({
 				properties: null,
 				element: null
 			},
+
+			copiedElement: null,
 
 			/* Default Properties */
 			props: {
@@ -179,10 +182,11 @@ const App = new Vue({
 			// Get new element node
 			let element = document.querySelector(`[data-id="${id}"]`)
 
-			// Only accept .element
-			if (element.classList.contains('nonelement')) {
+			// Only accept .element, except row
+			if (element.classList.contains('nonelement') && !element.classList.contains('row')) {
 				element = element.querySelector('.element')
 			}
+			
 
 			return element
 		},
@@ -417,13 +421,13 @@ const App = new Vue({
 		/**
 		 * Copy Element
 		 *
-		 * @param {Object} obj [Deep nested count and id]
+		 * @param {String} id  Element Id
 		 * @return {void}
 		 */
-		copyElement (obj) {
+		copyElement (id) {
 			let self = this
 
-			this.findElement(obj.id, function (element) {
+			this.findElement(id, function (element) {
 				let copy, copyElement
 
 				// Copy selected element to it's parent
@@ -464,21 +468,33 @@ const App = new Vue({
 		/**
 		 * Remove Element
 		 *
-		 * @param {Object} obj [id]
+		 * @param {String} id  Element Id
 		 * @return {void}
 		 */
-		removeElement (obj) {
+		removeElement (id) {
 			let self = this
 
 			// Find element and remove it
-			self.findElement(obj.id, function (element) {
+			self.findElement(id, function (element) {
 
 				// Remove element
 				element.parent.elements.$remove(element.self)
-				document.body.click()
 
 				// Reorder index
 				self.reorderElementIndex()
+
+				self.$nextTick(function () {
+					let siblingId
+
+					// Click siblings element
+					if (element.parent.elements.length>0) {
+						siblingId = _.first(element.parent.elements).id
+					} else {
+						siblingId = element.parent.id
+					}
+					
+					self.eventFire(self.activeElement(siblingId), 'click')
+				})
 			})
 		},
 
@@ -655,10 +671,10 @@ const App = new Vue({
 		 */
 		self.$on('manipulate', function (data) {
 			// Copy
-			if (data.action === 'copy') self.copyElement(data)
+			if (data.action === 'copy') self.copyElement(data.id)
 
 			// Remove
-			else if (data.action === 'remove') self.removeElement(data)
+			else if (data.action === 'remove') self.removeElement(data.id)
 		})
 
 
@@ -669,7 +685,9 @@ const App = new Vue({
 		 */
 		self.$on('elementSelect', function (breadcrumb) {
 			// check if it's wrapper or .element
-			this.eventFire(self.activeElement(breadcrumb.id), 'click')
+			self.$nextTick(function () {
+				self.eventFire(self.activeElement(breadcrumb.id), 'click')
+			})
 		})
 
 		
@@ -725,11 +743,51 @@ const App = new Vue({
 			}
 		})
 
-
 		/**
 		 * On drag move and drag end
 		 */
 		self.$on('dragmove', self.dragmove)
 		self.$on('dragend', self.dragend)
+
+		/**
+		 * On keyboard event binding
+		 * @param {String} action
+		 */
+		self.$on('keyCapture', function (action) {
+			switch (action) {
+				case 'copy':
+					self.findElement(self.selected.element, function (element) {
+						self.$set('copiedElement', element.self.id)
+					})
+				break;
+
+				case 'paste':
+					if (self.copiedElement && self.copiedElement !== 'body') {
+						self.copyElement(self.copiedElement)
+					}
+				break;
+
+				case 'delete':
+					if (self.selected.element && self.selected.element !== 'body') {
+						self.removeElement(self.selected.element)
+					}
+				break;
+			}
+		})
+
+		// Copy element
+		Mousetrap.bind(['ctrl+c', 'command+c'], function () {
+			self.$emit('keyCapture', 'copy')
+		});
+
+		// Paste element
+		Mousetrap.bind(['ctrl+v', 'command+v'], function () {
+			self.$emit('keyCapture', 'paste')
+		});
+
+		// Delete element
+		Mousetrap.bind('del', function () {
+			self.$emit('keyCapture', 'delete')
+		});
 	}
 })
