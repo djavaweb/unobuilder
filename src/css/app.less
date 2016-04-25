@@ -2,21 +2,10 @@
 @import "animate.css";
 @import "mixins.less";
 @import "colors.less";
+@import "element.less";
 
 html, body, #app {
     height: 100%
-}
-
-.grab () {
-    cursor: -webkit-grab;
-    cursor: -moz-grab;
-    cursor: grab;
-}
-
-.grabbing () {
-    cursor: -webkit-grabbing;
-    cursor: -moz-grabbing;
-    cursor: grabbing;
 }
 
 [draggable] {
@@ -39,6 +28,7 @@ html, body, #app {
 
 #app {
     .flex;
+    .userselect();
 }
 
 .left-panel {
@@ -95,6 +85,9 @@ html, body, #app {
         width: 100%;
         flex-grow: 1;
         position: relative;
+        &.disable {
+            pointer-events: none
+        }
         &.display-block-panel {
             z-index: 2;
         }
@@ -214,64 +207,6 @@ html, body, #app {
             float: right;
             color: @white;
             opacity: 1;
-        }
-    }
-}
-
-.element-item {
-    flex-grow: 1;
-    margin-right: 5px;
-    margin-bottom: 10px;
-    background-color: @charcoal-grey;
-    .grab();
-
-    &.ghost {
-        text-align: center;
-        width: 80px;
-        padding: 10px;
-    }
-
-    &:last-child {
-        margin-right: 0;
-    }
-
-    .label {
-        font-size: 11px;
-        color: @white;
-    }
-
-    .icon {
-        height: 50px;
-        background-size: 100%;
-        border: 1px solid @transparent-white;
-        border-radius: 2px;
-
-        &:hover {
-            border-color: @white;
-        }
-
-        &.column-1 {
-            background-image: url('../img/column-1.svg');
-        }
-
-        &.column-2 {
-            background-image: url('../img/column-2.svg');
-        }
-
-        &.column-3 {
-            background-image: url('../img/column-3.svg');
-        }
-
-        &.column-4 {
-            background-image: url('../img/column-4.svg');
-        }
-
-        &.column-5 {
-            background-image: url('../img/column-5.svg');
-        }
-
-        &.column-6 {
-            background-image: url('../img/column-6.svg');
         }
     }
 }
@@ -460,6 +395,10 @@ html, body, #app {
     pointer-events: none;
     z-index: 1;
 
+    &.small {
+        z-index: 990;
+    }
+
     &.remove {
         border: 1px solid @pastel-red;
         a {
@@ -499,20 +438,40 @@ html, body, #app {
 
         &.top {
             &:not(.body) {
-                bottom: -18px;
-                align-items: flex-end;
+                top: 100%;
+                align-items: flex-start;
+                &.small .edit-tools {
+                    align-items: flex-start;
+                }
             }
 
             &.body {
                 top: 0;
             }
 
-            a.copy {
-                margin-top: 2px;
-                line-height: normal;
+            .edit-tools {
+                align-items: flex-end;
             }
         }
 
+        &.small {
+            .edit-tools {
+                align-items: flex-end;
+                flex-grow: 1;
+                justify-content: space-between;
+            }
+
+            .selector {
+                flex-direction: column-reverse
+            }
+
+            a.active {
+                padding-right: 3px;
+                &:after {
+                    display: none;
+                }
+            }
+        }
 
         a {
             border: 1px solid @normal-sky-blue;
@@ -526,7 +485,6 @@ html, body, #app {
 
             &.active {
                 display: inline-block;
-                margin-top: 2px;
                 margin-bottom: 0;
             }
 
@@ -546,19 +504,31 @@ html, body, #app {
 
     .selector {
         .flex;
-        flex-direction: column-reverse;
+        flex-direction: row-reverse;
         align-items: flex-start;
         pointer-events: all;
+        a {
+            padding: 2px 0 2px 3px;
+            &:after {
+                content: '>';
+                margin-left: 5px;
+            }
+            &:first-child {
+                padding-right: 3px;
+                &:after {
+                    display: none;
+                }
+            }
+        }
     }
 
     .edit-tools {
         .flex;
-        align-items: baseline;
+        align-items: flex-start;
         .copy {
             display: inline-block;
             background: @stone !important;
             border-color: @stone !important;
-            line-height: 13px;
         }
     }
 }

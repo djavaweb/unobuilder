@@ -1,9 +1,18 @@
 <template>
-<div v-if="isType('section')" :class="classList" data-id="{{data.id}}" data-index="{{index}}" data-breadcrumb="{{data.type}}">
+<div v-if="isType('section')" :class="classList" data-id="{{data.id}}" data-index="{{index}}">
 	<slot></slot>
-	<div v-if="isKind('container')" class="element uk-container uk-container-center" data-kind="true" data-index="{{index}}" data-breadcrumb="{{data.type + ' + ' + data.kind}}">
-		container
+	<element v-if="isKind('section')" v-for="element in data.elements" :data="element" :index="$index"></element>
+	<div v-if="isKind('container')" class="element uk-container uk-container-center" data-kind="true" data-index="{{index}}" data-id="{{data.id}}">
+		<element v-for="element in data.elements" :data="element" :index="$index"></element>
 	</div>
+</div>
+
+<div v-if="isType('grid') && isKind('row')" class="uk-grid uk-grid-collapse" :class="classList" data-id="{{data.id}}" data-index="{{index}}">
+	<element v-for="element in data.elements" :data="element" :index="$index"></element>
+</div>
+
+<div v-if="isType('grid') && isKind('column')" :class="classList" data-id="{{data.id}}" data-index="{{index}}">
+	<div class="element" data-kind="true" data-index="{{index}}" data-id="{{data.id}}"></div>
 </div>
 </template>
 
@@ -32,22 +41,23 @@ export default {
 	computed: {
 		classList () {
 			let classList = {}
+
+			// Basic class
 			classList.element = true
+			classList[this.data.type] = (this.data.type)
+			classList[this.data.kind] = (this.data.kind)
+			classList.parent = (!this.child)
+			classList.child = this.child
 
-			if (this.data.type) classList[this.type] = true
-			if (this.data.kind) {
-				classList[this.data.kind] = true
+			// Column Class
+			classList[`uk-width-${this.data.width}`] = (this.data.kind === 'column')
 
-				// If container set section as non element
-				// So we can't select section layout
-				if (this.data.kind === 'container') {
-					classList.nonelement = true
-					delete classList.element
-				}
+			// If container set section as non element
+			// So we can't select section layout
+			if (this.data.kind && ['container', 'row', 'column'].includes(this.data.kind)) {
+				classList.nonelement = true
+				delete classList.element
 			}
-
-			if (!this.child) classList.parent = true
-			else classList.child = true
 
 			return classList
 		}

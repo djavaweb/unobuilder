@@ -19,12 +19,15 @@ export default {
 		 * @param {String} type [Section type]
 		 */
 		add (type) {
-			let self = this
+			let self = this,
+			breadcrumb = (type === 'container')? 'section + container': type
 
 			self.$root.$emit('addBlock', {
+				to: 'body',
 				type: 'section',
-				child: false,
 				kind: type,
+				child: false,
+				breadcrumb: breadcrumb,
 				index: self.index
 			})
 		}

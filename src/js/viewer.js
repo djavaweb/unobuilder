@@ -20,17 +20,26 @@ Vue.transition('appear', {
 
 /* Main app */
 const App = new Vue({
-	el: 'html',
+	el: 'body',
 	components: {layout},
 	
 	data () {
 		return {
+			/* Drag object */
+			dragging: false,
+			overlapElement: null,
+			clone: null,
+
+			/* Main Object */
 			selectedProperties: null,
 			body: {
+				id: 'body',
+				breadcrumb: 'body',
 				elements: [],
 				props: {}
 			},
 
+			/* Default Properties */
 			props: {
 				display: {
 					value: 'block',
@@ -53,7 +62,7 @@ const App = new Vue({
 						}
 					}
 				}
-			},
+			}
 		}
 	},
 
@@ -101,35 +110,79 @@ const App = new Vue({
 
 
 		/**
+		 * Set Properties
+		 * @param {String} breakpoint [Device Breakpoint]
+		 * @param {String} prop       [Property name]
+		 * @param {String|Number|Object|Array} value  [Properties Value]
+		 */
+		setProperties (breakpoint, prop, value) {
+			dot.set(`${breakpoint}.${prop}`, value, this.selectedProperties)
+		},
+
+
+		/**
 		 * Get breadcrumbs (parent) from current element
 		 * @param  {ElementNode} target 
 		 * @param  {Boolean} withParent [Whether include parent or not]
+		 * @param  {Function} fn [Callback]
 		 * @return {String}
 		 */
-		getBreadcrumbs (target, withParent) {
-			let breadcrumbs = [],
-			dataBreadcrumb = 'data-breadcrumb',
-			dataId = 'data-id',
+		getBreadcrumbs (target, withParent, fn) {
+			let self = this,
+			id = target.getAttribute('data-id'),
 			kind = target.getAttribute('data-kind'),
-			breadcrumb = target.getAttribute(dataBreadcrumb),
-			id = target.getAttribute(dataId)
-			
-			// Add current element to breadcrumbs
-			breadcrumbs.push({
-				id: id,
-				label: breadcrumb
-			})
+			breadcrumbs = []
 
-			// Check parent
-			if (withParent && target.parentElement.getAttribute && target.parentElement.getAttribute(dataBreadcrumb)) {
-				let parentBreadcrumb = this.getBreadcrumbs(target.parentElement, true)
-				if (kind) parentBreadcrumb.shift()
-				breadcrumbs.push(parentBreadcrumb)
+			self.findElement(id, function (element) {
+				// Check for initialization, if undefined don't add breadcrumb
+				if (element.self) {
+					breadcrumbs.push({
+						id: element.self.id,
+						label: element.self.breadcrumb
+					})
+				}
+
+				// remove undefined breadcrumb
+				// which is element that doesn't have to show on layout selector
+				// like row, etc
+				breadcrumbs = _.filter(breadcrumbs, function (item) {
+					return item.label !== undefined
+				})
+
+
+				// If with parent find again
+				if (withParent && element.parent) {
+					let parentElement = document.querySelector(`[data-id="${element.parent.id}"]`)
+					self.getBreadcrumbs(parentElement, true, function (breadcrumb) {
+						breadcrumbs.push(breadcrumb)
+						breadcrumbs = _.flatten(breadcrumbs)
+						fn && fn(breadcrumbs)
+					})
+				} else {
+					// Callback
+					fn && fn(breadcrumbs)
+				}
+			})
+		},
+
+
+		/**
+		 * Get active element, if it's none element, select it's child
+		 * @param  {String} target  [Element data-id]
+		 * @return {void}
+		 */
+		activeElement (id) {
+			// Get new element node
+			let element = document.querySelector(`[data-id="${id}"]`)
+
+			// Only accept .element
+			if (element.classList.contains('nonelement')) {
+				element = element.querySelector('.element')
 			}
 
-			if (withParent) breadcrumbs = _.flatten(breadcrumbs)
-			return breadcrumbs
+			return element
 		},
+
 
 		/**
 		 * Element outline
@@ -145,6 +198,7 @@ const App = new Vue({
 			
 			return {
 				$top: offset.top - bodyRect.top,
+				$width: offset.width,
 				top: 0,
 				left: 0,
 				transform: `translate(${offset.left}px, ${offset.top-bodyRect.top}px)`,
@@ -162,32 +216,24 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		hoverOutline (target, hide) {
-			let css = this.outline(target),
-			breadcrumbs = this.getBreadcrumbs(target, false)
+			let self = this
 
-			if (hide) css.display = 'none'
+			self.getBreadcrumbs(target, false, function (breadcrumbs) {
+				let css = self.outline(target)
+				if (hide) css.display = 'none'
 
-			// Remove temporary top position
-			let top = css.$top
-			delete css.$top
+				// Remove temporary top position
+				let top = css.$top
+				delete css.$width
+				delete css.$top
 
-			// Notify parent
-			this.parent().$broadcast('elementHover', {
-				css: css,
-				breadcrumbs: breadcrumbs,
-				boundTop: top
+				// Notify parent
+				self.parent().$broadcast('elementHover', {
+					css: css,
+					breadcrumbs: breadcrumbs,
+					boundTop: top
+				})
 			})
-		},
-
-
-		/**
-		 * Set Properties
-		 * @param {String} breakpoint [Device Breakpoint]
-		 * @param {String} prop       [Property name]
-		 * @param {String|Number|Object|Array} value  [Properties Value]
-		 */
-		setProperties (breakpoint, prop, value) {
-			dot.set(`${breakpoint}.${prop}`, value, this.selectedProperties)
 		},
 
 
@@ -198,32 +244,36 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		selectOutline (target) {
-			let css = this.outline(target), 
-			breadcrumbs = this.getBreadcrumbs(target, true), properties, id
+			let self = this,
+			css = self.outline(target),
+			id = target.getAttribute('data-id')
 
-			// Since body doesn't have data-index, we select it manually
-			if (target.classList.contains('body')) {
-				properties = this.body.props,
-				id = 'body'
-			} else {
-				let index = target.getAttribute('data-index')
-				properties = this.body.elements[index].props
-				id = this.body.elements[index].id
-			}
+			self.findElement(id, function (element) {
+				let properties
 
-			// Remove temporary top position
-			let top = css.$top
-			delete css.$top
+				if (element.self) {
+					// Get current properties
+					properties = element.self.props
 
-			// Notify parent to select the element
-			this.$set('selectedProperties', properties)
-			this.parent().$broadcast('elementSelect', {
-				css: css,
-				id: id,
-				properties: properties,
-				breadcrumbs: breadcrumbs,
-				boundTop: top,
-				showBreadcrumbs: false
+					// Remove temporary top position
+					let top = css.$top, width = css.$width
+					delete css.$width
+					delete css.$top
+
+					// Notify parent to select the element
+					self.$set('selectedProperties', properties)
+					self.getBreadcrumbs(target, true, function (breadcrumbs) {
+						self.parent().$broadcast('elementSelect', {
+							css: css,
+							id: id,
+							properties: properties,
+							breadcrumbs: breadcrumbs,
+							boundTop: top,
+							boundWidth: width,
+							showBreadcrumbs: false
+						})
+					})
+				}
 			})
 		},
 
@@ -288,48 +338,72 @@ const App = new Vue({
 		/**
 		 * Find Element nested with given ID
 		 * 
-		 * @param  {Number} nested [How many deep is the element]
 		 * @param  {String} id     [Element ID]
+		 * @param  {Function} fn   [Callback]
 		 * @return {Object}        [target is where the element belongs, found element is the selected element]
 		 */
-		findElement (deep, id) {
-			let elements = []
+		findElement (id, fn) {
+			let body = this.body
 
-			// How many times element nested
-			for (let i = 0; i < deep; i++) {
-				elements.push('elements')
+			if (id === 'body') {
+				fn && fn({parent: null,	self: body})
+				return
 			}
 
-			// Select elements
-			let target = dot.pick('body.' + elements.join('.'), this),
-			foundElement = _.findWhere(target, {id: id})
 
-			return {
-				target: target,
-				found: foundElement
+			const search = function (root) {
+				if (root && root.elements) {
+					for (let i = 0, len = root.elements.length;i<len;i++) {
+						if (root.elements[i] && root.elements[i].id === id) fn && fn({parent: root, self: root.elements[i]})
+						else search(root.elements[i], id, fn);
+					}
+				}
 			}
+
+			search(body, id, fn)
 		},
 
 
 		/**
 		 * Add Element
-		 * 
-		 * @type {Object}
+		 *
+		 * @param {Object} data [Type/Kind or etc]
+		 * @param {Function} fn [Callback]
+		 * @return {String}		[id of new element]
 		 */
-		addElement (data) {
-			data.id = this.generateId('el')
+		addElement (data, fn) {
+			let self = this
 
-			// Copy default props to breakpoints object, each breakpoint has unique value
-			data.props = this.cloneObject(this.body.props)
+			// Search parent element
+			self.findElement(data.to, function (element) {
+				delete data.to
 
-			// Element Children
-			data.elements = []
+				// Generate new id
+				data.id = self.generateId('el')
 
-			// Add Data to elements
-			this.body.elements.splice(data.index + 1, 0, data)
+				// Copy default props to breakpoints object, each breakpoint has unique value
+				data.props = self.cloneObject(self.body.props)
 
-			// Reorder Index
-			this.reorderElementIndex()
+				// Element Children
+				data.elements = []
+
+				// Add Data to elements
+				element.self.elements.splice(data.index + 1, 0, data)
+
+				// Reorder Index
+				self.reorderElementIndex()
+
+				// New element
+				self.findElement(data.id, function (newElement) {
+					// Click immediately
+					self.$nextTick(function () {			
+						if (newElement.self && newElement.self.breadcrumb) self.eventFire(self.activeElement(newElement.self.id), 'click')
+
+						// Callback
+						fn && fn(newElement)
+					})
+				})
+			})
 		},
 
 		/**
@@ -339,50 +413,207 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		copyElement (obj) {
-			let searchElement = this.findElement(obj.deep, obj.id)
+			let self = this
 
-			// Copy selected element to it's parent
-			let copy = this.cloneObject(searchElement.found)
-			copy.index += 1
-			searchElement.target.splice(copy.index, 0, copy)
+			this.findElement(obj.id, function (element) {
+				let copy, copyElement
 
-			// Reorder index
-			this.reorderElementIndex()
+				// Copy selected element to it's parent
+				copy = self.cloneObject(element.self)
+				copy.id = self.generateId('el')
+
+				// search all elements and change Id
+				const changeId = function (root) {
+					if (root && root.elements) {
+						for (let i = 0, len = root.elements.length;i<len;i++) {
+							if (root.elements[i]) {
+								root.elements[i].id = self.generateId('el')
+								changeId(root.elements[i]);
+							}
+						}
+					}
+				}
+
+				// Change all copy's child Id
+				changeId(copy)
+
+				// Increment index
+				copy.index += 1
+				element.parent.elements.push(copy)
+
+				// Reorder index
+				self.reorderElementIndex()
+
+				// Hover immediately
+				self.$nextTick(function () {
+					// Hover copy element
+					self.hoverOutline(self.activeElement(copy.id))
+				})
+			})
 		},
 
 
 		/**
 		 * Remove Element
 		 *
-		 * @param {Object} obj [Deep nested count and id]
+		 * @param {Object} obj [id]
 		 * @return {void}
 		 */
 		removeElement (obj) {
-			let searchElement = this.findElement(obj.deep, obj.id)
+			let self = this
 
-			// Remove element
-			searchElement.target.$remove(searchElement.found)
-			document.body.click()
+			// Find element and remove it
+			self.findElement(obj.id, function (element) {
 
-			// Reorder index
-			this.reorderElementIndex()
+				// Remove element
+				element.parent.elements.$remove(element.self)
+				document.body.click()
+
+				// Reorder index
+				self.reorderElementIndex()
+			})
 		},
 
 
-		drop (event) {
-			//console.log('drop', event)
+		/**
+		 * Trigger event on element
+		 * @param  {ElementNode} element
+		 * @param  {String} state
+		 * @return {void}
+		 */
+		eventFire (element, state) {
+			if (element && element.fireEvent) {
+				element.fireEvent(state);
+			} else {
+				let event = new MouseEvent(state, {
+					'view': window,
+					'bubbles': true,
+					'cancelable': true
+				});
+				element.dispatchEvent(event);
+			}
 		},
 
-		dragover (event) {
-			event.preventDefault()
-			//console.log('dragover', event)
+
+		/**
+		 * Check is drag source overlap with destination element
+		 * @param  {ElementNode} source [element source]
+		 * @param  {ElementNode} dest   [destination element]
+		 * @param  {Function} fn [Callback]
+		 * @return {void}
+		 */
+		overlap (source, dest, fn) {
+			if (source.getBoundingClientRect && dest.getBoundingClientRect) {
+				let sourceRect = source.getBoundingClientRect(),
+				destRect = dest.getBoundingClientRect(),
+				overlap = !(sourceRect.right - (sourceRect.width/4) < destRect.left || sourceRect.left > destRect.right || sourceRect.bottom - (sourceRect.height/4) < destRect.top || sourceRect.top + 10 > destRect.bottom)
+
+				// Callback
+				if (overlap) fn && fn()
+			}
+		},
+
+
+		/**
+		 * On drag move, move the ghost element
+		 * @param  {Object} coords
+		 * @return {void}
+		 */
+		dragmove (coords) {
+			let self = this,
+			clone = self.clone,
+			rect = clone.getBoundingClientRect(),
+			x = (coords.x - (rect.width / 2)),
+			y = (coords.y - (rect.height / 2))
+
+			// Follow the cursor
+			clone.style.top = y + 'px'
+			clone.style.left = x + 'px'
+
+			/**
+			 * Check overlap for element
+			 */
+			let element = document.querySelectorAll('.element')
+			for (let i in element) {
+				self.overlap(clone, element[i], function () {
+					self.$set('overlapElement', element[i])
+					self.eventFire(element[i], 'mouseover')
+				})
+			}
+		},
+
+
+		/**
+		 * Drag has ended, it's happy ending
+		 * @param  {data} event
+		 * @return {void}
+		 */
+		dragend (data) {
+			let self = this, elementId
+
+			// Remove it
+			if (self.clone) {
+				self.clone.remove()
+				self.$set('clone', null)
+			}
+
+			// Disable dragging state
+			self.$set('dragging', false)
+
+			// Get drop element id
+			if (self.overlapElement.getAttribute('data-kind')) {
+				elementId = self.overlapElement.parentElement.getAttribute('data-id')
+			} else {
+				elementId = self.overlapElement.getAttribute('data-id')
+			}
+
+			// Data manipulation, delete, add, etc
+			switch (data.kind) {
+				case 'column':
+					// Add row
+					self.addElement({
+						type: 'grid',
+						kind: 'row',
+						child: false,
+						index: 0,
+						to: elementId
+					}, function (row) {
+						// Delete Unnecessary properties
+						delete data.icon
+						delete data.label
+
+						// Get columns width
+						let width = data.width.split(',')
+
+						for (let i in width) {
+							// Clone data
+							let _data = self.cloneObject(data)
+							_data.width = width[i]
+
+							// Add element to parent
+							self.addElement(
+								_.extend(_data, {
+									child: false,
+									index: 0,
+									breadcrumb: _data.kind,
+									to: row.self.id
+								})
+							)
+						}
+					})					
+				break;
+			}
+
+			// Stop moving
+			document.removeEventListener('mousemove', self.dragmove, false);
+			document.removeEventListener('mouseup', self.dragend, false);
 		}
 	},
 
 	ready () {
 		let self = this
 
-		// Set body properties by responsive breakpoint
+		// Set body properties with responsive breakpoints
 		self.$set('body.props', {
 			large: self.cloneObject(self.props),
 			medium: self.cloneObject(self.props),
@@ -397,13 +628,23 @@ const App = new Vue({
 		// On set properties
 		self.$on('setProperties', self.setProperties)
 
-		// On add block
+
+		/**
+		 * When new block added, add element and notify block wrapper to close
+		 * @param  {Object} data  [Element Data]
+		 * @return {void}
+		 */
 		self.$on('addBlock', function (data) {
 			self.addElement(data)
 			self.$broadcast('addedBlock')
 		})
 
-		// On copy / remove element
+
+		/**
+		 * Manipulate elements
+		 * @param  {Object} data
+		 * @return {void}
+		 */
 		self.$on('manipulate', function (data) {
 			// Copy
 			if (data.action === 'copy') self.copyElement(data)
@@ -413,33 +654,56 @@ const App = new Vue({
 		})
 
 
-		// Breadcrumbs on selects element
+		/**
+		 * When breadcrumbs in layout clicked then click parent breadcrumb, fire click event
+		 * @param  {Object} breadcrumb [Breadcrumb data]
+		 * @return {void}
+		 */
 		self.$on('elementSelect', function (breadcrumb) {
-			document.querySelector(`[data-id="${breadcrumb.id}"]`).click()
+			// check if it's wrapper or .element
+			this.eventFire(self.activeElement(breadcrumb.id), 'click')
 		})
 
-		// Breadcrumbs on hover element
+		
+		/**
+		 * When breadcrumbs in layout clicked then hovered, fire mouseover event, otherwise fire mouseleave
+		 * @param  {Object} breadcrumb [Breadcrumb data]
+		 * @param  {Boolean} enter   [Mouse state, over or leave]
+		 * @return {void}
+		 */
 		self.$on('elementHover', function (breadcrumb, enter) {
-			let element = document.querySelector(`[data-id="${breadcrumb.id}"]`),
-			state = (enter) ? 'mouseover': 'mouseleave'
+			let state = (enter) ? 'mouseover': 'mouseleave'
 
-			// Support IE 9
-			if (element && element.fireEvent) {
-				element.fireEvent(state);
-			} else {
-				let event = new MouseEvent(state, {
-					'view': window,
-					'bubbles': true,
-					'cancelable': true
-				});
-				element.dispatchEvent(event);
-			}
+			// check if it's wrapper or .element
+			this.eventFire(self.activeElement(breadcrumb.id), state)
 		})
 		
 
-		// Scroll watcher
+		/**
+		 * Window scroll observer, when change notify the parent to set canvas top position as viewer top scroll
+		 * @return {void}
+		 */
 		window.addEventListener('scroll', function () {
 			self.parent().$broadcast('scroll', document.body.getBoundingClientRect().top)
-		});
+		})
+
+
+
+		self.$on('dragstart', function (drag, element) {
+			if (drag) {
+				// Set ghost element
+				this.$set('clone', element)
+
+				// Set style
+				this.clone.style.visibility = 'hidden'
+				this.clone.style.position = 'absolute'
+				this.clone.style.opacity = 0
+				this.clone.style.zIndex = 999
+				document.body.appendChild(element)
+			}
+		})
+
+		self.$on('dragmove', self.dragmove)
+		self.$on('dragend', self.dragend)
 	}
 })

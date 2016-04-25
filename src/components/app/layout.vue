@@ -6,14 +6,11 @@
 			<div class="title">Add Elements <a class="uk-close" @click="toggleElementPanel()"></a></div>
 			<div class="accordion-panel uk-accordion" data-uk-accordion>
 				<accordion-item title="Grid">
-					<element-item
-						v-for="element in elements.grid"
-						:icon="element.icon"
-						:label="element.label"></element-item>
+					<element-item v-for="element in elements.grid" :data="element"></element-item>
 				</accordion-item>
 
 				<accordion-item title="Component">
-					<element-item v-for="element in elements.component" :icon="element.icon" :label="element.label"></element-item>
+					<element-item v-for="element in elements.component" :data="element"></element-item>
 				</accordion-item>
 			</div>
 		</div>
@@ -32,7 +29,7 @@
 				<div class="outline-wrapper">
 					<div class="outline-tools hovered" :style="outline.hovered.css">
 						<div class="breadcrumbs hover" v-if="outline.hovered.breadcrumbs" :class="hoveredOutlineClass">
-							<div class="selector">
+							<div class="selector" v-if="outline.hovered.breadcrumbs.length!==0">
 								<a>{{outline.hovered.breadcrumbs[0].label}}</a>
 							</div>
 						</div>
@@ -42,6 +39,7 @@
 							<div class="edit-tools">
 								<div class="selector">
 									<a v-for="breadcrumb in outline.selected.breadcrumbs"
+									track-by="$index"
 									:class="{active: $index===0||outline.selected.showBreadcrumbs}"
 									@mouseover="showHoveredBreadcrumbs(breadcrumb,$index,true)"
 									@mouseleave="showHoveredBreadcrumbs(breadcrumb,$index,false)"
@@ -58,7 +56,7 @@
 					</div>
 				</div>
 			</div>
-			<iframe data-layout-viewer src="viewer.html" :class="{'display-block-panel': displayBlockPanel}"></iframe>
+			<iframe data-layout-viewer src="viewer.html" :class="{'display-block-panel': displayBlockPanel, disable: dragging}"></iframe>
 		</div>
 	</div>
 
@@ -289,12 +287,12 @@ export default {
 			/* Elements Item */
 			elements: {
 				grid: [
-					{label: '1 Columns', icon: 'column-1'},
-					{label: '2 Columns', icon: 'column-2'},
-					{label: '3 Columns', icon: 'column-3'},
-					{label: '4 Columns', icon: 'column-4'},
-					{label: '5 Columns', icon: 'column-5'},
-					{label: '6 Columns', icon: 'column-6'}
+					{label: '1 Columns', icon: 'column-1', type: 'grid', kind: 'column', width: '1-1'},
+					{label: '2 Columns', icon: 'column-2', type: 'grid', kind: 'column', width: '1-2,1-2'},
+					{label: '3 Columns', icon: 'column-3', type: 'grid', kind: 'column', width: '2-6,2-6,2-6'},
+					{label: '4 Columns', icon: 'column-4', type: 'grid', kind: 'column', width: '1-4'},
+					{label: '5 Columns', icon: 'column-5', type: 'grid', kind: 'column', width: '1-5,1-5,1-5,1-5,1-5'},
+					{label: '6 Columns', icon: 'column-6', type: 'grid', kind: 'column', width: '1-6,1-6,1-6,1-6,1-6,1-6'}
 				],
 
 				component: []
@@ -319,10 +317,8 @@ export default {
 			displayBlockPanel: false,
 			layoutScroll: {},
 
-			/* Dragging */
-			dragging: false,
-			dragPosition: {x: 0, y: 0},
-			dragElement: null
+			/* Dragging Element Item */
+			dragging: false
 		}
 	},
 
@@ -338,11 +334,11 @@ export default {
 
 		// Outline class when hovered
 		hoveredOutlineClass () {
-			let cssClass = {}, hovered = this.outline.hovered
+			let cssClass = {}, outline = this.outline.hovered
 
-			if (hovered.breadcrumbs !== undefined) {
-				cssClass.top = (hovered.boundTop < 30)
-				cssClass.body = (hovered.breadcrumbs[0].label === 'body')
+			if (outline.breadcrumbs !== undefined) {
+				cssClass.top = (outline.boundTop < 30)
+				cssClass.body = (outline.breadcrumbs.length>0 && outline.breadcrumbs[0].label === 'body')
 			}
 
 			return cssClass
@@ -350,11 +346,12 @@ export default {
 
 		// Outline class when selected
 		selectedOutlineClass () {
-			let cssClass = {}, selected = this.outline.selected
+			let cssClass = {}, outline = this.outline.selected
 
-			if (selected.breadcrumbs !== undefined) {
-				cssClass.top = (selected.boundTop < 30)
-				cssClass.body = (selected.breadcrumbs[0].label === 'body')
+			if (outline.breadcrumbs !== undefined) {
+				cssClass.top = (outline.boundTop < 30)
+				cssClass.body = (outline.breadcrumbs[0].label === 'body')
+				cssClass.small = (outline.boundWidth < 235)
 			}
 
 			return cssClass
@@ -508,7 +505,6 @@ export default {
 		 */
 		copy () {
 			this.layout.$emit('manipulate', {
-				deep: this.outline.selected.breadcrumbs.length - 1,
 				id: this.outline.selected.id,
 				action: 'copy'
 			})
@@ -517,24 +513,58 @@ export default {
 
 		/**
 		 * Remove Element
-		 * @return {[type]} [description]
+		 * @return {void}
 		 */
 		remove () {
 			this.layout.$emit('manipulate', {
-				deep: this.outline.selected.breadcrumbs.length - 1,
 				id: this.outline.selected.id,
 				action: 'remove'
 			})
-		},
-
-
-		dragInit () {
-			
 		}
 	},
 
 	ready () {
 		let self = this
+
+
+		/**
+		 * When element item dragging itself
+		 * @param {Boolean} drag [Whether in drag state or not]
+		 * @return {void}
+		 */
+		self.$on('dragstart', function (drag, element) {
+			// Notify to viewer
+			self.$set('dragging', drag)
+			self.layout.$emit('dragstart', drag, element)
+
+			// If in dragging state, close left panel element
+			if (drag) {
+				setTimeout(function () {
+					self.$set('showElementPanel', false)
+				}, 350)
+			}
+		})
+
+		/**
+		 * When element move, notify viewer to update latest coords
+		 * @param  {Object} coords
+		 * @return {void}
+		 */
+		self.$on('dragmove', function (coords) {
+			self.layout.$emit('dragmove', coords)
+		})
+
+
+		/**
+		 * When element drag is ended, notify viewer to add element
+		 * @param  {Object} data  [type and kind]
+		 * @return {void}
+		 */
+		self.$on('dragend', function (data) {
+			// Notify to viewer
+			self.$set('dragging', false)
+			self.layout.$emit('dragend', data)
+		})
 
 
 		/**
@@ -545,16 +575,12 @@ export default {
 		 */
 		self.$on('viewerReady', function (obj) {
 			self.layout = obj.App
-
-			/**
-			 * Init draggable
-			 */
-			self.dragInit();
 		})
 
 
 		/**
-		 * Hide element panel
+		 * Hide add element panel
+		 * @return {void}
 		 */
 		self.$on('hideParentPanel', function () {
 			self.$set('showElementPanel', false)
@@ -591,6 +617,11 @@ export default {
 		})
 
 
+		/**
+		 * On viewer scrolling
+		 * @param  {Number} value  Scroll Value
+		 * @return {void}
+		 */
 		self.$on('scroll', function (value) {
 			self.$set('layoutScroll', {
 				top: value + 'px'

@@ -1,0 +1,53 @@
+@import "colors.less";
+
+.element-item {
+    flex-grow: 1;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    background-color: @charcoal-grey;
+    .grab();
+
+    &:last-child {
+        margin-right: 0;
+    }
+
+    .label {
+        font-size: 11px;
+        color: @white;
+    }
+
+    .icon {
+        height: 50px;
+        background-size: 100%;
+        border: 1px solid @transparent-white;
+        border-radius: 2px;
+
+        &:hover {
+            border-color: @white;
+        }
+
+        &.column-1 {
+            background-image: url('../img/column-1.svg');
+        }
+
+        &.column-2 {
+            background-image: url('../img/column-2.svg');
+        }
+
+        &.column-3 {
+            background-image: url('../img/column-3.svg');
+        }
+
+        &.column-4 {
+            background-image: url('../img/column-4.svg');
+        }
+
+        &.column-5 {
+            background-image: url('../img/column-5.svg');
+        }
+
+        &.column-6 {
+            background-image: url('../img/column-6.svg');
+        }
+    }
+}
