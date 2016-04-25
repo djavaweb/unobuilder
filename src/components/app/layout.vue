@@ -56,7 +56,7 @@
 					</div>
 				</div>
 			</div>
-			<iframe data-layout-viewer src="viewer.html" :class="iframeClass"></iframe>
+			<iframe data-layout-viewer src="./viewer.html" :class="iframeClass"></iframe>
 		</div>
 	</div>
 

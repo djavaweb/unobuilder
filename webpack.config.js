@@ -7,8 +7,8 @@ module.exports = {
         'unobuilder.viewer': './src/js/viewer.js'
     },
     output: {
-        path: './dist',
-        publicPath: 'dist/js/',
+        path: './app',
+        publicPath: 'app/',
         filename: "[name].js"
     },
     module: {
@@ -16,11 +16,11 @@ module.exports = {
         loaders: [
         {
             test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-            loader: "url-loader?limit=10000&minetype=application/font-woff"
+            loader: "url-loader?name=assets/[hash].[ext]&limit=10000&minetype=application/font-woff"
         },
         {
             test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-            loader: "file-loader"
+            loader: "file-loader?name=assets/[hash].[ext]"
         },
         {
             test: /\.vue$/,
