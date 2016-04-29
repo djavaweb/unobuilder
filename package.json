@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/djavaweb/unobuilder",
   "devDependencies": {
+    "async": "^2.0.0-rc.3",
     "babel-core": "^6.7.2",
     "babel-loader": "^6.2.4",
     "babel-plugin-transform-es2015-block-scoping": "*",
@@ -36,7 +37,6 @@
     "json-loader": "*",
     "less-loader": "*",
     "medium-editor": "*",
-    "nouislider": "leongersen/noUiSlider",
     "rangy": "^1.3.0",
     "script-loader": "*",
     "svg-sprite-loader": "0.0.18",
@@ -52,6 +52,6 @@
   },
   "dependencies": {
     "es6-promise": "*",
-    "vue": "1.0.17"
+    "vue": "*"
   }
 }

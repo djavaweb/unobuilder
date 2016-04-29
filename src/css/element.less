@@ -1,14 +1,17 @@
 @import "colors.less";
 
 .element-item {
-    flex-grow: 1;
-    margin-right: 5px;
-    margin-bottom: 10px;
+    padding-right: 8px;
+    padding-bottom: 10px;
     background-color: @charcoal-grey;
     .grab();
 
-    &:last-child {
-        margin-right: 0;
+    &.ondrag {
+        padding: 10px 10px 5px !important;
+    }
+
+    &.no-space-right, &:last-child {
+        padding-right: 0;
     }
 
     .label {

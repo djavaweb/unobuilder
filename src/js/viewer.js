@@ -2,6 +2,7 @@
 import Vue from 'vue'
 import dot from 'dot-object'
 import _ from 'underscore'
+import async from 'async'
 import Mousetrap from './mousetrap.min.js'
 
 // Main Layout
@@ -34,19 +35,30 @@ const App = new Vue({
 			/* Main Object */
 			body: {
 				id: 'body',
+				kind: 'body',
 				breadcrumb: 'body',
 				elements: [],
 				props: {}
 			},
 
 			selected: {
-				properties: null,
-				element: null
+				element: null,
+				properties: null
 			},
 
 			copiedElement: null,
+			screenView: 'large',
 
-			/* Default Properties */
+			/**
+			 * Element properties,
+			 * Rule: 
+			 *
+			 * > value can be string | object | array
+			 * > all keys with _ as prefix will be excluded, if it's true change parent.hook, to true value, replace $var with parent.hook value
+			 * > all keys with $ as prefix are object value, if value is `custom`, get custom settings
+			 * > all keys with $ as suffix is array value, render by join their value, separate with delimiter, the last array is delimiter
+			 * @type {Object}
+			 */
 			props: {
 				display: {
 					value: 'block',
@@ -54,12 +66,12 @@ const App = new Vue({
 						flex: {
 							container: {
 								direction: 'row',
-								_reverse: false,
+								_reverse: {value: false, true: '$direction-reverse', hook: 'direction'},
 								alignItems: 'stretch',
 								alignContent: 'stretch',
 								justifyContent: 'flex-start',
 								wrap: 'nowrap',
-								_reverseWrap: false
+								_reverseWrap: {value: false, true: 'wrap-reverse', hook: 'wrap'}
 							},
 							item: {
 								$sizing: {value: 'flexGrow', custom: {}},
@@ -68,6 +80,66 @@ const App = new Vue({
 							}
 						}
 					}
+				},
+				position: {
+					value: 'relative',
+					settings: {
+						absolute: {
+							top$: [0, 'px', ''],
+							right$: [0, 'px', ''],
+							bottom$: [0, 'px', ''],
+							left$: [0, 'px', '']
+						},
+
+						fixed: {
+							top$: [0, 'px', ''],
+							right$: [0, 'px', ''],
+							bottom$: [0, 'px', ''],
+							left$: [0, 'px', '']
+						}
+					}
+				},
+				padding: {
+					value: {
+						top$: [0, 'px', ''],
+						right$: [0, 'px', ''],
+						bottom$: [0, 'px', ''],
+						left$: [0, 'px', '']
+					}
+				},
+				margin: {
+					value: {
+						top$: [0, 'px', ''],
+						right$: [0, 'px', ''],
+						bottom$: [0, 'px', ''],
+						left$: [0, 'px', '']
+					}
+				},
+				border: {
+					value: {
+						top$: [[0, 'px', ''], 'solid', '#000000', ' '],
+						right$: [[0, 'px', ''], 'solid', '#000000', ' '],
+						bottom$: [[0, 'px', ''], 'solid', '#000000', ' '],
+						left$: [[0, 'px', ''], 'solid', '#000000', ' ']
+					}
+				},
+				width: {
+					value: ['', 'px']
+				},
+				minWidth: {
+					value: ['', 'px']
+				},
+				maxWidth: {
+					value: ['', 'px']
+				},
+				height: {
+					value: ['', 'px']
+				},
+				minHeight: {
+					value: ['', 'px']
+				},
+				maxHeight: {
+					value: ['', 'px']
 				}
 			}
 		}
@@ -109,21 +181,25 @@ const App = new Vue({
 		/**
 		 * Clone deep object
 		 * @param  {Object} obj
+		 * @param  {Boolean} usejQuery  whether use json or jquery method
 		 * @return {Object}
 		 */
-		cloneObject (obj) {
-			return JSON.parse(JSON.stringify(obj))
+		cloneObject (obj, usejQuery) {
+			return (!usejQuery)? JSON.parse(JSON.stringify(obj)): $.extend(true, {}, obj)
 		},
 
 
 		/**
 		 * Set Properties
-		 * @param {String} breakpoint [Device Breakpoint]
 		 * @param {String} prop       [Property name]
 		 * @param {String|Number|Object|Array} value  [Properties Value]
 		 */
-		setProperties (breakpoint, prop, value) {
-			dot.set(`${breakpoint}.${prop}`, value, this.selected.properties)
+		setProperties (prop, value) {
+			let self = this
+			dot.set(`${prop}`, value, self.selected.properties[self.screenView])
+			self.$nextTick(function () {
+				self.parent().$broadcast('changeSelectedProperties', self.cloneObject(self.selected.properties))
+			})
 		},
 
 
@@ -141,6 +217,7 @@ const App = new Vue({
 			breadcrumbs = []
 
 			self.findElement(id, function (element) {
+
 				// Check for initialization, if undefined don't add breadcrumb
 				if (element.self) {
 					breadcrumbs.push({
@@ -183,11 +260,10 @@ const App = new Vue({
 			let element = document.querySelector(`[data-id="${id}"]`)
 
 			// Only accept .element, except row
-			if (element.classList.contains('nonelement') && !element.classList.contains('row')) {
+			if (element && element.classList.contains('nonelement') && !element.classList.contains('row')) {
 				element = element.querySelector('.element')
 			}
 			
-
 			return element
 		},
 
@@ -198,21 +274,35 @@ const App = new Vue({
 		 * @param  {ElementNode} target
 		 * @return {void}
 		 */
-		outline (target) {
-			let offset = target.getBoundingClientRect(),
+		outline (target, props) {
+			let offset = $(target).offset(),
 			width = target.offsetWidth,
 			height = target.offsetHeight,
-			bodyRect = document.body.getBoundingClientRect()
-			
-			return {
-				$top: offset.top - bodyRect.top,
-				$width: offset.width,
+			bodyRect = document.body.getBoundingClientRect(),
+			outline = {
+				$top: offset.top,
+				$left: offset.left,
+				$width: width,
+				$height: height,
 				top: 0,
 				left: 0,
-				transform: `translate(${offset.left}px, ${offset.top-bodyRect.top}px)`,
+				transform: `translate(${offset.left}px, ${offset.top}px)`,
 				width: `${width}px`,
 				height: `${height}px`
 			}
+
+			let kind = target.getAttribute('data-kind')
+			switch (kind) {
+				case 'container':
+					let offset = $(target.parentElement).offset()
+					outline.$outerLeft = offset.left
+					outline.$outerTop = offset.top
+					outline.$outerWidth = target.parentElement.offsetWidth
+					outline.$outerHeight = target.parentElement.offsetHeight
+				break;
+			}
+			
+			return outline
 		},
 
 
@@ -224,22 +314,19 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		hoverOutline (target, hide) {
-			let self = this
+			let self = this,
+			id = target.getAttribute('data-id')
 
-			self.getBreadcrumbs(target, false, function (breadcrumbs) {
-				let css = self.outline(target)
-				if (hide) css.display = 'none'
+			self.findElement(id, function (element) {
+				self.getBreadcrumbs(target, false, function (breadcrumbs) {
+					let css = self.outline(target, element.self.props)
+					if (hide) css.display = 'none'
 
-				// Remove temporary top position
-				let top = css.$top
-				delete css.$width
-				delete css.$top
-
-				// Notify parent
-				self.parent().$broadcast('elementHover', {
-					css: css,
-					breadcrumbs: breadcrumbs,
-					boundTop: top
+					// Notify parent
+					self.parent().$broadcast('elementHover', {
+						css: css,
+						breadcrumbs: breadcrumbs
+					})
 				})
 			})
 		},
@@ -253,35 +340,27 @@ const App = new Vue({
 		 */
 		selectOutline (target) {
 			let self = this,
-			css = self.outline(target),
 			id = target.getAttribute('data-id')
 
 			self.findElement(id, function (element) {
-				let properties
-
 				if (element.self) {
-					// Get current properties
-					properties = element.self.props
+					let css = self.outline(target, element.self.props)
 
-					// Remove temporary top position
-					let top = css.$top, width = css.$width
-					delete css.$width
-					delete css.$top
-
-					// Notify parent to select the element
-					self.$set('selected', {
-						properties: properties,
-						element: element.self.id
-					})
-
+					// Get selected breadcrumbs
 					self.getBreadcrumbs(target, true, function (breadcrumbs) {
+
+						// Set selected element
+						self.$set('selected', {
+							element: element.self.id,
+							properties: element.self.props
+						})
+
+						// Notify parent to select the element
+						self.parent().$broadcast('changeSelectedProperties', self.cloneObject(self.selected.properties))
 						self.parent().$broadcast('elementSelect', {
 							css: css,
 							id: id,
-							properties: properties,
 							breadcrumbs: breadcrumbs,
-							boundTop: top,
-							boundWidth: width,
 							showBreadcrumbs: false
 						})
 					})
@@ -358,20 +437,23 @@ const App = new Vue({
 			let body = this.body
 
 			if (id === 'body') {
-				fn && fn({parent: null,	self: body})
+				fn && fn({parent: null,	self: body, deep: 1})
 				return
 			}
 
-
+			// Seeking function
 			const search = function (root) {
 				if (root && root.elements) {
 					for (let i = 0, len = root.elements.length;i<len;i++) {
-						if (root.elements[i] && root.elements[i].id === id) fn && fn({parent: root, self: root.elements[i]})
+						let deep = i + 1, index = i
+
+						if (root.elements[i] && root.elements[i].id === id) fn && fn({parent: root, self: root.elements[i], deep: deep, index: index})
 						else search(root.elements[i], id, fn);
 					}
 				}
 			}
 
+			// Search body
 			search(body, id, fn)
 		},
 
@@ -385,16 +467,20 @@ const App = new Vue({
 		 */
 		addElement (data, fn) {
 			let self = this
+			data = self.cloneObject(data, true)
 
 			// Search parent element
 			self.findElement(data.to, function (element) {
 				delete data.to
 
+				// Deep
+				data.deep = element.deep + 1
+
 				// Generate new id
 				data.id = self.generateId('el')
 
 				// Copy default props to breakpoints object, each breakpoint has unique value
-				data.props = self.cloneObject(self.body.props)
+				data.props = self.cloneObject(self.body.props, true)
 
 				// Element Children
 				data.elements = []
@@ -427,40 +513,135 @@ const App = new Vue({
 		copyElement (id) {
 			let self = this
 
-			this.findElement(id, function (element) {
-				let copy, copyElement
+			async.waterfall([
 
-				// Copy selected element to it's parent
-				copy = self.cloneObject(element.self)
-				copy.id = self.generateId('el')
+				// Find copied element id
+				function (next) {
+					self.findElement(id, function (element) {
+						next(null, element)
+					})
+				},
 
-				// search all elements and change Id
-				const changeId = function (root) {
-					if (root && root.elements) {
-						for (let i = 0, len = root.elements.length;i<len;i++) {
-							if (root.elements[i]) {
-								root.elements[i].id = self.generateId('el')
-								changeId(root.elements[i]);
+				// Clone copy and manipulate copy data
+				function (element, next) {
+					// search all elements and change Id
+					let copy, copyElement
+					const changeId = function (root) {
+						if (root && root.elements) {
+							for (let i = 0, len = root.elements.length;i<len;i++) {
+								if (root.elements[i]) {
+									root.elements[i].id = self.generateId('el')
+									changeId(root.elements[i]);
+								}
 							}
 						}
 					}
+
+					// Copy selected element to it's parent
+					copy = self.cloneObject(element.self)
+					copy.id = self.generateId('el')
+
+					// Change all copy's child Id
+					changeId(copy)
+
+					// Increment index
+					copy.index += 1
+
+					// Continue
+					next(null, element, copy)
+				},
+
+				// Find if selected element is different
+				function (element, copy, next) {
+
+					self.findElement(self.selected.element, function (selectedElement) {
+
+						// If copy element and destination can't accept, cancel it
+						if ((element.self.accept !== undefined && selectedElement.self.kind !== undefined) && ! element.self.accept.includes(selectedElement.self.kind)) return
+
+						// Check parent element
+						next(null, element, selectedElement, copy)
+					})
+				},
+
+				// Check parent element
+				function (element, selectedElement, copy, next) {
+
+					// If element destination is the same, set parent element as usual
+					// If we selected another element after copying element, find the parent element
+					if (selectedElement.self.id === element.self.id) {
+						next(null, element.parent, copy)
+					} else {
+						switch (element.self.kind) {
+							case 'column':
+								// If we copy column into section or container
+								if (element.self.accept.split(',').includes(selectedElement.self.kind)) {
+
+									// And there is row element
+									if (selectedElement.self.elements.length > 0 && selectedElement.self.elements[0].kind === 'row') {
+
+										// Set parent as row
+										next(null, selectedElement.self.elements[0], copy)
+
+									} else {
+
+										// Add new row
+										self.addElement({
+											type: 'grid',
+											kind: 'row',
+											child: true,
+											index: 0,
+											to: selectedElement.self.id
+										}, function (row) {
+
+											// Set parent as new row
+											next(null, row.self, copy)
+										})
+									}
+								}
+							break;
+
+							// If we copy section or container to body
+							// Set parent element as body
+							case 'section':
+							case 'container':
+								if (selectedElement.self.kind === 'body') {
+									next(null, self.body, copy)
+								}
+							break;
+						}
+					}
+				},
+
+
+				function (parentElement, copy, next) {
+					// If this is grid-column and more than 6 cancel
+					if (copy.kind === 'column' && parentElement.elements.length>5) return;
+
+					if (parentElement) {
+
+						// Push to right element
+						parentElement.elements.push(copy)
+
+						// Reorder index
+						self.reorderElementIndex()
+
+						// Hover immediately
+						self.$nextTick(function () {
+							// If there is another column
+							// Re-select selected outline
+							self.eventFire(self.activeElement(self.selected.element), 'click')
+
+							// Hover copy element
+							self.hoverOutline(self.activeElement(copy.id))
+
+							// Done
+							next()
+						})
+					}
 				}
-
-				// Change all copy's child Id
-				changeId(copy)
-
-				// Increment index
-				copy.index += 1
-				element.parent.elements.push(copy)
-
-				// Reorder index
-				self.reorderElementIndex()
-
-				// Hover immediately
-				self.$nextTick(function () {
-					// Hover copy element
-					self.hoverOutline(self.activeElement(copy.id))
-				})
+			], function (err, done) {
+				console.log('Copied element')
 			})
 		},
 
@@ -530,7 +711,7 @@ const App = new Vue({
 			if (source.getBoundingClientRect && dest.getBoundingClientRect) {
 				let sourceRect = source.getBoundingClientRect(),
 				destRect = dest.getBoundingClientRect(),
-				overlap = !(sourceRect.right - (sourceRect.width/4) < destRect.left || sourceRect.left > destRect.right || sourceRect.bottom - (sourceRect.height/4) < destRect.top || sourceRect.top + 10 > destRect.bottom)
+				overlap = !(sourceRect.right < destRect.left || sourceRect.left > destRect.right || sourceRect.bottom < destRect.top || sourceRect.top > destRect.bottom)
 
 				// Callback
 				if (overlap) fn && fn()
@@ -543,12 +724,15 @@ const App = new Vue({
 		 * @param  {Object} coords
 		 * @return {void}
 		 */
-		dragmove (coords) {
+		dragmove (coords, gutter) {
 			let self = this,
 			clone = self.clone,
 			rect = clone.getBoundingClientRect(),
-			x = (coords.x - (rect.width / 2)),
-			y = (coords.y - (rect.height / 2))
+			bodyTop = document.body.getBoundingClientRect().top
+
+			// Get coordinate
+			let x = (coords.x - (rect.width / 2)) - (gutter / 2),
+			y = (coords.y - (rect.height / 2)) - bodyTop
 
 			// Follow the cursor
 			clone.style.top = y + 'px'
@@ -569,13 +753,15 @@ const App = new Vue({
 
 		/**
 		 * Drag has ended, it's happy ending
-		 * @param  {data} event
+		 * @param  {Object} obj
 		 * @return {void}
 		 */
-		dragend (data) {
-			let self = this, elementId
+		dragend (obj) {
+			let self = this,
+			data = self.cloneObject(obj)
 
-			// Remove it
+			// Stop moving earlier
+			// Remove clone elements
 			if (self.clone) {
 				self.clone.remove()
 				self.$set('clone', null)
@@ -583,54 +769,58 @@ const App = new Vue({
 
 			// Disable dragging state
 			self.$set('dragging', false)
+			document.removeEventListener('mousemove', self.dragmove, false)
+			document.removeEventListener('mouseup', self.dragend, false)
 
-			// Get drop element id
-			if (self.overlapElement.getAttribute('data-kind')) {
-				elementId = self.overlapElement.parentElement.getAttribute('data-id')
-			} else {
-				elementId = self.overlapElement.getAttribute('data-id')
-			}
+			// Cancel if acceptable drop area not valid
+			if (! self.overlapElement) return
+			if (_.intersection(data.accept.split(','), self.overlapElement.className.split(' ')).length === 0) return
 
-			// Data manipulation, delete, add, etc
-			switch (data.kind) {
-				case 'column':
-					// Add row
-					self.addElement({
-						type: 'grid',
-						kind: 'row',
-						child: false,
-						index: 0,
-						to: elementId
-					}, function (row) {
-						// Delete Unnecessary properties
-						delete data.icon
-						delete data.label
+			// Find Overlap Element
+			self.findElement(self.overlapElement.getAttribute('data-id'), function (element) {
 
-						// Get columns width
-						let width = data.width.split(',')
+				// Data manipulation, delete, add, etc
+				switch (data.kind) {
+					case 'column':
 
-						for (let i in width) {
-							// Clone data
-							let _data = self.cloneObject(data)
-							_data.width = width[i]
+						// If there is element in section or container, cancel
+						if (! element.self.child && element.self.elements.length > 0) return
 
-							// Add element to parent
-							self.addElement(
-								_.extend(_data, {
-									child: false,
-									index: 0,
-									breadcrumb: _data.kind,
-									to: row.self.id
-								})
-							)
-						}
-					})					
-				break;
-			}
+						// Add row
+						self.addElement({
+							type: 'grid',
+							kind: 'row',
+							child: true,
+							index: 0,
+							to: element.self.id
+						}, function (row) {
 
-			// Stop moving
-			document.removeEventListener('mousemove', self.dragmove, false);
-			document.removeEventListener('mouseup', self.dragend, false);
+							// Delete Unnecessary properties
+							delete data.icon
+							delete data.label
+
+							// Get columns width
+							let columnSize = data.size
+							delete data.size
+
+							for (let i = 0; i < columnSize; i++) {
+								// Clone data
+								let _data = self.cloneObject(data)
+
+								// Add element to parent
+								self.addElement(
+									_.extend(_data, {
+										child: true,
+										index: 0,
+										breadcrumb: _data.kind,
+										to: row.self.id
+									})
+								)
+							}
+						})					
+					break;
+				}
+			})
 		}
 	},
 
@@ -646,12 +836,13 @@ const App = new Vue({
 		})
 
 		// Notify layout is ready
-		document.body.click()
-		self.parent().$broadcast('viewerReady', {App: this})
+		self.selectOutline(document.body)
+		self.$nextTick(function () {
+			self.parent().$broadcast('viewerReady', this)
+		})
 
 		// On set properties
 		self.$on('setProperties', self.setProperties)
-
 
 		/**
 		 * When new block added, add element and notify block wrapper to close
@@ -717,7 +908,8 @@ const App = new Vue({
 		/**
 		 * On change responsive size / breakpoint
 		 */
-		self.$on('changeScreenView', function () {
+		self.$on('changeScreenView', function (breakpoint) {
+			self.$set('screenView', breakpoint)
 			self.$nextTick(function () {
 				self.eventFire(self.activeElement(self.selected.element), 'click')
 			})
@@ -735,8 +927,9 @@ const App = new Vue({
 				this.$set('clone', element)
 
 				// Set style
-				this.clone.style.visibility = 'hidden'
+				this.clone.classList.add('ondrag')
 				this.clone.style.position = 'absolute'
+				this.clone.style.visibility = 'hidden'
 				this.clone.style.opacity = 0
 				this.clone.style.zIndex = 999
 				document.body.appendChild(element)
@@ -772,22 +965,132 @@ const App = new Vue({
 						self.removeElement(self.selected.element)
 					}
 				break;
+
+				case 'selectUp':
+					if (self.selected.element && self.selected.element !== 'body') {
+						// Find Selected element
+						self.findElement(self.selected.element, function (element) {
+							let elementId
+
+							// Get previous element ID
+							if (element.index === 0) {
+								elementId = element.parent.id
+							} else {
+								let prevElement = element.index - 1
+								elementId = element.parent.elements[prevElement].id
+							}
+
+							// Select previous element
+							self.$nextTick(function () {
+								self.eventFire(self.activeElement(elementId), 'click')
+							})
+						})
+					}
+				break;
+
+				case 'selectDown':
+					if (self.selected.element) {
+						// Find Selected element
+						self.findElement(self.selected.element, function (element) {
+							let elementId
+
+							// For body
+							if (! element.parent) {
+								if (element.self.elements.length > 0) {
+									elementId = element.self.elements[0].id
+								}
+							} else {
+								let nextElement = element.index + 1
+								if (nextElement < element.parent.elements.length) {
+									elementId = element.parent.elements[nextElement].id
+								}
+							}
+
+							// Select next element
+							if (elementId) {
+								self.$nextTick(function () {
+									self.eventFire(self.activeElement(elementId), 'click')
+								})
+							}
+						})
+					}
+				break;
+
+				case 'enter':
+					if (self.selected.element) {
+						self.findElement(self.selected.element, function (element) {
+							if (element.self.elements.length>0) {
+								let childElement
+
+								if (element.self.elements[0].kind==='row') {
+									if (element.self.elements[0].elements.length>0) {
+										childElement = element.self.elements[0].elements[0].id
+									}
+								} else {
+									childElement = element.self.elements[0].id
+								}
+
+								self.$nextTick(function () {
+									self.eventFire(self.activeElement(childElement), 'click')
+								})
+							}
+						})
+					}
+				break;
 			}
 		})
+
 
 		// Copy element
 		Mousetrap.bind(['ctrl+c', 'command+c'], function () {
 			self.$emit('keyCapture', 'copy')
-		});
+		})
 
 		// Paste element
 		Mousetrap.bind(['ctrl+v', 'command+v'], function () {
 			self.$emit('keyCapture', 'paste')
-		});
+		})
 
 		// Delete element
 		Mousetrap.bind('del', function () {
+			self.parent().$broadcast('clearCanvas')
 			self.$emit('keyCapture', 'delete')
-		});
+		})
+
+		// Select using left and up
+		Mousetrap.bind(['left', 'up'], function () {
+			self.parent().$broadcast('clearCanvas')
+			self.$emit('keyCapture', 'selectUp')
+		})
+
+		// Select using right and down
+		Mousetrap.bind(['right', 'down'], function () {
+			self.parent().$broadcast('clearCanvas')
+			self.$emit('keyCapture', 'selectDown')
+		})
+
+		// Select childs using space
+		Mousetrap.bind(['space', 'enter'], function () {
+			self.parent().$broadcast('clearCanvas')
+			self.$emit('keyCapture', 'enter')
+		})
+
+
+
+		/**
+		 * Watch element properties
+		 */
+		/*self.$watch(function () {
+			return _.map(self.body.elements, function (element) {
+				return _.map(element.props, function (properties, breakpoint) {
+					return {
+						breakpoint: breakpoint,
+						properties: properties.margin.value
+					}
+				})
+			})
+		}, function (value) {
+			console.log(value)
+		}, {deep: true})*/
 	}
 })

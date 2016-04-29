@@ -29,7 +29,7 @@ export default {
 		 * @return {Object}
 		 */
 		elements () {
-			return this.$parent.body.elements
+			return this.$root.body.elements
 		}
 	},
 

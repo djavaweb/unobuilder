@@ -146,6 +146,7 @@ export default {
 		over () {
 			this.$set('forceShow', true)
 			this.$set('isActive', true)
+			this.$root.parent().$broadcast('displayBlockPanel', true)
 		},
 
 

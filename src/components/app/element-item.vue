@@ -63,6 +63,7 @@ export default {
 			this.$root.$broadcast('dragmove', {x: x, y: y})
 
 			// Follow the cursor
+			this.clone.classList.add('ondrag')
 			this.clone.style.position = 'absolute'
 			this.clone.style.top = y + 'px'
 			this.clone.style.left = x + 'px'

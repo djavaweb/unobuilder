@@ -1,9 +1,11 @@
 <template>
-<switcher :value="switcher" v-if="withSwitcher" :style="switcherStyle" :switcher-label="switcherLabel"></switcher>
-<h3 class="uk-accordion-title">
-	<i class="uk-icon-caret-right"></i> <i class="uk-icon-caret-down"></i> {{title}}
-</h3>
-<div class="uk-accordion-content"><slot></slot></div>
+<div class="accordion-wrapper">
+	<switcher :value="switcher" v-if="withSwitcher" :style="switcherStyle" :switcher-label="switcherLabel"></switcher>
+	<h3 class="uk-accordion-title">
+		<i class="uk-icon-caret-right"></i> <i class="uk-icon-caret-down"></i> {{title}}
+	</h3>
+	<div class="uk-accordion-content"><slot></slot></div>
+</div>
 </template>
 
 <script>
@@ -50,7 +52,7 @@ export default {
 			this.$set('switcherStyle', {
 				position: 'absolute',
 				top: '5px',
-				right: '10px',
+				right: '0',
 				zIndex: 10
 			})
 		}
