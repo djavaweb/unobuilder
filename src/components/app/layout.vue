@@ -78,7 +78,7 @@
 				<div class="pop-input-overlay" v-if="popInput.show" @click="hidePopInput()"></div>
 				<div class="pop-input-inner">
 					<div class="pop-input-up" v-if="popInput.show" :style="popInput.style" :class="[popInput.position]">
-						<number :value.sync="popInputValue" :unit.sync="popInputUnit" :label="popInput.label"></number>
+						<number :value.sync="popInputValue" :unit.sync="popInputUnit" :label="popInput.label" label-width="auto"></number>
 						<button @click="hidePopInput()">OK</button>
 					</div>
 				</div>
@@ -88,7 +88,6 @@
 				<!-- properties.display -->
 				<accordion-item title="Display" :with-switcher="true" :switcher="true" switcher-label="Advanced">
 					<accordion-item-view title="Display Settings">
-						{{getProps('display.value')}}
 						<div class="button-group">
 							<rect-button :active="getProps('display.value', 'block')" @click="setProps('display.value', 'block')" class="display-block"></rect-button>
 							<rect-button :active="getProps('display.value', 'flex')" @click="setProps('display.value', 'flex')" class="display-flex"></rect-button>
@@ -96,8 +95,8 @@
 						</div>
 					</accordion-item-view>
 
-					<accordion-expand-view v-show="getProps('display.value', 'flex')" v-if="validProps()">
-						<accordion-item-view title="Flex Layout Settings" border="bottom">
+					<accordion-expand-view v-show="getProps('display.value', 'flex') || getParentProps('display.value', 'flex')" v-if="validProps()">
+						<accordion-item-view title="Flex Layout Settings" v-if="getProps('display.value', 'flex')">
 							<div class="flex-layout">
 								<div class="row-column">
 									<rect-button
@@ -166,19 +165,19 @@
 									<input type="checkbox"
 									:true-value="true"
 									:false-value="false"
-									v-model="layout.selected.properties[screenView].display.settings.flex.container._reverse.value"> Reverse Layout
+									v-model="layout.selected.properties[screenView].display.settings.flex.container.reverse"> Reverse Layout
 								</label>
 
 								<label v-show="getProps('display.settings.flex.container.wrap', 'wrap')">
 								<input type="checkbox"
 								:true-value="true"
 								:false-value="false"
-								v-model="layout.selected.properties[screenView].display.settings.flex.container._reverseWrap.value"> Reverse Wrap
+								v-model="layout.selected.properties[screenView].display.settings.flex.container.reverseWrap"> Reverse Wrap
 								</label>
 
 								<div class="flex-wrap-buttons"
 								v-show="getProps('display.settings.flex.container.wrap', 'wrap')"
-								:class="{reverse: getProps('display.settings.flex.container._reverseWrap.value')}">
+								:class="{reverse: getProps('display.settings.flex.container.reverseWrap')}">
 
 									<rect-button
 										class="align-columns-start"
@@ -213,7 +212,7 @@
 							</div>
 						</accordion-item-view>
 
-						<accordion-item-view title="Flex Child Settings">
+						<accordion-item-view title="Flex Child Settings" v-if="getParentProps('display.value', 'flex')" border="top" :border-if="getProps('display.value', 'flex')">
 							<div class="flex-child-settings">
 								<div class="label-group">
 									<div>Sizing</div>
@@ -223,20 +222,20 @@
 								<div class="flex-child-buttons">
 									<div class="flex">
 										<rect-button class="shrink-if-needed"
-										:active="getProps('display.settings.flex.item.$sizing.value', 'flexShrink')"
-										@click="setProps('display.settings.flex.item.$sizing.value', 'flexShrink')"></rect-button>
+										:active="getProps('display.settings.flex.item.sizing.value', 'flexShrink')"
+										@click="setProps('display.settings.flex.item.sizing.value', 'flexShrink')"></rect-button>
 										
 										<rect-button class="fill-empty-space"
-										:active="getProps('display.settings.flex.item.$sizing.value', 'flexGrow')"
-										@click="setProps('display.settings.flex.item.$sizing.value', 'flexGrow')"></rect-button>
+										:active="getProps('display.settings.flex.item.sizing.value', 'flexGrow')"
+										@click="setProps('display.settings.flex.item.sizing.value', 'flexGrow')"></rect-button>
 										
 										<rect-button class="dont-shrink"
-										:active="getProps('display.settings.flex.item.$sizing.value', 'none')"
-										@click="setProps('display.settings.flex.item.$sizing.value', 'none')"></rect-button>
+										:active="getProps('display.settings.flex.item.sizing.value', 'none')"
+										@click="setProps('display.settings.flex.item.sizing.value', 'none')"></rect-button>
 
 										<rect-button class="settings"
-										:active="getProps('display.settings.flex.item.$sizing.value', 'custom')"
-										@click="setProps('display.settings.flex.item.$sizing.value', 'custom')"></rect-button>
+										:active="getProps('display.settings.flex.item.sizing.value', 'custom')"
+										@click="setProps('display.settings.flex.item.sizing.value', 'custom')"></rect-button>
 									</div>
 									<div class="flex">
 										<rect-button class="align-self-start"
@@ -261,20 +260,20 @@
 									</div>
 									<div class="flex">
 										<rect-button class="auto"
-										:active="getProps('display.settings.flex.item.$order.value', 'auto')"
-										@click="setProps('display.settings.flex.item.$order.value', 'auto')"></rect-button>
+										:active="getProps('display.settings.flex.item.order.value', 'auto')"
+										@click="setProps('display.settings.flex.item.order.value', 'auto')"></rect-button>
 
 										<rect-button class="order-first"
-										:active="getProps('display.settings.flex.item.$order.value', 'first')"
-										@click="setProps('display.settings.flex.item.$order.value', 'first')"></rect-button>
+										:active="getProps('display.settings.flex.item.order.value', 'first')"
+										@click="setProps('display.settings.flex.item.order.value', 'first')"></rect-button>
 
 										<rect-button class="order-last"
-										:active="getProps('display.settings.flex.item.$order.value', 'last')"
-										@click="setProps('display.settings.flex.item.$order.value', 'last')"></rect-button>
+										:active="getProps('display.settings.flex.item.order.value', 'last')"
+										@click="setProps('display.settings.flex.item.order.value', 'last')"></rect-button>
 
 										<rect-button class="settings"
-										:active="getProps('display.settings.flex.item.$order.value', 'custom')"
-										@click="setProps('display.settings.flex.item.$order.value', 'custom')"></rect-button>
+										:active="getProps('display.settings.flex.item.order.value', 'custom')"
+										@click="setProps('display.settings.flex.item.order.value', 'custom')"></rect-button>
 									</div>
 								</div>
 							</div>
@@ -294,29 +293,29 @@
 							@click="showPopInput($event, {
 								position: 'bottom',
 								label: 'Position Top',
-								input: ['position.settings.' + getProps('position.value'), 'top$']
-							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.top$') }}</dt>
+								input: 'position.settings.' + getProps('position.value') + '.top'
+							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.top') }}</dt>
 
 							<dt class="right"
 							@click="showPopInput($event, {
 								position: 'bottom',
 								label: 'Position Right',
-								input: ['position.settings.' + getProps('position.value'), 'right$']
-							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.right$', ' ') }}</dt>
+								input: 'position.settings.' + getProps('position.value') + '.right'
+							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.right', ' ') }}</dt>
 
 							<dt class="bottom"
 							@click="showPopInput($event, {
 								position: 'bottom',
 								label: 'Position Bottom',
-								input: ['position.settings.' + getProps('position.value'), 'bottom$']
-							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.bottom$') }}</dt>
+								input: 'position.settings.' + getProps('position.value') + '.bottom'
+							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.bottom') }}</dt>
 
 							<dt class="left"
 							@click="showPopInput($event, {
 								position: 'bottom',
 								label: 'Position Left',
-								input: ['position.settings.' + getProps('position.value'), 'left$']
-							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.left$', ' ') }}</dt>
+								input: 'position.settings.' + getProps('position.value') + '.left'
+							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.left', ' ') }}</dt>
 						</dl>
 
 						<div class="inner">
@@ -327,31 +326,31 @@
 								<dl>
 									<dt class="top"
 									@click="showPopInput($event, {
-										position: 'bottom',
+										position: 'top',
 										label: 'Margin Top',
-										input: 'margin.value.top$'
-									})">{{ unitValueOf('margin.value.top$') }}</dt>
+										input: 'marginTop'
+									})">{{ unitValueOf('marginTop') }}</dt>
 
 									<dt class="right"
 									@click="showPopInput($event, {
-										position: 'bottom',
+										position: 'right',
 										label: 'Margin Right',
-										input: ['margin.value', 'right$']
-									})">{{ unitValueOf('margin.value.right$', ' ') }}</dt>
+										input: 'marginRight'
+									})">{{ unitValueOf('marginRight', ' ') }}</dt>
 
 									<dt class="bottom"
 									@click="showPopInput($event, {
 										position: 'bottom',
 										label: 'Margin Bottom',
-										input: ['margin.value', 'bottom$']
-									})">{{ unitValueOf('margin.value.bottom$') }}</dt>
+										input: 'marginBottom'
+									})">{{ unitValueOf('marginBottom') }}</dt>
 
 									<dt class="left"
 									@click="showPopInput($event, {
-										position: 'bottom',
+										position: 'left',
 										label: 'Margin Left',
-										input: ['margin.value', 'left$']
-									})">{{ unitValueOf('margin.value.left$', ' ') }}</dt>
+										input: 'marginLeft'
+									})">{{ unitValueOf('marginLeft', ' ') }}</dt>
 								</dl>
 								<div class="inner">
 									<div class="prop-position-outline border"
@@ -363,29 +362,29 @@
 											@click="showPopInput($event, {
 												position: 'top',
 												label: 'Border Top',
-												input: ['border.value', 'top$']
-											})">{{ unitValueOf('border.value.top$') }}</dt>
+												input: 'borderTop'
+											})">{{ unitValueOf('borderTop') }}</dt>
 
 											<dt class="right"
 											@click="showPopInput($event, {
 												position: 'right',
 												label: 'Border Right',
-												input: ['border.value', 'right$']
-											})">{{ unitValueOf('border.value.right$', ' ') }}</dt>
+												input: 'borderRight'
+											})">{{ unitValueOf('borderRight', ' ') }}</dt>
 
 											<dt class="bottom"
 											@click="showPopInput($event, {
 												position: 'bottom',
 												label: 'Border Bottom',
-												input: ['border.value', 'bottom$']
-											})">{{ unitValueOf('border.value.bottom$') }}</dt>
+												input: 'borderBottom'
+											})">{{ unitValueOf('borderBottom') }}</dt>
 
 											<dt class="left"
 											@click="showPopInput($event, {
 												position: 'left',
 												label: 'Border Left',
-												input: ['border.value', 'left$']
-											})">{{ unitValueOf('border.value.left$', ' ') }}</dt>
+												input: 'borderLeft'
+											})">{{ unitValueOf('borderLeft', ' ') }}</dt>
 										</dl>
 										<div class="inner">
 											<div class="prop-position-outline padding"
@@ -397,29 +396,29 @@
 													@click="showPopInput($event, {
 														position: 'top',
 														label: 'Padding Top',
-														input: ['padding.value', 'top$']
-													})">{{ unitValueOf('padding.value.top$') }}</dt>
+														input: 'paddingTop'
+													})">{{ unitValueOf('paddingTop') }}</dt>
 
 													<dt class="right"
 													@click="showPopInput($event, {
 														position: 'top',
 														label: 'Padding Right',
-														input: ['padding.value', 'right$']
-													})">{{ unitValueOf('padding.value.right$', ' ') }}</dt>
+														input: 'paddingRight'
+													})">{{ unitValueOf('paddingRight', ' ') }}</dt>
 
 													<dt class="bottom"
 													@click="showPopInput($event, {
 														position: 'top',
 														label: 'Padding Bottom',
-														input: ['padding.value', 'bottom$']
-													})">{{ unitValueOf('padding.value.bottom$') }}</dt>
+														input: 'paddingBottom'
+													})">{{ unitValueOf('paddingBottom') }}</dt>
 
 													<dt class="left"
 													@click="showPopInput($event, {
 														position: 'top',
 														label: 'Padding Left',
-														input: ['padding.value', 'left$']
-													})">{{ unitValueOf('padding.value.left$', ' ') }}</dt>
+														input: 'paddingLeft'
+													})">{{ unitValueOf('paddingLeft', ' ') }}</dt>
 												</dl>
 											</div>
 										</div>
@@ -432,8 +431,20 @@
 				<!-- ./end of properties.position -->
 
 				<!-- properties.size -->
-				<accordion-item title="Size" :with-switcher="true" :switcher="true" switcher-label="Advanced">
-					Position
+				<accordion-item title="Size" :with-switcher="true" :switcher.sync="tabAdvanced.size" switcher-label="Advanced">
+					<div class="uk-grid uk-grid-small">
+						<div class="uk-width-5-10">
+							<number :value.sync="properties.width.value" :unit.sync="properties.width.unit" label="Width"></number>
+							<number :value.sync="properties.maxWidth.value" :unit.sync="properties.maxWidth.unit" label="Max" v-show="tabAdvanced.size" transition="fade"></number>
+							<number :value.sync="properties.minWidth.value" :unit.sync="properties.minWidth.unit" label="Min" v-show="tabAdvanced.size" transition="fade"></number>
+						</div>
+						<div class="uk-width-5-10">
+							<number :value.sync="properties.height.value" :unit.sync="properties.height.unit" label="Height"></number>
+							<number :value.sync="properties.maxHeight.value" :unit.sync="properties.maxHeight.unit" label="Max" v-show="tabAdvanced.size" transition="fade"></number>
+							<number :value.sync="properties.minHeight.value" :unit.sync="properties.minHeight.unit" label="Min" v-show="tabAdvanced.size" transition="fade"></number>
+						</div>
+					</div>
+					<div style="padding-bottom: 100px"></div>
 				</accordion-item>
 				<!-- ./end of properties.size -->
 			</div>
@@ -499,6 +510,9 @@ export default {
 			screenSize: 0,
 			rightBarView: 'settings',
 			selectedProperties: null,
+			tabAdvanced: {
+				size: false
+			},
 
 			/* Elements Item */
 			elements: {
@@ -529,6 +543,7 @@ export default {
 			},
 			displayBlockPanel: false,
 			layoutScroll: {},
+			boundTop: 0,
 			popInput: {
 				show: false,
 				position: 'top',
@@ -548,7 +563,7 @@ export default {
 		properties: {
 			get () {
 				if (! this.validProps()) return
-				return this.layout.selected.properties[this.screenView]
+				return this.selectedProperties[this.screenView]
 			}
 		},
 
@@ -617,22 +632,24 @@ export default {
 		// Unit value in popinput
 		popInputValue: {
 			get () {
-				return dot.pick(`${this.popInput.input}.0`, this.selectedProperties)
+				return this.getProps(`${this.popInput.input}.value`)
 			},
 
 			set (value) {
-				dot.set(`${this.popInput.input}.0`, value, this.layout.selected.properties[this.screenView])
+				value = parseInt(value)
+				value = (isNaN(value))? '': value
+				this.setProps(`${this.popInput.input}.value`, value)
 			}
 		},
 
 		// Unit value in popinput
 		popInputUnit: {
 			get () {
-				return this.popInput.input[1]
+				return this.getProps(`${this.popInput.input}.unit`)
 			},
 
-			set (val) {
-				this.popInput.input.$set(1, val)
+			set (value) {
+				this.setProps(`${this.popInput.input}.unit`, value)
 			}
 		}
 	},
@@ -651,14 +668,28 @@ export default {
 		/**
 		 * Get properties by dot notation
 		 * @param  {String} dotNotation [dot notation]
-		 * @return {String|Number|Array|Object}
+		 * @param  {String} equals [comparison]
+		 * @return {String|Number|Array|Object|Boolean}
 		 */
 		getProps (dotNotation, equals) {
-			let obj = dot.pick(dotNotation, this.selectedProperties)
-			if (equals) return obj === equals
-			return obj
+			if (equals) return dot.pick(dotNotation, this.selectedProperties[this.screenView]) === equals
+			return dot.pick(dotNotation, this.selectedProperties[this.screenView])
 		},
 
+
+		/**
+		 * Get properties of parent by dot notation
+		 * @param  {String} dotNotation [dot notation]
+		 * @param  {String} equals [comparison]
+		 * @return {String|Number|Array|Object|Boolean}
+		 */
+		getParentProps (dotNotation, equals) {
+			if (this.selectedProperties[this.screenView].getParent) {
+				if (equals) return dot.pick(dotNotation, this.selectedProperties[this.screenView].getParent()) === equals
+				return dot.pick(dotNotation, this.selectedProperties[this.screenView].getParent())
+			}
+			
+		},
 
 		/**
 		 * Set Properties to layout
@@ -666,7 +697,26 @@ export default {
 		 * @param {String|Number|Array|Object} value
 		 */
 		setProps (prop, value) {
-			this.layout.$emit('setProperties', prop, value)
+
+			if (this.screenView === 'large') {
+				dot.set(`${prop}`, value, this.layout.selected.properties['large'])
+			}
+			
+			if (this.screenView === 'large' || this.screenView === 'medium') {
+				dot.set(`${prop}`, value, this.layout.selected.properties['medium'])
+			}
+
+			if (this.screenView === 'large' || this.screenView === 'medium' || this.screenView === 'small') {
+				dot.set(`${prop}`, value, this.layout.selected.properties['small'])
+			}
+
+			if (this.screenView === 'large' || this.screenView === 'medium' || this.screenView === 'small' || this.screenView === 'mini') {
+				dot.set(`${prop}`, value, this.layout.selected.properties['mini'])
+			}
+
+			this.$nextTick(function () {
+				this.$set('selectedProperties', this.layout.selected.properties)
+			})
 		},
 
 
@@ -695,7 +745,7 @@ export default {
 		 */
 		setScreenView (breakpoint) {
 			this.$set('screenView', breakpoint)
-			this.layout.$emit('changeScreenView', breakpoint)
+			this.layout.$broadcast('changeScreenView', breakpoint)
 		},
 
 
@@ -810,31 +860,6 @@ export default {
 		 * @return {void}
 		 */
 		drawDiagonalOutline (canvas, mask, position) {
-			// Set position of selected element
-			let outline = this.outline.selected
-
-			// If position is defined, use function arguments,
-			// Why we not extend it, because it's not efficient enough
-			let defaultPosition = {
-				width: outline.css.$width,
-				height: outline.css.$height,
-				top: outline.css.$top,
-				left: outline.css.$left
-			}
-
-			if (! position)	{
-				defaultPosition.width = (! isNaN(outline.css.$outerWidth))? outline.css.$outerWidth: defaultPosition.$width,
-				defaultPosition.height = (! isNaN(outline.css.$outerHeight))? outline.css.$outerHeight: defaultPosition.$height,
-				defaultPosition.top = (! isNaN(outline.css.$outerTop))? outline.css.$outerTop: defaultPosition.$top,
-				defaultPosition.left = (! isNaN(outline.css.$outerLeft))? outline.css.$outerLeft: defaultPosition.$left
-				position = defaultPosition
-			} else {
-				if (_.isBoolean(position) && position) position = defaultPosition
-				else if (_.isObject(position)) {
-					position = _.extend(defaultPosition, position)
-				}
-			}
-
 			// Set style
 			canvas.element.style.top = '0px'
 			canvas.element.style.left = '0px'
@@ -878,35 +903,72 @@ export default {
 
 
 		/**
+		 * Draw diagonal outline for margin, padding, border, position
+		 * @param  {String} type
+		 * @return {void}
+		 */
+		drawDiagonalOutlineFor (type) {
+			let self = this,
+			canvasBuilder = document.querySelector('.canvas-builder').getBoundingClientRect(),
+			layoutViewer = document.querySelector('[data-layout-viewer]').getBoundingClientRect(),
+			canvas = self.canvas,
+			css = self.outline.selected.css,
+			position = {
+				width: (! isNaN(css.$outerWidth))? css.$outerWidth: css.$width,
+				height: (! isNaN(css.$outerHeight))? css.$outerHeight: css.$height,
+				top: (! isNaN(css.$outerTop))? css.$outerTop: css.$top,
+				left: (! isNaN(css.$outerLeft))? css.$outerLeft: css.$left
+			}
+
+			if (this.screenView !== 'large') {
+				position.left += (canvasBuilder.width - layoutViewer.width) / 2
+			}
+
+			switch (type) {
+				case 'padding':
+					self.drawDiagonalOutline(canvas.all, {
+						top: self.getProps('paddingTop.value'),
+						right: css.$width - self.getProps('paddingRight.value') - self.getProps('paddingLeft.value'),
+						bottom: css.$height - self.getProps('paddingBottom.value') - self.getProps('paddingTop.value'),
+						left: self.getProps('paddingLeft.value')
+					}, _.extend(position, {
+						top: css.$top + self.boundTop,
+						left: css.$left + ((canvasBuilder.width - layoutViewer.width) / 2),
+						width: css.$width,
+						height: css.$height,
+					}))
+					break;
+
+				case 'margin':
+					self.drawDiagonalOutline(canvas.all, {
+						top: self.getProps('marginTop.value'),
+						right: css.$width,
+						bottom: css.$height,
+						left: css.$left
+					}, _.extend(position, {
+						top: css.$outerTop + self.boundTop
+					}))
+					break;
+			}
+		},
+
+
+		/**
 		 * Position properties on mouse over
 		 * @param  {Event} event
 		 * @return {void}
 		 */
 		propPositionOver (event) {
 			let target = event.target
+
 			if (target.classList.contains('prop-position-outline')) {
 				target.classList.add('over')
 				target.parentElement.parentElement.classList.remove('over')
 
-				let canvas = this.canvas, outline = this.outline.selected
-
 				if (target.classList.contains('padding')) {
-					this.drawDiagonalOutline(this.canvas.all, {
-						top: this.properties.padding.value['top$'][0],
-						right: outline.css.$width - this.properties.padding.value['right$'][0],
-						bottom: outline.css.$height - this.properties.padding.value['bottom$'][0],
-						left: this.properties.padding.value['left$'][0]
-					}, {
-						left: outline.css.$left,
-						right: outline.css.$width
-					})
+					this.drawDiagonalOutlineFor('padding')
 				} else if (target.classList.contains('margin')) {
-					this.drawDiagonalOutline(this.canvas.all, {
-						top: this.properties.margin.value['top$'][0],
-						right: outline.css.$width + this.properties.margin.value['right$'][0],
-						bottom: outline.css.$height - this.properties.margin.value['bottom$'][0],
-						left: outline.css.$left + this.properties.margin.value['left$'][0]
-					})
+					this.drawDiagonalOutlineFor('margin')
 				} else {
 					this.clearCanvas()
 				}
@@ -944,17 +1006,9 @@ export default {
 			let value, unit
 			delimiter = (!delimiter)? '': delimiter
 
-			if (_.isArray(prop[0])) {
-				value = prop[0][0]
-				unit = prop[0][1]
-			} else {
-				value= prop[0]
-				unit = prop[1]
-			}
-
 			// Set output as array or object
-			if (outputArray) return {value: value, unit: unit}
-			return value + delimiter + unit
+			if (outputArray) return {value: prop.value, unit: prop.unit}
+			return prop.value + delimiter + prop.unit
 		},
 
 		/**
@@ -969,14 +1023,7 @@ export default {
 			input, style
 
 			// Get position
-			switch (obj.position) {
-				case 'top':
-				break;
-
-				case 'bottom':
-					style = {top: `${offset.top-20}px`}
-				break;
-			}
+			style = {top: `${offset.top-20}px`}
 
 			// Show pop input
 			this.$set('popInput', _.extend({
@@ -987,8 +1034,6 @@ export default {
 
 
 		hidePopInput () {
-			let value = (isNaN(this.popInputValue)) ? 'auto': parseInt(this.popInputValue)
-			this.setProps(`${this.popInput.input}.0`, value)
 			this.$set('popInput.show', false)
 		}
 	},
@@ -1003,17 +1048,13 @@ export default {
 		 * @return {void}
 		 */
 		self.$on('viewerReady', function (layout) {
-			self.$set('layout', layout)
+			//self.$set('layout', layout)
+			self.$set('layout', document.querySelector('[data-layout-viewer]').contentWindow.document.body.__vue__)
 		})
 
 
-		/**
-		 * Whenever properties change
-		 * @param  {Object} props
-		 * @return {void}
-		 */
-		self.$on('changeSelectedProperties', function (props) {
-			self.$set('selectedProperties', props[self.screenView])
+		self.$on('selectedProperties', function (props) {
+			self.$set('selectedProperties', props)
 		})
 
 
@@ -1087,8 +1128,22 @@ export default {
 		 */
 		self.$on('elementSelect', function (obj) {
 			self.$set('outline.selected', obj)
+		})
+
+
+		/**
+		 * Hide popup input
+		 * @return {void}
+		 */
+		self.$on('hidePopInput', function () {
 			self.$set('popInput.show', false)
 		})
+
+
+		self.$on('drawDiagonalOutline', function (type) {
+			self.drawDiagonalOutlineFor(type)
+		})
+
 
 		/**
 		 * Set zIndex of iframe when blockpanel Added
@@ -1102,12 +1157,13 @@ export default {
 
 		/**
 		 * On viewer scrolling
-		 * @param  {Number} value  Scroll Value
+		 * @param  {Object} bodyRect  Scroll Value
 		 * @return {void}
 		 */
-		self.$on('scroll', function (value) {
+		self.$on('scroll', function (bodyRect) {
+			self.$set('boundTop', bodyRect.top)
 			self.$set('layoutScroll', {
-				top: value + 'px'
+				top: bodyRect.top + 'px'
 			})
 		})
 

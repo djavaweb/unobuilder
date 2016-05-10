@@ -2,6 +2,7 @@
 @import "mixins.less";
 @import "colors.less";
 @import "element.less";
+@import "block.less";
 
 body {
 	height: 100%;
@@ -19,120 +20,8 @@ body {
     height: 100%;
 }
 
-.block-wrapper {
-	position: absolute;
-	width: 100%;
-	top: 0;
-	left: 0;
-	text-align: center;
-	pointer-events: none;
-	z-index: 998;
-
-	&.child {
-		top: -30px;
-	}
-
-	&.first {
-		top: inherit;
-		bottom: -30px;
-
-		.block-panel-wrapper {
-			position: absolute;
-			top: 30px;
-			width: 100%;
-		}
-	}
-
-	.add-block {
-		display: inline-block;
-		text-align: center;
-		padding: 5px 20px;
-		color: @greyish-normal;
-		cursor: default;
-		font-size: 17px;
-		background-color: @transparent-white;
-		position: relative;
-		pointer-events: all;
-
-		i {
-			pointer-events: visible;
-		}
-	}
-
-	&.active {
-		z-index: 999;
-	}
-
-	.block-panel-wrapper {
-		pointer-events: all;
-		overflow: hidden;
-	}
-}
-
-.block-panel {
-	background-color: @dark-grey;
-	padding: 20px;
-	position: relative;
-	height: 100%;
-
-	ul {
-		text-align: center;
-		padding: 0;
-		margin: 0;
-	}
-
-	li {
-		display: inline;
-		margin: 0 5px;
-
-		a {
-			padding: 5px 0;
-			text-decoration: none;
-			color: @white;
-
-			&:hover, &.selected {
-				border-bottom: 2px solid @normal-sky-blue;
-			}
-		}
-	}
-
-	.content {
-		.flex;
-		justify-content: center;
-		padding: 30px 0 20px;
-		.block-item {
-			border: 2px solid @white;
-			margin: 0 5px;
-
-			&:hover {
-				border-color: @normal-sky-blue;
-			}
-
-			&.section {
-				width: 100px;
-				height: 70px;
-				background-size: 100%;
-				
-				&.only {
-					background-image: url('../img/section.svg');
-				}
-
-				&.with-container {
-					background-image: url('../img/section-container.svg');
-				}
-			}
-		}
-	}
-}
-
 .element, .nonelement {
-	&.section, &.uk-container {
-		min-height: 60px;
-	}
-
 	&.parent {
-		position: relative;
-
 		.block-wrapper {
 			display: none;
 
@@ -153,7 +42,12 @@ body {
 	}
 }
 
+.element {
+	min-height: 60px
+}
+
 .nonelement {
+	overflow: auto;
 	pointer-events: none;
 	.element {
 		pointer-events: all;
@@ -163,6 +57,7 @@ body {
 .grid {
 	&.column {
 		.element {
+			position: relative;
 			min-height: 60px;
 			&:before {
 				content: ' ';
@@ -170,6 +65,8 @@ body {
 				width: 100%;
 				height: 100%;
 				background-color: @soft-grey;
+				top: 0;
+				left: 0;
 			}
 			&:after {
 				content: 'Empty';
@@ -186,11 +83,16 @@ body {
 	}
 }
 
-.deep-1:before, .deep-1:after { z-index: 11; }
-.deep-2:before, .deep-2:after { z-index: 12; }
-.deep-3:before, .deep-3:after { z-index: 13; }
-.deep-4:before, .deep-4:after { z-index: 14; }
-.deep-5:before, .deep-5:after { z-index: 15; }
+.element-zindex(@n; @i : 1) when (@i =< @n)
+{
+  .element .element {
+    z-index: (@i + 1);    
+    .element-zindex(@n; (@i + 1));
+  }
+}
+
+.element-zindex(30);
+
 
 @media (min-width: 1220px) {
 	.uk-container {

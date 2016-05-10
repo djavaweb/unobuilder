@@ -17,7 +17,7 @@ import _ from 'underscore'
 
 // Import child components
 import element from './element.vue'
-import block from './block.vue'
+import block from '../block/block.vue'
 
 export default {
 	name: 'layout',

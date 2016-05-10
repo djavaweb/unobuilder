@@ -16,12 +16,17 @@ export default {
 
 		border: {
 			default: null
+		},
+
+		borderIf: {
+			type: Boolean,
+			default: false
 		}
 	},
 
 	computed: {
 		borderClass () {
-			if (this.border) return 'border-' + this.border
+			if (this.border && this.borderIf) return 'border-' + this.border
 		}
 	}
 }

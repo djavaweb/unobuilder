@@ -1,6 +1,6 @@
 <template>
 <div class="accordion-wrapper">
-	<switcher :value="switcher" v-if="withSwitcher" :style="switcherStyle" :switcher-label="switcherLabel"></switcher>
+	<switcher :value.sync="switcher" v-if="withSwitcher" :style="switcherStyle" :switcher-label="switcherLabel"></switcher>
 	<h3 class="uk-accordion-title">
 		<i class="uk-icon-caret-right"></i> <i class="uk-icon-caret-down"></i> {{title}}
 	</h3>

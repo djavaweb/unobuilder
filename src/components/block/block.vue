@@ -1,5 +1,5 @@
 <template>
-<div class="block-wrapper" @mouseleave="closeImmediately()" @mouseover="over()" :class="{active: isActive, child: child}">
+<div class="block-wrapper" @mouseleave="closeImmediately()" @mouseover="over()" :class="{active: isActive, child: child}" :style="style">
 	<a class="add-block" @click="toggle()" transition="fade"><i class="uk-icon-plus"></i></a>
 	<div class="block-panel-wrapper">
 		<div class="block-panel animated" v-if="show&&isActive" transition="appear">
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import structure from './block/structure.vue'
+import structure from './item/structure.vue'
 
 export default {
 	name: 'block',
@@ -49,6 +49,7 @@ export default {
 			show: false,
 			forceShow: true,
 			isActive: false,
+			style: {},
 			block: 'structure'
 		}
 	},
@@ -84,7 +85,11 @@ export default {
 			this.$root.parent().$broadcast('elementHover', {
 				display: 'none'
 			})
-			this.$root.parent().$broadcast('displayBlockPanel', this.show)
+			
+
+			this.$nextTick(function () {
+				this.$root.parent().$broadcast('displayBlockPanel', this.show)
+			})
 		},
 
 
@@ -146,7 +151,6 @@ export default {
 		over () {
 			this.$set('forceShow', true)
 			this.$set('isActive', true)
-			this.$root.parent().$broadcast('displayBlockPanel', true)
 		},
 
 
@@ -170,6 +174,21 @@ export default {
 
 		self.$on('addedBlock', function (data) {
 			self.leave(true)
+		})
+
+		self.$on('blockCoords', function (coords) {
+			if (!self.child && !['section', 'container'].includes(coords.kind)) return
+			
+			let style = {}, top
+
+			if (self.index === 0) top = coords.top + coords.height
+			else {
+				if (coords.kind === 'container') top = coords.top - 30
+				else top = -30
+			}
+
+			style.transform = `translateY(${top}px)`
+			self.$set('style', style)
 		})
 	}
 }

@@ -66,16 +66,16 @@ const App = new Vue({
 						flex: {
 							container: {
 								direction: 'row',
-								_reverse: {value: false, true: '$direction-reverse', hook: 'direction'},
+								reverse: false,
 								alignItems: 'stretch',
 								alignContent: 'stretch',
 								justifyContent: 'flex-start',
 								wrap: 'nowrap',
-								_reverseWrap: {value: false, true: 'wrap-reverse', hook: 'wrap'}
+								reverseWrap: false
 							},
 							item: {
-								$sizing: {value: 'flexGrow', custom: {}},
-								$order: {value: 'auto', custom: {}},
+								sizing: {value: 'flexGrow', custom: {}},
+								order: {value: 'auto', custom: {}},
 								alignSelf: 'flex-start'
 							}
 						}
@@ -85,61 +85,123 @@ const App = new Vue({
 					value: 'relative',
 					settings: {
 						absolute: {
-							top$: [0, 'px', ''],
-							right$: [0, 'px', ''],
-							bottom$: [0, 'px', ''],
-							left$: [0, 'px', '']
+							top: {
+								value: 0,
+								unit: 'px'
+							},
+							right: {
+								value: 0,
+								unit: 'px'
+							},
+							bottom: {
+								value: 0,
+								unit: 'px'
+							},
+							left: {
+								value: 0,
+								unit: 'px'
+							}
 						},
 
 						fixed: {
-							top$: [0, 'px', ''],
-							right$: [0, 'px', ''],
-							bottom$: [0, 'px', ''],
-							left$: [0, 'px', '']
+							top: {
+								value: 0,
+								unit: 'px'
+							},
+							right: {
+								value: 0,
+								unit: 'px'
+							},
+							bottom: {
+								value: 0,
+								unit: 'px'
+							},
+							left: {
+								value: 0,
+								unit: 'px'
+							}
 						}
 					}
 				},
-				padding: {
-					value: {
-						top$: [0, 'px', ''],
-						right$: [0, 'px', ''],
-						bottom$: [0, 'px', ''],
-						left$: [0, 'px', '']
-					}
+				paddingTop: {
+					value: 0,
+					unit: 'px'
 				},
-				margin: {
-					value: {
-						top$: [0, 'px', ''],
-						right$: [0, 'px', ''],
-						bottom$: [0, 'px', ''],
-						left$: [0, 'px', '']
-					}
+				paddingBottom: {
+					value: 0,
+					unit: 'px'
 				},
-				border: {
-					value: {
-						top$: [[0, 'px', ''], 'solid', '#000000', ' '],
-						right$: [[0, 'px', ''], 'solid', '#000000', ' '],
-						bottom$: [[0, 'px', ''], 'solid', '#000000', ' '],
-						left$: [[0, 'px', ''], 'solid', '#000000', ' ']
-					}
+				paddingLeft: {
+					value: 0,
+					unit: 'px'
+				},
+				paddingRight: {
+					value: 0,
+					unit: 'px'
+				},
+				marginTop: {
+					value: 0,
+					unit: 'px'
+				},
+				marginBottom: {
+					value: 0,
+					unit: 'px'
+				},
+				marginLeft: {
+					value: 0,
+					unit: 'px'
+				},
+				marginRight: {
+					value: 0,
+					unit: 'px'
+				},
+				borderTop: {
+					value: 0,
+					unit: 'px',
+					style: 'solid',
+					color: '#000000'
+				},
+				borderRight: {
+					value: 0,
+					unit: 'px',
+					style: 'solid',
+					color: '#000000'
+				},
+				borderBottom: {
+					value: 0,
+					unit: 'px',
+					style: 'solid',
+					color: '#000000'
+				},
+				borderLeft: {
+					value: 0,
+					unit: 'px',
+					style: 'solid',
+					color: '#000000'
 				},
 				width: {
-					value: ['', 'px']
+					value: 0,
+					unit: 'px'
 				},
 				minWidth: {
-					value: ['', 'px']
+					value: 0,
+					unit: 'px'
 				},
 				maxWidth: {
-					value: ['', 'px']
+					value: 0,
+					unit: 'px'
 				},
 				height: {
-					value: ['', 'px']
+					value: 0,
+					unit: 'px'
 				},
 				minHeight: {
-					value: ['', 'px']
+					value: 0,
+					unit: 'px'
 				},
 				maxHeight: {
-					value: ['', 'px']
+					value: 0,
+					unit: 'px'
 				}
 			}
 		}
@@ -195,11 +257,7 @@ const App = new Vue({
 		 * @param {String|Number|Object|Array} value  [Properties Value]
 		 */
 		setProperties (prop, value) {
-			let self = this
-			dot.set(`${prop}`, value, self.selected.properties[self.screenView])
-			self.$nextTick(function () {
-				self.parent().$broadcast('changeSelectedProperties', self.cloneObject(self.selected.properties))
-			})
+			dot.set(`${prop}`, value, this.selected.properties[this.screenView])
 		},
 
 
@@ -260,7 +318,7 @@ const App = new Vue({
 			let element = document.querySelector(`[data-id="${id}"]`)
 
 			// Only accept .element, except row
-			if (element && element.classList.contains('nonelement') && !element.classList.contains('row')) {
+			if (element && ! element.classList.contains('element')) {
 				element = element.querySelector('.element')
 			}
 			
@@ -277,9 +335,9 @@ const App = new Vue({
 		outline (target, props) {
 			let offset = $(target).offset(),
 			width = target.offsetWidth,
-			height = target.offsetHeight,
-			bodyRect = document.body.getBoundingClientRect(),
-			outline = {
+			height = target.offsetHeight
+
+			let outline = {
 				$top: offset.top,
 				$left: offset.left,
 				$width: width,
@@ -294,11 +352,27 @@ const App = new Vue({
 			let kind = target.getAttribute('data-kind')
 			switch (kind) {
 				case 'container':
-					let offset = $(target.parentElement).offset()
-					outline.$outerLeft = offset.left
-					outline.$outerTop = offset.top
+					let containerOffset = $(target.parentElement.parentElement).offset()
+					outline.$outerLeft = containerOffset.left
+					outline.$outerTop = containerOffset.top
+					outline.$outerWidth = target.parentElement.parentElement.offsetWidth
+					outline.$outerHeight = target.parentElement.parentElement.offsetHeight
+				break;
+
+				case 'section':
+					let sectionOffset = $(target.parentElement).offset()
+					outline.$outerLeft = sectionOffset.left
+					outline.$outerTop = sectionOffset.top 
 					outline.$outerWidth = target.parentElement.offsetWidth
 					outline.$outerHeight = target.parentElement.offsetHeight
+				break;
+
+				case 'column':
+					let columnOffset = $(target.parentElement.parentElement).offset()
+					outline.$outerLeft = columnOffset.left
+					outline.$outerTop = columnOffset.top
+					outline.$outerWidth = target.parentElement.parentElement.offsetWidth
+					outline.$outerHeight = target.parentElement.parentElement.offsetHeight
 				break;
 			}
 			
@@ -321,6 +395,13 @@ const App = new Vue({
 				self.getBreadcrumbs(target, false, function (breadcrumbs) {
 					let css = self.outline(target, element.self.props)
 					if (hide) css.display = 'none'
+
+					// Notify block top position
+					self.$broadcast('blockCoords', {
+						top: css.$top,
+						height: css.$height,
+						kind: element.self.kind
+					})
 
 					// Notify parent
 					self.parent().$broadcast('elementHover', {
@@ -350,19 +431,18 @@ const App = new Vue({
 					self.getBreadcrumbs(target, true, function (breadcrumbs) {
 
 						// Set selected element
-						self.$set('selected', {
-							element: element.self.id,
-							properties: element.self.props
-						})
+						self.$set('selected.element', element.self.id)
+						self.$set('selected.properties', element.self.props)
 
 						// Notify parent to select the element
-						self.parent().$broadcast('changeSelectedProperties', self.cloneObject(self.selected.properties))
 						self.parent().$broadcast('elementSelect', {
 							css: css,
 							id: id,
 							breadcrumbs: breadcrumbs,
 							showBreadcrumbs: false
 						})
+
+						self.parent().$broadcast('selectedProperties', element.self.props)
 					})
 				}
 			})
@@ -376,8 +456,10 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		over (event) {
-			let	target = (event.target.classList.contains('element'))? event.target: event.target.parentElement
-			if (target.classList.contains('element')) this.hoverOutline(target)
+			let elementId = event.target.getAttribute('data-id')
+			if (elementId && event.target.classList.contains('element')) {
+				this.hoverOutline(event.target)
+			}
 		},
 
 		/**
@@ -409,6 +491,8 @@ const App = new Vue({
 				// Set selected element
 				this.selectOutline(target)
 			}
+
+			this.parent().$broadcast('hidePopInput')
 			
 			// Notify to parent to hide the left panel
 			this.parent().$broadcast('hideParentPanel')
@@ -445,9 +529,9 @@ const App = new Vue({
 			const search = function (root) {
 				if (root && root.elements) {
 					for (let i = 0, len = root.elements.length;i<len;i++) {
-						let deep = i + 1, index = i
+						let index = i
 
-						if (root.elements[i] && root.elements[i].id === id) fn && fn({parent: root, self: root.elements[i], deep: deep, index: index})
+						if (root.elements[i] && root.elements[i].id === id) fn && fn({parent: root, self: root.elements[i], index: index})
 						else search(root.elements[i], id, fn);
 					}
 				}
@@ -480,7 +564,19 @@ const App = new Vue({
 				data.id = self.generateId('el')
 
 				// Copy default props to breakpoints object, each breakpoint has unique value
-				data.props = self.cloneObject(self.body.props, true)
+				data.props = {
+					large: self.cloneObject(self.props),
+					medium: self.cloneObject(self.props),
+					small: self.cloneObject(self.props),
+					mini: self.cloneObject(self.props)
+				}
+
+				// Get parent element method
+				_.each(['large', 'medium', 'small', 'mini'], function (item, index) {
+					data.props[item].getParent = function () {
+						return element.self.props[item]
+					}
+				})
 
 				// Element Children
 				data.elements = []
@@ -538,7 +634,7 @@ const App = new Vue({
 					}
 
 					// Copy selected element to it's parent
-					copy = self.cloneObject(element.self)
+					copy = self.cloneObject(element.self, true)
 					copy.id = self.generateId('el')
 
 					// Change all copy's child Id
@@ -663,18 +759,28 @@ const App = new Vue({
 
 				// Reorder index
 				self.reorderElementIndex()
-
 				self.$nextTick(function () {
-					let siblingId
+					async.waterfall([
+						function (next) {
+							if (element.parent.elements.length > 0) {
+								next(true, element.parent.elements[0].id)
+							} else {
+								next()
+							}
+						},
 
-					// Click siblings element
-					if (element.parent.elements.length>0) {
-						siblingId = _.first(element.parent.elements).id
-					} else {
-						siblingId = element.parent.id
-					}
-					
-					self.eventFire(self.activeElement(siblingId), 'click')
+						function (next) {
+							if (element.parent.kind === 'row') {
+								self.findElement(element.parent.id, function (element) {
+									next(true, element.parent.id)
+								})
+							} else {
+								next(true, element.parent.id)
+							}
+						}
+					], function (err, nextSelectedId) {
+						self.eventFire(self.activeElement(nextSelectedId), 'click')
+					})					
 				})
 			})
 		},
@@ -784,7 +890,7 @@ const App = new Vue({
 					case 'column':
 
 						// If there is element in section or container, cancel
-						if (! element.self.child && element.self.elements.length > 0) return
+						//if (! element.self.child && element.self.elements.length > 0) return
 
 						// Add row
 						self.addElement({
@@ -875,10 +981,7 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		self.$on('elementSelect', function (breadcrumb) {
-			// check if it's wrapper or .element
-			self.$nextTick(function () {
-				self.eventFire(self.activeElement(breadcrumb.id), 'click')
-			})
+			self.eventFire(self.activeElement(breadcrumb.id), 'click')
 		})
 
 		
@@ -890,8 +993,6 @@ const App = new Vue({
 		 */
 		self.$on('elementHover', function (breadcrumb, enter) {
 			let state = (enter) ? 'mouseover': 'mouseleave'
-
-			// check if it's wrapper or .element
 			this.eventFire(self.activeElement(breadcrumb.id), state)
 		})
 		
@@ -901,7 +1002,7 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		window.addEventListener('scroll', function () {
-			self.parent().$broadcast('scroll', document.body.getBoundingClientRect().top)
+			self.parent().$broadcast('scroll', document.body.getBoundingClientRect())
 		})
 
 
@@ -1074,23 +1175,5 @@ const App = new Vue({
 			self.parent().$broadcast('clearCanvas')
 			self.$emit('keyCapture', 'enter')
 		})
-
-
-
-		/**
-		 * Watch element properties
-		 */
-		/*self.$watch(function () {
-			return _.map(self.body.elements, function (element) {
-				return _.map(element.props, function (properties, breakpoint) {
-					return {
-						breakpoint: breakpoint,
-						properties: properties.margin.value
-					}
-				})
-			})
-		}, function (value) {
-			console.log(value)
-		}, {deep: true})*/
 	}
 })
