@@ -43,6 +43,7 @@
     "sweetalert": "*",
     "underscore": "*",
     "url-loader": "*",
+    "vue-color": "0.0.3",
     "vue-hot-reload-api": "^1.2.0",
     "vue-html-loader": "^1.0.0",
     "vue-loader": "^8.0.0",
@@ -52,6 +53,8 @@
   },
   "dependencies": {
     "es6-promise": "*",
-    "vue": "*"
+    "tinycolor2": "*",
+    "vue": "*",
+    "lodash.throttle": "^4.0.0"
   }
 }

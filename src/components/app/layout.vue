@@ -78,7 +78,17 @@
 				<div class="pop-input-overlay" v-if="popInput.show" @click="hidePopInput()"></div>
 				<div class="pop-input-inner">
 					<div class="pop-input-up" v-if="popInput.show" :style="popInput.style" :class="[popInput.position]">
-						<number :value.sync="popInputValue" :unit.sync="popInputUnit" :label="popInput.label" label-width="auto"></number>
+						<number :value.sync="popInputValue" :unit.sync="popInputUnit" :label="popInput.label" label-width="70px"></number>
+						<div v-if="popInput.editBorder">
+							<label>Border Style</label>
+							<select v-model="popInputBorderStyle">
+								<option value="solid">Solid</option>
+								<option value="dotted">Dashed</option>
+								<option value="dashed">Dashed</option>
+							</select>
+
+							<label>Border Color</label> <color-picker :colors.sync="popInputColor"></color-picker>
+						</div>
 						<button @click="hidePopInput()">OK</button>
 					</div>
 				</div>
@@ -361,29 +371,33 @@
 											<dt class="top"
 											@click="showPopInput($event, {
 												position: 'top',
-												label: 'Border Top',
-												input: 'borderTop'
+												label: 'Border Width',
+												input: 'borderTop',
+												editBorder: true
 											})">{{ unitValueOf('borderTop') }}</dt>
 
 											<dt class="right"
 											@click="showPopInput($event, {
 												position: 'right',
-												label: 'Border Right',
-												input: 'borderRight'
+												label: 'Border Width',
+												input: 'borderRight',
+												editBorder: true
 											})">{{ unitValueOf('borderRight', ' ') }}</dt>
 
 											<dt class="bottom"
 											@click="showPopInput($event, {
 												position: 'bottom',
-												label: 'Border Bottom',
-												input: 'borderBottom'
+												label: 'Border Width',
+												input: 'borderBottom',
+												editBorder: true
 											})">{{ unitValueOf('borderBottom') }}</dt>
 
 											<dt class="left"
 											@click="showPopInput($event, {
 												position: 'left',
-												label: 'Border Left',
-												input: 'borderLeft'
+												label: 'Border Width',
+												input: 'borderLeft',
+												editBorder: true
 											})">{{ unitValueOf('borderLeft', ' ') }}</dt>
 										</dl>
 										<div class="inner">
@@ -434,20 +448,24 @@
 				<accordion-item title="Size" :with-switcher="true" :switcher.sync="tabAdvanced.size" switcher-label="Advanced">
 					<div class="uk-grid uk-grid-small">
 						<div class="uk-width-5-10">
-							<number :value.sync="properties.width.value" :unit.sync="properties.width.unit" label="Width"></number>
-							<number :value.sync="properties.maxWidth.value" :unit.sync="properties.maxWidth.unit" label="Max" v-show="tabAdvanced.size" transition="fade"></number>
-							<number :value.sync="properties.minWidth.value" :unit.sync="properties.minWidth.unit" label="Min" v-show="tabAdvanced.size" transition="fade"></number>
+							<number :value.sync="sizeWidth" :unit.sync="sizeWidthUnit" :disabled="properties.width.disabled" label="Width"></number>
+							<number :value.sync="sizeMinWidth" :unit.sync="sizeMinWidthUnit" :disabled="properties.minWidth.disabled" label="Min" v-show="tabAdvanced.size" transition="fade"></number>
+							<number :value.sync="sizeMaxWidth" :unit.sync="sizeMaxWidthUnit" :disabled="properties.maxWidth.disabled" label="Max" v-show="tabAdvanced.size" transition="fade"></number>
 						</div>
 						<div class="uk-width-5-10">
-							<number :value.sync="properties.height.value" :unit.sync="properties.height.unit" label="Height"></number>
-							<number :value.sync="properties.maxHeight.value" :unit.sync="properties.maxHeight.unit" label="Max" v-show="tabAdvanced.size" transition="fade"></number>
-							<number :value.sync="properties.minHeight.value" :unit.sync="properties.minHeight.unit" label="Min" v-show="tabAdvanced.size" transition="fade"></number>
+							<number :value.sync="sizeHeight" :unit.sync="sizeHeightUnit" label="Height"></number>
+							<number :value.sync="sizeMinHeight" :unit.sync="sizeMinHeightUnit" label="Min" v-show="tabAdvanced.size" transition="fade"></number>
+							<number :value.sync="sizeMaxHeight" :unit.sync="sizeMaxHeightUnit" label="Max" v-show="tabAdvanced.size" transition="fade"></number>
 						</div>
 					</div>
 					<div style="padding-bottom: 100px"></div>
 				</accordion-item>
 				<!-- ./end of properties.size -->
 			</div>
+		</div>
+
+		<div class="right-panel-container" v-show="isRightBarView('style')">
+			<color-picker :colors.sync="colors"></color-picker>
 		</div>
 	</div>
 </template>
@@ -473,6 +491,8 @@ import accordionExpandView from '../accordion/expand-view.vue'
 import rectButton from '../misc/rect-button.vue'
 import Number from '../misc/number.vue'
 
+import colorPicker from '../colorpicker/colorpicker.vue'
+
 // Import element Items
 import elementItem from './element-item.vue'
 
@@ -485,7 +505,7 @@ export default {
 	 */
 	components: {
 		accordionItem, accordionItemView, accordionExpandView,
-		elementItem, rectButton, Number
+		elementItem, rectButton, Number, colorPicker
 	},
 
 	/**
@@ -504,6 +524,29 @@ export default {
 	 */
 	data () {
 		return {
+			colors: {
+				hex: '#194d33',
+				hsl: {
+					h: 150,
+					s: 0.5,
+					l: 0.2,
+					a: 1
+				},
+				hsv: {
+					h: 150,
+					s: 0.66,
+					v: 0.30,
+					a: 1
+				},
+				rgba: {
+					r: 25,
+					g: 77,
+					b: 51,
+					a: 1
+				},
+				a: 1
+			},
+
 			layout: null,
 			showElementPanel: false,
 			screenView: 'large',
@@ -549,6 +592,7 @@ export default {
 				position: 'top',
 				label: '',
 				value: 0,
+				min: 0,
 				unit: 'px'
 			},
 
@@ -651,7 +695,153 @@ export default {
 			set (value) {
 				this.setProps(`${this.popInput.input}.unit`, value)
 			}
-		}
+		},
+
+		// Color value in popinput
+		popInputColor: {
+			get () {
+				return this.getProps(`${this.popInput.input}.color`)
+			},
+
+			set (value) {
+				this.setProps(`${this.popInput.input}.color`, value)
+			}
+		},
+
+		// Color value in popinput
+		popInputBorderStyle: {
+			get () {
+				return this.getProps(`${this.popInput.input}.borderStyle`)
+			},
+
+			set (value) {
+				this.setProps(`${this.popInput.input}.borderStyle`, value)
+			}
+		},
+
+
+		/**
+		 * Size (width/height) for sync properties value input number
+		 */
+		sizeWidth: {
+			get () {
+				return this.getProps(`width.value`)
+			},
+
+			set (value) {
+				this.setProps(`width.value`, value)
+			}
+		},
+
+		sizeWidthUnit: {
+			get () {
+				return this.getProps('width.unit')
+			},
+
+			set (value) {
+				this.setProps('width.unit', value)
+			}
+		},
+
+		sizeMinWidth: {
+			get () {
+				return this.getProps('minWidth.value')
+			},
+
+			set (value) {
+				this.setProps('minWidth.value', value)
+			}
+		},
+
+		sizeMinWidthUnit: {
+			get () {
+				return this.getProps('minWidth.unit')
+			},
+
+			set (value) {
+				this.setProps('minWidth.unit', value)
+			}
+		},
+
+		sizeMaxWidth: {
+			get () {
+				return this.getProps('maxWidth.value')
+			},
+
+			set (value) {
+				this.setProps('maxWidth.value', value)
+			}
+		},
+
+		sizeMaxWidthUnit: {
+			get () {
+				return this.getProps('maxWidth.unit')
+			},
+
+			set (value) {
+				this.setProps('maxWidth.unit', value)
+			}
+		},
+
+		sizeHeight: {
+			get () {
+				return this.getProps(`height.value`)
+			},
+
+			set (value) {
+				this.setProps(`height.value`, value)
+			}
+		},
+
+		sizeHeightUnit: {
+			get () {
+				return this.getProps('height.unit')
+			},
+
+			set (value) {
+				this.setProps('height.unit', value)
+			}
+		},
+
+		sizeMinHeight: {
+			get () {
+				return this.getProps('minHeight.value')
+			},
+
+			set (value) {
+				this.setProps('minHeight.value', value)
+			}
+		},
+
+		sizeMinHeightUnit: {
+			get () {
+				return this.getProps('minHeight.unit')
+			},
+
+			set (value) {
+				this.setProps('minHeight.unit', value)
+			}
+		},
+
+		sizeMaxHeight: {
+			get () {
+				return this.getProps('maxHeight.value')
+			},
+
+			set (value) {
+				this.setProps('maxHeight.value', value)
+			}
+		},
+
+		sizeMaxHeightUnit: {
+			get () {
+				return this.getProps('maxHeight.unit')
+			},
+
+			set (value) {
+				this.setProps('maxHeight.unit', value)
+			}
+		},
 	},
 
 
@@ -697,25 +887,44 @@ export default {
 		 * @param {String|Number|Array|Object} value
 		 */
 		setProps (prop, value) {
+			let self = this,
+			changeData = function (p, v) {
+				if (self.screenView === 'large') {
+					console.log('large')
+					dot.set(`${p}`, v, self.layout.selected.properties['large'])
+				}
+				
+				if (self.screenView === 'large' || self.screenView === 'medium') {
+					console.log('medium')
+					dot.set(`${p}`, v, self.layout.selected.properties['medium'])
+				}
 
-			if (this.screenView === 'large') {
-				dot.set(`${prop}`, value, this.layout.selected.properties['large'])
-			}
-			
-			if (this.screenView === 'large' || this.screenView === 'medium') {
-				dot.set(`${prop}`, value, this.layout.selected.properties['medium'])
+				if (self.screenView === 'large' || self.screenView === 'medium' || self.screenView === 'small') {
+					console.log('small')
+					dot.set(`${p}`, v, self.layout.selected.properties['small'])
+				}
+
+				if (self.screenView === 'large' || self.screenView === 'medium' || self.screenView === 'small' || self.screenView === 'mini') {
+					console.log('small')
+					dot.set(`${p}`, v, self.layout.selected.properties['mini'])
+				}
 			}
 
-			if (this.screenView === 'large' || this.screenView === 'medium' || this.screenView === 'small') {
-				dot.set(`${prop}`, value, this.layout.selected.properties['small'])
+			if (_.isArray(prop)) {
+				// Change multiple data from array
+				_.each(prop, function (item, index) {
+					self.$nextTick(function () {
+						changeData(item.prop, item.value)
+					})
+				})
+			} else {
+				// Single properties
+				changeData(prop, value)
 			}
 
-			if (this.screenView === 'large' || this.screenView === 'medium' || this.screenView === 'small' || this.screenView === 'mini') {
-				dot.set(`${prop}`, value, this.layout.selected.properties['mini'])
-			}
-
-			this.$nextTick(function () {
-				this.$set('selectedProperties', this.layout.selected.properties)
+			// Set selected properties after changed
+			self.$nextTick(function () {
+				self.$set('selectedProperties', self.layout.selected.properties)
 			})
 		},
 
@@ -745,7 +954,7 @@ export default {
 		 */
 		setScreenView (breakpoint) {
 			this.$set('screenView', breakpoint)
-			this.layout.$broadcast('changeScreenView', breakpoint)
+			this.layout.$emit('changeScreenView', breakpoint)
 		},
 
 
@@ -767,6 +976,7 @@ export default {
 		 */
 		setRightBarView (view) {
 			this.$set('rightBarView', view)
+			this.hidePopInput()
 		},
 
 
@@ -928,14 +1138,14 @@ export default {
 				case 'padding':
 					self.drawDiagonalOutline(canvas.all, {
 						top: self.getProps('paddingTop.value'),
-						right: css.$width - self.getProps('paddingRight.value') - self.getProps('paddingLeft.value'),
-						bottom: css.$height - self.getProps('paddingBottom.value') - self.getProps('paddingTop.value'),
-						left: self.getProps('paddingLeft.value')
+						right: css.$width - self.getProps('paddingRight.value') - self.getProps('paddingLeft.value') -  self.getProps('borderLeft.value') - self.getProps('borderRight.value'),
+						bottom: css.$height - self.getProps('paddingBottom.value') - self.getProps('paddingTop.value') - self.getProps('borderTop.value') - self.getProps('borderBottom.value'),
+						left: self.getProps('paddingLeft.value') + self.getProps('borderLeft.value')
 					}, _.extend(position, {
-						top: css.$top + self.boundTop,
+						top: css.$top + self.boundTop + self.getProps('borderTop.value'),
 						left: css.$left + ((canvasBuilder.width - layoutViewer.width) / 2),
-						width: css.$width,
-						height: css.$height,
+						width: css.$width - self.getProps('borderLeft.value'),
+						height: css.$height - self.getProps('borderTop.value') - self.getProps('borderBottom.value'),
 					}))
 					break;
 
@@ -1033,6 +1243,10 @@ export default {
 		},
 
 
+		/**
+		 * Hide pop input
+		 * @return {void}
+		 */
 		hidePopInput () {
 			this.$set('popInput.show', false)
 		}
@@ -1136,7 +1350,7 @@ export default {
 		 * @return {void}
 		 */
 		self.$on('hidePopInput', function () {
-			self.$set('popInput.show', false)
+			self.hidePopInput()
 		})
 
 

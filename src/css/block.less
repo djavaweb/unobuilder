@@ -6,15 +6,9 @@
 	text-align: center;
 	pointer-events: none;
 	z-index: 998;
-
-	&.child {
-		/*top: -30px;*/
-	}
+	flex-grow: 1;
 
 	&.first {
-		/*top: inherit;
-		bottom: -30px;*/
-
 		.block-panel-wrapper {
 			position: absolute;
 			top: 30px;
@@ -25,13 +19,18 @@
 	.add-block {
 		display: inline-block;
 		text-align: center;
-		padding: 5px 20px;
+		padding: 5px 15px;
 		color: @greyish-normal;
 		cursor: default;
 		font-size: 17px;
+		font-weight: 300;
 		background-color: @transparent-white;
 		position: relative;
 		pointer-events: all;
+
+		&:hover {
+			color: @normal-sky-blue;
+		}
 
 		i {
 			pointer-events: visible;

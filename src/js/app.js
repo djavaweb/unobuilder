@@ -20,6 +20,11 @@ Vue.transition('slideleft', {
 	leaveClass: 'slideOutLeft'
 })
 
+Vue.transition('slidey', {
+	enterClass: 'slideInDown',
+	leaveClass: 'slideOutUp'
+})
+
 /* Main app */
 const App = new Vue({
 	el: '#app',

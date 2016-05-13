@@ -177,15 +177,12 @@ export default {
 		})
 
 		self.$on('blockCoords', function (coords) {
-			if (!self.child && !['section', 'container'].includes(coords.kind)) return
+			if (!self.child) return
 			
 			let style = {}, top
 
 			if (self.index === 0) top = coords.top + coords.height
-			else {
-				if (coords.kind === 'container') top = coords.top - 30
-				else top = -30
-			}
+			else top = coords.top - 30
 
 			style.transform = `translateY(${top}px)`
 			self.$set('style', style)

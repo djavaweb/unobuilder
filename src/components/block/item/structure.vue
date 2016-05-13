@@ -22,7 +22,7 @@ export default {
 			let self = this,
 			breadcrumb = (type === 'container')? 'section + container': type
 
-			self.$root.$emit('addBlock', {
+			self.$dispatch('addBlock', {
 				to: 'body',
 				type: 'section',
 				kind: type,

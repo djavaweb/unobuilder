@@ -1,10 +1,10 @@
 <template>
-<div class="input-number">
+<div class="input-number" :class="{disabled: disabled}">
 	<label v-if="label" :style="{width: labelWidth}">{{label}}</label>
 	<div class="input-number-wrapper">
-		<input type="text" v-model="value" :value="value">
+		<input type="text" number min="{{min}}" max="{{max}}" step="{{step}}" v-model="value" :disabled="disabled">
 		<div class="unit-toggler">
-			<a @click="toggleSelectUnit()">{{unit}}</a>
+			<a @click="toggleSelectUnit()">{{selectedUnit}}</a>
 			<div class="unit-select" v-show="selectUnit">
 				<a @click="changeUnit('px')">px</a>
 				<a @click="changeUnit('em')">em</a>
@@ -35,8 +35,32 @@ export default {
 		unit: {
 			required: true,
 			default: 'px'
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		min: {
+			type: Number,
+			default: 0
+		},
+		step: {
+			type: Number,
+			default: 1
+		},
+		max: {
+			type: Number,
+			default: 100
 		}
 	},
+
+	computed: {
+		selectedUnit () {
+			if (this.value === 'auto') return '-'
+			return this.unit
+		}
+	},
+
 	methods: {
 		/**
 		 * Change unit value
@@ -53,7 +77,7 @@ export default {
 		 * @return {void}
 		 */
 		increase () {
-			if (isNaN(this.value)) return
+			if (isNaN(this.value) || this.disabled) return
 			let self = this, value
 
 			this.timer = setInterval(function () {
@@ -67,7 +91,7 @@ export default {
 		 * @return {void}
 		 */
 		decrease () {
-			if (isNaN(this.value)) return
+			if (isNaN(this.value) || this.disabled) return
 			let self = this, value
 
 			this.timer = setInterval(function () {
@@ -86,6 +110,7 @@ export default {
 
 
 		toggleSelectUnit () {
+			if (this.disabled) return
 			this.$set('selectUnit', !this.selectUnit)
 		}
 	},

@@ -1,8 +1,10 @@
 <template>
-	<block v-if="empty(elements)" :index="0"></block>
-	<element v-for="element in elements" :data="element" :index="element.index">
-		<block :child="true" :index="$index" :class="{first: $index===0, last: $index === elements.length-1}"></block>
-	</element>
+	<div class="wrapper element" data-id="body">
+		<block v-if="empty(elements)" :index="0"></block>
+		<element v-for="element in elements" :data="element" :index="element.index">
+			<block :child="true" :index="$index" :class="{first: $index===0, last: $index === elements.length-1}"></block>
+		</element>
+	</div>
 </template>
 
 

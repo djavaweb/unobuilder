@@ -2,6 +2,7 @@
 @import "mixins.less";
 @import "colors.less";
 @import "element.less";
+@import "button.less";
 
 html, body, #app {
     height: 100%
@@ -320,21 +321,6 @@ html, body, #app {
     .flex;
     flex-grow: 1;
     justify-content: center;
-}
-
-.button () {
-    line-height: 0;
-    border-radius: 2px;
-    background-color: @gunmetal;
-    background-repeat: no-repeat;
-    background-position: 50% 50%;
-    box-shadow: inset 1px 1px 0px 0px rgba(212, 212, 212, 0.12), 1px 2px 0 0 rgba(41, 41, 41, 0.7);
-    margin: 0 1px 2px;
-
-    &:hover, &.active {
-        background-color: @dark;
-        box-shadow: inset 1px 1px 0px 0px rgba(2, 2, 2, 0.99), 1px 2px 0 0 rgba(72, 72, 72, 0.26);
-    }
 }
 
 .rect-button {
@@ -800,6 +786,13 @@ html, body, #app {
         border-radius: 3px;
         border: 1px solid #000000;
     }
+    label {
+        font-size: 11px;
+        color: @white;
+        margin-right: 10px;
+        width: 70px;
+        display: inline-block;
+    }
     button {
         .button();
         line-height: normal;
@@ -809,6 +802,9 @@ html, body, #app {
         color: @white;
         margin-top: 15px;
         padding: 6px 0;
+    }
+    select {
+        margin-bottom: 5px;
     }
 }
 
@@ -876,8 +872,14 @@ html, body, #app {
     }
 
     .decrease {
-        bottom: 1px;
+        bottom: 0;
         right: 5px;
+    }
+
+    &.disabled {
+        input, a, a:before {
+            color: #545454;
+        }
     }
 }
 

@@ -76,6 +76,7 @@ const App = new Vue({
 							item: {
 								sizing: {value: 'flexGrow', custom: {}},
 								order: {value: 'auto', custom: {}},
+								forceAlign: false,
 								alignSelf: 'flex-start'
 							}
 						}
@@ -158,50 +159,140 @@ const App = new Vue({
 				borderTop: {
 					value: 0,
 					unit: 'px',
-					style: 'solid',
-					color: '#000000'
+					borderStyle: 'solid',
+					color: {
+						hex: '#000000',
+						hsl: {
+							h: 0,
+							s: 0,
+							l: 0,
+							a: 1
+						},
+						hsv: {
+							h: 0,
+							s: 0,
+							v: 0,
+							a: 1
+						},
+						rgba: {
+							r: 0,
+							g: 0,
+							b: 0,
+							a: 1
+						},
+						a: 1
+					}
 				},
 				borderRight: {
 					value: 0,
 					unit: 'px',
-					style: 'solid',
-					color: '#000000'
+					borderStyle: 'solid',
+					color: {
+						hex: '#000000',
+						hsl: {
+							h: 0,
+							s: 0,
+							l: 0,
+							a: 1
+						},
+						hsv: {
+							h: 0,
+							s: 0,
+							v: 0,
+							a: 1
+						},
+						rgba: {
+							r: 0,
+							g: 0,
+							b: 0,
+							a: 1
+						},
+						a: 1
+					}
 				},
 				borderBottom: {
 					value: 0,
 					unit: 'px',
-					style: 'solid',
-					color: '#000000'
+					borderStyle: 'solid',
+					color: {
+						hex: '#000000',
+						hsl: {
+							h: 0,
+							s: 0,
+							l: 0,
+							a: 1
+						},
+						hsv: {
+							h: 0,
+							s: 0,
+							v: 0,
+							a: 1
+						},
+						rgba: {
+							r: 0,
+							g: 0,
+							b: 0,
+							a: 1
+						},
+						a: 1
+					}
 				},
 				borderLeft: {
 					value: 0,
 					unit: 'px',
-					style: 'solid',
-					color: '#000000'
+					borderStyle: 'solid',
+					color: {
+						hex: '#000000',
+						hsl: {
+							h: 0,
+							s: 0,
+							l: 0,
+							a: 1
+						},
+						hsv: {
+							h: 0,
+							s: 0,
+							v: 0,
+							a: 1
+						},
+						rgba: {
+							r: 0,
+							g: 0,
+							b: 0,
+							a: 1
+						},
+						a: 1
+					}
 				},
 				width: {
-					value: 0,
-					unit: 'px'
+					value: 'auto',
+					unit: 'px',
+					disabled: false
 				},
 				minWidth: {
 					value: 0,
-					unit: 'px'
+					unit: 'px',
+					disabled: false
 				},
 				maxWidth: {
 					value: 0,
-					unit: 'px'
+					unit: 'px',
+					disabled: false
 				},
 				height: {
-					value: 0,
-					unit: 'px'
+					value: 'auto',
+					unit: 'px',
+					disabled: false
 				},
 				minHeight: {
 					value: 0,
-					unit: 'px'
+					unit: 'px',
+					disabled: false
 				},
 				maxHeight: {
 					value: 0,
-					unit: 'px'
+					unit: 'px',
+					disabled: false
 				}
 			}
 		}
@@ -252,12 +343,168 @@ const App = new Vue({
 
 
 		/**
-		 * Set Properties
-		 * @param {String} prop       [Property name]
-		 * @param {String|Number|Object|Array} value  [Properties Value]
+		 * Convert NaN to auto
+		 * @param  {Number} int
+		 * @param  {Boolean} useAuto
+		 * 
+		 * @return {void}
 		 */
-		setProperties (prop, value) {
-			dot.set(`${prop}`, value, this.selected.properties[this.screenView])
+		autoUnit (value, useAuto) {
+			if (isNaN(value.value)) {
+				useAuto = (useAuto === undefined)? true: useAuto
+				return (useAuto)? 'auto': 0 + value.unit
+			}
+
+			let parsedValue = ((value.value).toString().indexOf('.') > 0)? parseFloat(value.value): parseInt(value.value)
+			return parsedValue + value.unit
+		},
+
+
+		/**
+		 * Render rgba color
+		 * @param  {colors} value
+		 * @return {void}
+		 */
+		rgbaColor (value) {
+			return `rgba(${value.rgba.r}, ${value.rgba.g}, ${value.rgba.b}, ${value.rgba.a})`
+		},
+
+
+		/**
+		 * CSS Style watcher
+		 * @param  {Object} data
+		 * @return {Object}
+		 */
+		styleWatcher (data) {
+			let self = this, obj = {}
+
+			_.each(data.props, function (properties, breakpoint) {
+				let style = {
+					position: properties.position.value,
+
+					/* Display */
+					display: properties.display.value,
+
+					/* Margin */
+					marginTop: self.autoUnit(properties.marginTop),
+					marginRight: self.autoUnit(properties.marginRight),
+					marginBottom: self.autoUnit(properties.marginBottom),
+					marginLeft: self.autoUnit(properties.marginLeft),
+
+					/* Padding */
+					paddingTop: self.autoUnit(properties.paddingTop),
+					paddingRight: self.autoUnit(properties.paddingRight),
+					paddingBottom: self.autoUnit(properties.paddingBottom),
+					paddingLeft: self.autoUnit(properties.paddingLeft),
+
+					/* Border */
+					borderTop: self.autoUnit(properties.borderTop, false) +' '+ properties.borderTop.borderStyle + ' ' + self.rgbaColor(properties.borderTop.color),
+					borderRight: self.autoUnit(properties.borderRight, false) +' '+ properties.borderRight.borderStyle + ' ' + self.rgbaColor(properties.borderRight.color),
+					borderBottom: self.autoUnit(properties.borderBottom, false) +' '+ properties.borderBottom.borderStyle + ' ' + self.rgbaColor(properties.borderBottom.color),
+					borderLeft: self.autoUnit(properties.borderLeft, false) +' '+ properties.borderLeft.borderStyle + ' ' + self.rgbaColor(properties.borderLeft.color)
+				}
+
+				// Dimension
+				// Width
+				if (! properties.width.disabled) style.width = self.autoUnit(properties.width)
+				if (! properties.minWidth.disabled) style.minWidth = self.autoUnit(properties.minWidth, false)
+				if (! properties.maxWidth.disabled) style.maxWidth = self.autoUnit(properties.maxWidth, false)
+
+				// Height
+				style.height = self.autoUnit(properties.height)
+				if (properties.minHeight.value > 0) style.minHeight = self.autoUnit(properties.minHeight, false)
+				if (properties.maxHeight.value > 0) style.maxHeight = self.autoUnit(properties.maxHeight, false)
+
+				// Position
+				if (properties.position.value === 'absolute' || properties.position.value === 'fixed') {
+					style.top = self.autoUnit(properties.position.settings[properties.position.value].top)
+					style.bottom = self.autoUnit(properties.position.settings[properties.position.value].bottom)
+					style.right = self.autoUnit(properties.position.settings[properties.position.value].right)
+					style.left = self.autoUnit(properties.position.settings[properties.position.value].left)
+				}
+
+				// Display Properties
+				if (properties.display.value === 'flex') {
+					// flex-direction
+					let reverse = (properties.display.settings.flex.container.reverse)? '-reverse': ''
+					style.flexDirection = properties.display.settings.flex.container.direction + reverse
+
+					// flex-wrap
+					let wrap = properties.display.settings.flex.container.wrap,
+					reverseWrap = (properties.display.settings.flex.container.reverseWrap)? '-reverse': ''
+					if (wrap !== 'nowrap') style.flexWrap = wrap + reverseWrap
+					else style.flexWrap = wrap
+
+					// Flex alignment
+					style.alignItems = properties.display.settings.flex.container.alignItems
+					style.justifyContent = properties.display.settings.flex.container.justifyContent
+					style.alignContent = properties.display.settings.flex.container.alignContent
+				}
+
+				// Flex align-self
+				if (properties.getParent().display.value === 'flex' && data.kind === 'column') {
+					style.alignSelf = properties.display.settings.flex.item.alignSelf
+				}
+
+				// Style applied only for row
+				if (data.kind === 'row') {
+					// Set Rows display properties like it's parent
+					properties.display = properties.getParent().display
+
+					// Always set width, height and flex-grow to fill with parent
+					style.flexGrow = 1
+					style.width = '100%'
+					style.height = '100%'
+
+					// Delete position and other unnecesery style
+					_.each(['position',
+						'minWidth', 'maxWidth', 'minHeight', 'maxHeight',
+						'marginTop', 'marginLeft', 'marginRight', 'marginBottom',
+						'paddingTop', 'paddingLeft', 'paddingRight', 'paddingBottom',
+						'borderTop', 'borderLeft', 'borderRight', 'borderBottom'], function (item) {
+						delete style[item]
+					})
+				}
+				
+				// Set style by breakpoint
+				obj[breakpoint] = style
+			})
+
+			return obj
+		},
+
+
+		/**
+		 * CSS Style watcher callback
+		 * @param  {Object|String|Number} value   [New Value]
+		 * @param  {Object|String|Number} old   [Old Value]
+		 * @return {void}
+		 */
+		styleHandler (value, old) {
+			let self = this,
+			newValue = value[self.screenView],
+			oldValue = old[self.screenView]
+
+			self.$nextTick(function () {
+				// Select active element immediately
+				self.selectOutline(self.activeElement(self.selected.element))
+
+				// Set outline canvas for margin
+				if (newValue.marginTop !== oldValue.marginTop
+				|| newValue.marginRight !== oldValue.marginRight
+				|| newValue.marginBottom !== oldValue.marginBottom
+				|| newValue.marginLeft !== oldValue.marginLeft) {
+					self.parent().$broadcast('drawDiagonalOutline', 'margin')
+				}
+
+				// Set outline canvas for padding
+				if (newValue.paddingTop !== oldValue.paddingTop
+				|| newValue.paddingRight !== oldValue.paddingRight
+				|| newValue.paddingBottom !== oldValue.paddingBottom
+				|| newValue.paddingLeft !== oldValue.paddingLeft) {
+					self.parent().$broadcast('drawDiagonalOutline', 'padding')
+				}
+			})
 		},
 
 
@@ -400,7 +647,8 @@ const App = new Vue({
 					self.$broadcast('blockCoords', {
 						top: css.$top,
 						height: css.$height,
-						kind: element.self.kind
+						kind: element.self.kind,
+						parentKind: (element.parent) ? element.parent.kind : null
 					})
 
 					// Notify parent
@@ -424,7 +672,10 @@ const App = new Vue({
 			id = target.getAttribute('data-id')
 
 			self.findElement(id, function (element) {
+
+				// Check for initialization
 				if (element.self) {
+
 					let css = self.outline(target, element.self.props)
 
 					// Get selected breadcrumbs
@@ -442,6 +693,7 @@ const App = new Vue({
 							showBreadcrumbs: false
 						})
 
+						// Set parent selected properties
 						self.parent().$broadcast('selectedProperties', element.self.props)
 					})
 				}
@@ -563,12 +815,36 @@ const App = new Vue({
 				// Generate new id
 				data.id = self.generateId('el')
 
+				// Clone default properties
+				let props = self.cloneObject(self.props)
+
+				// Change properties of data kind
+				switch (data.kind) {
+					case 'column':
+						let width = 100 / data.totalColumn
+						props.width = {value: width, unit: '%'}
+						props.minWidth = {value: width, unit: '%'}
+						props.maxWidth = {value: 100, unit: '%'}
+						props.height = {value: 60, unit: 'px'}
+						props.minHeight = {value: 60, unit: 'px'}
+						delete data.totalColumn
+					break;
+
+					case 'section':
+					case 'container':
+						props.width.disabled = true
+						props.minWidth.disabled = true
+						props.maxWidth.disabled = true
+						props.minHeight = {value: 60, unit: 'px'}
+					break;
+				}
+
 				// Copy default props to breakpoints object, each breakpoint has unique value
 				data.props = {
-					large: self.cloneObject(self.props),
-					medium: self.cloneObject(self.props),
-					small: self.cloneObject(self.props),
-					mini: self.cloneObject(self.props)
+					large: self.cloneObject(props),
+					medium: self.cloneObject(props),
+					small: self.cloneObject(props),
+					mini: self.cloneObject(props)
 				}
 
 				// Get parent element method
@@ -759,8 +1035,12 @@ const App = new Vue({
 
 				// Reorder index
 				self.reorderElementIndex()
+
+				// Get next element to be selected
 				self.$nextTick(function () {
 					async.waterfall([
+
+						// If there is another child select first child
 						function (next) {
 							if (element.parent.elements.length > 0) {
 								next(true, element.parent.elements[0].id)
@@ -769,9 +1049,13 @@ const App = new Vue({
 							}
 						},
 
+						// If element parent is row
+						// Delete row and select parent id
+						// Else select parent id
 						function (next) {
 							if (element.parent.kind === 'row') {
 								self.findElement(element.parent.id, function (element) {
+									element.parent.elements.$remove(element.self)
 									next(true, element.parent.id)
 								})
 							} else {
@@ -779,6 +1063,7 @@ const App = new Vue({
 							}
 						}
 					], function (err, nextSelectedId) {
+						// Select next selected id
 						self.eventFire(self.activeElement(nextSelectedId), 'click')
 					})					
 				})
@@ -919,6 +1204,7 @@ const App = new Vue({
 										child: true,
 										index: 0,
 										breadcrumb: _data.kind,
+										totalColumn: columnSize,
 										to: row.self.id
 									})
 								)
@@ -944,11 +1230,8 @@ const App = new Vue({
 		// Notify layout is ready
 		self.selectOutline(document.body)
 		self.$nextTick(function () {
-			self.parent().$broadcast('viewerReady', this)
+			self.parent().$broadcast('viewerReady')
 		})
-
-		// On set properties
-		self.$on('setProperties', self.setProperties)
 
 		/**
 		 * When new block added, add element and notify block wrapper to close
@@ -1011,6 +1294,7 @@ const App = new Vue({
 		 */
 		self.$on('changeScreenView', function (breakpoint) {
 			self.$set('screenView', breakpoint)
+			self.$broadcast('changeScreenView', breakpoint)
 			self.$nextTick(function () {
 				self.eventFire(self.activeElement(self.selected.element), 'click')
 			})
