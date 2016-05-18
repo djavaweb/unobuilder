@@ -328,6 +328,13 @@ html, body, #app {
     height: 30px;
     .button();
 
+    &.disabled, &.disabled:hover {
+        opacity: 0.5;
+        background-color: @gunmetal;
+        box-shadow: none;
+        cursor: ;
+    }
+
     &.display-block {
         background-image: url('../img/display-block.svg');
     }
@@ -662,14 +669,7 @@ html, body, #app {
     position: relative;
 
     &.over {
-        background-color: @soft-grey !important;
-        color: @prop-bg !important;
-        > label, > label a {
-            color: @prop-bg !important;
-        }
-        > label a {
-            text-decoration: underline;
-        }
+        border-color: @sky-blue;
     }
 
     &.margin {
@@ -680,6 +680,7 @@ html, body, #app {
 
     &.border {
         height: 85px;
+        border-style: solid;
         background-color: @prop-bg-border;
     }
 
@@ -790,11 +791,12 @@ html, body, #app {
         font-size: 11px;
         color: @white;
         margin-right: 10px;
-        width: 70px;
+        width: 90px;
         display: inline-block;
     }
     button {
         .button();
+        border-radius: 1px;
         line-height: normal;
         outline: none;
         width: 100%;
@@ -802,9 +804,18 @@ html, body, #app {
         color: @white;
         margin-top: 15px;
         padding: 6px 0;
+        &:hover {
+            background-color: @charcoal-grey-three;
+            box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.2), inset 0px 1px 0px 0px rgba(255, 255, 255, 0.1);
+        }
+        &:active {
+            background-color: @dark;
+            box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.8);
+        }
     }
     select {
         margin-bottom: 5px;
+        width: 60px;
     }
 }
 
@@ -822,7 +833,10 @@ html, body, #app {
     .input-number-wrapper {
         background-color: #171a1b;
         position: relative;
-        padding: 1px 30px 1px 5px;
+        padding: 1px 25px 1px 5px;
+        &.focus {
+            box-shadow: 0 0px 2px 1px @normal-sky-blue
+        }
     }
 
     .input-number-wrapper, input {
@@ -831,29 +845,65 @@ html, body, #app {
 
     .unit-toggler {
         position: absolute;
-        top: 0;
-        right: 15px;
+        top: 1px;
+        right: 14px;
         width: 15px;
-        a {
-            font-size: 11px;
+        > a {
+            font-size: 10px;
             color: @white;
+            padding: 2px;
+            margin: 4px 0;
+            line-height: 10px;
+            border-radius: 2px;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            position: relative;
+            z-index: 999;
+            &:hover, &.select-unit {
+                background: @charcoal-grey;
+            }
+            &.select-unit {
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+                padding-bottom: 5px;
+            }
         }
     }
 
     .unit-select {
-        width: 15px;
-        top: 0px;
-        right: -3px;
+        width: 35px;
+        top: 20px;
+        right: 0;
         font-size: 11px;
-        background: #171a1b;
-        padding: 2px 5px;
+        background: @charcoal-grey;
+        padding: 2px 0;
         position: absolute;
         text-align: center;
-        z-index: 999;
+        border-radius: 2px;
+        border-top-right-radius: 0;
+        z-index: 998;
+        box-shadow: 0 0 2px 1px rgba(0,0,0,0.5);
+        text-align: center;
+        a {
+            display: block;
+            font-size: 11px;
+            line-height: 10px;
+            border-bottom: 1px solid #313131;
+            padding: 2px 5px 4px;
+            color: @white;
+            text-decoration: none;
+            &:hover {
+                background-color: #646A6C;
+            }
+            &:last-child {
+                border-bottom: none;
+            }
+        }
     }
 
     input {
-        width: 25px;
+        width: 30px;
         background: none;
         outline: none;
         border: none;

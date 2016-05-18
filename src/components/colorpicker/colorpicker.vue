@@ -68,7 +68,7 @@ import alpha from './common/Alpha.vue'
 let presetColors = [
   '#2ecc71', '#27ae60', '#3498db', '#9b59b6', '#f1c40f', '#e67e22', '#e74c3c', '#34495e', 
   '#1abc9c', '#16a085', '#2980b9', '#8e44ad', '#f39c12', '#d35400', '#c0392b', '#2c3e50',
-  '#ecf0f1', '#95a5a6', '#bdc3c7', '#7f8c8d'
+  '#ecf0f1', '#bdc3c7', '#95a5a6', '#7f8c8d'
 ]
 
 export default {

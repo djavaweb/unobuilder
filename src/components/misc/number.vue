@@ -1,14 +1,15 @@
 <template>
 <div class="input-number" :class="{disabled: disabled}">
 	<label v-if="label" :style="{width: labelWidth}">{{label}}</label>
-	<div class="input-number-wrapper">
-		<input type="text" number min="{{min}}" max="{{max}}" step="{{step}}" v-model="value" :disabled="disabled">
-		<div class="unit-toggler">
-			<a @click="toggleSelectUnit()">{{selectedUnit}}</a>
+	<div class="input-number-wrapper" :class="{focus: isFocus}">
+		<input type="text" min="{{min}}" max="{{max}}" step="{{step}}" v-model="value" :disabled="disabled" placeholder="None" @focus="focus()" @blur="blur()">
+		<div class="unit-toggler" v-show="value!==''">
+			<a @click="toggleSelectUnit()" :class="{'select-unit': selectUnit}">{{selectedUnit}}</a>
 			<div class="unit-select" v-show="selectUnit">
 				<a @click="changeUnit('px')">px</a>
-				<a @click="changeUnit('em')">em</a>
 				<a @click="changeUnit('%')">%</a>
+				<a @click="changeUnit('vh')">vh</a>
+				<a @click="changeUnit('em')">em</a>
 			</div>
 		</div>
 		<a class="increase uk-icon-caret-up" @mousedown="increase()" @mouseup="clearTimer()"></a>
@@ -23,7 +24,7 @@ export default {
 	props: {
 		value: {
 			required: true,
-			default: 0
+			default: ''
 		},
 		label: {
 			required: true,
@@ -82,7 +83,7 @@ export default {
 
 			this.timer = setInterval(function () {
 				value = parseInt(self.value)
-				self.$set('value', value + 1)
+				if (value < self.max) self.$set('value', value + self.step)
 			}, 100)
 		},
 
@@ -96,7 +97,7 @@ export default {
 
 			this.timer = setInterval(function () {
 				value = parseInt(self.value)
-				self.$set('value', value - 1)
+				if (value > self.min) self.$set('value', value - self.step)
 			}, 100)
 		},
 
@@ -109,9 +110,27 @@ export default {
 		},
 
 
+		/**
+		 * Toggle show/hide unit selector
+		 * @return {void}
+		 */
 		toggleSelectUnit () {
 			if (this.disabled) return
 			this.$set('selectUnit', !this.selectUnit)
+		},
+
+
+		/**
+		 * Input on :focus
+		 * @return {void}
+		 */
+		focus () {
+			this.$set('isFocus', true)
+			this.$set('selectUnit', false)
+		},
+
+		blur () {
+			this.$set('isFocus', false)
 		}
 	},
 
@@ -124,6 +143,7 @@ export default {
 		return {
 			id: '',
 			selectUnit: false,
+			isFocus: false,
 			timer: null,
 			units: ['px', 'em', '%']
 		}	

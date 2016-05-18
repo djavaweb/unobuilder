@@ -181,7 +181,7 @@ export default {
 			
 			let style = {}, top
 
-			if (self.index === 0) top = coords.top + coords.height
+			if (coords.top < 20) top = coords.top + coords.height
 			else top = coords.top - 30
 
 			style.transform = `translateY(${top}px)`

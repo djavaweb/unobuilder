@@ -26,6 +26,7 @@
 		</div>
 
 		<div class="canvas-builder">
+			<context-menu :menus="contextMenu.list" :position="contextMenu.position" :show="contextMenu.show"></context-menu>
 			<div class="canvas-outline">
 				<canvas class="canvas-all"></canvas>
 				<canvas class="canvas-top"></canvas>
@@ -78,7 +79,7 @@
 				<div class="pop-input-overlay" v-if="popInput.show" @click="hidePopInput()"></div>
 				<div class="pop-input-inner">
 					<div class="pop-input-up" v-if="popInput.show" :style="popInput.style" :class="[popInput.position]">
-						<number :value.sync="popInputValue" :unit.sync="popInputUnit" :label="popInput.label" label-width="70px"></number>
+						<number :value.sync="popInputValue" :unit.sync="popInputUnit" :label="popInput.label" label-width="90px" :min="popInput.inputMin"></number>
 						<div v-if="popInput.editBorder">
 							<label>Border Style</label>
 							<select v-model="popInputBorderStyle">
@@ -96,12 +97,26 @@
 
 			<div class="accordion-panel uk-accordion" data-uk-accordion v-show="validProps()">
 				<!-- properties.display -->
-				<accordion-item title="Display" :with-switcher="true" :switcher="true" switcher-label="Advanced">
+				<accordion-item title="Display" :with-switcher="false" switcher-label="Advanced">
 					<accordion-item-view title="Display Settings">
 						<div class="button-group">
-							<rect-button :active="getProps('display.value', 'block')" @click="setProps('display.value', 'block')" class="display-block"></rect-button>
-							<rect-button :active="getProps('display.value', 'flex')" @click="setProps('display.value', 'flex')" class="display-flex"></rect-button>
-							<rect-button :active="getProps('display.value', 'none')" @click="setProps('display.value', 'none')" class="display-none"></rect-button>
+							<rect-button
+							:disabled="getProps('display.disabled')"
+							:active="getProps('display.value', 'block')"
+							@click="!getProps('display.disabled')? setProps('display.value', 'block'): null" 
+							class="display-block"></rect-button>
+
+							<rect-button 
+							:disabled="getProps('display.disabled') || getProps('disableDisplayFlex')()"
+							:active="getProps('display.value', 'flex')"
+							@click="(!getProps('display.disabled') && !getProps('disableDisplayFlex')())? setProps('display.value', 'flex'): null"
+							class="display-flex"></rect-button>
+
+							<rect-button
+							:disabled="getProps('display.disabled')"
+							:active="getProps('display.value', 'none')"
+							@click="!getProps('display.disabled')? setProps('display.value', 'none'): null"
+							class="display-none"></rect-button>
 						</div>
 					</accordion-item-view>
 
@@ -293,7 +308,7 @@
 				<!-- ./end of properties.display -->
 
 				<!-- properties.position -->
-				<accordion-item title="Position" :with-switcher="true" :switcher="true" switcher-label="Advanced">
+				<accordion-item title="Position" :with-switcher="false" switcher-label="Advanced">
 					<div class="prop-position-outline"
 					@mouseover="propPositionOver($event)"
 					@mouseleave="propPositionLeave($event)">
@@ -303,28 +318,32 @@
 							@click="showPopInput($event, {
 								position: 'bottom',
 								label: 'Position Top',
-								input: 'position.settings.' + getProps('position.value') + '.top'
+								input: 'position.settings.' + getProps('position.value') + '.top',
+								inputMin: -1000
 							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.top') }}</dt>
 
 							<dt class="right"
 							@click="showPopInput($event, {
 								position: 'bottom',
 								label: 'Position Right',
-								input: 'position.settings.' + getProps('position.value') + '.right'
+								input: 'position.settings.' + getProps('position.value') + '.right',
+								inputMin: -1000
 							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.right', ' ') }}</dt>
 
 							<dt class="bottom"
 							@click="showPopInput($event, {
 								position: 'bottom',
 								label: 'Position Bottom',
-								input: 'position.settings.' + getProps('position.value') + '.bottom'
+								input: 'position.settings.' + getProps('position.value') + '.bottom',
+								inputMin: -1000
 							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.bottom') }}</dt>
 
 							<dt class="left"
 							@click="showPopInput($event, {
 								position: 'bottom',
 								label: 'Position Left',
-								input: 'position.settings.' + getProps('position.value') + '.left'
+								input: 'position.settings.' + getProps('position.value') + '.left',
+								inputMin: -1000
 							})">{{ unitValueOf('position.settings.' + getProps('position.value') + '.left', ' ') }}</dt>
 						</dl>
 
@@ -338,28 +357,32 @@
 									@click="showPopInput($event, {
 										position: 'top',
 										label: 'Margin Top',
-										input: 'marginTop'
+										input: 'marginTop',
+										inputMin: -1000
 									})">{{ unitValueOf('marginTop') }}</dt>
 
 									<dt class="right"
 									@click="showPopInput($event, {
 										position: 'right',
 										label: 'Margin Right',
-										input: 'marginRight'
+										input: 'marginRight',
+										inputMin: -1000
 									})">{{ unitValueOf('marginRight', ' ') }}</dt>
 
 									<dt class="bottom"
 									@click="showPopInput($event, {
 										position: 'bottom',
 										label: 'Margin Bottom',
-										input: 'marginBottom'
+										input: 'marginBottom',
+										inputMin: -1000
 									})">{{ unitValueOf('marginBottom') }}</dt>
 
 									<dt class="left"
 									@click="showPopInput($event, {
 										position: 'left',
 										label: 'Margin Left',
-										input: 'marginLeft'
+										input: 'marginLeft',
+										inputMin: -1000
 									})">{{ unitValueOf('marginLeft', ' ') }}</dt>
 								</dl>
 								<div class="inner">
@@ -373,7 +396,8 @@
 												position: 'top',
 												label: 'Border Width',
 												input: 'borderTop',
-												editBorder: true
+												editBorder: true,
+												inputMin: 0
 											})">{{ unitValueOf('borderTop') }}</dt>
 
 											<dt class="right"
@@ -381,7 +405,8 @@
 												position: 'right',
 												label: 'Border Width',
 												input: 'borderRight',
-												editBorder: true
+												editBorder: true,
+												inputMin: 0
 											})">{{ unitValueOf('borderRight', ' ') }}</dt>
 
 											<dt class="bottom"
@@ -389,7 +414,8 @@
 												position: 'bottom',
 												label: 'Border Width',
 												input: 'borderBottom',
-												editBorder: true
+												editBorder: true,
+												inputMin: 0
 											})">{{ unitValueOf('borderBottom') }}</dt>
 
 											<dt class="left"
@@ -397,7 +423,8 @@
 												position: 'left',
 												label: 'Border Width',
 												input: 'borderLeft',
-												editBorder: true
+												editBorder: true,
+												inputMin: 0
 											})">{{ unitValueOf('borderLeft', ' ') }}</dt>
 										</dl>
 										<div class="inner">
@@ -410,28 +437,32 @@
 													@click="showPopInput($event, {
 														position: 'top',
 														label: 'Padding Top',
-														input: 'paddingTop'
+														input: 'paddingTop',
+														inputMin: 0
 													})">{{ unitValueOf('paddingTop') }}</dt>
 
 													<dt class="right"
 													@click="showPopInput($event, {
 														position: 'top',
 														label: 'Padding Right',
-														input: 'paddingRight'
+														input: 'paddingRight',
+														inputMin: 0
 													})">{{ unitValueOf('paddingRight', ' ') }}</dt>
 
 													<dt class="bottom"
 													@click="showPopInput($event, {
 														position: 'top',
 														label: 'Padding Bottom',
-														input: 'paddingBottom'
+														input: 'paddingBottom',
+														inputMin: 0
 													})">{{ unitValueOf('paddingBottom') }}</dt>
 
 													<dt class="left"
 													@click="showPopInput($event, {
 														position: 'top',
 														label: 'Padding Left',
-														input: 'paddingLeft'
+														input: 'paddingLeft',
+														inputMin: 0
 													})">{{ unitValueOf('paddingLeft', ' ') }}</dt>
 												</dl>
 											</div>
@@ -448,14 +479,14 @@
 				<accordion-item title="Size" :with-switcher="true" :switcher.sync="tabAdvanced.size" switcher-label="Advanced">
 					<div class="uk-grid uk-grid-small">
 						<div class="uk-width-5-10">
-							<number :value.sync="sizeWidth" :unit.sync="sizeWidthUnit" :disabled="properties.width.disabled" label="Width"></number>
-							<number :value.sync="sizeMinWidth" :unit.sync="sizeMinWidthUnit" :disabled="properties.minWidth.disabled" label="Min" v-show="tabAdvanced.size" transition="fade"></number>
-							<number :value.sync="sizeMaxWidth" :unit.sync="sizeMaxWidthUnit" :disabled="properties.maxWidth.disabled" label="Max" v-show="tabAdvanced.size" transition="fade"></number>
+							<number :value.sync="sizeWidth" :unit.sync="sizeWidthUnit" :disabled="properties.width.disabled" label="Width" :max="1000"></number>
+							<number number :value.sync="sizeMinWidth" :unit.sync="sizeMinWidthUnit" :disabled="properties.minWidth.disabled" label="Min" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
+							<number number :value.sync="sizeMaxWidth" :unit.sync="sizeMaxWidthUnit" :disabled="properties.maxWidth.disabled" label="Max" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
 						</div>
 						<div class="uk-width-5-10">
-							<number :value.sync="sizeHeight" :unit.sync="sizeHeightUnit" label="Height"></number>
-							<number :value.sync="sizeMinHeight" :unit.sync="sizeMinHeightUnit" label="Min" v-show="tabAdvanced.size" transition="fade"></number>
-							<number :value.sync="sizeMaxHeight" :unit.sync="sizeMaxHeightUnit" label="Max" v-show="tabAdvanced.size" transition="fade"></number>
+							<number :value.sync="sizeHeight" :unit.sync="sizeHeightUnit" label="Height" :max="1000"></number>
+							<number number :value.sync="sizeMinHeight" :unit.sync="sizeMinHeightUnit" label="Min" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
+							<number number :value.sync="sizeMaxHeight" :unit.sync="sizeMaxHeightUnit" label="Max" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
 						</div>
 					</div>
 					<div style="padding-bottom: 100px"></div>
@@ -490,6 +521,7 @@ import accordionExpandView from '../accordion/expand-view.vue'
 // Import misc component
 import rectButton from '../misc/rect-button.vue'
 import Number from '../misc/number.vue'
+import contextMenu from '../misc/contextmenu.vue'
 
 import colorPicker from '../colorpicker/colorpicker.vue'
 
@@ -505,7 +537,7 @@ export default {
 	 */
 	components: {
 		accordionItem, accordionItemView, accordionExpandView,
-		elementItem, rectButton, Number, colorPicker
+		elementItem, rectButton, Number, colorPicker, contextMenu
 	},
 
 	/**
@@ -597,7 +629,22 @@ export default {
 			},
 
 			/* Dragging Element Item */
-			dragging: false
+			dragging: false,
+
+			/* Context Menu */
+			contextMenu: {
+				list: [
+					{label: 'Copy', shortcut: '&#8984;+c', click: this.contextFn('copy')},
+					{label: 'Paste', shortcut: '&#8984;+v', click: this.contextFn('paste')},
+					{label: 'Delete', shortcut: 'del', click: this.contextFn('delete'), over: this.contextFn('removeover', true), leave: this.contextFn('removeleave', true)},
+					'-',
+					{label: 'Copy Style', shortcut: '&#8984;+&#8679;+c', click: this.contextFn('copyStyle')},
+					{label: 'Paste Style', shortcut: '&#8984;+&#8679;+c', click: this.contextFn('pasteStyle')},
+					{label: 'Clear Style', shortcut: '&#8679;+del', click: this.contextFn('clearStyle')},
+				],
+				position: {},
+				show: false
+			},
 		}
 	},
 
@@ -789,7 +836,7 @@ export default {
 			},
 
 			set (value) {
-				this.setProps(`height.value`, value)
+				this.setProps('height.value', value)
 			}
 		},
 
@@ -887,39 +934,18 @@ export default {
 		 * @param {String|Number|Array|Object} value
 		 */
 		setProps (prop, value) {
-			let self = this,
-			changeData = function (p, v) {
-				if (self.screenView === 'large') {
-					console.log('large')
-					dot.set(`${p}`, v, self.layout.selected.properties['large'])
-				}
-				
-				if (self.screenView === 'large' || self.screenView === 'medium') {
-					console.log('medium')
-					dot.set(`${p}`, v, self.layout.selected.properties['medium'])
-				}
+			let self = this
 
-				if (self.screenView === 'large' || self.screenView === 'medium' || self.screenView === 'small') {
-					console.log('small')
-					dot.set(`${p}`, v, self.layout.selected.properties['small'])
-				}
-
-				if (self.screenView === 'large' || self.screenView === 'medium' || self.screenView === 'small' || self.screenView === 'mini') {
-					console.log('small')
-					dot.set(`${p}`, v, self.layout.selected.properties['mini'])
-				}
-			}
-
-			if (_.isArray(prop)) {
+			if (_.isArray(prop) && prop.length > 0) {
 				// Change multiple data from array
 				_.each(prop, function (item, index) {
 					self.$nextTick(function () {
-						changeData(item.prop, item.value)
+						dot.set(`${item.prop}`, item.value, self.layout.selected.properties[self.screenView])
 					})
 				})
 			} else {
 				// Single properties
-				changeData(prop, value)
+				dot.set(`${prop}`, value, self.layout.selected.properties[self.screenView])
 			}
 
 			// Set selected properties after changed
@@ -977,6 +1003,7 @@ export default {
 		setRightBarView (view) {
 			this.$set('rightBarView', view)
 			this.hidePopInput()
+			this.$emit('hideContextMenu')
 		},
 
 
@@ -1017,6 +1044,8 @@ export default {
 			} else {
 				this.layout.$emit('elementSelect', breadcrumb)
 			}
+
+			this.$emit('hideContextMenu')
 		},
 
 
@@ -1249,6 +1278,38 @@ export default {
 		 */
 		hidePopInput () {
 			this.$set('popInput.show', false)
+		},
+
+
+		/**
+		 * Context function
+		 * @param  {String} cmd
+		 * @param  {Boolean} customEvent
+		 * @return {void}
+		 */
+		contextFn (cmd, customEvent) {
+			let self = this
+
+			if (!customEvent) {
+				return function () {
+					self.layout.$emit('keyCapture', cmd)
+					self.$set('contextMenu.show', false)
+				}
+			} else {
+				switch (cmd) {
+					case 'removeover':
+						return function () {
+							self.outlineRemoveOver()
+						}
+					break;
+
+					case 'removeleave':
+						return function () {
+							self.outlineRemoveLeave()
+						}
+					break;
+				}
+			}
 		}
 	},
 
@@ -1402,6 +1463,36 @@ export default {
 		}, true)
 
 
+
+		/**
+		 * Context Menu
+		 */
+		self.$on('showContextMenu', function (coords) {
+			// Get gutter between canvas and iframe
+			let canvasWidth = document.querySelector('.canvas-builder').getBoundingClientRect().width,
+			layoutViewerWidth = document.querySelector('[data-layout-viewer]').getBoundingClientRect().width,
+			gutter = canvasWidth - layoutViewerWidth
+
+			// Get top and left position
+			let left = coords.left + (gutter / 2),
+			top = coords.top + self.boundTop
+
+			// Set context menu position
+			self.$set('contextMenu.position', {
+				top: top + 'px',
+				left: left + 'px'
+			})
+
+			// Show context menu
+			self.$set('contextMenu.show', true)
+		})
+
+		// Hide context menu
+		self.$on('hideContextMenu', function () {
+			self.$set('contextMenu.show', false)
+		})
+
+
 		// Keyboard Event Binding using Mousetrap
 		// Copy element
 		Mousetrap.bind(['ctrl+c', 'command+c'], function () {
@@ -1416,6 +1507,21 @@ export default {
 		// Delete element
 		Mousetrap.bind('del', function () {
 			self.layout.$emit('keyCapture', 'delete')
+		})
+
+		// Copy element style
+		Mousetrap.bind(['ctrl+shift+c', 'command+shift+c'], function () {
+			self.layout.$emit('keyCapture', 'copyStyle')
+		})
+
+		// Paste element style
+		Mousetrap.bind(['ctrl+shift+v', 'command+shift+v'], function () {
+			self.layout.$emit('keyCapture', 'pasteStyle')
+		})
+
+		// Clear element style
+		Mousetrap.bind(['ctrl+shift+del', 'command+shift+del'], function () {
+			self.layout.$emit('keyCapture', 'clearStyle')
 		})
 
 		// Select using left and up

@@ -1,6 +1,7 @@
 // Modules
 import Vue from 'vue'
 import dot from 'dot-object'
+import diff from 'deep-diff'
 import _ from 'underscore'
 import async from 'async'
 import Mousetrap from './mousetrap.min.js'
@@ -46,7 +47,12 @@ const App = new Vue({
 				properties: null
 			},
 
+			hovered: {
+				element: null
+			},
+
 			copiedElement: null,
+			copiedElementStyle: null,
 			screenView: 'large',
 
 			/**
@@ -62,6 +68,7 @@ const App = new Vue({
 			props: {
 				display: {
 					value: 'block',
+					disabled: false,
 					settings: {
 						flex: {
 							container: {
@@ -160,6 +167,10 @@ const App = new Vue({
 					value: 0,
 					unit: 'px',
 					borderStyle: 'solid',
+					radius: {
+						value: 0,
+						unit: 'px'
+					},
 					color: {
 						hex: '#000000',
 						hsl: {
@@ -187,6 +198,10 @@ const App = new Vue({
 					value: 0,
 					unit: 'px',
 					borderStyle: 'solid',
+					radius: {
+						value: 0,
+						unit: 'px'
+					},
 					color: {
 						hex: '#000000',
 						hsl: {
@@ -214,6 +229,10 @@ const App = new Vue({
 					value: 0,
 					unit: 'px',
 					borderStyle: 'solid',
+					radius: {
+						value: 0,
+						unit: 'px'
+					},
 					color: {
 						hex: '#000000',
 						hsl: {
@@ -241,6 +260,10 @@ const App = new Vue({
 					value: 0,
 					unit: 'px',
 					borderStyle: 'solid',
+					radius: {
+						value: 0,
+						unit: 'px'
+					},
 					color: {
 						hex: '#000000',
 						hsl: {
@@ -371,6 +394,58 @@ const App = new Vue({
 
 
 		/**
+		 * Watch all properties for breakpoints
+		 * @param  {Object} props
+		 * @return {void}
+		 */
+		breakpointWatcher (props) {
+			let properties = {}
+
+			_.each(props, function (value, prop) {
+				properties[prop] = value
+			})
+
+			return properties
+		},
+
+
+		/**
+		 * Apply individual properties change of selected screen
+		 * @param  {Object} data
+		 * @param  {Object} value
+		 * @param  {Object} cache
+		 * @param  {String} src
+		 * @param  {String} dest
+		 * @return {void}
+		 */
+		breakpointPropApplyChange (data, value, cache, src, dest) {
+			// Get diff new value and old value
+			let self = this, propDiff = diff.diff(value, cache[`${data.id}-${src}`])
+
+			// Iterate and apply new value for each properties
+			if (propDiff && propDiff.length > 0) {
+				_.each(propDiff, function (diff, key) {
+					if (diff.path && diff.path.length > 0) {
+						// Get object path
+						let propValue = dot.pick(diff.path.join('.'), value)
+
+						// Set properties
+						dot.set(diff.path.join('.'), propValue, data.props[dest])
+
+					} else if (diff.kind === 'D') {
+
+						data.props[dest] = self.cloneObject(diff.lhs, true)
+
+					}
+				})
+			}
+
+			// Set old value cache
+			cache[`${data.id}-${src}`] = self.cloneObject(value, true)
+		},
+
+
+		/**
 		 * CSS Style watcher
 		 * @param  {Object} data
 		 * @return {Object}
@@ -465,7 +540,7 @@ const App = new Vue({
 						delete style[item]
 					})
 				}
-				
+
 				// Set style by breakpoint
 				obj[breakpoint] = style
 			})
@@ -487,7 +562,9 @@ const App = new Vue({
 
 			self.$nextTick(function () {
 				// Select active element immediately
-				self.selectOutline(self.activeElement(self.selected.element))
+				let activeElement = self.activeElement(self.selected.element)
+				self.selectOutline(activeElement)
+				self.hoverOutline(activeElement, true)
 
 				// Set outline canvas for margin
 				if (newValue.marginTop !== oldValue.marginTop
@@ -643,11 +720,15 @@ const App = new Vue({
 					let css = self.outline(target, element.self.props)
 					if (hide) css.display = 'none'
 
+					// Hover element
+					self.$set('hovered.element', element.self.id)
+
 					// Notify block top position
 					self.$broadcast('blockCoords', {
 						top: css.$top,
 						height: css.$height,
 						kind: element.self.kind,
+						element: element.self.id,
 						parentKind: (element.parent) ? element.parent.kind : null
 					})
 
@@ -678,12 +759,15 @@ const App = new Vue({
 
 					let css = self.outline(target, element.self.props)
 
+					// Set selected element
+					self.$set('selected.element', element.self.id)
+					self.$set('selected.properties', element.self.props)
+
+					// Set parent selected properties
+					self.parent().$broadcast('selectedProperties', element.self.props)
+
 					// Get selected breadcrumbs
 					self.getBreadcrumbs(target, true, function (breadcrumbs) {
-
-						// Set selected element
-						self.$set('selected.element', element.self.id)
-						self.$set('selected.properties', element.self.props)
 
 						// Notify parent to select the element
 						self.parent().$broadcast('elementSelect', {
@@ -692,9 +776,6 @@ const App = new Vue({
 							breadcrumbs: breadcrumbs,
 							showBreadcrumbs: false
 						})
-
-						// Set parent selected properties
-						self.parent().$broadcast('selectedProperties', element.self.props)
 					})
 				}
 			})
@@ -737,17 +818,41 @@ const App = new Vue({
 			// If it's an element (has properties)
 			if (target.classList.contains('element')) {
 
-				// Hide hover outline
-				this.hoverOutline(target, true)
-
 				// Set selected element
 				this.selectOutline(target)
+
+				// Hide hover outline
+				this.hoverOutline(target, true)
+				
 			}
 
+			// Notify to parent to hide pop Input
 			this.parent().$broadcast('hidePopInput')
 			
 			// Notify to parent to hide the left panel
 			this.parent().$broadcast('hideParentPanel')
+
+			// Hide context menu
+			this.parent().$broadcast('hideContextMenu')
+		},
+
+
+		/**
+		 * Right click event, will show context menu
+		 * @param  {Event} event
+		 * @return {void}
+		 */
+		rightclick (event) {
+			event.preventDefault()
+
+			// Click hovered element
+			this.eventFire(this.activeElement(this.hovered.element), 'click')
+
+			// Notify parent to show context menu
+			this.parent().$broadcast('showContextMenu', {
+				top: event.pageY,
+				left: event.pageX
+			})
 		},
 
 
@@ -761,6 +866,14 @@ const App = new Vue({
 			})
 		},
 
+
+		/**
+		 * Reselect element
+		 * @return {void}
+		 */
+		reselectElement () {
+			this.eventFire(this.activeElement(this.selected.element), 'click')
+		},
 
 		/**
 		 * Find Element nested with given ID
@@ -795,6 +908,45 @@ const App = new Vue({
 
 
 		/**
+		 * Set default size (width & height) of an element
+		 * @param {Object} props
+		 * @param {Object} data
+		 *
+		 * @return {Object}
+		 */
+		setDefaultSize (props, data) {
+			// Change properties of data kind
+			switch (data.kind) {
+				case 'column':
+					let width = 100 / data.totalColumn
+					props.width = {value: width, unit: '%'}
+					props.minWidth = {value: width, unit: '%'}
+					props.maxWidth = {value: 100, unit: '%'}
+					props.height = {value: 60, unit: 'px'}
+					props.minHeight = {value: 60, unit: 'px'}
+					delete data.totalColumn
+				break
+
+				case 'section':
+					props.width.disabled = true
+					props.minWidth.disabled = true
+					props.maxWidth.disabled = true
+					props.minHeight = {value: 60, unit: 'px'}
+				break
+
+				case 'container':
+					props.width.disabled = true
+					props.minWidth.disabled = true
+					props.maxWidth.disabled = true
+					props.height = {value: 100, unit: '%'}
+				break
+			}
+
+			return props
+		},
+
+
+		/**
 		 * Add Element
 		 *
 		 * @param {Object} data [Type/Kind or etc]
@@ -817,27 +969,7 @@ const App = new Vue({
 
 				// Clone default properties
 				let props = self.cloneObject(self.props)
-
-				// Change properties of data kind
-				switch (data.kind) {
-					case 'column':
-						let width = 100 / data.totalColumn
-						props.width = {value: width, unit: '%'}
-						props.minWidth = {value: width, unit: '%'}
-						props.maxWidth = {value: 100, unit: '%'}
-						props.height = {value: 60, unit: 'px'}
-						props.minHeight = {value: 60, unit: 'px'}
-						delete data.totalColumn
-					break;
-
-					case 'section':
-					case 'container':
-						props.width.disabled = true
-						props.minWidth.disabled = true
-						props.maxWidth.disabled = true
-						props.minHeight = {value: 60, unit: 'px'}
-					break;
-				}
+				props = self.setDefaultSize(props, data)
 
 				// Copy default props to breakpoints object, each breakpoint has unique value
 				data.props = {
@@ -851,6 +983,10 @@ const App = new Vue({
 				_.each(['large', 'medium', 'small', 'mini'], function (item, index) {
 					data.props[item].getParent = function () {
 						return element.self.props[item]
+					}
+
+					data.props[item].disableDisplayFlex = function () {
+						return data.kind === 'section' && data.elements.length > 0 && data.elements[0].kind === 'container'
 					}
 				})
 
@@ -896,6 +1032,7 @@ const App = new Vue({
 
 				// Clone copy and manipulate copy data
 				function (element, next) {
+
 					// search all elements and change Id
 					let copy, copyElement
 					const changeId = function (root) {
@@ -973,14 +1110,20 @@ const App = new Vue({
 								}
 							break;
 
+							case 'container':
+								if (selectedElement.self.kind === 'section'
+								&& selectedElement.self.elements.length > 0
+								|| selectedElement.self.kind === 'body') return
+
+								selectedElement.self.props.large.display.value = 'block'
+								next(null, selectedElement.self, copy)
+							break
+
 							// If we copy section or container to body
 							// Set parent element as body
 							case 'section':
-							case 'container':
-								if (selectedElement.self.kind === 'body') {
-									next(null, self.body, copy)
-								}
-							break;
+								next(null, self.body, copy)
+							break
 						}
 					}
 				},
@@ -1002,7 +1145,7 @@ const App = new Vue({
 						self.$nextTick(function () {
 							// If there is another column
 							// Re-select selected outline
-							self.eventFire(self.activeElement(self.selected.element), 'click')
+							self.reselectElement()
 
 							// Hover copy element
 							self.hoverOutline(self.activeElement(copy.id))
@@ -1175,7 +1318,7 @@ const App = new Vue({
 					case 'column':
 
 						// If there is element in section or container, cancel
-						//if (! element.self.child && element.self.elements.length > 0) return
+						if (element.self.kind === 'section' && element.self.elements.length > 0) return
 
 						// Add row
 						self.addElement({
@@ -1220,11 +1363,14 @@ const App = new Vue({
 		let self = this
 
 		// Set body properties with responsive breakpoints
+		let bodyProps = self.cloneObject(self.props)
+		bodyProps.display.disabled = true
+		
 		self.$set('body.props', {
-			large: self.cloneObject(self.props),
-			medium: self.cloneObject(self.props),
-			small: self.cloneObject(self.props),
-			mini: self.cloneObject(self.props)
+			large: self.cloneObject(bodyProps),
+			medium: self.cloneObject(bodyProps),
+			small: self.cloneObject(bodyProps),
+			mini: self.cloneObject(bodyProps)
 		})
 
 		// Notify layout is ready
@@ -1239,7 +1385,26 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		self.$on('addBlock', function (data) {
-			self.addElement(data)
+			switch (data.kind) {
+				case 'container':
+					let sectionData = self.cloneObject(data)
+					
+					// Overwrite important data of container
+					sectionData.kind = 'section'
+					sectionData.breadcrumb = 'section'
+					sectionData.accept = 'body,section'
+
+					// Add container to section
+					self.addElement(sectionData, function (section) {
+						data.to = section.self.id
+						self.addElement(data)
+					})
+					break
+
+				default:
+					self.addElement(data)
+					break
+			}
 			self.$broadcast('addedBlock')
 		})
 
@@ -1286,6 +1451,7 @@ const App = new Vue({
 		 */
 		window.addEventListener('scroll', function () {
 			self.parent().$broadcast('scroll', document.body.getBoundingClientRect())
+			self.reselectElement()
 		})
 
 
@@ -1296,7 +1462,7 @@ const App = new Vue({
 			self.$set('screenView', breakpoint)
 			self.$broadcast('changeScreenView', breakpoint)
 			self.$nextTick(function () {
-				self.eventFire(self.activeElement(self.selected.element), 'click')
+				self.reselectElement()
 			})
 		})
 
@@ -1330,11 +1496,14 @@ const App = new Vue({
 		/**
 		 * On keyboard event binding
 		 * @param {String} action
+		 * @param {Boolean} isHoveredElement
 		 */
-		self.$on('keyCapture', function (action) {
+		self.$on('keyCapture', function (action, isHoveredElement) {
+			let selectedElement = (isHoveredElement)? self.hovered.element: self.selected.element
+
 			switch (action) {
 				case 'copy':
-					self.findElement(self.selected.element, function (element) {
+					self.findElement(selectedElement, function (element) {
 						self.$set('copiedElement', element.self.id)
 					})
 				break;
@@ -1346,15 +1515,15 @@ const App = new Vue({
 				break;
 
 				case 'delete':
-					if (self.selected.element && self.selected.element !== 'body') {
-						self.removeElement(self.selected.element)
+					if (selectedElement && selectedElement !== 'body') {
+						self.removeElement(selectedElement)
 					}
 				break;
 
 				case 'selectUp':
-					if (self.selected.element && self.selected.element !== 'body') {
+					if (selectedElement && selectedElement !== 'body') {
 						// Find Selected element
-						self.findElement(self.selected.element, function (element) {
+						self.findElement(selectedElement, function (element) {
 							let elementId
 
 							// Get previous element ID
@@ -1374,9 +1543,10 @@ const App = new Vue({
 				break;
 
 				case 'selectDown':
-					if (self.selected.element) {
+					if (selectedElement) {
+
 						// Find Selected element
-						self.findElement(self.selected.element, function (element) {
+						self.findElement(selectedElement, function (element) {
 							let elementId
 
 							// For body
@@ -1402,8 +1572,8 @@ const App = new Vue({
 				break;
 
 				case 'enter':
-					if (self.selected.element) {
-						self.findElement(self.selected.element, function (element) {
+					if (selectedElement) {
+						self.findElement(selectedElement, function (element) {
 							if (element.self.elements.length>0) {
 								let childElement
 
@@ -1421,6 +1591,38 @@ const App = new Vue({
 							}
 						})
 					}
+				break;
+
+				case 'copyStyle':
+					self.findElement(selectedElement, function (element) {
+						self.$set('copiedElementStyle', self.cloneObject(element.self.props[self.screenView], true))
+					})
+				break;
+
+				case 'pasteStyle':
+					if (self.copiedElementStyle && self.copiedElementStyle !== 'body') {
+						self.findElement(selectedElement, function (element) {
+							element.self.props[self.screenView] = self.copiedElementStyle
+							self.$nextTick(function () {
+								self.$set('copiedElementStyle', self.cloneObject(self.copiedElementStyle, true))
+							})
+						})
+					}
+				break;
+
+				case 'clearStyle':
+					self.findElement(selectedElement, function (element) {
+						let props = self.cloneObject(self.props)
+						props = self.setDefaultSize(props, element.self)
+
+						element.self.props[self.screenView] = props
+						element.self.props[self.screenView].getParent = function () {
+							return element.parent.props[self.screenView]
+						}
+						element.self.props[self.screenView].disableDisplayFlex = function () {
+							return element.self.kind === 'section' && element.self.elements.length > 0 && element.self.elements[0].kind === 'container'
+						}
+					})
 				break;
 			}
 		})
@@ -1440,6 +1642,21 @@ const App = new Vue({
 		Mousetrap.bind('del', function () {
 			self.parent().$broadcast('clearCanvas')
 			self.$emit('keyCapture', 'delete')
+		})
+
+		// Copy element style
+		Mousetrap.bind(['ctrl+shift+c', 'command+shift+c'], function () {
+			self.$emit('keyCapture', 'copyStyle')
+		})
+
+		// Paste element style
+		Mousetrap.bind(['ctrl+shift+v', 'command+shift+v'], function () {
+			self.$emit('keyCapture', 'pasteStyle')
+		})
+
+		// Clear element style
+		Mousetrap.bind(['ctrl+shift+del', 'command+shift+del'], function () {
+			self.$emit('keyCapture', 'clearStyle')
 		})
 
 		// Select using left and up

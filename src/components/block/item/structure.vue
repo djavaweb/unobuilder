@@ -20,14 +20,15 @@ export default {
 		 */
 		add (type) {
 			let self = this,
-			breadcrumb = (type === 'container')? 'section + container': type
+			accept = (type === 'section')? 'body,section': 'section'
 
 			self.$dispatch('addBlock', {
 				to: 'body',
 				type: 'section',
-				kind: type,
 				child: false,
-				breadcrumb: breadcrumb,
+				kind: type,
+				breadcrumb: type,
+				accept: accept,
 				index: self.index
 			})
 		}

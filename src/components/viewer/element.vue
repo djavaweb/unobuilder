@@ -1,17 +1,14 @@
 <template>
 	<div v-if="isKind('section')" :class="classListParent" data-id="{{data.id}}" data-index="{{index}}">
 		<slot></slot>
-		<div class="element section" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :style="elementStyle">
+		<div class="element section" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :style="elementStyle" :class="{empty: data.elements.length<1}">
 			<element v-for="element in data.elements" :data="element" :index="$index"></element>
 		</div>
 	</div>
 
-	<div v-if="isKind('container')" :class="classListParent" data-id="{{data.id}}" data-index="{{index}}">
-		<slot></slot>
-		<div class="uk-container uk-container-center" :class="classListParent">
-			<div class="element container" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :style="elementStyle">
-				<element v-for="element in data.elements" :data="element" :index="$index"></element>
-			</div>
+	<div v-if="isKind('container')" class="uk-container uk-container-center" :class="classListParent" :style="containerStyle">
+		<div class="element container" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :style="elementStyle" :class="{empty: data.elements.length<1}">
+			<element v-for="element in data.elements" :data="element" :index="$index"></element>
 		</div>
 	</div>
 
@@ -59,11 +56,15 @@ export default {
 		return {
 			elementStyle: {},
 			screenView: 'large',
-			regValArray: /(.*)\[\]$/g
+			cacheValue: {}
 		}
 	},
 
 	computed: {
+		/**
+		 * Class list for element
+		 * @return {Object}
+		 */
 		classList () {
 			// Basic class
 			let cssClass = {}
@@ -81,6 +82,10 @@ export default {
 			return cssClass
 		},
 
+		/**
+		 * Class list for parent element
+		 * @return {Object}
+		 */
 		classListParent () {
 			let cssClass = $.extend(true, {}, this.classList)
 
@@ -94,6 +99,17 @@ export default {
 			}
 
 			return cssClass
+		},
+
+
+		/**
+		 * Height style only for container
+		 * @return {Object}
+		 */
+		containerStyle () {
+			let cssStyle = {}
+			if (this.elementStyle.height && this.elementStyle.height.indexOf('%') > 0) cssStyle.height = this.elementStyle.height
+			return cssStyle
 		}
 	},
 
@@ -131,8 +147,30 @@ export default {
 	},
 
 	ready () {
-		let self = this
+		let self = this, elementStyle
+
+		// Large watcher
+		self.$watch(function () {
+			return self.$root.breakpointWatcher(self.data.props.large)
+		}, function (value) {
+			self.$root.breakpointPropApplyChange(self.data, value, self.cacheValue, 'large', 'medium')
+		}, {deep: true})
+
+		// Medium Watcher
+		self.$watch(function () {
+			return self.$root.breakpointWatcher(self.data.props.medium)
+		}, function (value) {
+			self.$root.breakpointPropApplyChange(self.data, value, self.cacheValue, 'medium', 'small')
+		}, {deep: true})
+
+		// Small Watcher
+		self.$watch(function () {
+			return self.$root.breakpointWatcher(self.data.props.small)
+		}, function (value) {
+			self.$root.breakpointPropApplyChange(self.data, value, self.cacheValue, 'small', 'mini')
+		}, {deep: true})
 		
+
 		// Watcher
 		self.$watch(function () {
 			return self.$root.styleWatcher(self.data)
@@ -140,41 +178,35 @@ export default {
 			// If current element is flex, forc echild align-self as align-items
 			if (value[self.screenView].display === 'flex') self.$broadcast('childAlignSelf', value[self.screenView].alignItems)
 
-			// Set element style
-			self.$set('elementStyle', value[self.screenView])
-
 			// Style handler
 			self.$root.styleHandler(value, old)
+
+			// Set element style
+			self.$set('elementStyle', value[self.screenView])
 		}, {deep: true})
 
-		// When ready apply style immediately
-		let elementStyle = self.$root.styleWatcher(self.data)
-		self.$set('elementStyle', elementStyle[self.screenView])
 
-
-		// When 
+		// When flex container change align-items, all children will auto update it's align-self property
 		self.$on('childAlignSelf', function (alignItems) {
 			self.data.props[self.screenView].display.settings.flex.item.alignSelf = alignItems
 		})
 
 		// When screen change
-		self.$on('changeScreenView', function (breakpoint, reselectElement) {
-			
+		self.$on('changeScreenView', function (breakpoint) {
+
 			// Set screen breakpoint and it's child
 			self.$set('screenView', breakpoint)
-			self.$broadcast('changeScreenView', breakpoint, false)
+			self.$broadcast('changeScreenView', breakpoint)
 
-			// Get new style
+			// Render new style
 			elementStyle = self.$root.styleWatcher(self.data)
 			self.$set('elementStyle', elementStyle[breakpoint])
-
-			// Re-select selected element
-			if (reselectElement === undefined) {
-				self.$nextTick(function () {
-					self.$root.eventFire(self.$root.activeElement(self.$root.selected.element), 'click')
-				})
-			}
 		})
+
+
+		// When ready apply style immediately
+		elementStyle = self.$root.styleWatcher(self.data)
+		self.$set('elementStyle', elementStyle[self.screenView])
 	}
 }
 </script>

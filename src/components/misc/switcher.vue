@@ -78,7 +78,7 @@ export default {
 	width: 32px;
 	&::after {
 		-webkit-transform: translate3d(0, 0, 0);
-		background: #ffffff;
+		background: #646A6C;
 		border-radius: 100px;
 		content: '';
 		display: block;
