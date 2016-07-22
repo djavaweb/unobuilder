@@ -1,9 +1,6 @@
 <template>
-	<div class="wrapper element" data-id="body">
-		<block v-if="empty(elements)" :index="0"></block>
-		<element v-for="element in elements" :data="element" :index="element.index">
-			<block :child="true" :index="$index" :class="{first: $index===0, last: $index === elements.length-1}"></block>
-		</element>
+	<div class="uno-wrapper uno-el" data-id="body">
+		<element v-for="element in elements" :data="element" :index="element.index"></element>
 	</div>
 </template>
 
@@ -19,15 +16,14 @@ import _ from 'underscore'
 
 // Import child components
 import element from './element.vue'
-import block from '../block/block.vue'
 
 export default {
 	name: 'layout',
-	components: {block, element},
+	components: {element},
 	computed: {
 		/**
 		 * Get elements from $parent
-		 * 
+		 *
 		 * @return {Object}
 		 */
 		elements () {
@@ -38,8 +34,8 @@ export default {
 	methods: {
 		/**
 		 * Check is array empty
-		 * 
-		 * @param  {Array} array 
+		 *
+		 * @param  {Array} array
 		 * @return {Boolean}
 		 */
 		empty (array) {

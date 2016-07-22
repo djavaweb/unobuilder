@@ -1,7 +1,7 @@
 <template>
 <div class="block-wrapper" @mouseleave="closeImmediately()" @mouseover="over()" :class="{active: isActive, child: child}" :style="style">
-	<a class="add-block" @click="toggle()" transition="fade"><i class="uk-icon-plus"></i></a>
-	<div class="block-panel-wrapper">
+	<a class="add-block" @click="toggle()" transition="fade" :class="{top: isTop, 'top-show': show}"></a>
+	<div class="block-panel-wrapper" :class="{top: isTop}">
 		<div class="block-panel animated" v-if="show&&isActive" transition="appear">
 			<ul>
 				<li v-for="item in list">
@@ -49,6 +49,7 @@ export default {
 			show: false,
 			forceShow: true,
 			isActive: false,
+			isTop: false,
 			style: {},
 			block: 'structure'
 		}
@@ -179,12 +180,19 @@ export default {
 		self.$on('blockCoords', function (coords) {
 			if (!self.child) return
 			
-			let style = {}, top
+			let style = {}, top, isTop = false
 
-			if (coords.top < 20) top = coords.top + coords.height
-			else top = coords.top - 30
+			if (coords.top < 20) {
+				top = coords.top + coords.height
+				isTop = true
+			}
+			else {
+				top = coords.top - 35
+				isTop = false
+			}
 
 			style.transform = `translateY(${top}px)`
+			self.$set('isTop', isTop)
 			self.$set('style', style)
 		})
 	}

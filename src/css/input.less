@@ -1,0 +1,129 @@
+.input-text {
+	color: white;
+	background-color: @dark-grey;
+	outline: none;
+	border: none;
+	padding: 5px;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -khtml-box-sizing: border-box;
+	&.full {
+		width: 100%;
+	}
+}
+
+.input-number {
+    margin-bottom: 5px;
+
+    label {
+        font-size: 11px;
+        color: @white;
+        margin-right: 10px;
+        width: 28px;
+        display: inline-block;
+    }
+
+    .input-number-wrapper {
+        background-color: rgba(0, 0, 0, 0.41);
+        position: relative;
+        padding: 1px 25px 2px 5px;
+        &.focus {
+            box-shadow: 0 0px 2px 1px @normal-sky-blue
+        }
+    }
+
+    .input-number-wrapper, input {
+        display: inline-block;
+    }
+
+    .unit-toggler {
+        position: absolute;
+        top: 1px;
+        right: 14px;
+        width: 15px;
+        > a {
+            font-size: 10px;
+            color: @white;
+            padding: 2px;
+            margin: 4px 0;
+            line-height: 10px;
+            border-radius: 2px;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            position: relative;
+            &:hover, &.select-unit {
+                background: @charcoal-grey;
+            }
+            &.select-unit {
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+                padding-bottom: 5px;
+                z-index: 999;
+            }
+        }
+    }
+
+    .unit-select {
+        width: 35px;
+        top: 20px;
+        right: 0;
+        font-size: 11px;
+        background: @charcoal-grey;
+        padding: 2px 0;
+        position: absolute;
+        text-align: center;
+        border-radius: 2px;
+        border-top-right-radius: 0;
+        z-index: 998;
+        box-shadow: 0 0 2px 1px rgba(0,0,0,0.5);
+        text-align: center;
+        a {
+            display: block;
+            font-size: 11px;
+            line-height: 10px;
+            border-bottom: 1px solid #313131;
+            padding: 2px 5px 4px;
+            color: @white;
+            text-decoration: none;
+            &:hover {
+                background-color: #646A6C;
+            }
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+
+    input {
+        width: 30px;
+        background: none;
+        outline: none;
+        border: none;
+        color: @white;
+    }
+
+    .increase, .decrease {
+        position: absolute;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .increase {
+        top: 3px;
+        right: 5px;
+    }
+
+    .decrease {
+        bottom: 1px;
+        right: 5px;
+    }
+
+    &.disabled {
+        input, a, a:before {
+            color: #545454;
+        }
+    }
+}

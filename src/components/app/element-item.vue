@@ -1,6 +1,6 @@
 <template>
 <div class="element-item" @mousedown="dragstart($event)">
-	<div class="icon {{data.icon}}"></div>
+	<div class="icon" :class="[data.class]" :style="style"></div>
 	<div class="label">{{data.label}}</div>
 </div>
 </template>
@@ -20,6 +20,18 @@ export default {
 		return {
 			clone: null,
 			dragging: false
+		}
+	},
+
+	computed: {
+		style () {
+			if (this.data.iconSrc) {
+				return {
+					backgroundImage: 'url(' + this.data.iconSrc + ')'
+				}
+			}
+
+			return {}
 		}
 	},
 

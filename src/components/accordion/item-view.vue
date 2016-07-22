@@ -1,6 +1,6 @@
 <template>
 <div class="accordion-item-view" :class="[borderClass]">
-<label class="title">{{title}}</label>
+<label class="title" v-if="title">{{title}}</label>
 <slot></slot>
 </div>
 </template>
@@ -10,7 +10,6 @@ export default {
 	name: 'accordionItemView',
 	props: {
 		title: {
-			required: true,
 			default: ''
 		},
 

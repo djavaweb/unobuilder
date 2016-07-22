@@ -1,0 +1,74 @@
+{
+	"id": "text",
+	"group": "Component",
+	"label": "Text",
+	"icon": "icon.svg",
+	"view": "<span class=\"test\">Test<\/span> $hello @font_family.value Lorem ipsum dolor sit amet, nemore rationibus pro ea, est nisl vero ei. @font_family.value",
+	"editable": true,
+	"inline": false,
+	"advancedMenu": true,
+	"advancedValue": false,
+	"settings": {
+		"font_family": {
+			"label": "Font Family",
+			"css": "font-family",
+			"value": "Arial",
+			"type": "options",
+			"options": ["Arial", "Tahoma", "Verdana"]
+		},
+
+		"color": {
+			"label": "Color",
+			"css": "color",
+			"value": "#000000",
+			"type": "colorpicker"
+		},
+
+		"test_btn_group": {
+			"label": "Text Style",
+			"type": "buttons",
+			"group": false,
+			"buttons": [
+				{
+					"name": "font_weight",
+					"label": "Font Weight",
+					"css": "font-weight",
+					"value": true,
+					"trueval": "bold",
+					"falseval": "",
+					"type": "toggle",
+					"icon": "icon.svg"
+				},
+
+				{
+					"name": "font_style",
+					"label": "Font Style",
+					"css": "font-style",
+					"value": true,
+					"trueval": "italic",
+					"falseval": "",
+					"type": "toggle",
+					"icon": "icon.svg"
+				}
+			]
+		},
+
+		"test_textfield": {
+			"label": "Text Field",
+			"type": "text",
+			"value": "",
+			"attrs": {
+				"maxlength": 10,
+				"minlength": 10
+			}
+		},
+
+		"test_expandview": {
+			"type": "expandview",
+			"advanced": true,
+			"title": "Text testing"
+		}
+	},
+	"css": ["test.css"],
+	"js": ["test.js"]
+}

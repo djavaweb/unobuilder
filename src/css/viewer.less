@@ -4,28 +4,32 @@
 @import "element.less";
 @import "block.less";
 
-html {
+body {
+	overflow: auto;
+	pointer-events: all;
 	height: 100%;
 }
 
-body {
+[data-id="body"] {
 	height: 100%;
 	min-height: 100vh;
-	pointer-events: all;
 	font-family: 'Open Sans', sans-serif;
 	-webkit-font-smoothing: antialiased;
-	overflow: auto;
 }
 
-.wrapper {
+[contenteditable] {
+	outline:none
+}
+
+.uno-wrapper {
 	position: relative;
     overflow: auto;
     min-height: 100vh !important;
     height: 100%;
 }
 
-.element, .nonelement {
-	&.parent {
+.uno-el, .uno-n-el {
+	&.uno-p {
 		.block-wrapper {
 			display: none;
 
@@ -46,37 +50,38 @@ body {
 	}
 }
 
-.element {
-	min-height: 60px;
-	&.empty {
+.uno-el {
+	cursor: default;
+	&.uno-el.uno-col-empty {
 		outline: 1px dashed rgba(0,0,0,0.5);
 		outline-offset: -1px !important;
 	}
 }
 
-.nonelement {
-	overflow: auto;
+.uno-n-el {
+	/*overflow: auto;
+	overflow-y: hidden;*/
 	pointer-events: none;
-	.element {
+	.uno-el {
 		pointer-events: all;
 	}
 }
 
-.grid {
-	&.column {
-		.element {
+.uno-grid {
+	&.uno-column {
+		>.uno-el {
 			position: relative;
 			min-height: 60px;
-			width: 100%;
+			width: auto;
 			height: 100%;
 
-			&.empty {
+			&.uno-col-empty {
 				&:before {
 					content: ' ';
 					position: absolute;
 					width: 100%;
 					height: 100%;
-					background-color: @soft-grey;
+					background-color: rgba(234, 234, 234, 0.63);
 					top: 0;
 					left: 0;
 				}
@@ -96,10 +101,14 @@ body {
 	}
 }
 
+.uno-inline {
+	display: inline !important;
+}
+
 .element-zindex(@n; @i : 1) when (@i =< @n)
 {
-  .element .element {
-    z-index: (@i + 1);    
+  .uno-el .uno-el {
+    z-index: (@i + 1);
     .element-zindex(@n; (@i + 1));
   }
 }

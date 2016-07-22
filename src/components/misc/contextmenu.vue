@@ -1,5 +1,5 @@
 <template>
-<ul class="_cm" :style="position" v-if="show" @contextmenu="noop(event)">
+<ul class="_cm" :style="position" v-show="show" @contextmenu.capture="noop($event)">
 	<li v-for="item in menus">
 		<span v-if="item === '-'" class="_cm-delimiter"></span>
 		<a @click="click(item.click)" @mouseover="over(item.over)" @mouseleave="leave(item.leave)" v-else>
@@ -14,11 +14,12 @@
 @import "../../css/colors.less";
 
 	._cm {
+		pointer-events: all;
 		position: absolute;
 		width: 200px;
 		background: @dark;
 		list-style: none;
-		padding: 0;
+		padding: 5px 0;
 		margin: 0;
 		border-radius: 4px;
 		box-shadow: 0 0 5px 0px rgba(0, 0, 0, 0.7);
@@ -32,7 +33,7 @@
 		}
 
 		a {
-			padding: 3px 10px;
+			padding: 5px 10px;
 			color: @white;
 			display: block;
 			font-size: 12px;

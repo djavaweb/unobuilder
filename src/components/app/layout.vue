@@ -1,32 +1,50 @@
 <template>
 	<div class="screen-too-small" v-show="screenSize<951"></div>
 	<div class="left-panel">
-		<a @click="toggleElementPanel()" class="toggle-element-panel"><i class="uk-icon-plus"></i></a>
+		<div class="left-panel-buttons">
+			<a @click="toggleElementPanel()" class="toggle-button" :class="{'active': !
+			showCodeEditor}"><i class="uk-icon-plus"></i></a>
+			<a @click="toggleCodeEditorPanel()" class="toggle-button" :class="{'active': showCodeEditor}"><i class="icon-code-editor"></i></a>
+		</div>
+
 		<div class="blackout"></div>
 		<div class="element-chooser-panel animated" v-show="showElementPanel" transition="slideleft">
 			<div class="title">Add Elements <a class="uk-close" @click="toggleElementPanel()"></a></div>
-			<div class="accordion-panel uk-accordion" data-uk-accordion>
+			<div class="search"><input type="text" v-model="searchElement" placeholder="Search Elements" class="input-text full"></div>
+			<accordion-wrapper v-if="elements.component!==null">
 				<accordion-item title="Grid">
-					<element-item v-for="element in elements.grid" :data="element" :class="{'no-space-right': ($index + 1) % 3 === 0}"></element-item>
+					<element-item v-for="element in elements.grid|filterBy searchElement" :data="element" :class="{'no-space-right': ($index + 1) % 3 === 0}"></element-item>
 				</accordion-item>
 
-				<accordion-item title="Component">
-					<element-item v-for="element in elements.component" :data="element" :class="{'no-space-right': ($index + 1) % 3 === 0}"></element-item>
+				<accordion-item :title="name" v-for="(name, components) in elements.component">
+					<element-item v-for="element in components|filterBy searchElement" :data="element" :class="{'no-space-right': ($index + 1) % 3 === 0}"></element-item>
 				</accordion-item>
-			</div>
+			</accordion-wrapper>
 		</div>
 	</div>
 
 	<div class="center-panel">
 		<div class="topbar-panel">
-			<a @click="setScreenView('large')" :class="{active: isScreenView('large')}"><i class="uk-icon-laptop"></i></a>
-			<a @click="setScreenView('medium')" :class="{active: isScreenView('medium')}"><i class="uk-icon-tablet"></i></a>
-			<a @click="setScreenView('small')" :class="{active: isScreenView('small')}"><i class="uk-icon-mobile horizontal"></i></a>
-			<a @click="setScreenView('mini')" :class="{active: isScreenView('mini')}"><i class="uk-icon-mobile"></i></a>
+			<div>&nbsp;</div>
+			<div class="screen-view">
+				<a @click="setScreenView('large')" :class="{active: isScreenView('large')}"><i class="uk-icon-laptop"></i></a>
+				<a @click="setScreenView('medium')" :class="{active: isScreenView('medium')}"><i class="uk-icon-tablet"></i></a>
+				<a @click="setScreenView('small')" :class="{active: isScreenView('small')}"><i class="uk-icon-mobile horizontal"></i></a>
+				<a @click="setScreenView('mini')" :class="{active: isScreenView('mini')}"><i class="uk-icon-mobile"></i></a>
+			</div>
+			<div class="save-view-rollback">
+				<a class="button unre-do"><i class="uk-icon-mail-reply"></i></a>
+				<a class="button unre-do"><i class="uk-icon-mail-forward"></i></a>
+				<a class="button"><i class="uk-icon-eye"></i></a>
+				<a class="button"><i class="uk-icon-save"></i> <span>Save</span></a>
+			</div>
+		</div>
+
+		<div class="code-editor-panel" v-if="showCodeEditor">
+			sfsfwfw
 		</div>
 
 		<div class="canvas-builder">
-			<context-menu :menus="contextMenu.list" :position="contextMenu.position" :show="contextMenu.show"></context-menu>
 			<div class="canvas-outline">
 				<canvas class="canvas-all"></canvas>
 				<canvas class="canvas-top"></canvas>
@@ -35,18 +53,19 @@
 				<canvas class="canvas-left"></canvas>
 			</div>
 			<div class="tools" :style="layoutScroll" :class="breakPointClass">
-				<div class="outline-wrapper">
+				<div class="outline-wrapper" v-if="!componentOnEdit">
 					<div class="outline-tools hovered" :style="outline.hovered.css">
 						<div class="breadcrumbs hover" v-if="outline.hovered.breadcrumbs" :class="hoveredOutlineClass">
 							<div class="selector" v-if="outline.hovered.breadcrumbs.length!==0">
 								<a>{{outline.hovered.breadcrumbs[0].label}}</a>
 							</div>
 						</div>
+						<a class="add-block" @click="showBlockPanel()" v-if="outline.hovered.type === 'section'" :class="hoveredOutlineClass"></a>
 					</div>
 					<div class="outline-tools selected" :style="outline.selected.css" :class="{remove: outline.selected.removeOver}">
 						<div class="breadcrumbs" v-if="outline.selected.breadcrumbs" :class="selectedOutlineClass">
 							<div class="edit-tools">
-								<div class="selector">
+								<div class="selector" @contextmenu="breadcrumbRightClick($event)">
 									<a v-for="breadcrumb in outline.selected.breadcrumbs|limit 3"
 									track-by="$index"
 									:class="{active: $index===0||outline.selected.showBreadcrumbs}"
@@ -62,7 +81,29 @@
 							@mouseleave="outlineRemoveLeave()"
 							@click="remove()"></a>
 						</div>
+						<a class="add-block" @click="showBlockPanel()"
+						:class="selectedOutlineClass"  v-if="outline.selected.type === 'section' || (outline.selected.type === 'body' && outline.selected.childSize<1)"></a>
 					</div>
+				</div>
+
+				<div class="canvas-block animated" v-if="block.panel" :style="block.css" transition="appear">
+					<ul>
+						<li v-for="block in block.items">
+							<a @click="showBlock(block.id)" :class="{selected: isBlock(block.id)}">{{block.label}}</a>
+						</li>
+					</ul>
+
+					<div class="block-items" v-for="block in block.items" v-show="isBlock(block.id)">
+						<div v-for="blockItem in block.items" class="block-item only" :class="[blockItem.kind]" @click="addBlock(blockItem)"></div>
+					</div>
+				</div>
+
+				<div class="canvas-contextmenu">
+					<context-menu :menus="contextMenu.list" :position="contextMenu.position" :show="contextMenu.show"></context-menu>
+				</div>
+
+				<div class="canvas-editor">
+					<editor :element.sync="editor.element" :style="editor.css" v-if="editor.element"></editor>
 				</div>
 			</div>
 			<iframe data-layout-viewer src="./viewer.html" :class="iframeClass"></iframe>
@@ -70,6 +111,10 @@
 	</div>
 
 	<div class="right-panel" @mouseleave="clearCanvas()">
+		<div class="color-picker-popup" v-show="colorPickerShow">
+			<color-picker :colors.sync="colorPickerValue" :popup="true" :ok="hideColorPicker"></color-picker>
+		</div>
+
 		<div class="right-panel-navbar">
 			<a class="edit" @click="setRightBarView('edit')" :class="{active: isRightBarView('edit')}"></a><a @click="setRightBarView('settings')" class="settings" :class="{active: isRightBarView('settings')}"></a><a @click="setRightBarView('style')" class="style" :class="{active: isRightBarView('style')}"></a>
 		</div>
@@ -88,156 +133,187 @@
 								<option value="dashed">Dashed</option>
 							</select>
 
-							<label>Border Color</label> <color-picker :colors.sync="popInputColor"></color-picker>
+							<label>Border Color</label> <color-picker :colors.sync="popInputColor" :palette="false" :click="showColorPicker"></color-picker>
 						</div>
 						<button @click="hidePopInput()">OK</button>
 					</div>
 				</div>
 			</div>
 
-			<div class="accordion-panel uk-accordion" data-uk-accordion v-show="validProps()">
+			<accordion-wrapper v-show="validProps()">
 				<!-- properties.display -->
-				<accordion-item title="Display" :with-switcher="false" switcher-label="Advanced">
-					<accordion-item-view title="Display Settings">
-						<div class="button-group">
-							<rect-button
-							:disabled="getProps('display.disabled')"
-							:active="getProps('display.value', 'block')"
-							@click="!getProps('display.disabled')? setProps('display.value', 'block'): null" 
-							class="display-block"></rect-button>
+				<accordion-item title="Display" :with-switcher="true" switcher-label="Advanced" :switcher.sync="tabAdvanced.display">
+					<accordion-item-view>
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-2-5 bold"><span>Select Type</span></label>
+							<div class="uk-width-3-5">
+								<div class="button-group right">
+									<rect-button
+									:disabled="getProps('display.disabled')"
+									:active="getProps('display.value', 'block')"
+									@click="!getProps('display.disabled')? setProps('display.value', 'block'): null"
+									class="display-block"></rect-button>
 
-							<rect-button 
-							:disabled="getProps('display.disabled') || getProps('disableDisplayFlex')()"
-							:active="getProps('display.value', 'flex')"
-							@click="(!getProps('display.disabled') && !getProps('disableDisplayFlex')())? setProps('display.value', 'flex'): null"
-							class="display-flex"></rect-button>
+									<rect-button
+									:disabled="getProps('display.disabled') || getProps('disableDisplayFlex')()"
+									:active="getProps('display.value', 'flex')"
+									@click="(!getProps('display.disabled') && !getProps('disableDisplayFlex')())? setProps('display.value', 'flex'): null"
+									v-show="tabAdvanced.display"
+									class="display-flex"></rect-button>
 
-							<rect-button
-							:disabled="getProps('display.disabled')"
-							:active="getProps('display.value', 'none')"
-							@click="!getProps('display.disabled')? setProps('display.value', 'none'): null"
-							class="display-none"></rect-button>
+									<rect-button
+									:disabled="getProps('display.disabled')"
+									:active="getProps('display.value', 'none')"
+									@click="!getProps('display.disabled')? setProps('display.value', 'none'): null"
+									class="display-none"></rect-button>
+								</div>
+							</div>
 						</div>
 					</accordion-item-view>
 
-					<accordion-expand-view v-show="getProps('display.value', 'flex') || getParentProps('display.value', 'flex')" v-if="validProps()">
-						<accordion-item-view title="Flex Layout Settings" v-if="getProps('display.value', 'flex')">
+					<accordion-expand-view v-if="validProps() && ((getKind('section') || getKind('container') || getKind('column')) || (getProps('display.value', 'flex') || getParentProps('display.value', 'flex')))">
+
+						<accordion-item-view  title="Flex Layout Settings" v-if="getProps('display.value', 'flex') && tabAdvanced.display">
 							<div class="flex-layout">
-								<div class="row-column">
+								<div class="flex-row-column">
 									<rect-button
+										class="flex-row"
+										:class="{'flex-row--reverse': getProps(
+											'display.settings.flex.container.reverse')}"
 										:active="getProps('display.settings.flex.container.direction', 'row')"
-										@click="setProps('display.settings.flex.container.direction', 'row')" class="flexrow"></rect-button>
+										@click="setProps('display.settings.flex.container.direction', 'row')"></rect-button>
 
 									<rect-button
+										class="flex-column"
+										:class="{'flex-column--reverse': getProps(
+											'display.settings.flex.container.reverse')}"
 										:active="getProps('display.settings.flex.container.direction', 'column')"
-										@click="setProps('display.settings.flex.container.direction', 'column')" class="flexcolumn"></rect-button>
+										@click="setProps('display.settings.flex.container.direction', 'column')"></rect-button>
 								</div>
-								<div class="vline"></div>
-								<div class="column-buttons">
+								<div class="flex-buttons">
 									<rect-button
-										class="col-alignstart"
-										:active="getProps('display.settings.flex.container.alignItems', 'flex-start')"
-										@click="setProps('display.settings.flex.container.alignItems', 'flex-start')"></rect-button>
-									<rect-button
-										class="col-aligncenter"
-										:active="getProps('display.settings.flex.container.alignItems', 'center')"
-										@click="setProps('display.settings.flex.container.alignItems', 'center')"></rect-button>
-									<rect-button
-										class="col-alignend"
-										:active="getProps('display.settings.flex.container.alignItems', 'flex-end')"
-										@click="setProps('display.settings.flex.container.alignItems', 'flex-end')"></rect-button>
-									<rect-button
-										class="col-alignstretch"
-										:active="getProps('display.settings.flex.container.alignItems', 'stretch')"
-										@click="setProps('display.settings.flex.container.alignItems', 'stretch')"></rect-button>
-									<rect-button
-										class="col-alignbaseline"
-										:active="getProps('display.settings.flex.container.alignItems', 'baseline')"
-										@click="setProps('display.settings.flex.container.alignItems', 'baseline')"></rect-button>
-
-									<rect-button
-										class="col-justifystart"
+										:class="flexBtnDirectionClass('justify', 'start')"
 										:active="getProps('display.settings.flex.container.justifyContent', 'flex-start')"
 										@click="setProps('display.settings.flex.container.justifyContent', 'flex-start')"></rect-button>
 									<rect-button
-										class="col-justifycenter"
+										:class="flexBtnDirectionClass('justify', 'center')"
 										:active="getProps('display.settings.flex.container.justifyContent', 'center')"
 										@click="setProps('display.settings.flex.container.justifyContent', 'center')"></rect-button>
 									<rect-button
-										class="col-justifyend"
+										:class="flexBtnDirectionClass('justify', 'end')"
 										:active="getProps('display.settings.flex.container.justifyContent', 'flex-end')"
 										@click="setProps('display.settings.flex.container.justifyContent', 'flex-end')"></rect-button>
 									<rect-button
-										class="col-justify-space-between"
+										:class="flexBtnDirectionClass('justify', 'space-between')"
 										:active="getProps('display.settings.flex.container.justifyContent', 'space-between')"
 										@click="setProps('display.settings.flex.container.justifyContent', 'space-between')"></rect-button>
 									<rect-button
-										class="col-justify-space-around"
+										:class="flexBtnDirectionClass('justify', 'space-around')"
 										:active="getProps('display.settings.flex.container.justifyContent', 'space-around')"
 										@click="setProps('display.settings.flex.container.justifyContent', 'space-around')"></rect-button>
+
+									<rect-button
+										:class="flexBtnDirectionClass('align', 'start')"
+										:active="getProps('display.settings.flex.container.alignItems', 'flex-start')"
+										@click="setProps('display.settings.flex.container.alignItems', 'flex-start')"></rect-button>
+									<rect-button
+										:class="flexBtnDirectionClass('align', 'center')"
+										:active="getProps('display.settings.flex.container.alignItems', 'center')"
+										@click="setProps('display.settings.flex.container.alignItems', 'center')"></rect-button>
+									<rect-button
+										:class="flexBtnDirectionClass('align', 'end')"
+										:active="getProps('display.settings.flex.container.alignItems', 'flex-end')"
+										@click="setProps('display.settings.flex.container.alignItems', 'flex-end')"></rect-button>
+									<rect-button
+										:class="flexBtnDirectionClass('align', 'stretch')"
+										:active="getProps('display.settings.flex.container.alignItems', 'stretch')"
+										@click="setProps('display.settings.flex.container.alignItems', 'stretch')"></rect-button>
+									<rect-button
+										:class="flexBtnDirectionClass('align', 'baseline')"
+										:active="getProps('display.settings.flex.container.alignItems', 'baseline')"
+										@click="setProps('display.settings.flex.container.alignItems', 'baseline')"></rect-button>
+								</div>
+								<div class="flex-reverse">
+									<rect-button
+										class="flex-reverse--row"
+										v-if="getProps('display.settings.flex.container.direction', 'row')"
+										:active="getProps('display.settings.flex.container.reverse')"
+										@click="setProps(
+											'display.settings.flex.container.reverse', !getProps('display.settings.flex.container.reverse')
+										)"></rect-button>
+
+									<rect-button
+										class="flex-reverse--col"
+										v-if="getProps('display.settings.flex.container.direction', 'column')"
+										:active="getProps('display.settings.flex.container.reverse')"
+										@click="setProps(
+											'display.settings.flex.container.reverse', !getProps('display.settings.flex.container.reverse')
+										)"></rect-button>
 								</div>
 							</div>
 
 							<div class="flex-wrap-layout">
-								<label>
-								<input type="checkbox"
-								:true-value="'wrap'"
-								:false-value="'nowrap'"
-								v-model="layout.selected.properties[screenView].display.settings.flex.container.wrap"> Wrap Children
-								</label>
-
-								<label>
-									<input type="checkbox"
-									:true-value="true"
-									:false-value="false"
-									v-model="layout.selected.properties[screenView].display.settings.flex.container.reverse"> Reverse Layout
-								</label>
-
-								<label v-show="getProps('display.settings.flex.container.wrap', 'wrap')">
-								<input type="checkbox"
-								:true-value="true"
-								:false-value="false"
-								v-model="layout.selected.properties[screenView].display.settings.flex.container.reverseWrap"> Reverse Wrap
-								</label>
-
-								<div class="flex-wrap-buttons"
-								v-show="getProps('display.settings.flex.container.wrap', 'wrap')"
-								:class="{reverse: getProps('display.settings.flex.container.reverseWrap')}">
-
+								<div class="flex-wrap">
 									<rect-button
-										class="align-columns-start"
+										class="flex-wrap"
+										:class="flexBtnDirectionClass('wrap')"
+										:active="getProps('display.settings.flex.container.wrap')"
+										@click="setProps('display.settings.flex.container.wrap', !getProps('display.settings.flex.container.wrap'))"></rect-button>
+								</div>
+
+								<div class="flex-wrap-buttons" v-if="getProps('display.settings.flex.container.wrap')">
+									<rect-button
+										:class="flexBtnWrapClass('align', 'start')"
 										:active="getProps('display.settings.flex.container.alignContent', 'flex-start')"
 										@click="setProps('display.settings.flex.container.alignContent', 'flex-start')"></rect-button>
 
 									<rect-button
-										class="align-columns-center"
+										:class="flexBtnWrapClass('align', 'center')"
 										:active="getProps('display.settings.flex.container.alignContent', 'center')"
 										@click="setProps('display.settings.flex.container.alignContent', 'center')"></rect-button>
 
 									<rect-button
-										class="align-columns-end"
+										:class="flexBtnWrapClass('align', 'end')"
 										:active="getProps('display.settings.flex.container.alignContent', 'flex-end')"
 										@click="setProps('display.settings.flex.container.alignContent', 'flex-end')"></rect-button>
 
 									<rect-button
-										class="align-columns-stretch"
+										:class="flexBtnWrapClass('align', 'stretch')"
 										:active="getProps('display.settings.flex.container.alignContent', 'stretch')"
 										@click="setProps('display.settings.flex.container.alignContent', 'stretch')"></rect-button>
 
 									<rect-button
-										class="align-columns-space-between"
+										:class="flexBtnWrapClass('align', 'space-between')"
 										:active="getProps('display.settings.flex.container.alignContent', 'space-between')"
 										@click="setProps('display.settings.flex.container.alignContent', 'space-between')"></rect-button>
 
 									<rect-button
-										class="align-columns-space-around"
+										:class="flexBtnWrapClass('align', 'space-around')"
 										:active="getProps('display.settings.flex.container.alignContent', 'space-around')"
 										@click="setProps('display.settings.flex.container.alignContent', 'space-around')"></rect-button>
+								</div>
+
+								<div class="flex-reverse" v-if="getProps('display.settings.flex.container.wrap')">
+									<rect-button
+										class="flex-reverse--wrap-row"
+										v-if="getProps('display.settings.flex.container.direction', 'row')"
+										:active="getProps('display.settings.flex.container.reverseWrap')"
+										@click="setProps(
+											'display.settings.flex.container.reverseWrap', !getProps('display.settings.flex.container.reverseWrap')
+										)"></rect-button>
+
+									<rect-button
+										class="flex-reverse--wrap-col"
+										v-if="getProps('display.settings.flex.container.direction', 'column')"
+										:active="getProps('display.settings.flex.container.reverseWrap')"
+										@click="setProps(
+											'display.settings.flex.container.reverseWrap', !getProps('display.settings.flex.container.reverseWrap')
+										)"></rect-button>
 								</div>
 							</div>
 						</accordion-item-view>
 
-						<accordion-item-view title="Flex Child Settings" v-if="getParentProps('display.value', 'flex')" border="top" :border-if="getProps('display.value', 'flex')">
+						<accordion-item-view title="Flex Child Settings" v-if="getParentProps('display.value', 'flex') && tabAdvanced.display" border="top" :border-if="getProps('display.value', 'flex')">
 							<div class="flex-child-settings">
 								<div class="label-group">
 									<div>Sizing</div>
@@ -246,14 +322,14 @@
 								</div>
 								<div class="flex-child-buttons">
 									<div class="flex">
-										<rect-button class="shrink-if-needed"
+										<rect-button class="flex-wrap"
 										:active="getProps('display.settings.flex.item.sizing.value', 'flexShrink')"
 										@click="setProps('display.settings.flex.item.sizing.value', 'flexShrink')"></rect-button>
-										
+
 										<rect-button class="fill-empty-space"
 										:active="getProps('display.settings.flex.item.sizing.value', 'flexGrow')"
 										@click="setProps('display.settings.flex.item.sizing.value', 'flexGrow')"></rect-button>
-										
+
 										<rect-button class="dont-shrink"
 										:active="getProps('display.settings.flex.item.sizing.value', 'none')"
 										@click="setProps('display.settings.flex.item.sizing.value', 'none')"></rect-button>
@@ -302,6 +378,14 @@
 									</div>
 								</div>
 							</div>
+						</accordion-item-view>
+
+						<accordion-item-view border="top" :border-if="getProps('display.value', 'flex')" v-if="getKind('section') || getKind('container') || getKind('column')">
+							<label style="margin-right:5px">Grid gutter</label>
+							<buttons :items="[{label: 'Large', active: getProps('gutter.value', 'large'), click: setGutter('large')},
+								{label: 'Medium', active: getProps('gutter.value', 'medium'), click: setGutter('medium')},
+								{label: 'Small', active: getProps('gutter.value', 'small'), click: setGutter('small')},
+								{icon: 'close', active: getProps('gutter.value', 'collapse'), click: setGutter('collapse')}]"></buttons>
 						</accordion-item-view>
 					</accordion-expand-view>
 				</accordion-item>
@@ -469,7 +553,7 @@
 										</div>
 									</div>
 								</div>
-							</div>							
+							</div>
 						</div>
 					</div>
 				</accordion-item>
@@ -477,26 +561,188 @@
 
 				<!-- properties.size -->
 				<accordion-item title="Size" :with-switcher="true" :switcher.sync="tabAdvanced.size" switcher-label="Advanced">
-					<div class="uk-grid uk-grid-small">
-						<div class="uk-width-5-10">
-							<number :value.sync="sizeWidth" :unit.sync="sizeWidthUnit" :disabled="properties.width.disabled" label="Width" :max="1000"></number>
-							<number number :value.sync="sizeMinWidth" :unit.sync="sizeMinWidthUnit" :disabled="properties.minWidth.disabled" label="Min" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
-							<number number :value.sync="sizeMaxWidth" :unit.sync="sizeMaxWidthUnit" :disabled="properties.maxWidth.disabled" label="Max" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
+					<accordion-item-view>
+						<div class="uk-grid uk-grid-small">
+							<div class="uk-width-5-10">
+								<number :value.sync="sizeWidth" :unit.sync="sizeWidthUnit" :disabled="properties.width.disabled" label="Width" :max="1000"></number>
+								<number number :value.sync="sizeMinWidth" :unit.sync="sizeMinWidthUnit" :disabled="properties.minWidth.disabled" label="Min" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
+								<number number :value.sync="sizeMaxWidth" :unit.sync="sizeMaxWidthUnit" :disabled="properties.maxWidth.disabled" label="Max" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
+							</div>
+							<div class="uk-width-5-10">
+								<number :value.sync="sizeHeight" :unit.sync="sizeHeightUnit" label="Height" :max="1000"></number>
+								<number number :value.sync="sizeMinHeight" :unit.sync="sizeMinHeightUnit" label="Min" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
+								<number number :value.sync="sizeMaxHeight" :unit.sync="sizeMaxHeightUnit" label="Max" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
+							</div>
 						</div>
-						<div class="uk-width-5-10">
-							<number :value.sync="sizeHeight" :unit.sync="sizeHeightUnit" label="Height" :max="1000"></number>
-							<number number :value.sync="sizeMinHeight" :unit.sync="sizeMinHeightUnit" label="Min" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
-							<number number :value.sync="sizeMaxHeight" :unit.sync="sizeMaxHeightUnit" label="Max" v-show="tabAdvanced.size" transition="fade" :max="1000"></number>
-						</div>
-					</div>
-					<div style="padding-bottom: 100px"></div>
+					</accordion-item-view>
 				</accordion-item>
 				<!-- ./end of properties.size -->
-			</div>
+
+				<!-- custom attributes and css -->
+				<accordion-item title="CSS &amp; Attributes">
+					<accordion-item-view>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+						<p>Test</p>
+					</accordion-item-view>
+				</accordion-item>
+			</accordion-wrapper>
 		</div>
 
-		<div class="right-panel-container" v-show="isRightBarView('style')">
-			<color-picker :colors.sync="colors"></color-picker>
+		<div class="right-panel-container" v-show="isRightBarView('style')" v-if="validProps()">
+			<accordion-wrapper>
+				<accordion-item title="Typography" :with-switcher="true" switcher-label="Advanced" :switcher.sync="tabAdvanced.display">
+					<accordion-item-view>
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-1-10 icon"><i class="font-family"></i></label>
+							<div class="uk-width-9-10">
+								<multiselect
+								:multiple="false"
+								:show-labels="false"
+								:selected.sync="fontFamilyValue"
+								:max-height="250"
+								:options="fontFamilyList"
+								placeholder="Font Family"
+								><span slot="noResult">No fonts have been found!</span></multiselect>
+							</div>
+						</div>
+					</accordion-item-view>
+
+					<accordion-item-view>
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-1-10 icon"><i class="font-weight"></i></label>
+							<div class="uk-width-2-10">
+								<multiselect
+								:multiple="false"
+								:searchable="false"
+								:show-labels="false"
+								:selected.sync="layout.selected.properties[screenView].fontWeight.value"
+								:max-height="250"
+								:options="[100, 200, 300, 400, 500, 600, 700, 800]"
+								placeholder="100"
+								></multiselect>
+							</div>
+
+							<label class="uk-width-1-10 icon"><i class="font-size"></i></label>
+							<div class="uk-width-3-10">
+								<number :value.sync="layout.selected.properties[screenView].fontSize.value" :unit.sync="layout.selected.properties[screenView].fontSize.unit" :min="0" label=""></number>
+							</div>
+
+							<label class="uk-width-1-10 icon"><i class="font-color"></i></label>
+							<div class="uk-width-2-10">
+								<color-picker :colors.sync="fontColorValue" :palette="false" :click="editFontColor"></color-picker>
+							</div>
+						</div>
+					</accordion-item-view>
+
+					<accordion-item-view>
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-1-10 icon"><i class="line-height"></i></label>
+							<div class="uk-width-2-10">
+								<number :input-width="10" :value.sync="layout.selected.properties[screenView].lineHeight.value" :unit.sync="layout.selected.properties[screenView].lineHeight.unit" :min="0" label=""></number>
+							</div>
+
+							<label class="uk-width-1-10 icon"><i class="font-style"></i></label>
+							<div class="uk-width-2-10">
+								<buttons :items="[{icon: 'i-normal'}, {icon: 'italic'}]"></buttons>
+							</div>
+
+							<label class="uk-width-1-10 icon"><i class="text-decoration"></i></label>
+							<div class="uk-width-3-10">
+								<buttons :items="[{icon: 'text-width'}, {icon: 'text-width'}, {icon: 'text-width'}]"></buttons>
+							</div>
+						</div>
+					</accordion-item-view>
+
+					<accordion-item-view>
+						<div class="uk-grid uk-grid-small">
+							<label class="uk-width-1-10 icon"><i class="text-align"></i></label>
+							<div class="uk-width-3-10">
+								<buttons :items="[{icon: 'i-normal'}, {icon: 'italic'}, {icon: 'italic'}, {icon: 'italic'}]"></buttons>
+							</div>
+							<div class="uk-width-2-10">&nbsp;</div>
+							<label class="uk-width-1-10 icon"><i class="letter-spacing"></i></label>
+							<div class="uk-width-3-10">
+								<number :input-width="10" :value.sync="layout.selected.properties[screenView].letterSpacing.value" :unit.sync="layout.selected.properties[screenView].letterSpacing.unit" :min="0" label=""></number>
+							</div>
+						</div>
+					</accordion-item-view>
+				</accordion-item>
+
+				<accordion-item title="Background" :with-switcher="true" switcher-label="Advanced" :switcher.sync="tabAdvanced.display">
+					<accordion-item-view>
+						<div class="uk-grid uk-grid-collapse">
+							<label class="uk-width-3-10 bold"><span>Select Type</span></label>
+							<div class="uk-width-7-10 uk-flex">
+								<div class="button-group right">
+									<rect-button
+									:disabled="getProps('background.disabled')"
+									:active="getProps('background.value', 'none')"
+									@click="!getProps('background.disabled')? setProps('background.value', 'none'): null"
+									class="background-none"></rect-button>
+									<rect-button
+									:disabled="getProps('background.disabled')"
+									:active="getProps('background.value', 'color')"
+									@click="!getProps('background.disabled')? setProps('background.value', 'color'): null"
+									class="background-color"></rect-button>
+									<rect-button
+									:disabled="getProps('background.disabled')"
+									:active="getProps('background.value', 'image')"
+									@click="!getProps('background.disabled')? setProps('background.value', 'image'): null"
+									class="background-image"></rect-button>
+									<rect-button
+									:disabled="getProps('background.disabled')"
+									:active="getProps('background.value', 'video')"
+									@click="!getProps('background.disabled')? setProps('background.value', 'video'): null"
+									class="background-video"></rect-button>
+									<rect-button
+									:disabled="getProps('background.disabled')"
+									:active="getProps('background.value', 'gradient')"
+									@click="!getProps('background.disabled')? setProps('background.value', 'gradient'): null"
+									class="background-gradient"></rect-button>
+								</div>
+							</div>
+						</div>
+					</accordion-item-view>
+
+					<accordion-expand-view v-if="!getProps('background.value', 'none')">
+						<accordion-item-view v-if="getProps('background.value', 'color')">
+							<color-picker :colors.sync="backgroundColorValue" :palette="true" :button="false"></color-picker>
+						</accordion-item-view>
+					</accordion-expand-view>
+				</accordion-item>
+
+				<accordion-item title="Animation" :with-switcher="true" switcher-label="Advanced" :switcher.sync="tabAdvanced.display">
+				</accordion-item>
+			</accordion-wrapper>
 		</div>
 	</div>
 </template>
@@ -508,22 +754,27 @@
 
 
 <script>
+const GOOGLE_API_KEY = 'AIzaSyALxXBrp1LxICQoso23j0Ls46aI7QZCktU'
+
 // Modules
 import dot from 'dot-object'
 import _ from 'underscore'
-import Mousetrap from '../../js/mousetrap.min.js'
+import Mousetrap from '../../js/lib/mousetrap.min.js'
+import Multiselect from '../multiselect/index.js'
 
 // Import child components
+import accordionWrapper from '../accordion/wrapper.vue'
 import accordionItem from '../accordion/item.vue'
 import accordionItemView from '../accordion/item-view.vue'
 import accordionExpandView from '../accordion/expand-view.vue'
 
 // Import misc component
 import rectButton from '../misc/rect-button.vue'
+import buttons from '../misc/buttons.vue'
 import Number from '../misc/number.vue'
 import contextMenu from '../misc/contextmenu.vue'
-
 import colorPicker from '../colorpicker/colorpicker.vue'
+import editor from '../editor/editor.vue'
 
 // Import element Items
 import elementItem from './element-item.vue'
@@ -536,8 +787,9 @@ export default {
 	 * @type {Object}
 	 */
 	components: {
-		accordionItem, accordionItemView, accordionExpandView,
-		elementItem, rectButton, Number, colorPicker, contextMenu
+		accordionWrapper, accordionItem, accordionItemView, accordionExpandView,
+		elementItem, rectButton, Number, colorPicker, contextMenu,
+		Multiselect, buttons, editor
 	},
 
 	/**
@@ -556,51 +808,56 @@ export default {
 	 */
 	data () {
 		return {
-			colors: {
-				hex: '#194d33',
-				hsl: {
-					h: 150,
-					s: 0.5,
-					l: 0.2,
-					a: 1
-				},
-				hsv: {
-					h: 150,
-					s: 0.66,
-					v: 0.30,
-					a: 1
-				},
-				rgba: {
-					r: 25,
-					g: 77,
-					b: 51,
-					a: 1
-				},
-				a: 1
-			},
-
 			layout: null,
+			searchElement: '',
+			editor: {
+				css: null,
+				element: null
+			},
 			showElementPanel: false,
+			showCodeEditor: false,
 			screenView: 'large',
 			screenSize: 0,
 			rightBarView: 'settings',
 			selectedProperties: null,
+			selectedElementKind: null,
 			tabAdvanced: {
+				display: true,
 				size: false
 			},
 
 			/* Elements Item */
+			components: _.extend(uno.component.list, []),
+			componentOnEdit: false,
 			elements: {
 				grid: [
-					{label: '1 Columns', icon: 'column-1', type: 'grid', kind: 'column', size: 1, accept: 'section,container,column'},
-					{label: '2 Columns', icon: 'column-2', type: 'grid', kind: 'column', size: 2, accept: 'section,container,column'},
-					{label: '3 Columns', icon: 'column-3', type: 'grid', kind: 'column', size: 3, accept: 'section,container,column'},
-					{label: '4 Columns', icon: 'column-4', type: 'grid', kind: 'column', size: 4, accept: 'section,container,column'},
-					{label: '5 Columns', icon: 'column-5', type: 'grid', kind: 'column', size: 5, accept: 'section,container,column'},
-					{label: '6 Columns', icon: 'column-6', type: 'grid', kind: 'column', size: 6, accept: 'section,container,column'}
+					{label: '1 Columns', class: 'column-1', type: 'grid', kind: 'column', size: 1, accept: 'section,container,column'},
+					{label: '2 Columns', class: 'column-2', type: 'grid', kind: 'column', size: 2, accept: 'section,container,column'},
+					{label: '3 Columns', class: 'column-3', type: 'grid', kind: 'column', size: 3, accept: 'section,container,column'},
+					{label: '4 Columns', class: 'column-4', type: 'grid', kind: 'column', size: 4, accept: 'section,container,column'},
+					{label: '5 Columns', class: 'column-5', type: 'grid', kind: 'column', size: 5, accept: 'section,container,column'},
+					{label: '6 Columns', class: 'column-6', type: 'grid', kind: 'column', size: 6, accept: 'section,container,column'}
 				],
 
-				component: _.extend(window.unocomponents, [])
+				component: null
+			},
+
+			/* Blocks */
+			block: {
+				panel: false,
+				latest: null,
+				selected: 'structure',
+				items: [
+					{id: 'structure', label: 'Structure', items: [
+						{type: 'section', kind: 'section', accept: 'body,section'},
+						{type: 'section', kind: 'container', accept: 'section'}
+					]},
+					{id: 'headers', label: 'Headers'},
+					{id: 'blog', label: 'Blog'},
+					{id: 'features', label: 'Features'},
+					{id: 'team', label: 'Team'},
+					{id: 'gallery', label: 'Gallery'}
+				]
 			},
 
 			/* Outline when element hovered / selected */
@@ -645,6 +902,16 @@ export default {
 				position: {},
 				show: false
 			},
+
+
+			/**
+			 * Color Picker Pop up
+			 */
+			colorPickerModel: null,
+			colorPickerShow: false,
+
+			/* Font family */
+			fontFamilyList: ['Inherit (Default)', 'Andale Mono', 'Arial', 'Arial Black', 'Arial Narrow', 'Arial Rounded MT Bold', 'Avant Garde', 'Baskerville', 'Big Caslon', 'Bodoni MT', 'Book Antiqua', 'Brush Script MT', 'Calibri', 'Calisto MT', 'Cambria', 'Candara', 'Century Gothic', 'Consolas', 'Copperplate', 'Courier New', 'Didot', 'Fantasy', 'Franklin Gothic Medium', 'Futura', 'Garamond', 'Geneva', 'Georgia', 'Gill Sans', 'Goudy Old Style', 'Helvetica', 'Hoefler Text', 'Impact', 'Lucida Bright', 'Lucida Console', 'Lucida Grande', 'Lucida Sans Typewriter', 'Monaco', 'Monospaced', 'Optima', 'Palatino', 'Papyrus', 'Perpetua', 'Rockwell', 'Rockwell Extra Bold', 'Script', 'Segoe UI', 'Serif', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana']
 		}
 	},
 
@@ -700,6 +967,7 @@ export default {
 			cssClass[this.screenView] = true
 			return cssClass
 		},
+
 
 		// Get outline canvas
 		canvas () {
@@ -889,10 +1157,98 @@ export default {
 				this.setProps('maxHeight.unit', value)
 			}
 		},
+
+		colorPickerValue: {
+			get () {
+				return (this.colorPickerModel)? this.getProps(`${this.colorPickerModel}`): {
+					hex: '#000000',
+					hsl: {h: 0,	s: 0, l: 0,	a: 1},
+					hsv: {h: 0,	s: 0, v: 0,	a: 1},
+					rgba: {r: 0, g: 0, b: 0, a: 1},
+					a: 1
+				}
+			},
+
+			set (value) {
+				if (this.colorPickerModel) this.setProps(`${this.colorPickerModel}`, value)
+			}
+		},
+
+		// Font family
+		fontFamilyValue: {
+			get () {
+				return this.getProps('fontFamily.value')
+			},
+
+			set (value) {
+				this.setProps('fontFamily.value', value)
+			}
+		},
+
+		// Color value in popinput
+		fontColorValue: {
+			get () {
+				return this.getProps('fontColor')
+			},
+
+			set (value) {
+				this.setProps('fontColor', value)
+			}
+		},
+
+		backgroundColorValue: {
+			get () {
+				return this.getProps('background.settings.color')
+			},
+
+			set (value) {
+				this.setProps('background.settings.color', value)
+			}
+		},
 	},
 
 
 	methods: {
+		/**
+		 * Get iframe viewer element
+		 * @param {ElementNode} body
+		 * @param {Boolean} doconly
+		 * @return {ElementNode}
+		 */
+		getCanvasIframe (selector, doconly) {
+			let iframe = document.querySelector('[data-layout-viewer]')
+			if (selector) {
+				let iframeDoc = iframe.contentWindow.document
+				if (doconly) {
+					return iframeDoc
+				}
+
+				return iframeDoc.querySelector(selector)
+			}
+			return iframe
+		},
+
+
+		/**
+		 * Get canvas iframe properties
+		 * @param  {String} property
+		 * @return {String|Number|Object|Array}
+		 */
+		getCanvasSize (property) {
+			let body = this.getCanvasIframe('body'),
+			html = this.getCanvasIframe(null, true)
+
+			switch (property) {
+				case 'height':
+					return Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+				break
+
+				case 'width':
+					return this.getCanvasIframe().getBoundingClientRect().width
+				break
+			}
+		},
+
 		/**
 		 * Check is properties are ready or valid
 		 * @return {Boolean}
@@ -913,6 +1269,16 @@ export default {
 			return dot.pick(dotNotation, this.selectedProperties[this.screenView])
 		},
 
+		/**
+		 * Get properties by dot notation
+		 * @param  {String} equals [comparison]
+		 * @return {String|Number|Array|Object|Boolean}
+		 */
+		getKind (equals) {
+			if (equals) return this.selectedElementKind === equals
+			return this.selectedElementKind
+		},
+
 
 		/**
 		 * Get properties of parent by dot notation
@@ -925,7 +1291,7 @@ export default {
 				if (equals) return dot.pick(dotNotation, this.selectedProperties[this.screenView].getParent()) === equals
 				return dot.pick(dotNotation, this.selectedProperties[this.screenView].getParent())
 			}
-			
+
 		},
 
 		/**
@@ -951,9 +1317,19 @@ export default {
 			// Set selected properties after changed
 			self.$nextTick(function () {
 				self.$set('selectedProperties', self.layout.selected.properties)
+				self.$set('selectedElementKind', self.layout.selected.kind)
 			})
 		},
 
+		/**
+		 * Toggle Element Panel on the left
+		 *
+		 * @return {void}
+		 */
+		toggleElementPanel () {
+			this.$set('showElementPanel', !this.showElementPanel)
+			this.hideCodeEditorPanel()
+		},
 
 		/**
 		 * Force hide element panel
@@ -963,16 +1339,20 @@ export default {
 			this.$set('showElementPanel', false)
 		},
 
-
 		/**
-		 * Toggle Element Panel on the left
-		 * 
-		 * @return {void}
+		 * Toggle code editor
 		 */
-		toggleElementPanel () {
-			this.$set('showElementPanel', !this.showElementPanel)
+		toggleCodeEditorPanel () {
+			this.$set('showCodeEditor', !this.showCodeEditor)
+			this.hideElementPanel()
 		},
 
+		/**
+		 * Force hide code editor
+		 */
+		hideCodeEditorPanel () {
+			this.$set('showCodeEditor', false)
+		},
 
 		/**
 		 * Set screen device view
@@ -986,7 +1366,7 @@ export default {
 
 		/**
 		 * Check current screen Device
-		 * 
+		 *
 		 * @param  {String}
 		 * @return {Boolean}
 		 */
@@ -997,7 +1377,7 @@ export default {
 
 		/**
 		 * Set Rightbar view
-		 * 
+		 *
 		 * @param {String} view
 		 */
 		setRightBarView (view) {
@@ -1046,6 +1426,21 @@ export default {
 			}
 
 			this.$emit('hideContextMenu')
+		},
+
+
+		breadcrumbRightClick (event) {
+			event.preventDefault()
+
+			let canvasWidth = document.querySelector('.canvas-builder').getBoundingClientRect().width,
+			layoutViewerWidth = this.getCanvasIframe().getBoundingClientRect().width,
+			gutter = canvasWidth - layoutViewerWidth
+
+			// Get top and left position
+			this.$emit('showContextMenu', {
+				top: event.pageY - this.boundTop - 35,
+				left: event.pageX - (gutter / 2) - 35
+			})
 		},
 
 
@@ -1149,7 +1544,7 @@ export default {
 		drawDiagonalOutlineFor (type) {
 			let self = this,
 			canvasBuilder = document.querySelector('.canvas-builder').getBoundingClientRect(),
-			layoutViewer = document.querySelector('[data-layout-viewer]').getBoundingClientRect(),
+			layoutViewer = self.getCanvasIframe().getBoundingClientRect(),
 			canvas = self.canvas,
 			css = self.outline.selected.css,
 			position = {
@@ -1230,12 +1625,12 @@ export default {
 
 		/**
 		 * Show unit value, like 10px, 1em, 100%
-		 * 
+		 *
 		 * @param  {String} propName
 		 * @param  {String} key
 		 * @param  {String} delimiter
 		 * @param  {Boolean} outputArray
-		 * 
+		 *
 		 * @return {String|Object}
 		 */
 		unitValueOf (propName, delimiter, outputArray) {
@@ -1269,6 +1664,11 @@ export default {
 				show: true,
 				style: style
 			}, obj))
+
+			// Set color model
+			if (obj.editBorder) {
+				this.$set('colorPickerModel', obj.input + '.color')
+			}
 		},
 
 
@@ -1278,6 +1678,20 @@ export default {
 		 */
 		hidePopInput () {
 			this.$set('popInput.show', false)
+		},
+
+
+		showColorPicker () {
+			this.$set('colorPickerShow', true)
+		},
+
+		hideColorPicker () {
+			this.$set('colorPickerShow', false)
+		},
+
+		editFontColor () {
+			this.$set('colorPickerModel', 'fontColor')
+			this.showColorPicker()
 		},
 
 
@@ -1310,143 +1724,664 @@ export default {
 					break;
 				}
 			}
+		},
+
+		/**
+		 * Get component data
+		 * @param  {Object} component
+		 * @return {Object}
+		 */
+		getComponentData (component) {
+			let self = this,
+			validSettings = (!_.isArray(component.data.settings) && _.isObject(component.data.settings))
+
+			let data = {
+				// Value getter
+				get view () {
+					return component.data.view
+				},
+
+				// Value setter
+				set view (value) {
+					component.data.view = value
+
+					// Fire onchange component
+					self.componentFire(component, 'onchange', 'data.value', value)
+				},
+
+				// Settings can't use setter & getter method
+				// We define it as object with method get & set
+				// So we can easily pick setings with dot notation
+				settings: {
+					get: function (key) {
+						if (key.indexOf('.')<0) key += '.value'
+						return dot.pick(key, component.data.settings)
+					},
+
+					set: function (key, value) {
+						if (validSettings && key.indexOf('.')>-1) {
+							dot.set(key, value, component.data.settings)
+						}
+					}
+				},
+
+				// Evaluate javascript
+				// Inside component.js register
+				get $eval () {
+					return function (fn) {
+						var params = uno.utils.getParams(fn);
+						uno.viewer.$emit('evalFunction', component.id, component.uid, fn, params);
+					}
+				},
+
+				// Prevent someone to set eval
+				set $eval (value) {
+					return
+				}
+			}
+
+			return _.extend(data, component.events.data)
+		},
+
+
+		/**
+		 * Fire component events
+		 * @param  {Object} component
+		 * @param  {String} eventType
+		 * @param  {Array|Object|String|Number} args
+		 * @return {void}
+		 */
+		componentFire () {
+			let self = this,
+			component = arguments[0],
+			eventType = arguments[1],
+			data = this.getComponentData(component)
+
+			if (eventType === 'ready') {
+				var model = arguments[2],
+				dataView = model.data.view,
+				settings = model.data.settings
+
+				// Redefine getter and setter for template data binding with vuejs
+				_.each(model.data.tpl_data, function (tpl_data, key) {
+					let dataKey = model.data.tpl_data[key]
+					Object.defineProperty(data, key, {
+						set: function (value) {
+							if (value !== dataKey) {
+								// Change if new data isn't the same with old data
+								model.$set('data.tpl_data.' + key, value)
+
+								// Fire on change
+								self.componentFire(component, 'onchange', key, value, dataKey)
+							}
+						},
+						get: function (value) {
+							return dataKey
+						}
+					})
+				})
+
+				// Redefine getter and setter for view binding with vuejs
+				Object.defineProperty(data, 'view', {
+					set: function (value) {
+						if (value !== dataView) {
+							// Change if new data isn't the same with old data
+							model.$set('data.view', value)
+
+							// Fire on change
+							self.componentFire(component, 'onchange', 'view', value, dataView)
+						}
+					},
+
+					get: function () {
+						return dataView
+					}
+				})
+
+				// Redefine settings bind with vuejs
+				Object.defineProperty(data, 'settings', {
+					value: {
+						set: function (key, value) {
+							if (key.indexOf('.')>-1) {
+								dot.set(key, value, settings)
+							}
+						},
+
+						get: function (key) {
+							if (key.indexOf('.')<0) key += '.value'
+							return dot.pick(key, settings)
+						},
+					}
+				})
+			}
+
+			// Get arguments remain
+			let args = []
+			for (let i = 0; i < arguments.length; i++) {
+				if (i>1) args.push(arguments[i])
+			}
+
+			// Fire event
+			component.events[eventType] && component.events[eventType].apply(data, args)
+		},
+
+
+		/**
+		 * Fire all events on component
+		 * @param  {String} eventType
+		 * @param  {Array|Object|String|Number} args
+		 * @return {void}
+		 */
+		componentsFire (eventType, args) {
+			let self = this
+			_.each(this.components, function (component, index) {
+				self.componentFire(component, eventType, args)
+			})
+		},
+
+
+		/**
+		 * Toggle block panel
+		 * @return {void}
+		 */
+		showBlockPanel () {
+			let hoveredBreadcrumb = _.first(this.outline.hovered.breadcrumbs)
+			this.layout.$emit('elementSelect', hoveredBreadcrumb)
+			this.$set('block.panel', !this.block.panel)
+		},
+
+		/**
+		 * Select blok tab
+		 * @param  {String} id
+		 */
+		showBlock (id) {
+			this.$set('block.selected', id)
+		},
+
+		/**
+		 * Check whether block is selected or not
+		 * @param  {String}  id
+		 * @return {Boolean}
+		 */
+		isBlock (id) {
+			return this.block.selected === id
+		},
+
+		/**
+		 * Add block element to viewer
+		 * @param {Object} block
+		 */
+		addBlock (block) {
+			if (this.layout) {
+				this.layout.$emit('addBlock', _.extend(block, {
+					to: 'body',
+					child: false,
+					breadcrumb: block.kind,
+					index: this.outline.selected.index
+				}))
+			}
+		},
+
+		/**
+		 * Set gutter for selected element (only for section, container, column)
+		 * @param {String} size
+		 */
+		setGutter (size) {
+			if (this.getKind('section') || this.getKind('container') || this.getKind('column')) {
+				let self = this
+				return function () {
+					self.setProps('gutter.value', size)
+				}
+			}
+
+			return
+		},
+
+		/**
+		 * Reposition block panel based on element position
+		 * @param  {Object}
+		 * @return {void}
+		 */
+		blockPanelReposition (obj) {
+			let blockPosition = 0
+
+			if (obj.type !== 'body') {
+				let outerHeight = obj.css.$top + obj.css.$height,
+				viewerHeight = this.getCanvasSize('height')
+
+				// If element is in bottom, set position above element
+				if (viewerHeight - outerHeight < 175) {
+					blockPosition = outerHeight - (obj.css.$height + 175)
+				} else {
+					// If element is on top set position over element
+					if (obj.css.$top > 20) {
+						blockPosition = obj.css.$top
+					} else {
+						blockPosition = outerHeight
+					}
+				}
+			}
+
+			this.$set('block.css', {
+				top: blockPosition + 'px'
+			})
+		},
+
+
+		/**
+		 * Generate flex buttons class for flex-direction
+		 * @param  {String} prefix
+		 * @param  {String} suffix
+		 * @return {Object}
+		 */
+		flexBtnDirectionClass (prefix, suffix) {
+			let direction = 'row', klass = {}
+			if (!this.getProps('display.settings.flex.container.direction', 'row')) {
+				direction = 'col'
+			}
+
+			if (suffix) {
+				suffix = '--' + suffix
+			} else {
+				suffix = ''
+			}
+
+			if (this.getProps('display.settings.flex.container.reverse')) {
+				suffix += '-reverse'
+			}
+
+			klass[direction + '-' + prefix + suffix] = true
+			return klass
+		},
+
+		/**
+		 * Generate flex buttons class for flex-wrap and align-items
+		 * @param  {String} prefix
+		 * @param  {String} suffix
+		 * @return {Object}
+		 */
+		flexBtnWrapClass (prefix, suffix) {
+			let klass = {},
+			direction = this.getProps('display.settings.flex.container.direction')
+
+			if (prefix) {
+				prefix = '--' + prefix
+			}
+
+			if (suffix) {
+				suffix = '-' + suffix
+			} else {
+				suffix = ''
+			}
+
+			if (this.getProps('display.settings.flex.container.reverseWrap')) {
+				suffix += '-reverse'
+			}
+
+			klass['flex-wrap-' + direction + prefix + suffix] = true
+			return klass;
 		}
 	},
 
-	ready () {
-		let self = this
-
+	events: {
 		/**
 		 * Set viewer when layout viewer is ready
-		 * 
+		 *
 		 * @param layout {Object}
 		 * @return {void}
 		 */
-		self.$on('viewerReady', function (layout) {
-			//self.$set('layout', layout)
-			self.$set('layout', document.querySelector('[data-layout-viewer]').contentWindow.document.body.__vue__)
-		})
+		viewerReady () {
+			let self = this,
+			layout = self.getCanvasIframe('[data-id="body"]').__vue__
 
+			// Set layout
+			self.$set('layout', layout)
+			uno.viewer = layout
 
-		self.$on('selectedProperties', function (props) {
-			self.$set('selectedProperties', props)
-		})
+			/**
+			 * Parsing Components
+			 */
+			let syntaxData = /\$([a-zA-Z0-9_]+)/g,
+			syntaxSettings = /\@([a-zA-Z0-9_\.]+)/g,
+			group = {}
 
+			// Add components to elements.component
+			_.each(self.components, function (_component, index) {
+				// Init component
+				self.componentFire(_component, 'init')
+
+				// Construct data for addElement
+				let view = _component.data.view
+
+				// Replace syntax on data
+				.replace(syntaxData, "{{data.tpl_data.$1}}")
+
+				// Replace
+				.replace(syntaxSettings, function (match, $1) {
+					if ($1.indexOf('.')<0) $1 += '.value'
+					return '{{data.settings.'+ $1 +'}}'
+				})
+
+				// Change all class and id to el-{{name}}-classname
+				$('span', $(view)).each(function (el) {
+					console.log(el)
+				})
+
+				// Reconstruct our component
+				let component = {
+					type: 'component',
+					class: 'no-border',
+					data: _component.data,
+					events: _component.events,
+					kind: _component.data.id,
+					label: _component.data.label,
+					iconSrc: _component.path.icon + _component.data.icon,
+					accept: _component.data.accept || 'section,container,column',
+					editable: _component.data.editable,
+					display: _component.data.display,
+					settings: _component.data.settings,
+					view: view
+				}
+
+				// Add external stylesheet
+				if (_component.data.css) {
+					_.each(_component.data.css, function (css, index) {
+						let csspath = (css.includes(['http://', 'https://', '://']))? css: _component.path.css + css
+						self.layout.$emit('addCSS', csspath)
+					})
+					delete _component.data.css
+				}
+
+				// Add external javascript
+				if (_component.data.js) {
+					/*_.each(_.component.data.js, function (js, index) {
+
+					})*/
+					delete _component.data.js
+				}
+
+				// Add to component list
+				if (!group[_component.data.group]) {
+					group[_component.data.group] = []
+				}
+
+				group[_component.data.group].push(component)
+			})
+
+			self.$set('elements.component', group)
+		},
 
 		/**
-		 * When element item dragging itself
-		 * @param {Boolean} drag [Whether in drag state or not]
+		 * On component element ready
+		 * @param {Object} data
 		 * @return {void}
 		 */
-		self.$on('dragstart', function (drag, element) {
-			// Notify to viewer
-			self.$set('dragging', drag)
-			self.layout.$emit('dragstart', drag, element)
-
-			// If in dragging state, close left panel element
-			if (drag) {
-				setTimeout(function () {
-					self.$set('showElementPanel', false)
-				}, 350)
-			}
-		})
-
-		/**
-		 * When element move, notify viewer to update latest coords
-		 * @param  {Object} coords
-		 * @return {void}
-		 */
-		self.$on('dragmove', function (coords) {
-			let canvasWidth = document.querySelector('.canvas-builder').getBoundingClientRect().width,
-			layoutViewerWidth = document.querySelector('[data-layout-viewer]').getBoundingClientRect().width,
-			gutter = canvasWidth - layoutViewerWidth
-			self.layout.$emit('dragmove', coords, gutter)
-		})
-
-
-		/**
-		 * When element drag is ended, notify viewer to add element
-		 * @param  {Object} data  [type and kind]
-		 * @return {void}
-		 */
-		self.$on('dragend', function (data) {
-			// Notify to viewer
-			self.$set('dragging', false)
-			self.layout.$emit('dragend', data)
-		})
-
-
-		/**
-		 * Hide add element panel
-		 * @return {void}
-		 */
-		self.$on('hideParentPanel', function () {
-			self.$set('showElementPanel', false)
-		})
-
+		elementReady (data) {
+			this.componentsFire('ready', data)
+		},
 
 		/**
 		 * Display element outline when mouseover
-		 * 
+		 *
 		 * @param  {Object} obj
 		 * @return {void}
 		 */
-		self.$on('elementHover', function (obj) {
-			self.$set('outline.hovered', obj)
-		})
-
+		elementHover (obj) {
+			this.$set('outline.hovered', obj)
+		},
 
 		/**
 		 * Display element outline when selected
 		 * @param  {Object} obj
 		 * @return {void}
 		 */
-		self.$on('elementSelect', function (obj) {
-			self.$set('outline.selected', obj)
-		})
+		elementSelect (obj) {
+			// Select element
+			this.$set('outline.selected', obj)
 
+			// Toggle block panel
+			this.$set('block.panel', false)
+			this.blockPanelReposition(obj)
+
+			// Editor handler
+			if (this.editor.element) {
+				let elementHeight = obj.css.$top + $(this.editor.element).outerHeight(true)
+
+				this.$set('editor.css', {
+					top: 0,
+					left: 0,
+					transform: `translate(${obj.css.$left}px, ${elementHeight}px)`
+				})
+
+				if (obj.id !== this.editor.element.getAttribute('data-id')) {
+					// Disable content editor
+					if (this.layout) {
+						this.layout.$broadcast('disableEditor')
+					}
+				}
+			}
+		},
+
+
+		/**
+		 * Get selected properties
+		 * @param  {Object} props
+		 * @return {void}
+		 */
+		selectedProperties (props) {
+			this.$set('selectedProperties', props)
+		},
+
+		/**
+		 * Get selected kind
+		 * @param  {Object} props
+		 * @return {void}
+		 */
+		selectedElementKind (props) {
+			this.$set('selectedElementKind', props)
+		},
+
+		/**
+		 * Catch if  component editable on focus / blur
+		 * @param  {Boolean} edit
+		 * @return {void}
+		 */
+		onEditable (edit) {
+			this.$set('componentOnEdit', edit)
+		},
+
+		/**
+		 * When element item dragging itself
+		 * @param {Boolean} drag [Whether in drag state or not]
+		 * @return {void}
+		 */
+		dragstart (drag, element) {
+			// Notify to viewer
+			this.$set('dragging', drag)
+			this.componentsFire('dragstart')
+			this.layout.$emit('dragstart', drag, element)
+
+			// If in dragging state, close left panel element
+			if (drag) {
+				setTimeout(() => this.$set('showElementPanel', false), 350)
+			}
+		},
+
+		/**
+		 * When element move, notify viewer to update latest coords
+		 * @param  {Object} coords
+		 * @return {void}
+		 */
+		dragmove (coords) {
+			let canvasWidth = document.querySelector('.canvas-builder').getBoundingClientRect().width,
+			layoutViewerWidth = this.getCanvasIframe().getBoundingClientRect().width,
+			gutter = canvasWidth - layoutViewerWidth
+
+			this.componentsFire('dragmove', coords)
+			this.layout.$emit('dragmove', coords, gutter)
+		},
+
+		/**
+		 * When element drag is ended, notify viewer to add element
+		 * @param  {Object} data  [type and kind]
+		 * @return {void}
+		 */
+		dragend (data) {
+			this.$set('dragging', false)
+			this.componentsFire('dragend')
+			this.layout.$emit('dragend', data)
+		},
+
+		/**
+		 * Hide add element panel
+		 * @return {void}
+		 */
+		hideParentPanel () {
+			this.$set('showElementPanel', false)
+		},
 
 		/**
 		 * Hide popup input
 		 * @return {void}
 		 */
-		self.$on('hidePopInput', function () {
-			self.hidePopInput()
-		})
+		hidePopInput () {
+			this.hidePopInput()
+		},
 
-
-		self.$on('drawDiagonalOutline', function (type) {
-			self.drawDiagonalOutlineFor(type)
-		})
-
+		/**
+		 * Draw diagonal line for margin/padding
+		 * @param  {String} type
+		 * @return {void}
+		 */
+		drawDiagonalOutline (type) {
+			this.drawDiagonalOutlineFor(type)
+		},
 
 		/**
 		 * Set zIndex of iframe when blockpanel Added
 		 * @param  {Boolean} display
 		 * @return {void}
 		 */
-		self.$on('displayBlockPanel', function (display) {
-			self.$set('displayBlockPanel', display)
-		})
-
+		displayBlockPanel (display) {
+			this.$set('displayBlockPanel', display)
+		},
 
 		/**
 		 * On viewer scrolling
 		 * @param  {Object} bodyRect  Scroll Value
 		 * @return {void}
 		 */
-		self.$on('scroll', function (bodyRect) {
-			self.$set('boundTop', bodyRect.top)
-			self.$set('layoutScroll', {
+		scroll (bodyRect) {
+			this.$set('boundTop', bodyRect.top)
+			this.$set('layoutScroll', {
 				top: bodyRect.top + 'px'
 			})
-		})
+		},
 
+		/**
+		 * Reactivate Iframe it's will resize iframe after dragged components
+		 * @return {void}
+		 */
+		reactivateIframe () {
+			let iframe = this.getCanvasIframe(), width
+
+			switch (this.screenView) {
+				case 'large':
+					width = '99%'
+				break;
+
+				case 'medium':
+					width = '727px'
+				break;
+
+				case 'small':
+					width = '599px'
+				break;
+
+				default:
+					width = '479px'
+				break;
+			}
+
+			iframe.style.flexGrow = 0
+			iframe.style.width = width
+			setTimeout(() => iframe.removeAttribute('style'), 1)
+		},
 
 		/**
 		 * Clear Canvas
 		 */
-		self.$on('clearCanvas', self.clearCanvas)
+		clearCanvas () {
+			this.clearCanvas()
+		},
+
+		/**
+		 * Show Context Menu
+		 */
+		showContextMenu (coords) {
+			// Get gutter between canvas and iframe
+			let viewerWidth = this.getCanvasSize('width'),
+			viewerHeight = this.getCanvasSize('height'),
+			gutter = document.querySelector('.canvas-builder').getBoundingClientRect().width - viewerWidth
+
+			// Get top and left position
+			let leftOrRight, topOrBottom, contextPosition = {},
+			contextMenuHeight = $('._cm').outerHeight(true),
+			x = coords.left + (gutter / 2),
+			y = coords.top
+
+			// Set x position
+			if (viewerWidth - coords.left < 200) {
+				contextPosition.right = viewerWidth - x + 'px'
+			} else {
+				contextPosition.left = x + 'px'
+			}
+
+			// Set y position
+			if (viewerHeight - coords.top < contextMenuHeight) {
+				contextPosition.top = y - contextMenuHeight + 'px'
+			} else {
+				contextPosition.top = y + 'px'
+			}
+
+			// Set context menu position
+			this.$set('contextMenu.position', contextPosition)
+
+			// Show context menu
+			this.$set('contextMenu.show', true)
+		},
+
+		// Hide context menu
+		hideContextMenu () {
+			this.$set('contextMenu.show', false)
+		},
+
+		/**
+		 * Set editor element
+		 */
+		setEditorElement (element) {
+			this.$set('editor.element', element)
+		}
+	},
+
+	ready () {
+
+		let self = this
+
+		// Google fonts family api key
+		//
+		$.getJSON('https://www.googleapis.com/webfonts/v1/webfonts?fields=items%2Ffamily&key=' + GOOGLE_API_KEY, function (response) {
+			let fontFamilyList = self.fontFamilyList
+
+			if (response.items && response.items.length > 0) {
+				_.each(response.items, function (item) {
+					fontFamilyList.push(item.family)
+				})
+			}
+
+			// Avoid duplicate font
+			self.$set('fontFamilyList', _.unique(fontFamilyList))
+		})
 
 
 		/**
@@ -1457,40 +2392,10 @@ export default {
 			return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
 		}
 
-		self.$set('screenSize', windowWidth())
+		this.$set('screenSize', windowWidth())
 		window.addEventListener('resize', function () {
-			self.$set('screenSize', windowWidth())
+			this.$set('screenSize', windowWidth())
 		}, true)
-
-
-
-		/**
-		 * Context Menu
-		 */
-		self.$on('showContextMenu', function (coords) {
-			// Get gutter between canvas and iframe
-			let canvasWidth = document.querySelector('.canvas-builder').getBoundingClientRect().width,
-			layoutViewerWidth = document.querySelector('[data-layout-viewer]').getBoundingClientRect().width,
-			gutter = canvasWidth - layoutViewerWidth
-
-			// Get top and left position
-			let left = coords.left + (gutter / 2),
-			top = coords.top + self.boundTop
-
-			// Set context menu position
-			self.$set('contextMenu.position', {
-				top: top + 'px',
-				left: left + 'px'
-			})
-
-			// Show context menu
-			self.$set('contextMenu.show', true)
-		})
-
-		// Hide context menu
-		self.$on('hideContextMenu', function () {
-			self.$set('contextMenu.show', false)
-		})
 
 
 		// Keyboard Event Binding using Mousetrap

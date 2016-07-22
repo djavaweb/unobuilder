@@ -2,7 +2,7 @@
 <div class="input-number" :class="{disabled: disabled}">
 	<label v-if="label" :style="{width: labelWidth}">{{label}}</label>
 	<div class="input-number-wrapper" :class="{focus: isFocus}">
-		<input type="text" min="{{min}}" max="{{max}}" step="{{step}}" v-model="value" :disabled="disabled" placeholder="None" @focus="focus()" @blur="blur()">
+		<input type="text" min="{{min}}" max="{{max}}" step="{{step}}" v-model="value" :disabled="disabled" placeholder="None" @focus="focus()" @blur="blur()" :style="inputStyle">
 		<div class="unit-toggler" v-show="value!==''">
 			<a @click="toggleSelectUnit()" :class="{'select-unit': selectUnit}">{{selectedUnit}}</a>
 			<div class="unit-select" v-show="selectUnit">
@@ -52,6 +52,10 @@ export default {
 		max: {
 			type: Number,
 			default: 100
+		},
+		inputWidth: {
+			type: Number,
+			default: -1
 		}
 	},
 
@@ -59,6 +63,15 @@ export default {
 		selectedUnit () {
 			if (this.value === 'auto') return '-'
 			return this.unit
+		},
+
+		inputStyle () {
+			if (this.inputWidth>-1) {
+				return {
+					width: this.inputWidth + 'px'
+				}
+			}
+			return null;
 		}
 	},
 
