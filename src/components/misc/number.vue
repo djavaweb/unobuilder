@@ -1,5 +1,5 @@
 <template>
-<div class="input-number" :class="{disabled: disabled}">
+<div class="input-number" :class="{disabled: disabled}" @mouseup.capture="clearTimer()" @mouseleave.capture="clearTimer()">
 	<label v-if="label" :style="{width: labelWidth}">{{label}}</label>
 	<div class="input-number-wrapper" :class="{focus: isFocus}">
 		<input type="text" min="{{min}}" max="{{max}}" step="{{step}}" v-model="value" :disabled="disabled" placeholder="None" @focus="focus()" @blur="blur()" :style="inputStyle">
@@ -12,8 +12,8 @@
 				<a @click="changeUnit('em')">em</a>
 			</div>
 		</div>
-		<a class="increase uk-icon-caret-up" @mousedown="increase()" @mouseup="clearTimer()"></a>
-		<a class="decrease uk-icon-caret-down" @mousedown="decrease()" @mouseup="clearTimer()"></a>
+		<a class="increase uk-icon-caret-up" @mousedown="increase()"></a>
+		<a class="decrease uk-icon-caret-down" @mousedown="decrease()"></a>
 	</div>
 </div>
 </template>
@@ -132,7 +132,6 @@ export default {
 			this.$set('selectUnit', !this.selectUnit)
 		},
 
-
 		/**
 		 * Input on :focus
 		 * @return {void}
@@ -159,7 +158,7 @@ export default {
 			isFocus: false,
 			timer: null,
 			units: ['px', 'em', '%']
-		}	
+		}
 	}
 }
 </script>

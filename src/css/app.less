@@ -287,6 +287,7 @@ html, body, #app {
         label {
             font-size: 11px;
             color: @white;
+            vertical-align: 1px;
             &.bold {
                 font-weight: bold;
                 span {
@@ -1172,7 +1173,7 @@ label.icon i {
     background-repeat: no-repeat;
     background-position: 50% 50%;
     display: inline-block;
-    width: 16px;
+    width: 17px;
     height: 16px;
     vertical-align: -5px;
 
@@ -1181,6 +1182,7 @@ label.icon i {
     }
 
     &.font-weight {
+        width: 15px;
         background-image: url('../img/font-weight.svg');
     }
 
@@ -1190,7 +1192,7 @@ label.icon i {
 
     &.font-color {
         background-image: url('../img/font-color.svg');
-        width: 20px;
+        width: 18px;
     }
 
     &.line-height {
@@ -1212,6 +1214,66 @@ label.icon i {
 
     &.letter-spacing {
         background-image: url('../img/letter-spacing.svg');
+        width: 20px;
+    }
+}
+
+.uk-icon-text-style {
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    width: 9px;
+    height: 11px;
+}
+
+.uk-icon {
+    &-x {
+        .uk-icon-text-style;
+        background-image: url('../img/x.svg');
+        background-size: 60%;
+        width: 14px;
+    }
+    &-text-style {
+        &-normal {
+            .uk-icon-text-style;
+            background-image: url('../img/text-style-normal.svg');
+        }
+        &-italic {
+            .uk-icon-text-style;
+            background-image: url('../img/text-style-italic.svg');
+        }
+    }
+
+    &-text-align {
+        &-left {
+            .uk-icon-text-style;
+            background-image: url('../img/text-align-left.svg');
+        }
+
+        &-center {
+            .uk-icon-text-style;
+            background-image: url('../img/text-align-center.svg');
+        }
+
+        &-right {
+            .uk-icon-text-style;
+            background-image: url('../img/text-align-right.svg');
+        }
+
+        &-justify {
+            .uk-icon-text-style;
+            background-image: url('../img/text-align-justify.svg');
+        }
+    }
+
+    &-text-decoration {
+        &-underline {
+            .uk-icon-text-style;
+            background-image: url('../img/text-decoration-underline.svg');
+        }
+        &-strikethrough {
+            .uk-icon-text-style;
+            background-image: url('../img/text-decoration-strikethrough.svg');
+        }
     }
 }
 

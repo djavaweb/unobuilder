@@ -5,7 +5,8 @@ import diff from 'deep-diff'
 import _ from 'underscore'
 import async from 'async'
 import Mousetrap from '../lib/mousetrap.min.js'
-import classList from "../lib/classlist.js"
+import classList from '../lib/classlist.js'
+import helpers from './uno.helpers.js'
 
 // Main Layout
 import layout from '../../components/viewer/layout.vue'
@@ -287,6 +288,9 @@ const PROPERTIES = {
 		value: 14,
 		unit: 'px'
 	},
+	fontStyle: {
+		value: 'normal'
+	},
 	fontColor: {
 		hex: '#000000',
 		hsl: {
@@ -310,7 +314,7 @@ const PROPERTIES = {
 		a: 1
 	},
 	lineHeight: {
-		value: 0,
+		value: 17,
 		unit: 'px',
 		disabled: false
 	},
@@ -318,6 +322,12 @@ const PROPERTIES = {
 		value: 0,
 		unit: 'px',
 		disabled: false
+	},
+	textAlign: {
+		value: 'left'
+	},
+	textDecoration: {
+		value: 'none'
 	},
 	background: {
 		value: 'none',
@@ -385,7 +395,8 @@ const App = new Vue({
 
 			copiedElement: null,
 			copiedElementStyle: null,
-			screenView: 'large'
+			screenView: 'large',
+			loadedFonts: []
 		}
 	},
 
@@ -474,7 +485,37 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		rgbaColor (value) {
-			return `rgba(${value.rgba.r}, ${value.rgba.g}, ${value.rgba.b}, ${value.rgba.a})`
+			if (value.rgba.a < 1) {
+				return `rgba(${value.rgba.r}, ${value.rgba.g}, ${value.rgba.b}, ${value.rgba.a})`
+			}
+
+			return value.hex
+		},
+
+		/**
+		 * Load font family dynamically, check if it's google font or native
+		 * @param  {Object} font
+		 * @return {String}
+		 */
+		loadFont (font) {
+			let fontFamily = font.value
+			if (fontFamily.indexOf('Default')>0) {
+				fontFamily = 'inherit'
+			}
+
+			if (! this.loadedFonts.includes(fontFamily)) {
+				if (! helpers.NATIVE_FONTS.includes(fontFamily) && fontFamily !== 'inherit') {
+					WebFont.load({
+						google: {
+							families: [fontFamily]
+						}
+					})
+				}
+
+				this.loadedFonts.push(fontFamily)
+			}
+
+			return fontFamily
 		},
 
 
@@ -564,6 +605,20 @@ const App = new Vue({
 					borderLeft: self.autoUnit(properties.borderLeft, false) +' '+ properties.borderLeft.borderStyle + ' ' + self.rgbaColor(properties.borderLeft.color),
 				}
 
+
+				/**
+				 * Text style including:
+				 * font family, font color, font style, text-align,
+				 * text-decoration, etc
+				 */
+				style.fontFamily = self.loadFont(properties.fontFamily)
+				style.fontSize = self.autoUnit(properties.fontSize)
+				style.fontStyle = properties.fontStyle.value
+				style.textAlign = properties.textAlign.value
+				style.textDecoration = properties.textDecoration.value
+				style.lineHeight = self.autoUnit(properties.lineHeight)
+				style.letterSpacing = self.autoUnit(properties.letterSpacing)
+				style.color = self.rgbaColor(properties.fontColor)
 
 				/**
 				 * Background

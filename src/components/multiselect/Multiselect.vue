@@ -210,7 +210,8 @@
   box-sizing: content-box;
   display: block;
   position: relative;
-  width: 100%;
+  width: auto;
+  min-width: 40px;
   text-align: left;
   color: #35495E;
 }

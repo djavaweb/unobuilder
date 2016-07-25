@@ -579,39 +579,9 @@
 				<!-- ./end of properties.size -->
 
 				<!-- custom attributes and css -->
-				<accordion-item title="CSS &amp; Attributes">
+				<accordion-item title="Attributes">
 					<accordion-item-view>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
-						<p>Test</p>
+
 					</accordion-item-view>
 				</accordion-item>
 			</accordion-wrapper>
@@ -621,15 +591,17 @@
 			<accordion-wrapper>
 				<accordion-item title="Typography" :with-switcher="true" switcher-label="Advanced" :switcher.sync="tabAdvanced.display">
 					<accordion-item-view>
-						<div class="uk-grid uk-grid-small">
-							<label class="uk-width-1-10 icon"><i class="font-family"></i></label>
+						<div class="uk-grid uk-grid-collapse">
+							<div class="uk-width-1-10">
+								<label class="icon"><i class="font-family"></i></label>
+							</div>
 							<div class="uk-width-9-10">
 								<multiselect
 								:multiple="false"
 								:show-labels="false"
 								:selected.sync="fontFamilyValue"
 								:max-height="250"
-								:options="fontFamilyList"
+								:options="fontFamilyList|orderBy 1"
 								placeholder="Font Family"
 								><span slot="noResult">No fonts have been found!</span></multiselect>
 							</div>
@@ -638,60 +610,109 @@
 
 					<accordion-item-view>
 						<div class="uk-grid uk-grid-small">
-							<label class="uk-width-1-10 icon"><i class="font-weight"></i></label>
-							<div class="uk-width-2-10">
-								<multiselect
-								:multiple="false"
-								:searchable="false"
-								:show-labels="false"
-								:selected.sync="layout.selected.properties[screenView].fontWeight.value"
-								:max-height="250"
-								:options="[100, 200, 300, 400, 500, 600, 700, 800]"
-								placeholder="100"
-								></multiselect>
-							</div>
-
-							<label class="uk-width-1-10 icon"><i class="font-size"></i></label>
 							<div class="uk-width-3-10">
-								<number :value.sync="layout.selected.properties[screenView].fontSize.value" :unit.sync="layout.selected.properties[screenView].fontSize.unit" :min="0" label=""></number>
+								<div class="uk-grid uk-grid-collapse">
+									<div class="uk-width-3-10">
+										<label class="icon "><i class="font-weight"></i></label>
+									</div>
+									<div class="uk-width-7-10">
+										<multiselect
+										:multiple="false"
+										:searchable="false"
+										:show-labels="false"
+										:selected.sync="layout.selected.properties[screenView].fontWeight.value"
+										:max-height="250"
+										:options="[100, 200, 300, 400, 500, 600, 700, 800]"
+										placeholder="100"
+										></multiselect>
+									</div>
+								</div>
 							</div>
 
-							<label class="uk-width-1-10 icon"><i class="font-color"></i></label>
-							<div class="uk-width-2-10">
-								<color-picker :colors.sync="fontColorValue" :palette="false" :click="editFontColor"></color-picker>
+							<div class="uk-width-2-6">
+								<div class="uk-grid uk-grid-collapse">
+									<div class="uk-width-3-10">
+										<label class="icon"><i class="font-size"></i></label>
+									</div>
+									<div class="uk-width-7-10">
+										<number :input-width="18" :value.sync="fontSize" :unit.sync="fontSizeUnit" :min="0" label=""></number>
+									</div>
+								</div>
+							</div>
+							<div class="uk-width-2-6">
+								<div class="uk-grid uk-grid-collapse">
+									<div class="uk-width-3-10">
+										<label class="icon"><i class="line-height"></i></label>
+									</div>
+
+									<div class="uk-width-7-10">
+										<number :input-width="20" :value.sync="layout.selected.properties[screenView].lineHeight.value" :unit.sync="layout.selected.properties[screenView].lineHeight.unit" :min="0" label=""></number>
+									</div>
+								</div>
 							</div>
 						</div>
 					</accordion-item-view>
 
 					<accordion-item-view>
 						<div class="uk-grid uk-grid-small">
-							<label class="uk-width-1-10 icon"><i class="line-height"></i></label>
-							<div class="uk-width-2-10">
-								<number :input-width="10" :value.sync="layout.selected.properties[screenView].lineHeight.value" :unit.sync="layout.selected.properties[screenView].lineHeight.unit" :min="0" label=""></number>
-							</div>
-
-							<label class="uk-width-1-10 icon"><i class="font-style"></i></label>
-							<div class="uk-width-2-10">
-								<buttons :items="[{icon: 'i-normal'}, {icon: 'italic'}]"></buttons>
-							</div>
-
-							<label class="uk-width-1-10 icon"><i class="text-decoration"></i></label>
 							<div class="uk-width-3-10">
-								<buttons :items="[{icon: 'text-width'}, {icon: 'text-width'}, {icon: 'text-width'}]"></buttons>
+								<div class="uk-grid uk-grid-collapse">
+									<div class="uk-width-3-10">
+										<label class="icon"><i class="font-color"></i></label>
+									</div>
+									<div class="uk-width-7-10">
+										<color-picker :colors.sync="fontColor" :palette="false" :click="editFontColor"></color-picker>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="uk-width-3-10">
+								<div class="uk-grid uk-grid-small">
+									<div class="uk-width-3-10">
+										<label class="icon"><i class="font-style"></i></label>
+									</div>
+									<div class="uk-width-7-10">
+										<buttons :items="[{icon: 'text-style-normal', active: getProps('fontStyle.value', 'normal'), click: setFontStyle('normal')}, {icon: 'text-style-italic', active: getProps('fontStyle.value', 'italic'), click: setFontStyle('italic')}]"></buttons>
+									</div>
+								</div>
+							</div>
+
+							<div class="uk-width-4-10">
+								<div class="uk-grid uk-grid-small">
+									<div class="uk-width-2-10">
+										<label class="icon"><i class="text-decoration"></i></label>
+									</div>
+									<div class="uk-width-8-10">
+										<buttons :items="[{icon: 'x', active: getProps('textDecoration.value', 'none'), click: setTextDecoration('none')}, {icon: 'text-decoration-underline', active: getProps('textDecoration.value', 'underline'), click: setTextDecoration('underline')}, {icon: 'text-decoration-strikethrough', active: getProps('textDecoration.value', 'line-through'), click: setTextDecoration('line-through')}]"></buttons>
+									</div>
+								</div>
 							</div>
 						</div>
 					</accordion-item-view>
 
 					<accordion-item-view>
 						<div class="uk-grid uk-grid-small">
-							<label class="uk-width-1-10 icon"><i class="text-align"></i></label>
-							<div class="uk-width-3-10">
-								<buttons :items="[{icon: 'i-normal'}, {icon: 'italic'}, {icon: 'italic'}, {icon: 'italic'}]"></buttons>
+							<div class="uk-width-5-10">
+								<div class="uk-grid uk-grid-collapse">
+									<div class="uk-width-2-10">
+										<label class="icon"><i class="text-align"></i></label>
+									</div>
+									<div class="uk-width-8-10">
+										<buttons :items="[{icon: 'text-align-left', active: getProps('textAlign.value', 'left'), click: setTextAlign('left')}, {icon: 'text-align-center', active: getProps('textAlign.value', 'center'), click: setTextAlign('center')}, {icon: 'text-align-right', active: getProps('textAlign.value', 'right'), click: setTextAlign('right')}, {icon: 'text-align-justify', active: getProps('textAlign.value', 'justify'), click: setTextAlign('justify')}]"></buttons>
+									</div>
+								</div>
 							</div>
-							<div class="uk-width-2-10">&nbsp;</div>
-							<label class="uk-width-1-10 icon"><i class="letter-spacing"></i></label>
-							<div class="uk-width-3-10">
-								<number :input-width="10" :value.sync="layout.selected.properties[screenView].letterSpacing.value" :unit.sync="layout.selected.properties[screenView].letterSpacing.unit" :min="0" label=""></number>
+
+							<div class="uk-width-4-10 uk-push-1-10">
+								<div class="uk-grid uk-grid-collapse">
+									<div class="uk-width-3-10">
+										<label class="icon"><i class="letter-spacing"></i></label>
+									</div>
+									<div class="uk-width-7-10">
+										<number :input-width="20" :value.sync="layout.selected.properties[screenView].letterSpacing.value" :unit.sync="layout.selected.properties[screenView].letterSpacing.unit" :min="-100" label=""></number>
+									</div>
+								</div>
 							</div>
 						</div>
 					</accordion-item-view>
@@ -754,13 +775,12 @@
 
 
 <script>
-const GOOGLE_API_KEY = 'AIzaSyALxXBrp1LxICQoso23j0Ls46aI7QZCktU'
-
 // Modules
 import dot from 'dot-object'
 import _ from 'underscore'
 import Mousetrap from '../../js/lib/mousetrap.min.js'
 import Multiselect from '../multiselect/index.js'
+import helpers from '../../js/core/uno.helpers.js'
 
 // Import child components
 import accordionWrapper from '../accordion/wrapper.vue'
@@ -911,7 +931,7 @@ export default {
 			colorPickerShow: false,
 
 			/* Font family */
-			fontFamilyList: ['Inherit (Default)', 'Andale Mono', 'Arial', 'Arial Black', 'Arial Narrow', 'Arial Rounded MT Bold', 'Avant Garde', 'Baskerville', 'Big Caslon', 'Bodoni MT', 'Book Antiqua', 'Brush Script MT', 'Calibri', 'Calisto MT', 'Cambria', 'Candara', 'Century Gothic', 'Consolas', 'Copperplate', 'Courier New', 'Didot', 'Fantasy', 'Franklin Gothic Medium', 'Futura', 'Garamond', 'Geneva', 'Georgia', 'Gill Sans', 'Goudy Old Style', 'Helvetica', 'Hoefler Text', 'Impact', 'Lucida Bright', 'Lucida Console', 'Lucida Grande', 'Lucida Sans Typewriter', 'Monaco', 'Monospaced', 'Optima', 'Palatino', 'Papyrus', 'Perpetua', 'Rockwell', 'Rockwell Extra Bold', 'Script', 'Segoe UI', 'Serif', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana']
+			fontFamilyList: helpers.NATIVE_FONTS
 		}
 	},
 
@@ -1186,13 +1206,33 @@ export default {
 		},
 
 		// Color value in popinput
-		fontColorValue: {
+		fontColor: {
 			get () {
 				return this.getProps('fontColor')
 			},
 
 			set (value) {
 				this.setProps('fontColor', value)
+			}
+		},
+
+		fontSize: {
+			get (value) {
+				return this.getProps('fontSize.value')
+			},
+
+			set (value) {
+				this.setProps('fontSize.value', value)
+			}
+		},
+
+		fontSizeUnit: {
+			get (value) {
+				return this.getProps('fontSize.unit')
+			},
+
+			set (value) {
+				this.setProps('fontSize.unit', value)
 			}
 		},
 
@@ -1769,8 +1809,8 @@ export default {
 				// Inside component.js register
 				get $eval () {
 					return function (fn) {
-						var params = uno.utils.getParams(fn);
-						uno.viewer.$emit('evalFunction', component.id, component.uid, fn, params);
+						var params = uno.utils.getParams(fn)
+						uno.viewer.$emit('evalFunction', component.id, component.uid, fn, params)
 					}
 				},
 
@@ -1928,13 +1968,37 @@ export default {
 		 */
 		setGutter (size) {
 			if (this.getKind('section') || this.getKind('container') || this.getKind('column')) {
-				let self = this
-				return function () {
-					self.setProps('gutter.value', size)
-				}
+				return () => this.setProps('gutter.value', size)
 			}
 
 			return
+		},
+
+		/**
+		 * Set font-style properties in curry function
+		 * @param {String} style
+		 * @return {Function}
+		 */
+		setFontStyle (style) {
+			return () => this.setProps('fontStyle.value', style)
+		},
+
+		/**
+		 * Set text-align properties in curry function
+		 * @param {String} style
+		 * @return {Function}
+		 */
+		setTextAlign (align) {
+			return () => this.setProps('textAlign.value', align)
+		},
+
+		/**
+		 * Set text-align properties in curry function
+		 * @param {String} style
+		 * @return {Function}
+		 */
+		setTextDecoration (align) {
+			return () => this.setProps('textDecoration.value', align)
 		},
 
 		/**
@@ -2370,7 +2434,7 @@ export default {
 
 		// Google fonts family api key
 		//
-		$.getJSON('https://www.googleapis.com/webfonts/v1/webfonts?fields=items%2Ffamily&key=' + GOOGLE_API_KEY, function (response) {
+		$.getJSON(helpers.GOOGLE.endpointUrl + helpers.GOOGLE.apiKey, function (response) {
 			let fontFamilyList = self.fontFamilyList
 
 			if (response.items && response.items.length > 0) {
@@ -2392,9 +2456,9 @@ export default {
 			return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
 		}
 
-		this.$set('screenSize', windowWidth())
+		self.$set('screenSize', windowWidth())
 		window.addEventListener('resize', function () {
-			this.$set('screenSize', windowWidth())
+			self.$set('screenSize', windowWidth())
 		}, true)
 
 
