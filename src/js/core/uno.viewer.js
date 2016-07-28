@@ -22,6 +22,8 @@ Vue.transition('appear', {
 
 const classPrefix = 'uno-';
 const PROPERTIES = {
+	id: '',
+	klass: '',
 	gutter: {
 		value: 'medium'
 	},
@@ -396,7 +398,8 @@ const App = new Vue({
 			copiedElement: null,
 			copiedElementStyle: null,
 			screenView: 'large',
-			loadedFonts: []
+			loadedFonts: [],
+			customCSS: ''
 		}
 	},
 
@@ -756,12 +759,11 @@ const App = new Vue({
 		 * @return {String}
 		 */
 		getBreadcrumbs (target, withParent, fn) {
-			let self = this,
-			id = target.getAttribute('data-id'),
+			let id = target.getAttribute('data-id'),
 			kind = target.getAttribute('data-kind'),
 			breadcrumbs = []
 
-			self.findElement(id, function (element) {
+			this.findElement(id, function (element) {
 
 				// Check for initialization, if undefined don't add breadcrumb
 				if (element.self) {
@@ -782,14 +784,14 @@ const App = new Vue({
 				// If with parent find again
 				if (withParent && element.parent) {
 					let parentElement = document.querySelector(`[data-id="${element.parent.id}"]`)
-					self.getBreadcrumbs(parentElement, true, function (breadcrumb) {
+					this.getBreadcrumbs(parentElement, true, function (breadcrumb) {
 						breadcrumbs.push(breadcrumb)
 						breadcrumbs = _.flatten(breadcrumbs)
-						fn && fn(breadcrumbs)
+						fn && fn.call(this, breadcrumbs)
 					})
 				} else {
 					// Callback
-					fn && fn(breadcrumbs)
+					fn && fn.call(this, breadcrumbs)
 				}
 			})
 		},
@@ -875,20 +877,19 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		hoverOutline (target, hide) {
-			let self = this,
-			id = target.getAttribute('data-id')
+			let id = target.getAttribute('data-id')
 
-			self.findElement(id, function (element) {
-				self.getBreadcrumbs(target, false, function (breadcrumbs) {
+			this.findElement(id, function (element) {
+				this.getBreadcrumbs(target, false, function (breadcrumbs) {
 
-					let css = self.outline(target)
+					let css = this.outline(target)
 					if (hide) css.display = 'none'
 
 					// Hover element
-					self.$set('hovered.element', element.self.id)
+					this.$set('hovered.element', element.self.id)
 
 					// Notify parent
-					self.parent().$broadcast('elementHover', {
+					this.parent().$broadcast('elementHover', {
 						css: css,
 						type: element.self.type,
 						breadcrumbs: breadcrumbs
@@ -1010,6 +1011,11 @@ const App = new Vue({
 
 			}
 
+			if (event.target.tagName.toLowerCase() === 'a') {
+				event.preventDefault()
+				this.$broadcast('enableEditor')
+			}
+
 			// Notify to parent to hide pop Input
 			this.parent().$broadcast('hidePopInput')
 
@@ -1071,10 +1077,11 @@ const App = new Vue({
 		 * @return {Object}        [target is where the element belongs, found element is the selected element]
 		 */
 		findElement (id, fn) {
+			var self = this
 			let body = this.body
 
 			if (id === 'body') {
-				fn && fn({parent: null,	self: body, deep: 1})
+				fn && fn.call(self, {parent: null,	self: body, deep: 1})
 				return
 			}
 
@@ -1084,8 +1091,17 @@ const App = new Vue({
 					for (let i = 0, len = root.elements.length;i<len;i++) {
 						let index = i
 
-						if (root.elements[i] && root.elements[i].id === id) fn && fn({parent: root, self: root.elements[i], index: index})
-						else search(root.elements[i], id, fn);
+						if (root.elements[i] && root.elements[i].id === id) {
+							let args = {
+								parent: root,
+								self: root.elements[i],
+								index: index
+							}
+
+							fn && fn.call(self, args)
+						} else {
+							search(root.elements[i], id, fn)
+						}
 					}
 				}
 			}
@@ -1142,29 +1158,28 @@ const App = new Vue({
 		 * @return {String}		[id of new element]
 		 */
 		addElement (data, fn) {
-			let self = this
-			data = self.cloneObject(data, true)
+			data = this.cloneObject(data, true)
 
 			// Search parent element
-			self.findElement(data.to, function (element) {
+			this.findElement(data.to, function (element) {
 				delete data.to
 
 				// Deep
 				data.deep = element.deep + 1
 
 				// Generate new id
-				data.id = self.generateId('el')
+				data.id = this.generateId('el')
 
 				// Clone default properties
-				let props = self.cloneObject(PROPERTIES)
-				props = self.setDefaultSize(props, data)
+				let props = this.cloneObject(PROPERTIES)
+				props = this.setDefaultSize(props, data)
 
 				// Copy default props to breakpoints object, each breakpoint has unique value
 				data.props = {
-					large: self.cloneObject(props),
-					medium: self.cloneObject(props),
-					small: self.cloneObject(props),
-					mini: self.cloneObject(props)
+					large: this.cloneObject(props),
+					medium: this.cloneObject(props),
+					small: this.cloneObject(props),
+					mini: this.cloneObject(props)
 				}
 
 				// Get parent element method
@@ -1186,18 +1201,18 @@ const App = new Vue({
 				element.self.elements.splice(index, 0, data)
 
 				// Reorder Index
-				self.reorderElementIndex()
+				this.reorderElementIndex()
 
 				// New element
-				self.findElement(data.id, function (newElement) {
+				this.findElement(data.id, function (newElement) {
 					// Click immediately
-					self.$nextTick(function () {
+					this.$nextTick(function () {
 						if (newElement.self && newElement.self.breadcrumb) {
-							self.reselectElement(newElement.self.id)
+							this.reselectElement(newElement.self.id)
 						}
 
 						// Callback
-						fn && fn(newElement)
+						fn && fn.call(this, newElement)
 					})
 				})
 			})
@@ -1235,7 +1250,7 @@ const App = new Vue({
 
 									// Change UID (for components)
 									if (root.elements[i].uid) {
-										root.elements[i].uid = root.elements[i].id + '-' + Date.now()
+										root.elements[i].uid = root.elements[i].kind + '-' + Date.now()
 									}
 
 									// Change method
@@ -1257,7 +1272,7 @@ const App = new Vue({
 
 					// Rename UID (for component)
 					if (copy.uid) {
-						copy.uid = self.id + '-' + Date.now()
+						copy.uid = copy.kind + '-' + Date.now()
 					}
 
 					// Change all copy's child Id
@@ -1500,7 +1515,9 @@ const App = new Vue({
 				overlap = !(sourceRect.right < destRect.left || sourceRect.left > destRect.right || sourceRect.bottom < destRect.top || sourceRect.top > destRect.bottom)
 
 				// Callback
-				if (overlap) fn && fn()
+				if (overlap) {
+					fn && fn.call(this)
+				}
 			}
 		},
 
@@ -1511,9 +1528,7 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		dragmove (coords, gutter) {
-			let self = this,
-			clone = self.clone,
-			rect = clone.getBoundingClientRect(),
+			let rect = this.clone.getBoundingClientRect(),
 			bodyTop = document.body.getBoundingClientRect().top
 
 			// Get coordinate
@@ -1521,17 +1536,17 @@ const App = new Vue({
 			y = (coords.y - (rect.height / 2)) - bodyTop
 
 			// Follow the cursor
-			clone.style.top = y + 'px'
-			clone.style.left = x + 'px'
+			this.clone.style.top = y + 'px'
+			this.clone.style.left = x + 'px'
 
 			/**
 			 * Check overlap for element
 			 */
 			let element = document.querySelectorAll('.uno-el')
 			for (let i in element) {
-				self.overlap(clone, element[i], function () {
-					self.$set('overlapElement', element[i])
-					self.eventFire(element[i], 'mouseover')
+				this.overlap(this.clone, element[i], function () {
+					this.$set('overlapElement', element[i])
+					this.eventFire(element[i], 'mouseover')
 				})
 			}
 		},
@@ -1606,7 +1621,7 @@ const App = new Vue({
 					break;
 
 					default:
-						let uid = data.id + '-' + Date.now()
+						let uid = data.data.id + '-' + Date.now()
 						self.addElement({
 							uid: uid,
 							type: 'component',
@@ -1627,6 +1642,290 @@ const App = new Vue({
 				// Reactivate iframe
 				self.parent().$broadcast('reactivateIframe')
 			})
+		}
+	},
+
+	events: {
+		/**
+		 * When component adding a new stylesheet
+		 * @param {String} src
+		 */
+		addCSS (src) {
+			let css = document.createElement('link')
+			css.setAttribute('href', src)
+			css.setAttribute('rel', 'stylesheet')
+			css.setAttribute('type', 'text/css')
+			document.getElementsByTagName('head')[0].appendChild(css)
+		},
+
+		/**
+		 * Component Eval Function
+		 * @param  {String}   id         [description]
+		 * @param  {String}   uid        [description]
+		 * @param  {Function} fn         [description]
+		 * @param  {Objects}   parameters [description]
+		 */
+		evalFunction (id, uid, fn, parameters) {
+			let params = [], excludes = ['this']
+			_.each(parameters, function (param, index) {
+				if (!param.includes(excludes)) {
+					params.push(window[param])
+				}
+			})
+
+			fn.apply($(`[data-component="${uid}"][data-kind="${id}"]`), params)
+		},
+
+
+		/**
+		 * When new block added, add element and notify block wrapper to close
+		 * @param  {Object} data  [Element Data]
+		 * @return {void}
+		 */
+		addBlock (data) {
+			switch (data.kind) {
+				case 'container':
+					let sectionData = this.cloneObject(data)
+
+					// Overwrite important data of container
+					sectionData.kind = 'section'
+					sectionData.breadcrumb = 'section'
+					sectionData.accept = 'body,section'
+
+					// Add container to section
+					this.addElement(sectionData, function (section) {
+						data.to = section.self.id
+						this.addElement(data)
+					})
+					break
+
+				default:
+					this.addElement(data)
+					break
+			}
+			this.$broadcast('addedBlock')
+		},
+
+
+		/**
+		 * Manipulate elements
+		 * @param  {Object} data
+		 * @return {void}
+		 */
+		manipulate (data) {
+			// Copy
+			if (data.action === 'copy') this.copyElement(data.id)
+
+			// Remove
+			else if (data.action === 'remove') this.removeElement(data.id)
+		},
+
+
+		/**
+		 * When breadcrumbs in layout clicked then click parent breadcrumb, fire click event
+		 * @param  {Object} breadcrumb [Breadcrumb data]
+		 * @return {void}
+		 */
+		elementSelect (breadcrumb) {
+			this.eventFire(this.activeElement(breadcrumb.id), 'click')
+		},
+
+
+		/**
+		 * When breadcrumbs in layout clicked then hovered, fire mouseover event, otherwise fire mouseleave
+		 * @param  {Object} breadcrumb [Breadcrumb data]
+		 * @param  {Boolean} enter   [Mouse state, over or leave]
+		 * @return {void}
+		 */
+		elementHover (breadcrumb, enter) {
+			let state = (enter) ? 'mouseover': 'mouseleave'
+			this.eventFire(this.activeElement(breadcrumb.id), state)
+		},
+
+
+		/**
+		 * On change responsive size / breakpoint
+		 */
+		changeScreenView (breakpoint) {
+			this.$set('screenView', breakpoint)
+			this.$broadcast('changeScreenView', breakpoint)
+			this.$nextTick(function () {
+				this.reselectElement()
+			})
+		},
+
+
+		/**
+		 * On dragging element from left panel
+		 * @param  {Boolean} drag
+		 * @param  {String} element
+		 */
+		dragstart (drag, element) {
+			if (drag) {
+				// Set ghost element
+				this.$set('clone', element)
+
+				// Set style
+				this.clone.classList.add('ondrag')
+				this.clone.style.position = 'absolute'
+				this.clone.style.visibility = 'hidden'
+				this.clone.style.opacity = 0
+				this.clone.style.zIndex = 999
+				document.body.appendChild(element)
+			}
+		},
+
+		/**
+		 * On drag move and drag end
+		 */
+		dragmove (coords, gutter) {
+			this.dragmove(coords, gutter)
+		},
+		dragend (obj) {
+			this.dragend(obj)
+		},
+
+		/**
+		 * On keyboard event binding
+		 * @param {String} action
+		 * @param {Boolean} isHoveredElement
+		 */
+		keyCapture (action, isHoveredElement) {
+			let selectedElement = (isHoveredElement)? this.hovered.element: this.selected.element
+
+			switch (action) {
+				case 'copy':
+					this.findElement(selectedElement, function (element) {
+						this.$set('copiedElement', element.self.id)
+					})
+				break;
+
+				case 'paste':
+					if (this.copiedElement && self.copiedElement !== 'body') {
+						this.copyElement(this.copiedElement)
+					}
+				break;
+
+				case 'delete':
+					if (selectedElement && selectedElement !== 'body') {
+						this.removeElement(selectedElement)
+					}
+				break;
+
+				case 'selectUp':
+					if (selectedElement && selectedElement !== 'body') {
+						// Find Selected element
+						this.findElement(selectedElement, function (element) {
+							let elementId
+
+							// Get previous element ID
+							if (element.index === 0) {
+								elementId = element.parent.id
+							} else {
+								let prevElement = element.index - 1
+								elementId = element.parent.elements[prevElement].id
+							}
+
+							// Select previous element
+							this.$nextTick(function () {
+								this.eventFire(this.activeElement(elementId), 'click')
+							})
+						})
+					}
+				break;
+
+				case 'selectDown':
+					if (selectedElement) {
+
+						// Find Selected element
+						this.findElement(selectedElement, function (element) {
+							let elementId
+
+							// For body
+							if (! element.parent) {
+								if (element.self.elements.length > 0) {
+									elementId = element.self.elements[0].id
+								}
+							} else {
+								let nextElement = element.index + 1
+								if (nextElement < element.parent.elements.length) {
+									elementId = element.parent.elements[nextElement].id
+								}
+							}
+
+							// Select next element
+							if (elementId) {
+								this.$nextTick(function () {
+									this.eventFire(this.activeElement(elementId), 'click')
+								})
+							}
+						})
+					}
+				break;
+
+				case 'enter':
+					if (selectedElement) {
+						this.findElement(selectedElement, function (element) {
+							if (element.self.elements.length>0) {
+								let childElement
+
+								if (element.self.elements[0].kind==='row') {
+									if (element.self.elements[0].elements.length>0) {
+										childElement = element.self.elements[0].elements[0].id
+									}
+								} else {
+									childElement = element.self.elements[0].id
+								}
+
+								this.$nextTick(function () {
+									this.eventFire(this.activeElement(childElement), 'click')
+								})
+							}
+						})
+					}
+				break;
+
+				case 'copyStyle':
+					this.findElement(selectedElement, function (element) {
+						this.$set('copiedElementStyle', this.cloneObject(element.self.props[this.screenView], true))
+					})
+				break;
+
+				case 'pasteStyle':
+					if (this.copiedElementStyle && this.copiedElementStyle !== 'body') {
+						this.findElement(selectedElement, function (element) {
+							element.self.props[this.screenView] = this.copiedElementStyle
+							this.$nextTick(function () {
+								this.$set('copiedElementStyle', this.cloneObject(this.copiedElementStyle, true))
+							})
+						})
+					}
+				break;
+
+				case 'clearStyle':
+					this.findElement(selectedElement, function (element) {
+						let props = this.cloneObject(PROPERTIES)
+						props = this.setDefaultSize(props, element.self)
+
+						element.self.props[this.screenView] = props
+						element.self.props[this.screenView].getParent = function () {
+							return element.parent.props[this.screenView]
+						}
+						element.self.props[this.screenView].disableDisplayFlex = function () {
+							return element.self.kind === 'section' && element.self.elements.length > 0 && element.self.elements[0].kind === 'container'
+						}
+					})
+				break;
+			}
+		},
+
+		/**
+		 * Save custom CSS
+		 * @param  {String} css
+		 */
+		saveCustomCSS (css) {
+			this.customCSS = css
+			this.$nextTick(() => this.reselectElement())
 		}
 	},
 
@@ -1667,268 +1966,6 @@ const App = new Vue({
 		self.$nextTick(function () {
 			self.parent().$broadcast('viewerReady')
 		})
-
-
-		// Component when Adding a Stylesheet
-		self.$on('addCSS', function (src) {
-			let css = document.createElement('link')
-			css.setAttribute('href', src)
-			css.setAttribute('rel', 'stylesheet')
-			css.setAttribute('type', 'text/css')
-			document.getElementsByTagName('head')[0].appendChild(css)
-		})
-
-		// Component Eval Function
-		self.$on('evalFunction', function (id, uid, fn, parameters) {
-			let params = [], excludes = ['this']
-			_.each(parameters, function (param, index) {
-				if (!param.includes(excludes)) {
-					params.push(window[param])
-				}
-			})
-
-			fn.apply($(`[data-component="${uid}"][data-kind="${id}"]`), params)
-		})
-
-
-		/**
-		 * When new block added, add element and notify block wrapper to close
-		 * @param  {Object} data  [Element Data]
-		 * @return {void}
-		 */
-		self.$on('addBlock', function (data) {
-			switch (data.kind) {
-				case 'container':
-					let sectionData = self.cloneObject(data)
-
-					// Overwrite important data of container
-					sectionData.kind = 'section'
-					sectionData.breadcrumb = 'section'
-					sectionData.accept = 'body,section'
-
-					// Add container to section
-					self.addElement(sectionData, function (section) {
-						data.to = section.self.id
-						self.addElement(data)
-					})
-					break
-
-				default:
-					self.addElement(data)
-					break
-			}
-			self.$broadcast('addedBlock')
-		})
-
-
-		/**
-		 * Manipulate elements
-		 * @param  {Object} data
-		 * @return {void}
-		 */
-		self.$on('manipulate', function (data) {
-			// Copy
-			if (data.action === 'copy') self.copyElement(data.id)
-
-			// Remove
-			else if (data.action === 'remove') self.removeElement(data.id)
-		})
-
-
-		/**
-		 * When breadcrumbs in layout clicked then click parent breadcrumb, fire click event
-		 * @param  {Object} breadcrumb [Breadcrumb data]
-		 * @return {void}
-		 */
-		self.$on('elementSelect', function (breadcrumb) {
-			self.eventFire(self.activeElement(breadcrumb.id), 'click')
-		})
-
-
-		/**
-		 * When breadcrumbs in layout clicked then hovered, fire mouseover event, otherwise fire mouseleave
-		 * @param  {Object} breadcrumb [Breadcrumb data]
-		 * @param  {Boolean} enter   [Mouse state, over or leave]
-		 * @return {void}
-		 */
-		self.$on('elementHover', function (breadcrumb, enter) {
-			let state = (enter) ? 'mouseover': 'mouseleave'
-			this.eventFire(self.activeElement(breadcrumb.id), state)
-		})
-
-
-		/**
-		 * On change responsive size / breakpoint
-		 */
-		self.$on('changeScreenView', function (breakpoint) {
-			self.$set('screenView', breakpoint)
-			self.$broadcast('changeScreenView', breakpoint)
-			self.$nextTick(function () {
-				self.reselectElement()
-			})
-		})
-
-
-		/**
-		 * On dragging element from left panel
-		 * @param  {Boolean} drag
-		 * @param  {String} element
-		 */
-		self.$on('dragstart', function (drag, element) {
-			if (drag) {
-				// Set ghost element
-				this.$set('clone', element)
-
-				// Set style
-				this.clone.classList.add('ondrag')
-				this.clone.style.position = 'absolute'
-				this.clone.style.visibility = 'hidden'
-				this.clone.style.opacity = 0
-				this.clone.style.zIndex = 999
-				document.body.appendChild(element)
-			}
-		})
-
-		/**
-		 * On drag move and drag end
-		 */
-		self.$on('dragmove', self.dragmove)
-		self.$on('dragend', self.dragend)
-
-		/**
-		 * On keyboard event binding
-		 * @param {String} action
-		 * @param {Boolean} isHoveredElement
-		 */
-		self.$on('keyCapture', function (action, isHoveredElement) {
-			let selectedElement = (isHoveredElement)? self.hovered.element: self.selected.element
-
-			switch (action) {
-				case 'copy':
-					self.findElement(selectedElement, function (element) {
-						self.$set('copiedElement', element.self.id)
-					})
-				break;
-
-				case 'paste':
-					if (self.copiedElement && self.copiedElement !== 'body') {
-						self.copyElement(self.copiedElement)
-					}
-				break;
-
-				case 'delete':
-					if (selectedElement && selectedElement !== 'body') {
-						self.removeElement(selectedElement)
-					}
-				break;
-
-				case 'selectUp':
-					if (selectedElement && selectedElement !== 'body') {
-						// Find Selected element
-						self.findElement(selectedElement, function (element) {
-							let elementId
-
-							// Get previous element ID
-							if (element.index === 0) {
-								elementId = element.parent.id
-							} else {
-								let prevElement = element.index - 1
-								elementId = element.parent.elements[prevElement].id
-							}
-
-							// Select previous element
-							self.$nextTick(function () {
-								self.eventFire(self.activeElement(elementId), 'click')
-							})
-						})
-					}
-				break;
-
-				case 'selectDown':
-					if (selectedElement) {
-
-						// Find Selected element
-						self.findElement(selectedElement, function (element) {
-							let elementId
-
-							// For body
-							if (! element.parent) {
-								if (element.self.elements.length > 0) {
-									elementId = element.self.elements[0].id
-								}
-							} else {
-								let nextElement = element.index + 1
-								if (nextElement < element.parent.elements.length) {
-									elementId = element.parent.elements[nextElement].id
-								}
-							}
-
-							// Select next element
-							if (elementId) {
-								self.$nextTick(function () {
-									self.eventFire(self.activeElement(elementId), 'click')
-								})
-							}
-						})
-					}
-				break;
-
-				case 'enter':
-					if (selectedElement) {
-						self.findElement(selectedElement, function (element) {
-							if (element.self.elements.length>0) {
-								let childElement
-
-								if (element.self.elements[0].kind==='row') {
-									if (element.self.elements[0].elements.length>0) {
-										childElement = element.self.elements[0].elements[0].id
-									}
-								} else {
-									childElement = element.self.elements[0].id
-								}
-
-								self.$nextTick(function () {
-									self.eventFire(self.activeElement(childElement), 'click')
-								})
-							}
-						})
-					}
-				break;
-
-				case 'copyStyle':
-					self.findElement(selectedElement, function (element) {
-						self.$set('copiedElementStyle', self.cloneObject(element.self.props[self.screenView], true))
-					})
-				break;
-
-				case 'pasteStyle':
-					if (self.copiedElementStyle && self.copiedElementStyle !== 'body') {
-						self.findElement(selectedElement, function (element) {
-							element.self.props[self.screenView] = self.copiedElementStyle
-							self.$nextTick(function () {
-								self.$set('copiedElementStyle', self.cloneObject(self.copiedElementStyle, true))
-							})
-						})
-					}
-				break;
-
-				case 'clearStyle':
-					self.findElement(selectedElement, function (element) {
-						let props = self.cloneObject(PROPERTIES)
-						props = self.setDefaultSize(props, element.self)
-
-						element.self.props[self.screenView] = props
-						element.self.props[self.screenView].getParent = function () {
-							return element.parent.props[self.screenView]
-						}
-						element.self.props[self.screenView].disableDisplayFlex = function () {
-							return element.self.kind === 'section' && element.self.elements.length > 0 && element.self.elements[0].kind === 'container'
-						}
-					})
-				break;
-			}
-		})
-
 
 		// Copy element
 		Mousetrap.bind(['ctrl+c', 'command+c'], function () {

@@ -23,6 +23,10 @@
 		</div>
 	</div>
 
+	<div class="code-editor-panel" v-if="showCodeEditor">
+		<div id="css-editor"></div>
+	</div>
+
 	<div class="center-panel">
 		<div class="topbar-panel">
 			<div>&nbsp;</div>
@@ -38,10 +42,6 @@
 				<a class="button"><i class="uk-icon-eye"></i></a>
 				<a class="button"><i class="uk-icon-save"></i> <span>Save</span></a>
 			</div>
-		</div>
-
-		<div class="code-editor-panel" v-if="showCodeEditor">
-			sfsfwfw
 		</div>
 
 		<div class="canvas-builder">
@@ -103,7 +103,7 @@
 				</div>
 
 				<div class="canvas-editor">
-					<editor :element.sync="editor.element" :style="editor.css" v-if="editor.element"></editor>
+					<editor :element.sync="editor.element" :window="editor.window" :style="editor.css" v-if="editor.element"></editor>
 				</div>
 			</div>
 			<iframe data-layout-viewer src="./viewer.html" :class="iframeClass"></iframe>
@@ -581,7 +581,19 @@
 				<!-- custom attributes and css -->
 				<accordion-item title="Attributes">
 					<accordion-item-view>
+						<div class="uk-grid">
+							<label class="uk-width-2-10">Class</label>
+							<div class="uk-width-8-10">
+								<input class="input-text uk-width-1-1" v-model="classValue" />
+							</div>
+						</div>
 
+						<div class="uk-grid">
+							<label class="uk-width-2-10">ID</label>
+							<div class="uk-width-8-10">
+								<input class="input-text uk-width-1-1" v-model="idValue" />
+							</div>
+						</div>
 					</accordion-item-view>
 				</accordion-item>
 			</accordion-wrapper>
@@ -832,10 +844,12 @@ export default {
 			searchElement: '',
 			editor: {
 				css: null,
-				element: null
+				element: null,
+				window: null
 			},
 			showElementPanel: false,
 			showCodeEditor: false,
+			cssEditor: null,
 			screenView: 'large',
 			screenSize: 0,
 			rightBarView: 'settings',
@@ -1178,6 +1192,33 @@ export default {
 			}
 		},
 
+		idValue: {
+			get () {
+				return this.getProps('id')
+			},
+			set (value) {
+				this.setProps('id', this.slugifyKlass(value))
+
+				// Little hack to re select element
+				if (this.layout) {
+					setTimeout(() => this.layout.reselectElement(), 1)
+				}
+			}
+		},
+
+		classValue: {
+			get () {
+				return this.getProps('klass')
+			},
+			set (value) {
+				this.setProps('klass', this.slugifyKlass(value))
+				// Little hack to re select element
+				if (this.layout) {
+					setTimeout(() => this.layout.reselectElement(), 1)
+				}
+			}
+		},
+
 		colorPickerValue: {
 			get () {
 				return (this.colorPickerModel)? this.getProps(`${this.colorPickerModel}`): {
@@ -1385,6 +1426,51 @@ export default {
 		toggleCodeEditorPanel () {
 			this.$set('showCodeEditor', !this.showCodeEditor)
 			this.hideElementPanel()
+
+			/**
+			 * Setup editor
+			 */
+			if (this.showCodeEditor) {
+				this.$nextTick(() => {
+					let cssEditorElement = document.querySelector('#css-editor'),
+					codeEditor = document.querySelector('.code-editor-panel')
+
+					cssEditorElement.style.height = codeEditor.offsetHeight + 'px'
+
+					if (this.cssEditor) {
+						this.cssEditor.destroy()
+					}
+					ace.require('ace/ext/language_tools')
+					this.cssEditor = ace.edit('css-editor')
+
+					/**
+					 * Save and get value
+					 */
+					if (this.layout) {
+						this.cssEditor.setValue(this.layout.customCSS)
+					}
+					this.cssEditor.on('change', () => {
+						let value = this.cssEditor.getValue()
+						if (this.layout) {
+							this.layout.$emit('saveCustomCSS', value)
+						}
+					})
+
+					this.$blockScrolling = Infinity;
+					this.cssEditor.session.setMode('ace/mode/css')
+					this.cssEditor.setTheme('ace/theme/monokai')
+					this.cssEditor.setOptions({
+						enableBasicAutocompletion: true,
+						enableSnippets: true,
+						enableLiveAutocompletion: true,
+						showPrintMargin: false
+					})
+				})
+			} else {
+				if (this.cssEditor) {
+					this.cssEditor.destroy()
+				}
+			}
 		},
 
 		/**
@@ -1523,6 +1609,7 @@ export default {
 				id: this.outline.selected.id,
 				action: 'remove'
 			})
+			this.$emit('disableEditor')
 		},
 
 
@@ -2084,6 +2171,17 @@ export default {
 
 			klass['flex-wrap-' + direction + prefix + suffix] = true
 			return klass;
+		},
+
+		/**
+		 * Convert string into valid css class selector
+		 * @param  {String} value
+		 * @return {String}
+		 */
+		slugifyKlass (value) {
+			return value.replace(/^[^-_a-zA-Z]+/, '')
+			.replace(/^-(?:[-0-9]+)/, '-')
+			.replace(/[^-_a-zA-Z0-9]+/g, '-')
 		}
 	},
 
@@ -2219,9 +2317,7 @@ export default {
 
 				if (obj.id !== this.editor.element.getAttribute('data-id')) {
 					// Disable content editor
-					if (this.layout) {
-						this.layout.$broadcast('disableEditor')
-					}
+					this.$emit('disableEditor')
 				}
 			}
 		},
@@ -2423,8 +2519,19 @@ export default {
 		/**
 		 * Set editor element
 		 */
-		setEditorElement (element) {
+		setEditorElement (element, window) {
 			this.$set('editor.element', element)
+			this.$set('editor.window', window)
+		},
+
+		/**
+		 * Disable editor immediately
+		 * @return {void}
+		 */
+		disableEditor () {
+			if (this.layout) {
+				this.layout.$broadcast('disableEditor')
+			}
 		}
 	},
 
@@ -2433,10 +2540,10 @@ export default {
 		let self = this
 
 		// Google fonts family api key
-		//
 		$.getJSON(helpers.GOOGLE.endpointUrl + helpers.GOOGLE.apiKey, function (response) {
 			let fontFamilyList = self.fontFamilyList
 
+			// Push item to list
 			if (response.items && response.items.length > 0) {
 				_.each(response.items, function (item) {
 					fontFamilyList.push(item.family)
@@ -2446,7 +2553,6 @@ export default {
 			// Avoid duplicate font
 			self.$set('fontFamilyList', _.unique(fontFamilyList))
 		})
-
 
 		/**
 		 * Window resize observer, since we can't using this app with screen < 950, warning will appear

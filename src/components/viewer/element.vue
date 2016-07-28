@@ -2,13 +2,13 @@
 	<style>{{stylesheet()}}</style>
 	<div v-if="isKind('section')" :class="classListParent" data-id="{{data.id}}" data-index="{{index}}">
 		<slot></slot>
-		<div class="uno-el" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :class="[data.elements.length<1?$root.klass('col-empty'):'',$root.klass('section')]">
+		<div class="uno-el" id="{{idValue}}" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :class="[classValue,data.elements.length<1?$root.klass('col-empty'):'',$root.klass('section')]">
 			<element v-for="element in data.elements" :data="element" :index="$index"></element>
 		</div>
 	</div>
 
 	<div v-if="isKind('container')" class="uk-container uk-container-center" :class="classListParent" :style="containerStyle">
-		<div class="uno-el" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :class="[data.elements.length<1?$root.klass('col-empty'):'',$root.klass('container')]">
+		<div class="uno-el" id="{{idValue}}" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :class="[classValue,data.elements.length<1?$root.klass('col-empty'):'',$root.klass('container')]">
 			<element v-for="element in data.elements" :data="element" :index="$index"></element>
 		</div>
 	</div>
@@ -18,22 +18,23 @@
 	</div>
 
 	<div v-if="isType('grid') && isKind('column')" :class="classList" data-id="{{data.id}}" data-index="{{index}}">
-		<div class="uno-el" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :class="[data.elements.length<1?$root.klass('col-empty'):'',$root.klass('column')]">
+		<div class="uno-el" id="{{idValue}}" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" :class="[classValue,data.elements.length<1?$root.klass('col-empty'):'',$root.klass('column')]">
 			<element v-for="element in data.elements" :data="element" :index="$index" :item-length="data.elements.length"></element>
 		</div>
 	</div>
 
-	<div v-if="isType('component')" @dblclick="activateEditor()" :contenteditable="contentEditable" class="uno-el" :class="classList" data-component="{{data.uid}}" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" v-html="compile(data.view)"></div>
+	<div v-if="isType('component')" id="{{idValue}}" @dblclick="activateEditor()" :contenteditable="contentEditable" class="uno-el" :class="[classValue,classList]" data-component="{{data.uid}}" data-kind="{{data.kind}}" data-index="{{index}}" data-id="{{data.id}}" v-html="compile(data.view)"></div>
 </template>
 
 <script>
 import _ from 'underscore'
 
-const prefixes = ['-webkit-', '-moz-', '-ms-']
-const camelPrefixes = ['Webkit', 'Moz', 'ms']
-const hyphenateRE = /([a-z\d])([A-Z])/g
-const importantRE = /!important;?$/
-const camelizeRE = /-(\w)/g
+const prefixes = ['-webkit-', '-moz-', '-ms-'],
+camelPrefixes = ['Webkit', 'Moz', 'ms'],
+hyphenateRE = /([a-z\d])([A-Z])/g,
+importantRE = /!important;?$/,
+camelizeRE = /-(\w)/g,
+syntaxRE = /\$([a-zA-Z0-9_]+)/g
 
 export default {
 	name: 'element',
@@ -142,11 +143,47 @@ export default {
 			let cssStyle = {}
 			if (this.elementStyle.height && this.elementStyle.height.indexOf('%') > 0) cssStyle.height = this.elementStyle.height
 			return cssStyle
+		},
+
+		idValue () {
+			return this.data.props[this.screenView].id
+		},
+
+		classValue () {
+			let classList = {}, klass = this.data.props[this.screenView].klass
+			if (klass.length>0) {
+				classList[klass] = true
+			}
+			return classList
 		}
 	},
 
 	methods: {
+		/**
+		 * Recompile data of components
+		 * @param  {String} str
+		 * @return {ElementNode}
+		 */
 		compile: function (str) {
+			// match if there is any variables e.g $hello (from component)
+			if (str.match(syntaxRE)) {
+				// Replace syntax $hello become 'world'
+				str = str.replace(syntaxRE, (m, $1) => {
+
+					// If there is variable in data.tpl_data
+					// just replace it
+					let data = this.data.tpl_data[$1]
+					if (data !== undefined) {
+						return data
+					}
+
+					// Default is keep variable
+					return '$' + $1
+				})
+			}
+
+			// Okay, so we need to replace {{data}}, {{kind}}, etc
+			str = str.replace('', '')
 			return this.$interpolate(str)
 		},
 
@@ -302,7 +339,7 @@ export default {
 
 			// Set contenteditable attribute
 			this.$set('contentEditable', true)
-			this.$root.parent().$broadcast('setEditorElement', element)
+			this.$root.parent().$broadcast('setEditorElement', element, window)
 
 			// Trigger click (select element)
 			this.$root.reselectElement(this.data.id)
@@ -358,6 +395,48 @@ export default {
 		}
 	},
 
+	events: {
+		/**
+		 * Enable editing mode
+		 */
+		enableEditor () {
+			this.activateEditor()
+		},
+
+		/**
+		 * Disable editing mode
+		 */
+		disableEditor () {
+			this.deactivateEditor()
+		},
+
+		/**
+		 * When flex container change align-items
+		 * all children will auto update it's align-self property
+		 *
+		 * @param  {Object} alignItems
+		 * @return {void}
+		 */
+		childAlignSelf (alignItems) {
+			this.data.props[this.screenView].display.settings.flex.item.alignSelf = alignItems
+		},
+
+		/**
+		 * When screen change
+		 * @param  {String} breakpoint
+		 * @return {void}
+		 */
+		changeScreenView (breakpoint) {
+			// Set screen breakpoint and it's child
+			this.$set('screenView', breakpoint)
+			this.$broadcast('changeScreenView', breakpoint)
+
+			// Render new style
+			let elementStyle = this.$root.styleWatcher(this.data)
+			this.$set('elementStyle', elementStyle[breakpoint])
+		}
+	},
+
 	ready () {
 		let self = this, elementStyle
 
@@ -396,30 +475,6 @@ export default {
 			// Set element style
 			self.$set('elementStyle', value[self.screenView])
 		}, {deep: true})
-
-
-		// Disable editing
-		self.$on('disableEditor', function () {
-			self.deactivateEditor()
-		})
-
-		// When flex container change align-items, all children will auto update it's align-self property
-		self.$on('childAlignSelf', function (alignItems) {
-			self.data.props[self.screenView].display.settings.flex.item.alignSelf = alignItems
-		})
-
-		// When screen change
-		self.$on('changeScreenView', function (breakpoint) {
-
-			// Set screen breakpoint and it's child
-			self.$set('screenView', breakpoint)
-			self.$broadcast('changeScreenView', breakpoint)
-
-			// Render new style
-			elementStyle = self.$root.styleWatcher(self.data)
-			self.$set('elementStyle', elementStyle[breakpoint])
-		})
-
 
 		// When ready apply style immediately
 		elementStyle = self.$root.styleWatcher(self.data)

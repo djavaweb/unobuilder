@@ -9,6 +9,7 @@ sudo uglifyjs app/unobuilder.viewer.js -o app/unobuilder.viewer.js
 # Copy distribution into github pages
 sudo mkdir -p ../unobuilder-page/unobuilder
 sudo cp -R app/ ../unobuilder-page/unobuilder/app/
+sudo cp -R components/ ../unobuilder-page/unobuilder/components/
 sudo cp index.html ../unobuilder-page/unobuilder/index.html
 sudo cp viewer.html ../unobuilder-page/unobuilder/viewer.html
 

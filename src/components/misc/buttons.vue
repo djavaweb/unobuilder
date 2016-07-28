@@ -1,24 +1,10 @@
 <template>
-<div class="buttons"><rect-button v-for="item in items" :active="item.active" @click="click(item)"><i v-if="item.icon" class="uk-icon-{{item.icon}}"></i> <span v-if="item.label">{{item.label}}</span></rect-button></div>
+<div class="buttons"><rect-button v-for="item in items" :active="item.active" @click="click(item)" class="group"><i v-if="item.icon" class="uk-icon-{{item.icon}}"></i> <span v-if="item.label">{{item.label}}</span></rect-button></div>
 </template>
 
-<style lang="less">
+<style>
 .buttons {
-	display: inline-block;
-	.rect-button {
-		color: #ffffff;
-		vertical-align: middle;
-	    margin: 0;
-		padding: 5px;
-		font-size: 11px;
-		text-align: center;
-		display: inline-block;
-		height: 10px;
-		width: auto;
-		span {
-			vertical-align: -5px;
-		}
-	}
+	display: inline-block
 }
 </style>
 

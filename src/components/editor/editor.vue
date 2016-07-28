@@ -1,15 +1,21 @@
 <template>
-<div id="ed-btn-wrapper" :style="style">
-    {{baba}}
-    <button v-for="btn in defaultButtons" @click="command(btn)" title="{{{btn.title}}}" id="{{btn.id}}">{{{btn.label}}}</button>
+<div class="ed-btn--wrapper" :style="style">
+    <button v-for="btn in defaultButtons" @click="command(btn)" title="{{{btn.title}}}" id="{{btn.id}}" :class="{'active': btn.toggle}">{{{btn.label}}}</button>
+    <div class="ed-btn--tools">
+        <!--<div class="ed-btn--tools-link" v-if="toggle === 'link'">
+            <input class="input-text" placeholder="http://" v-model="button.link" /> <rect-button class="group" @click="createLink()"><span>OK</span></rect-button>
+        </div>-->
+    </div>
 </div>
 </template>
 
 <script>
 import _ from 'underscore'
+import rectButton from '../misc/rect-button.vue'
 
 export default {
     name: 'editor',
+    components: {rectButton},
     props: {
         buttons: {
             default: null,
@@ -18,6 +24,11 @@ export default {
         },
 
         element: {
+            default: null,
+            required: true
+        },
+
+        window: {
             default: null,
             required: true
         },
@@ -38,20 +49,33 @@ export default {
             if ('spellcheck' in this.element.ownerDocument.body) {
                 this.element.ownerDocument.body.spellcheck = false
             }
+
+            this.toggle = ''
+            this.button = {}
         }
     },
 
     data () {
         return {
             editor: null,
+            toggle: '',
+            button: {},
             defaultButtons: _.extend([
-                {label: '<i class="uk-icon-bold"></i>', title: 'Bold', command: 'bold'},
-                {label: '<i class="uk-icon-italic"></i>', title: 'Italic', command: 'italic'},
-                {label: '<i class="link"></i>', title: 'Insert Link', command: 'fn', fn () {
-
+                {id: 'bold', label: '<i class="uk-icon-bold"></i>', title: 'Bold', command: 'bold'},
+                {id: 'italic', label: '<i class="uk-icon-italic"></i>', title: 'Italic', command: 'italic'},
+                {id: 'link', label: '<i class="link"></i>', title: 'Insert Link', toggle: false, command: 'fn', fn () {
+                    this.getSelection((selection, selector, editor, window) => {
+                        selector().removeAllRanges()
+                        selector().addRange(selection.range)
+                        console.log(editor)
+                        //this.exec('insertHTML', '{{data|json}}')
+                        //this.exec('insertHTML', '<span class="uno-el uno-link">' + selection.word +'</span>')
+                        selector().removeAllRanges()
+                        this.$dispatch('disableEditor')
+                    })
                 }},
-                {label: '<i class="remove-style"></i>', title: 'Clear Style', command: 'removeFormat'},
-                {label: '<i class="color-picker"></i>', title: 'Color', command: 'fn', fn () {
+                {id: 'remove', label: '<i class="remove-style"></i>', title: 'Clear Style', command: 'removeFormat'},
+                {id: 'color-picker', label: '<i class="color-picker"></i>', title: 'Color', command: 'fn', fn () {
 
                 }}
             ], this.buttons)
@@ -59,16 +83,132 @@ export default {
     },
 
     methods: {
-        command (button) {
-            if (this.element) {
+        getEditor (callback) {
+            if (this.element && this.window) {
                 let editor = this.element.ownerDocument
-
-                if (button.command !== 'fn') {
-                    editor.execCommand(button.command, false, null)
-                } else {
-                    button.fn && button.fn.apply(this, [button, editor])
-                }
+                callback && callback.call(this, editor, this.window)
             }
+        },
+
+        command (button) {
+            if (button.command !== 'fn') {
+                this.exec(button.command)
+            } else {
+                this.getEditor((editor) => {
+                    button.toggle = !button.toggle
+                    if (button.toggle) {
+                        this.toggle = button.id
+                        this.button = button
+                        button.fn && button.fn.apply(this, [button, editor])
+                    } else {
+                        this.toggle = ''
+                        this.button = {}
+                    }
+                })
+            }
+        },
+
+        exec (command, content) {
+            if (this.element) {
+                this.getEditor((editor) => {
+                    if (content === undefined) {
+                        content = null
+                    }
+
+                    editor.execCommand(command, false, content)
+                })
+            }
+        },
+
+        /**
+         * Get selection range
+         * @param  {Function} callback
+         * @return {void}
+         */
+        getSelection (callback) {
+            const expandWord = (range) => {
+                if (range.startOffset === range.endOffset) {
+                    let startOffset = range.startOffset
+                    while (startOffset--) {
+                        if (range.startContainer.data[startOffset].match(/\s+/g) !== null) {
+                            break
+                        }
+                    }
+
+                    let endOffset = range.endOffset
+                    while (endOffset++) {
+                        if (range.endContainer.data[endOffset].match(/\s+/g) !== null) {
+                            break
+                        }
+                    }
+
+                    /* Set position */
+                    range.setStart(range.startContainer, startOffset + 1)
+                    range.setEnd(range.endContainer, endOffset)
+
+                    return range.toString()
+                    .replace(/\r?\n/g, " ")
+                    .replace(/\s+/g, " ")
+                    .replace(/^\W+|\W+$/g, '')
+                }
+
+                return range.toString()
+            }
+
+
+            this.getEditor((editor, window) => {
+                let selected, doc = window.document, getSelection
+
+                /**
+                 * Modern browser with window.getSelection
+                 * Firefox with multi tabs open with document.getSelection
+                 */
+                if (window.getSelection || window.document.getSelection) {
+                    getSelection = window.document.getSelection
+                    if (window.getSelection) {
+                        getSelection = window.getSelection
+                    }
+
+                    let range = getSelection().getRangeAt(0),
+                    content = range.cloneContents()
+
+                    // HTML selection
+                    let div = document.createElement('div')
+                    div.appendChild(content)
+
+                    selected = {
+                        range: range,
+                        text: range.toString(),
+                        html: div.innerHTML
+                    }
+                    selected.word = expandWord(range)
+                // Old browser IE8
+                } else if (doc.selection && doc.selection.type != "Control") {
+                    getSelection = doc.selection
+
+                    let range = getSelection.createRange(),
+                    textNode = document.createTextNode(range.text)
+
+                    selected = {
+                        range: range,
+                        text: textNode,
+                        html: range.htmlText
+                    }
+                    selected.word = range.expand('word').text
+                }
+
+                callback && callback.call(this, selected, getSelection, editor, window)
+            })
+        },
+
+
+        setSelection (start, end) {
+
+        },
+
+        createLink () {
+            this.exec('CreateLink', this.button.link)
+            this.$dispatch('disableEditor')
         }
     }
 }
@@ -76,7 +216,7 @@ export default {
 
 <style lang="less">
 @import "../../css/colors.less";
-#ed-btn-wrapper {
+.ed-btn--wrapper {
     pointer-events: all;
     background: @dark-grey;
     position: absolute;
@@ -94,7 +234,7 @@ export default {
         font-size: 16px;
         width: 35px;
         height: 30px;
-        border-right: 1px solid @black;
+        border-right: 1px solid rgba(255, 255, 255, 0.14);
         border-top: 1px solid #2d3233;
         outline: none;
         border-radius: 2px;
@@ -104,6 +244,10 @@ export default {
         &:hover {
             border-top-color: lighten(#2d3233, 5%);
             background-color: lighten(@dark-grey, 5%);
+        }
+
+        &.active {
+            background-color: darken(@dark-grey, 10%);
         }
 
         i {
@@ -123,6 +267,21 @@ export default {
             &.color-picker {
                 background-image: url('../../img/palette.svg');
             }
+        }
+    }
+}
+
+.ed-btn--tools {
+    position: relative;
+    &-link {
+        position: absolute;
+        top: 2px;
+        background: @charcoal-grey;
+        border-radius: 2px;
+        padding: 5px;
+        width: 200px;
+        input {
+            width: 85%;
         }
     }
 }
