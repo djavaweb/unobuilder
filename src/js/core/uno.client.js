@@ -4,8 +4,13 @@
 
 var uno = (function unobuilder () {
 	'use strict';
-	var _root = this
+	var _root = this,
 
+	/**
+	 * Regex
+	 */
+ 	rStripComments = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
+	rArgumentNames = /([^\s,]+)/g;
 
 	/**
 	* Current Script Path
@@ -42,10 +47,33 @@ var uno = (function unobuilder () {
 			path.css = path.root + 'css/'
 			path.js = path.root + 'js/'
 			path.json = path.root + 'component.json'
+			path.template = path.root + 'component.html'
 
-			// Push to list
+			// Get package information
 			$.getJSON(path.json, function (json) {
-				self.list.push(json);
+				var componentObj = {
+					info: json,
+					path: path
+				}
+
+				if (objects.methods) {
+					componentObj.methods = objects.methods
+				}
+
+				if (objects.data) {
+					componentObj.data = objects.data
+				}
+
+				if (objects.events) {
+					componentObj.events = objects.events
+				}
+
+				self.list.push(componentObj)
+			})
+
+			// Get template
+			$.get(path.template, function (response) {
+				console.log('response', response)
 			})
 		};
 
@@ -57,9 +85,7 @@ var uno = (function unobuilder () {
 	 * Unobuilder Utils
 	 */
 	function utils () {
-		var self = this,
-		rStripComments = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
-		rArgumentNames = /([^\s,]+)/g;
+		var self = this
 
 		/**
 		 * Get function params
