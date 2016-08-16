@@ -33,9 +33,9 @@ var uno = (function unobuilder () {
 
 		/**
 		 * Add component into list
-		 * @param {[type]} events [description]
+		 * @param {Objects} objects
 		 */
-		self.add = function (events) {
+		self.add = function (objects) {
 			var path = {}
 			path.root = componentPath()
 			path.icon = path.root + 'icon/',
@@ -45,12 +45,7 @@ var uno = (function unobuilder () {
 
 			// Push to list
 			$.getJSON(path.json, function (json) {
-				self.list.push({
-					id: json.id,
-					path: path,
-					data: json,
-					events: events
-				});
+				self.list.push(json);
 			})
 		};
 

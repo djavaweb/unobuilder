@@ -1938,7 +1938,15 @@ export default {
          * Register Components
          */
         registerComponents () {
-
+            $.getJSON(constant.COMPONENT_REST_URL, (response) => {
+                if (response.items) {
+                    _.each(response.items, (item, index) => {
+                        let script = document.createElement('script')
+                        script.src = item.url
+                        document.body.appendChild(script)
+                    })
+                }
+            })
         },
 
         /**
