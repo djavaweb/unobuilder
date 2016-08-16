@@ -7,7 +7,7 @@
 
 <script>
 export default {
-	name: 'elementItem',
+	name: 'componentItem',
 	props: {
 		data: {
 			required: true,
@@ -42,7 +42,7 @@ export default {
 		 * @return {void}
 		 */
 		dragstart (event) {
-			this.$root.$broadcast('dragstart', true, this.$el.cloneNode(true))		
+			this.$root.$broadcast('dragstart', true, this.$el.cloneNode(true))
 			document.addEventListener('mousemove', this.dragmove, false);
 			document.addEventListener('mouseup', this.dragend, false);
 		},

@@ -19,7 +19,7 @@ module.exports = {
                 loader: "url-loader?name=assets/[hash].[ext]&limit=10000&minetype=application/font-woff"
             },
             {
-                test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+                test: /\.(ttf|eot|svg|cur)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
                 loader: "file-loader?name=assets/[hash].[ext]"
             },
             {
@@ -55,11 +55,10 @@ if (process.env.NODE_ENV === 'production') {
         }),
         new webpack.optimize.OccurenceOrderPlugin(),
         new WebpackShellPlugin({
-                onBuildStart: ['echo "Start Build"'], 
+                onBuildStart: ['echo "Start Build"'],
                 onBuildEnd: ['./postbuild.sh']
         })
     ]
 } else {
     module.exports.devtool = '#source-map'
 }
-

@@ -1,16 +1,15 @@
 <template>
-  <a class="c-picker" :style="{background: activeColor}" @click="toggle()" v-if="!popup && button"></a>
+  <a class="c-picker" :style="{background: activeColor}" @click="toggle()" v-if="onlyButton"></a>
 
-  <div class="c-picker-overlay" v-show="show || popup" v-if="palette"></div>
-  <div class="c-picker-wrapper" v-show="show || popup || !button" v-if="palette">
-	<div class="c-sketch" :class="{'c-sketch-popup': show || popup}">
+  <div class="c-picker-wrapper" v-show="show || !onlyButton" v-if="palette">
+	<div class="c-sketch" :class="{'c-sketch-popup': show}">
 	  <div class="saturation-wrap">
 		<saturation :colors.sync="colors" :on-change="childChange"></saturation>
 	  </div>
 	  <div class="controls">
 		<div class="sliders">
 		  <div class="hue-wrap">
-			<hue :colors.sync="colors" :on-change="childChange"></hue>  
+			<hue :colors.sync="colors" :on-change="childChange"></hue>
 		  </div>
 		  <div class="alpha-wrap">
 			<alpha :colors.sync="colors" :on-change="childChange"></alpha>
@@ -25,14 +24,14 @@
 		<div class="double">
 		  <ed-in label="hex"
 		  :val.sync="colors.hex"
-		  :on-change="inputChange"></ed-in>  
-		</div>
-		<div class="single">
-		  <ed-in label="r" :val.sync="colors.rgba.r" 
 		  :on-change="inputChange"></ed-in>
 		</div>
 		<div class="single">
-		  <ed-in label="g" :val.sync="colors.rgba.g" 
+		  <ed-in label="r" :val.sync="colors.rgba.r"
+		  :on-change="inputChange"></ed-in>
+		</div>
+		<div class="single">
+		  <ed-in label="g" :val.sync="colors.rgba.g"
 		  :on-change="inputChange"></ed-in>
 		</div>
 		<div class="single">
@@ -53,7 +52,7 @@
 		  >
 		</div>
 	  </div>
-	  <a @click="close()" class="c-picker-ok">OK</a>
+	  <a @click="okClick()" v-if="okButton" class="c-picker-ok">OK</a>
 	</div>
   </div>
 </template>
@@ -66,7 +65,7 @@ import hue from './common/Hue.vue'
 import alpha from './common/Alpha.vue'
 
 let presetColors = [
-'#2ecc71', '#27ae60', '#3498db', '#9b59b6', '#f1c40f', '#e67e22', '#e74c3c', '#34495e', 
+'#2ecc71', '#27ae60', '#3498db', '#9b59b6', '#f1c40f', '#e67e22', '#e74c3c', '#34495e',
 '#1abc9c', '#16a085', '#2980b9', '#8e44ad', '#f39c12', '#d35400', '#c0392b', '#2c3e50',
 '#ecf0f1', '#bdc3c7', '#95a5a6', '#7f8c8d'
 ]
@@ -75,18 +74,13 @@ export default {
 	name: 'colorPicker',
 	mixins: [colorMixin],
 	props: {
-		button: {
+		onlyButton: {
 			default: true,
 			required: false
 		},
 
 		palette: {
 			default: true,
-			required: false
-		},
-
-		popup: {
-			default: false,
 			required: false
 		},
 
@@ -100,7 +94,12 @@ export default {
 			default: false,
 			type: Function,
 			required: false
-		}
+		},
+
+        okButton: {
+			default: true,
+			required: false
+		},
 	},
 	components: {
 		saturation,
@@ -128,6 +127,10 @@ export default {
 
 			this.click && this.click.call(this)
 		},
+
+        okClick () {
+            this.ok && typeof this.ok === 'function' && this.ok.call(this)
+        },
 
 		close () {
 			this.$set('show', false)
@@ -178,7 +181,7 @@ export default {
 	display: inline-block;
 	width: 18px;
 	height: 18px;
-	margin: 2px 0 0px 5px;
+	margin: 2px 0 0 0;
 	border: 1px solid @dark;
 	box-shadow: 0 0px 1px 0px rgba(0,0,0,0.5);
 }
@@ -200,19 +203,6 @@ export default {
 	&:active {
 		border: none;
 	}
-}
-
-.c-picker-wrapper {
-}
-
-.c-picker-overlay {
-	background-color: rgba(23, 23, 23, 0.8);
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 1;
 }
 
 .c-sketch {

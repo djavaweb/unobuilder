@@ -1,5 +1,5 @@
 <template>
-<ul class="_cm" :style="position" v-show="show" @contextmenu.capture="noop($event)">
+<ul class="_cm" :style="position" @contextmenu.capture="noop($event)">
 	<li v-for="item in menus">
 		<span v-if="item === '-'" class="_cm-delimiter"></span>
 		<a @click="click(item.click)" @mouseover="over(item.over)" @mouseleave="leave(item.leave)" v-else>
@@ -73,10 +73,6 @@
 export default {
 	name: 'contextMenu',
 	props: {
-		show: {
-			type: Boolean,
-			default: false
-		},
 		menus: {
 			type: Array,
 			default: null

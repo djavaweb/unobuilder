@@ -26,5 +26,4 @@ uno.component.add({
 	dragend: function () {
 		//console.log('dragged')
 	},
-
 })

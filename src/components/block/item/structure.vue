@@ -15,21 +15,22 @@ export default {
 	methods: {
 		/**
 		 * Dispatch event to Parent, Add section block
-		 * 
+		 *
 		 * @param {String} type [Section type]
 		 */
 		add (type) {
-			let self = this,
-			accept = (type === 'section')? 'body,section': 'section'
+			let accept = 'section'
+			if (type === 'section') {
+				accept = 'body,section'
+			}
 
-			self.$dispatch('addBlock', {
-				to: 'body',
+			this.$dispatch('addBlock', {
+				append: 'body',
+				tag: 'section',
 				type: 'section',
 				child: false,
 				kind: type,
-				breadcrumb: type,
-				accept: accept,
-				index: self.index
+				accept: accept
 			})
 		}
 	}

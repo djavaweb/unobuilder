@@ -10,7 +10,7 @@ body {
 	height: 100%;
 }
 
-[data-id="body"] {
+[data-type="body"] {
 	height: 100%;
 	min-height: 100vh;
 	font-family: 'Open Sans', sans-serif;
@@ -21,33 +21,16 @@ body {
 	outline:none
 }
 
-.uno-wrapper {
-	position: relative;
-    overflow: auto;
-    min-height: 100vh !important;
-    height: 100%;
+.uno-el-wrapper {
+	pointer-events: none;
+	.uno-el {
+		pointer-events: all;
+	}
 }
 
-.uno-el, .uno-n-el {
-	&.uno-p {
-		.block-wrapper {
-			display: none;
-
-			&.active {
-				display: block !important;
-
-				.block-panel {
-					display: block;
-				}
-			}
-		}
-
-		&:hover {
-			.block-wrapper {
-				display: block;
-			}
-		}
-	}
+.uno-el-empty {
+	border: 1px dashed #000000;
+    outline-offset: -1px !important;
 }
 
 .uno-el {
@@ -55,15 +38,6 @@ body {
 	&.uno-el.uno-col-empty {
 		outline: 1px dashed rgba(0,0,0,0.5);
 		outline-offset: -1px !important;
-	}
-}
-
-.uno-n-el {
-	/*overflow: auto;
-	overflow-y: hidden;*/
-	pointer-events: none;
-	.uno-el {
-		pointer-events: all;
 	}
 }
 

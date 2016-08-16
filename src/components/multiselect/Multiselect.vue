@@ -247,6 +247,7 @@
   padding: 1px 0 0 3px;
   width: calc(100%);
   transition: border 0.1s ease;
+  text-transform: capitalize;
   box-sizing: border-box;
   font-size: 11px;
   color: @white;
@@ -396,7 +397,7 @@
   font-size: 11px;
   line-height: 16px;
   text-decoration: none;
-  text-transform: none;
+  text-transform: capitalize;
   vertical-align: middle;
   position: relative;
   color: @white;

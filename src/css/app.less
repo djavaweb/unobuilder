@@ -198,7 +198,7 @@ html, body, #app {
 
 .topbar-panel {
     .flex;
-    padding: 8px 10px;
+    padding: 0 10px;
     background-color: @dark-grey;
     text-align: center;
     justify-content: space-between;
@@ -230,8 +230,10 @@ html, body, #app {
 
         &:not(.button) {
             color: @white;
-            font-size: 26px;
-            padding: 5px 10px;
+            font-size: 23px;
+            padding: 10px;
+            display: inline-block;
+            text-decoration: none;
             &.active {
                 background: @charcoal-grey-two;
             }
@@ -308,10 +310,8 @@ html, body, #app {
             vertical-align: 1px;
             &.bold {
                 font-weight: bold;
-                span {
-                    display: inline-block;
-                    padding: 5px 0;
-                }
+                display: inline-block;
+                padding: 5px 0;
             }
             &.title {
                 margin: 0 0 10px;
@@ -391,6 +391,40 @@ html, body, #app {
     }
 }
 
+.resize {
+    &-updown * {
+        cursor: url('../cursor/up-down.cur') 12 12, row-resize !important;
+    }
+    &-leftright * {
+        cursor: url('../cursor/left-right.cur') 12 12, col-resize !important;
+    }
+    &-nwse * {
+        cursor: url('../cursor/nw-se.cur') 12 12, nwse-resize !important;
+    }
+    &-nesw * {
+        cursor: url('../cursor/ne-sw.cur') 12 12, nesw-resize !important;
+    }
+}
+
+.right-panel-overlay {
+    position: absolute;
+    left: 0;
+    top: 40px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(23, 29, 31, 0.77);
+    z-index: 995;
+}
+
+.right-panel-popup {
+    z-index: 999;
+    width: 92%;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
 .right-panel-navbar {
     background-color: @dark;
     height: 40px;
@@ -402,6 +436,11 @@ html, body, #app {
         background-size: 20px;
         background-repeat: no-repeat;
         background-position: 50% 50%;
+        margin-left: -4px;
+
+        &:first-child {
+            margin-left: 0
+        }
 
         &.edit {
             background-image: url('../img/edit.svg');
@@ -694,16 +733,53 @@ html, body, #app {
         border-color: @sky-blue;
     }
 
+    &.updown {
+        border-top-color: @pastel-red !important;
+        border-bottom-color: @pastel-red !important;
+        border-left-color: @prop-bg !important;
+        border-right-color: @prop-bg !important;
+    }
+    &.leftright {
+        border-left-color: @pastel-red !important;
+        border-right-color: @pastel-red !important;
+        border-top-color: @prop-bg !important;
+        border-bottom-color: @prop-bg !important;
+    }
+
     &.margin {
         height: 130px;
         border-style: dashed;
         background-color: @prop-bg-margin;
+        &.updown {
+            border-top-color: @pastel-red;
+            border-bottom-color: @pastel-red;
+            border-left-color: @prop-bg-margin;
+            border-right-color: @prop-bg-margin;
+        }
+        &.leftright {
+            border-left-color: @pastel-red;
+            border-right-color: @pastel-red;
+            border-top-color: @prop-bg-margin;
+            border-bottom-color: @prop-bg-margin;
+        }
     }
 
     &.border {
         height: 85px;
         border-style: solid;
         background-color: @prop-bg-border;
+        &.updown {
+            border-top-color: @pastel-red;
+            border-bottom-color: @pastel-red;
+            border-left-color: @prop-bg-border;
+            border-right-color: @prop-bg-border;
+        }
+        &.leftright {
+            border-left-color: @pastel-red;
+            border-right-color: @pastel-red;
+            border-top-color: @prop-bg-border;
+            border-bottom-color: @prop-bg-border;
+        }
     }
 
     &.padding {
@@ -716,12 +792,26 @@ html, body, #app {
             transform: translate(-50%, -50%);
             position: absolute;
         }
+        &.updown {
+            border-top-color: @pastel-red;
+            border-bottom-color: @pastel-red;
+            border-left-color: @prop-bg-padding;
+            border-right-color: @prop-bg-padding;
+        }
+        &.leftright {
+            border-left-color: @pastel-red;
+            border-right-color: @pastel-red;
+            border-top-color: @prop-bg-padding;
+            border-bottom-color: @prop-bg-padding;
+        }
     }
 
     label, a {
         color: @white;
         font-weight: bold;
         font-size: 10px;
+        z-index: 99;
+        position: relative;
     }
 
     dl {
@@ -735,22 +825,63 @@ html, body, #app {
         text-align: center;
         font-weight: normal;
         cursor: pointer;
+
         &.top {
             top: 5px;
             left: 50%;
             -webkit-transform: translate(-50%, 0);
             transform: translate(-50%, 0);
             white-space: nowrap;
+            &-resize {
+                top: 0;
+                left: 0;
+                height: 25px;
+                width: 100%;
+                cursor: url('../cursor/up-down.cur') 12 12, row-resize;
+                &.padding {
+                    height: 15px;
+                }
+            }
         }
         &.right {
             right: 2px;
             top: 50%;
             transform: translate(0, -50%);
+            &-resize {
+                top: 25px;
+                right: 0;
+                height: 90px;
+                width: 20px;
+                cursor: url('../cursor/left-right.cur') 12 12, col-resize;
+                &.border {
+                    height: 46px;
+                }
+                &.padding {
+                    top: 15px;
+                    width: 15px;
+                    height: 15px;
+                }
+            }
         }
         &.left {
             left: 2px;
             top: 50%;
             transform: translate(0, -50%);
+            &-resize {
+                top: 25px;
+                left: 0;
+                height: 90px;
+                width: 20px;
+                cursor: url('../cursor/left-right.cur') 12 12, col-resize;
+                &.border {
+                    height: 46px;
+                }
+                &.padding {
+                    top: 15px;
+                    width: 15px;
+                    height: 15px;
+                }
+            }
         }
         &.bottom {
             left: 50%;
@@ -758,6 +889,56 @@ html, body, #app {
             -webkit-transform: translate(-50%, 0);
             transform: translate(-50%, 0);
             white-space: nowrap;
+            &-resize {
+                bottom: 0;
+                left: 0;
+                height: 18px;
+                width: 100%;
+                cursor: url('../cursor/up-down.cur') 12 12, row-resize;
+                &.padding {
+                    height: 15px;
+                }
+            }
+        }
+    }
+
+    .radius {
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        background: @white;
+        z-index: 99;
+
+        &:hover {
+            background: @sky-blue;
+        }
+
+        &.top {
+            top: 0;
+
+            &.left {
+                border-bottom-right-radius: 100%;
+                left: 0;
+            }
+
+            &.right {
+                border-bottom-left-radius: 100%;
+                right: 0;
+            }
+        }
+
+        &.bottom {
+            bottom: 0;
+
+            &.left {
+                border-top-right-radius: 100%;
+                left: 0;
+            }
+
+            &.right {
+                border-top-left-radius: 100%;
+                right: 0;
+            }
         }
     }
 
@@ -782,51 +963,6 @@ html, body, #app {
     canvas {
         position: absolute;
         z-index: 9;
-    }
-}
-
-.pop-input-wrapper {
-    .pop-input-overlay {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(23, 23, 23, 0.8);
-        z-index: 99;
-    }
-    .pop-input-inner {
-        position: relative;
-        z-index: 100;
-    }
-    .pop-input-up {
-        position: absolute;
-        left: 20px;
-        right: 20px;
-        background-color: @charcoal-grey;
-        padding: 15px;
-        box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.5);
-        border-radius: 3px;
-        border: 1px solid #000000;
-    }
-    label {
-        font-size: 11px;
-        color: @white;
-        margin-right: 10px;
-        width: 90px;
-        display: inline-block;
-    }
-    button {
-        .button;
-        line-height: normal;
-        outline: none;
-        width: 100%;
-        color: @white;
-        margin-top: 15px;
-    }
-    select {
-        margin-bottom: 5px;
-        width: 60px;
     }
 }
 
