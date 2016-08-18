@@ -521,17 +521,17 @@
 					@mouseleave="propPositionLeave('position')">
 						<label>Position <a v-html="getProps('position.value')" @click="switchPosition()"></a></label>
 						<dl>
-                            <dt class="top-resize" @mousedown="dragPositionStart($event, 'position', 'top')" @mouseover.self="propPositionOver('position', 'top')" v-if="!isProps('position.value', 'relative')"></dt>
-							<dt class="top" v-html="positionValue('top')"  @mousedown="dragPositionStart($event, 'position', 'top')" v-if="!isProps('position.value', 'relative')"></dt>
+                            <dt class="top-resize" @mousedown="dragStartPosition($event, 'position', 'top')" @mouseover.self="propPositionOver('position', 'top')" v-if="!isProps('position.value', 'relative')"></dt>
+							<dt class="top" v-html="positionValue('top')"  @mousedown="dragStartPosition($event, 'position', 'top')" v-if="!isProps('position.value', 'relative')"></dt>
 
-                            <dt class="right-resize" @mousedown="dragPositionStart($event, 'position', 'right')" @mouseover.self="propPositionOver('position', 'right')" v-if="!isProps('position.value', 'relative')"></dt>
-							<dt class="right" v-html="positionValue('right')"  @mousedown="dragPositionStart($event, 'position', 'right')" v-if="!isProps('position.value', 'relative')"></dt>
+                            <dt class="right-resize" @mousedown="dragStartPosition($event, 'position', 'right')" @mouseover.self="propPositionOver('position', 'right')" v-if="!isProps('position.value', 'relative')"></dt>
+							<dt class="right" v-html="positionValue('right')"  @mousedown="dragStartPosition($event, 'position', 'right')" v-if="!isProps('position.value', 'relative')"></dt>
 
-                            <dt class="bottom-resize" @mousedown="dragPositionStart($event, 'position', 'bottom')" @mouseover.self="propPositionOver('position', 'bottom')" v-if="!isProps('position.value', 'relative')"></dt>
-							<dt class="bottom" v-html="positionValue('bottom')" @mousedown="dragPositionStart($event, 'position', 'bottom')" v-if="!isProps('position.value', 'relative')"></dt>
+                            <dt class="bottom-resize" @mousedown="dragStartPosition($event, 'position', 'bottom')" @mouseover.self="propPositionOver('position', 'bottom')" v-if="!isProps('position.value', 'relative')"></dt>
+							<dt class="bottom" v-html="positionValue('bottom')" @mousedown="dragStartPosition($event, 'position', 'bottom')" v-if="!isProps('position.value', 'relative')"></dt>
 
-                            <dt class="left-resize" @mousedown="dragPositionStart($event, 'position', 'left')" @mouseover.self="propPositionOver('position', 'left')" v-if="!isProps('position.value', 'relative')"></dt>
-							<dt class="left" v-html="positionValue('left')" @mousedown="dragPositionStart($event, 'position', 'left')" v-if="!isProps('position.value', 'relative')"></dt>
+                            <dt class="left-resize" @mousedown="dragStartPosition($event, 'position', 'left')" @mouseover.self="propPositionOver('position', 'left')" v-if="!isProps('position.value', 'relative')"></dt>
+							<dt class="left" v-html="positionValue('left')" @mousedown="dragStartPosition($event, 'position', 'left')" v-if="!isProps('position.value', 'relative')"></dt>
 						</dl>
 
 						<div class="inner">
@@ -540,17 +540,17 @@
 							@mouseover.self="propPositionOver('margin')">
 								<label><a @click="allPopup('margin', true)">Margin</a></label>
 								<dl>
-                                    <dt class="top-resize" @mousedown="dragPositionStart($event, 'margin', 'top')" @mouseover.self="propPositionOver('margin', 'top')"></dt>
-									<dt class="top" v-html="marginValue('top')" @mousedown="dragPositionStart($event, 'margin', 'top')"></dt>
+                                    <dt class="top-resize" @mousedown="dragStartPosition($event, 'margin', 'top')" @mouseover.self="propPositionOver('margin', 'top')"></dt>
+									<dt class="top" v-html="marginValue('top')" @mousedown="dragStartPosition($event, 'margin', 'top')"></dt>
 
-                                    <dt class="right-resize" @mousedown="dragPositionStart($event, 'margin', 'right')" @mouseover.self="propPositionOver('margin', 'right')"></dt>
-									<dt class="right" v-html="marginValue('right')" @mousedown="dragPositionStart($event, 'margin', 'right')"></dt>
+                                    <dt class="right-resize" @mousedown="dragStartPosition($event, 'margin', 'right')" @mouseover.self="propPositionOver('margin', 'right')"></dt>
+									<dt class="right" v-html="marginValue('right')" @mousedown="dragStartPosition($event, 'margin', 'right')"></dt>
 
-                                    <dt class="bottom-resize" @mousedown="dragPositionStart($event, 'margin', 'bottom')" @mouseover.self="propPositionOver('margin', 'bottom')"></dt>
-									<dt class="bottom" v-html="marginValue('bottom')" @click="positionPopup('margin', 'bottom', true)" @mousedown="dragPositionStart($event, 'margin', 'bottom')"></dt>
+                                    <dt class="bottom-resize" @mousedown="dragStartPosition($event, 'margin', 'bottom')" @mouseover.self="propPositionOver('margin', 'bottom')"></dt>
+									<dt class="bottom" v-html="marginValue('bottom')" @click="positionPopup('margin', 'bottom', true)" @mousedown="dragStartPosition($event, 'margin', 'bottom')"></dt>
 
-                                    <dt class="left-resize" @mousedown="dragPositionStart($event, 'margin', 'left')" @mouseover.self="propPositionOver('margin', 'left')"></dt>
-									<dt class="left" v-html="marginValue('left')" @mousedown="dragPositionStart($event, 'margin', 'left')"></dt>
+                                    <dt class="left-resize" @mousedown="dragStartPosition($event, 'margin', 'left')" @mouseover.self="propPositionOver('margin', 'left')"></dt>
+									<dt class="left" v-html="marginValue('left')" @mousedown="dragStartPosition($event, 'margin', 'left')"></dt>
 								</dl>
 								<div class="inner">
 									<div class="prop-position-outline border"
@@ -564,21 +564,21 @@
                                         <a class="radius bottom right" @mousedown="dragRadiusStart($event, 'bottom', 'right')"></a>
 
 										<dl>
-                                            <dt class="top-resize" @mousedown="dragPositionStart($event, 'border', 'top')" @mouseover.self="propPositionOver('border', 'top')"></dt>
+                                            <dt class="top-resize" @mousedown="dragStartPosition($event, 'border', 'top')" @mouseover.self="propPositionOver('border', 'top')"></dt>
 											<dt class="top"
-                                            v-html="borderValue('top')" @mousedown="dragPositionStart($event, 'border', 'top')"></dt>
+                                            v-html="borderValue('top')" @mousedown="dragStartPosition($event, 'border', 'top')"></dt>
 
-                                            <dt class="right-resize border" @mousedown="dragPositionStart($event, 'border', 'right')" @mouseover.self="propPositionOver('border', 'right')"></dt>
+                                            <dt class="right-resize border" @mousedown="dragStartPosition($event, 'border', 'right')" @mouseover.self="propPositionOver('border', 'right')"></dt>
 											<dt class="right"
-                                            v-html="borderValue('right')" @mousedown="dragPositionStart($event, 'border', 'right')"></dt>
+                                            v-html="borderValue('right')" @mousedown="dragStartPosition($event, 'border', 'right')"></dt>
 
-                                            <dt class="bottom-resize" @mousedown="dragPositionStart($event, 'border', 'bottom')" @mouseover.self="propPositionOver('border', 'bottom')"></dt>
+                                            <dt class="bottom-resize" @mousedown="dragStartPosition($event, 'border', 'bottom')" @mouseover.self="propPositionOver('border', 'bottom')"></dt>
 											<dt class="bottom"
-                                            v-html="borderValue('bottom')" @mousedown="dragPositionStart($event, 'border', 'bottom')"></dt>
+                                            v-html="borderValue('bottom')" @mousedown="dragStartPosition($event, 'border', 'bottom')"></dt>
 
-                                            <dt class="left-resize border" @mousedown="dragPositionStart($event, 'border', 'left')" @mouseover.self="propPositionOver('border', 'left')"></dt>
+                                            <dt class="left-resize border" @mousedown="dragStartPosition($event, 'border', 'left')" @mouseover.self="propPositionOver('border', 'left')"></dt>
 											<dt class="left"
-                                            v-html="borderValue('left')" @mousedown="dragPositionStart($event, 'border', 'left')"></dt>
+                                            v-html="borderValue('left')" @mousedown="dragStartPosition($event, 'border', 'left')"></dt>
 										</dl>
 										<div class="inner">
 											<div class="prop-position-outline padding"
@@ -587,21 +587,21 @@
 												<label><a @click="allPopup('padding', true)">Padding</a></label>
 												<dl>
                                                     <dt class="top-resize padding"
-                                                    @mousedown="dragPositionStart($event, 'padding', 'top')" @mouseover.self="propPositionOver('padding', 'top')"></dt>
+                                                    @mousedown="dragStartPosition($event, 'padding', 'top')" @mouseover.self="propPositionOver('padding', 'top')"></dt>
 													<dt class="top"
-                                                    v-html="paddingValue('top', true)" @mousedown="dragPositionStart($event, 'padding', 'top')"></dt>
+                                                    v-html="paddingValue('top', true)" @mousedown="dragStartPosition($event, 'padding', 'top')"></dt>
 
-                                                    <dt class="right-resize padding" @mousedown="dragPositionStart($event, 'padding', 'right')" @mouseover.self="propPositionOver('padding', 'right')"></dt>
+                                                    <dt class="right-resize padding" @mousedown="dragStartPosition($event, 'padding', 'right')" @mouseover.self="propPositionOver('padding', 'right')"></dt>
 													<dt class="right"
-                                                    v-html="paddingValue('right')" @mousedown="dragPositionStart($event, 'padding', 'right')"></dt>
+                                                    v-html="paddingValue('right')" @mousedown="dragStartPosition($event, 'padding', 'right')"></dt>
 
-                                                    <dt class="bottom-resize padding" @mousedown="dragPositionStart($event, 'padding', 'bottom')" @mouseover.self="propPositionOver('padding', 'bottom')"></dt>
+                                                    <dt class="bottom-resize padding" @mousedown="dragStartPosition($event, 'padding', 'bottom')" @mouseover.self="propPositionOver('padding', 'bottom')"></dt>
 													<dt class="bottom"
-                                                    v-html="paddingValue('bottom')" @mousedown="dragPositionStart($event, 'padding', 'bottom')"></dt>
+                                                    v-html="paddingValue('bottom')" @mousedown="dragStartPosition($event, 'padding', 'bottom')"></dt>
 
-                                                    <dt class="left-resize padding" @mousedown="dragPositionStart($event, 'padding', 'left')" @mouseover.self="propPositionOver('padding', 'left')"></dt>
+                                                    <dt class="left-resize padding" @mousedown="dragStartPosition($event, 'padding', 'left')" @mouseover.self="propPositionOver('padding', 'left')"></dt>
 													<dt class="left"
-                                                    v-html="paddingValue('left')" @mousedown="dragPositionStart($event, 'padding', 'left')"></dt>
+                                                    v-html="paddingValue('left')" @mousedown="dragStartPosition($event, 'padding', 'left')"></dt>
 												</dl>
 											</div>
 										</div>
@@ -2876,7 +2876,7 @@ export default {
          * @param {String} prop
          * @param {String} direction
          */
-        dragPositionStart (event, prop, direction) {
+        dragStartPosition (event, prop, direction) {
             let key = prop + this.capitalize(direction), value
             if (prop === 'position') {
                 let position = this.getProps('position.value')
@@ -2901,7 +2901,7 @@ export default {
          * Drag start on position properties
          * @param {Object} event
          */
-        dragPositionEnd (event) {
+        dragEndPosition (event) {
             if (!this.drag.move) {
                 this.positionPopup(this.drag.modelValue, this.drag.direction, true)
             }
@@ -2915,7 +2915,7 @@ export default {
          * Drag move on position properties
          * @param {Object} event
          */
-        dragPositionMove (event) {
+        dragMovePosition (event) {
             let key = this.drag.modelValue + this.capitalize(this.drag.direction),
             x, y, position, positionKey
 
@@ -3015,7 +3015,7 @@ export default {
          * @param  {String} position
          * @param  {String} position2
          */
-        dragRadiusStart (event, position, direction) {
+        dragStartRadius (event, position, direction) {
             let key = 'borderRadius' + this.capitalize(position) + this.capitalize(direction),
 
             // Get current value of model
@@ -3036,7 +3036,7 @@ export default {
          * Drag start on position properties
          * @param {Object} event
          */
-        dragRadiusEnd (event) {
+        dragEndRadius (event) {
             if (!this.drag.move) {
                 let position = this.drag.modelValue.replace('borderRadius', '')
                 this.positionPopup('borderRadius' + position, this.capitalize(this.drag.direction), true)
@@ -3051,7 +3051,7 @@ export default {
          * When dragging border radius
          * @param  {Event} event
          */
-        dragRadiusMove (event) {
+        dragMoveRadius (event) {
             let y
 
             // Get y coords by decreasing from start coords
@@ -3118,7 +3118,7 @@ export default {
          * @param {Event} event
          * @param {ElementNode} element
          */
-        dragComponentStart (event, element, component) {
+        dragStartComponent (event, element, component) {
             // Clone element item
             let clone = element.cloneNode(true)
             document.body.appendChild(clone)
@@ -3132,13 +3132,16 @@ export default {
             this.callComponentEvent(component, 'dragstart')
 
             // Draggin'
-            this.$emit('dragStart', 'component')
+            if (this.canvas) {
+                this.$emit('dragStart', 'component')
+                this.canvas.$emit('dragStartComponent', element, component)
+            }
         },
 
         /**
          * When dragging component end
          */
-        dragComponentEnd () {
+        dragEndComponent () {
             // Fire components event 'dragend'
             this.callComponentEvent(this.drag.modelValue, 'dragend')
 
@@ -3147,14 +3150,17 @@ export default {
             this.drag.componentEl = null
             this.drag.component = false
             this.drag.modelValue = ''
-            this.$emit('dragEnd', 'component')
+            if (this.canvas) {
+                this.$emit('dragEnd', 'component')
+                this.canvas.$emit('dragEndComponent')
+            }
         },
 
         /**
          * On dragging component
          * @param  {Event} event
          */
-        dragComponentMove (event) {
+        dragMoveComponent (event) {
             let clone = this.drag.componentEl
 
 			// Bounds Rectangle of clone element
@@ -3172,7 +3178,10 @@ export default {
 
             // Fire components event 'dragmove'
             let coords = {x: x, y: y}
-            this.callComponentEvent(this.drag.modelValue, 'dragmove', [coords])
+            if (this.canvas) {
+                this.canvas.$emit('dragMoveComponent', coords)
+                this.callComponentEvent(this.drag.modelValue, 'dragmove', [coords])
+            }
         }
     },
 
@@ -3315,8 +3324,8 @@ export default {
             if (name) {
                 this.setUI('dragging', true)
                 name = this.capitalize(name)
-                document.addEventListener('mousemove', this[`drag${name}Move`], false)
-                document.addEventListener('mouseup', this[`drag${name}End`], false)
+                document.addEventListener('mousemove', this[`dragMove${name}`], false)
+                document.addEventListener('mouseup', this[`dragEnd${name}`], false)
             }
         },
 
@@ -3328,8 +3337,8 @@ export default {
         dragEnd (name, options) {
             if (name) {
                 name = this.capitalize(name)
-                document.removeEventListener('mousemove', this[`drag${name}Move`], false)
-                document.removeEventListener('mouseup', this[`drag${name}End`], false)
+                document.removeEventListener('mousemove', this[`dragMove${name}`], false)
+                document.removeEventListener('mouseup', this[`dragEnd${name}`], false)
                 this.setUI('dragging', false)
             }
         },
@@ -3341,7 +3350,7 @@ export default {
          * @param {Object} data
          */
         dragComponent (event, element, data) {
-            this.dragComponentStart(event, element, data)
+            this.dragStartComponent(event, element, data)
         }
     },
 

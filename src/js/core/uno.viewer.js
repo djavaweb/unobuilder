@@ -27,6 +27,8 @@ const App = new Vue({
 			activeElement: null,
 			hoverElement: null,
 			copiedElement: null,
+			componentClone: null,
+			dragging: false,
 			customCSS: '',
 			elements: {}
 		}
@@ -965,6 +967,53 @@ const App = new Vue({
 				this.tryHover()
 				this.trySelect()
 			})
+		},
+
+		/**
+		 * When component start to drag
+		 * @param {ElementNode} element
+		 * @param {Object} component
+		 */
+		dragStartComponent (element, component) {
+			// Dragging clone elements
+			this.dragging = true
+			this.componentClone = element.cloneNode(true)
+
+			// Set style of cloned element
+			this.componentClone.classList.add('ondrag')
+			this.componentClone.style.position = 'absolute'
+			this.componentClone.style.visibility = 'hidden'
+			this.componentClone.style.opacity = 0
+			this.componentClone.style.zIndex = 999
+			document.body.appendChild(this.componentClone)
+		},
+
+		/**
+		 * Drag end on component
+		 */
+		dragEndComponent () {
+			if (this.dragging && this.componentClone) {
+				this.componentClone.remove()
+				this.componentClone = null
+
+
+			}
+		},
+
+		/**
+		 * Event when dragging component from left panel to canvas
+		 * @param  {Object} coords
+		 */
+		dragMoveComponent (coords) {
+			let body = this.getElement('body')
+
+			if (body) {
+				let componentRect = this.componentClone.getBoundingClientRect(),
+				bodyRect = body.getBoundingClientRect(),
+				bodyRectTop = bodyRect.top
+
+				console.log(componentRect, coords);
+			}
 		}
     },
 
