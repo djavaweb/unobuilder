@@ -35,7 +35,7 @@
             <!-- End of search components -->
 
             <!-- Component collections -->
-			<accordion-wrapper v-if="componentsLoaded()">
+			<accordion-wrapper v-if="componentSize>0">
 				<accordion-item :title="name" v-for="(name, elements) in components">
 					<component-item v-for="element in elements|filterBy filter.searchComponent" :data="element" :class="{'no-space-right': ($index + 1) % 3 === 0}"></component-item>
 				</accordion-item>
@@ -1055,16 +1055,7 @@ export default {
              * Component list
              * @type {Object}
              */
-            components: {
-				/*grid: [
-					{label: '1 Columns', class: 'column-1', type: 'grid', kind: 'column', size: 1, accept: 'section,container,column'},
-					{label: '2 Columns', class: 'column-2', type: 'grid', kind: 'column', size: 2, accept: 'section,container,column'},
-					{label: '3 Columns', class: 'column-3', type: 'grid', kind: 'column', size: 3, accept: 'section,container,column'},
-					{label: '4 Columns', class: 'column-4', type: 'grid', kind: 'column', size: 4, accept: 'section,container,column'},
-					{label: '5 Columns', class: 'column-5', type: 'grid', kind: 'column', size: 5, accept: 'section,container,column'},
-					{label: '6 Columns', class: 'column-6', type: 'grid', kind: 'column', size: 6, accept: 'section,container,column'}
-				]*/
-			},
+            components: {},
 
             /**
              * Block list
@@ -1120,6 +1111,14 @@ export default {
      * @type {Object}
      */
     computed: {
+        /**
+         * Count component length
+         * @return {Number}
+         */
+        componentSize () {
+            return _.size(this.components)
+        },
+
         /**
          * CSS class for iframe viewer
          * @return {Object} klass
@@ -1905,11 +1904,48 @@ export default {
      */
     methods: {
         /**
-         * Check whether components not empty
-         * @return {Boolean}
+         * Add component
+         * @param {Object} component
          */
-        componentsLoaded () {
-            return _.size(this.components) > 0
+        addComponent (component) {
+            let group = 'Ungrouped'
+            if (component.info.group) {
+                group = component.info.group
+            }
+
+            // Set new group if not exists
+            if (!this.components[group]) {
+                this.$set(`components.${group}`, [])
+            }
+
+            // Convert component into object
+            let componentData = this.componentToObject(component)
+            this.components[group].push(componentData)
+        },
+
+        /**
+         * Load component, basically it's just append script tag
+         * @param  {String} url
+         */
+        loadComponent (url) {
+            let script = document.createElement('script')
+            script.src = url
+            document.body.appendChild(script)
+        },
+
+        /**
+         * Register Components
+         */
+        registerComponents () {
+            $.getJSON(constant.COMPONENT_REST_URL)
+            .then((response) => {
+                if (response.items) {
+                    let itemCount = 0
+                    _.each(response.items, (item, index) => {
+                        this.loadComponent(item.url)
+                    })
+                }
+            })
         },
 
         /**
@@ -1935,18 +1971,89 @@ export default {
         },
 
         /**
-         * Register Components
+         * Convert component into template
+         * @param {Object} component
          */
-        registerComponents () {
-            $.getJSON(constant.COMPONENT_REST_URL, (response) => {
-                if (response.items) {
-                    _.each(response.items, (item, index) => {
-                        let script = document.createElement('script')
-                        script.src = item.url
-                        document.body.appendChild(script)
-                    })
+        componentToObject (component) {
+            let template = this.parsingTemplateMarkup(component.template, 'component')
+            component.template = template
+
+            return component
+        },
+
+        /**
+         * Parsing template markup
+         * @param {String} str
+         * @param {String} type
+         * @link https://github.com/djavaweb/unobuilder/wiki/Create-New-Uno-Component
+         */
+        parsingTemplateMarkup (template, type) {
+            /*{
+                tag: 'section',
+                type: 'section',
+                kind: 'section',
+                append: 'body',
+                accept: 'body,section',
+                elements: [{
+                    tag: 'div',
+                    type: 'section',
+                    kind: 'container',
+                    accept: 'body,section',
+                    wrapper: true,
+                    selectable: false,
+                    attrs: {class: 'uk-container uk-container-center'},
+                    elements: [{
+                        tag: 'div',
+                        type: 'child',
+                        kind: 'container'
+                    }]
+                }],
+            }*/
+            let templateObject = {type: type}
+
+            // Parsing tag to node element
+            template = $($.parseXML(template)).children()
+
+            // Get kind
+            let kind = template.get(0).tagName
+            templateObject.kind = kind
+
+            // Only if wrappers
+            if (kind === 'wrapper') {
+                templateObject.wrapper = true
+                templateObject.selectable = false
+            }
+
+            // Tag name
+            let tagName = template.attr('tag') || 'div'
+            templateObject.tag = tagName
+
+            // Get attributes
+            let attrs = {}
+            _.each(template.get(0).attributes, (attr, index) => {
+                if (attr.name !== 'tag') {
+                    attrs[attr.name] = attr.value
                 }
             })
+            templateObject.attrs = attrs
+
+            // Get children
+            let elements = [], childNodes = template.get(0).childNodes,
+            childLength = childNodes.length
+
+            // Parsing child elements if any
+            while (childLength--) {
+                if (childNodes[childLength].nodeType === 1) {
+                    elements.unshift(this.parsingTemplateMarkup(childNodes[childLength].outerHTML, type))
+                }
+            }
+
+            // Push to template object
+            if (elements.length>0) {
+                templateObject.elements = elements
+            }
+
+            return templateObject
         },
 
         /**
@@ -3116,11 +3223,18 @@ export default {
      * When element is ready
      */
     ready () {
+
         // Load google web fonts
 		this.registerGoogleFont()
 
+        // Get event when uno add new components
+        uno.on('addComponent', (component) => {
+            this.addComponent(component)
+        })
+
         // Register components
         this.registerComponents()
+
 
         /**
 		 * Window resize observer, since we can't using this app with screen < 950, warning will appear

@@ -616,7 +616,7 @@ const App = new Vue({
 
 				// If element has child
 				// Add child elements
-				if (element.elements) {
+				if (element.elements && element.elements.length>0) {
 					for (let i in element.elements) {
 						el.$add(element.elements[i], ready)
 					}
