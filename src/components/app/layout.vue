@@ -3076,6 +3076,28 @@ export default {
         },
 
         /**
+         * Apply `this` to components, combines data, and methods
+         * @param {Object} component
+         */
+        componentScope (component) {
+            let componentObject = {}
+
+            if (component.data) {
+                _.each(component.data, (value, key) => {
+                    componentObject[key] = value
+                })
+            }
+
+            if (component.methods) {
+                _.each(component.methods, (fn, key) => {
+                    componentObject[key] = fn
+                })
+            }
+
+            return componentObject
+        },
+
+        /**
          * Drag start on component
          * @param {Event} event
          * @param {ElementNode} element
@@ -3092,7 +3114,7 @@ export default {
 
             // Fire components event 'dragstart'
             if (component.events && component.events.dragstart) {
-                component.events.dragstart.call(component)
+                component.events.dragstart.call(this.componentScope(component))
             }
 
             // Draggin'
@@ -3105,7 +3127,7 @@ export default {
         dragComponentEnd () {
             // Fire components event 'dragend'
             if (this.drag.modelValue.events && this.drag.modelValue.events.dragend) {
-                this.drag.modelValue.events.dragend.call(this.drag.modelValue)
+                this.drag.modelValue.events.dragend.call(this.componentScope(this.drag.modelValue))
             }
 
             // Reset all values
@@ -3139,7 +3161,7 @@ export default {
             // Fire components event 'dragmove'
             if (this.drag.modelValue.events && this.drag.modelValue.events.dragmove) {
                 let coords = {x: x, y: y}
-                this.drag.modelValue.events.dragmove.call(this.drag.modelValue, coords)
+                this.drag.modelValue.events.dragmove.call(this.componentScope(this.drag.modelValue), coords)
             }
         }
     },
