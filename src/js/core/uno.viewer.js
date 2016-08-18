@@ -28,6 +28,7 @@ const App = new Vue({
 			hoverElement: null,
 			copiedElement: null,
 			componentClone: null,
+			dropElement: null,
 			dragging: false,
 			customCSS: '',
 			elements: {}
@@ -360,7 +361,7 @@ const App = new Vue({
 
 			// Select element
 			el.$select = () => {
-				if (element.selectable) {
+				if (el.$selectable) {
 					this.activeElement = el.$id
 					this.$nextTick(() => {
 						this.parent().$broadcast('elementSelect', {
@@ -368,7 +369,7 @@ const App = new Vue({
 							css: this.outline(el),
 							type: el.$type,
 							index: 0,
-							childSize: el.querySelectorAll('*').length,
+							childSize: 0,
 							breadcrumbs: el.$breadcrumbs(),
 							showBreadcrumbs: false
 						})
@@ -378,7 +379,7 @@ const App = new Vue({
 
 			// Hover element
 			el.$hover = () => {
-				if (element.selectable) {
+				if (el.$selectable) {
 					this.hoverElement = el.$id
 					this.$nextTick(() => {
 						this.parent().$broadcast('elementHover', {
@@ -667,7 +668,10 @@ const App = new Vue({
 		 * @return {void}
 		 */
 		click (event) {
-			event.target.$select()
+			let element = event.target
+			if (element.$selectable) {
+				element.$select()
+			}
 		},
 
 		/**
@@ -1025,11 +1029,34 @@ const App = new Vue({
 
 		/**
 		 * Drag end on component
+		 * @param {Object} component
 		 */
-		dragEndComponent () {
+		dragEndComponent (component) {
 			if (this.dragging && this.componentClone) {
 				this.componentClone.remove()
 				this.componentClone = null
+
+				// Create elements
+				switch (component.template.kind) {
+					case 'column':
+						let element = this.dropElement.$element()
+						element.$add({
+							tag: 'div',
+							type: 'grid',
+							kind: 'row',
+							wrapper: true,
+							selectable: false,
+							attrs: {class: 'uk-grid'},
+							elements: [this.cloneObject(component.template)]
+						})
+						//this.cloneObject(component.template)
+					break
+
+					default:
+					break
+				}
+
+				this.dropElement = null
 			}
 		},
 
@@ -1063,34 +1090,34 @@ const App = new Vue({
 							// If its collide
 							if (is.collide) {
 								let elementRect = element.getBoundingClientRect(),
-								yPos = 8, dragTarget = null,
-								css = {top: 0, left: 0},
+								yPos = 8, innerPadding = 3, dragTarget = null,
+								css = {top: 0, left: 0, width: 0},
 								top, left, width
 
 								// We are dragging component in the top of drop element
 								if (y < elementRect.top + yPos) {
 									dragTarget = 'top'
-									top = elementRect.top
-									left = elementRect.left
+									top = elementRect.top + innerPadding
 								}
 								// Otherwise
 								else if (y > (elementRect.top + elementRect.height) - yPos) {
 									dragTarget = 'bottom'
-									top = elementRect.top + elementRect.height
-									left = elementRect.left
+									top = (elementRect.top + elementRect.height) - innerPadding
 								}
+
+								left = elementRect.left + innerPadding
+								width = elementRect.width - innerPadding
 
 								if (left && top) {
 									css.transform = `translate(${left}px, ${top}px)`
+									css.width = `${width}px`
 								}
-								css.width = elementRect.width
 
-								console.log('dragTarget', dragTarget, css);
-
-								this.parent().$broadcast('dragTarget', dragTarget, css)
 
 								// Hover it
 								element.$hover()
+								this.dropElement = element
+								this.parent().$broadcast('dragTarget', dragTarget, css)
 							}
 						})
 					}
