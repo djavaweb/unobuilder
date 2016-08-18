@@ -4,7 +4,7 @@ uno.component.add({
     },
 
     events: {
-        init: f unction () {},
+        init: function () {},
         dragstart: function () {},
         dragmove: function (coords) {},
         dragend: function () {},
