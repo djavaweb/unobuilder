@@ -4,7 +4,11 @@ uno.component.add({
     },
     methods: {
         test: function (arg1, arg2) {
-            console.log('chuck testa', arg1, arg2)
+            console.log('chuck testa', this.join(arg1, arg2))
+        },
+
+        join: function (arg1, arg2) {
+            return arg1 + ':' + arg2
         }
     },
     events: {
