@@ -1,5 +1,5 @@
 const constant = {
-    COMPONENT_REST_URL: 'https://cdn.rawgit.com/djavaweb/unobuilder/new/components.json',
+    COMPONENT_REST_URL: 'https://www.oknoorap.com/unobuilder/components.php',
     GOOGLE: {
     	apiKey: 'AIzaSyALxXBrp1LxICQoso23j0Ls46aI7QZCktU',
     	endpointUrl: 'https://www.googleapis.com/webfonts/v1/webfonts?fields=items%2Ffamily&key='

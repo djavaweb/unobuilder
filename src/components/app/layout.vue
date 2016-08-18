@@ -962,6 +962,11 @@ export default {
              * @type {Object}
              */
             drag: {
+                // For components
+                component: false,
+                componentEl: null,
+
+                // For global
                 modelValue: null,
                 direction: false,
                 move: false,
@@ -1793,6 +1798,10 @@ export default {
          * @return {Array} klass
          */
         resizeCursor () {
+            if (this.drag.component) {
+                return
+            }
+
             let klass = []
 
             if (this.drag.direction==='left'||this.drag.direction==='right') {
@@ -1977,6 +1986,13 @@ export default {
         componentToObject (component) {
             let template = this.parsingTemplateMarkup(component.template, 'component')
             component.template = template
+
+            // Replace icon path
+            if (component.info) {
+                if (component.info.icon) {
+                    component.info.icon = component.path.root + component.info.icon
+                }
+            }
 
             return component
         },
@@ -3031,6 +3047,10 @@ export default {
             this.$emit('dragEnd', 'radius')
         },
 
+        /**
+         * When dragging border radius
+         * @param  {Event} event
+         */
         dragRadiusMove (event) {
             let y
 
@@ -3050,11 +3070,76 @@ export default {
             }
 
             if (y) {
-
-                console.log(y);
-
                 this.drag.move = true
                 this.setProps(`${this.drag.modelValue}.value`, y)
+            }
+        },
+
+        /**
+         * Drag start on component
+         * @param {Event} event
+         * @param {ElementNode} element
+         */
+        dragComponentStart (event, element, component) {
+            // Clone element item
+            let clone = element.cloneNode(true)
+            document.body.appendChild(clone)
+
+            // Tell the dragging data as component
+            this.drag.component = true
+            this.drag.componentEl = clone
+            this.drag.modelValue = component
+
+            // Fire components event 'dragstart'
+            if (component.events && component.events.dragstart) {
+                component.events.dragstart.call(component)
+            }
+
+            // Draggin'
+            this.$emit('dragStart', 'component')
+        },
+
+        /**
+         * When dragging component end
+         */
+        dragComponentEnd () {
+            // Fire components event 'dragend'
+            if (this.drag.modelValue.events && this.drag.modelValue.events.dragend) {
+                this.drag.modelValue.events.dragend.call(this.drag.modelValue)
+            }
+
+            // Reset all values
+            this.drag.componentEl.remove()
+            this.drag.componentEl = null
+            this.drag.component = false
+            this.drag.modelValue = ''
+            this.$emit('dragEnd', 'component')
+        },
+
+        /**
+         * On dragging component
+         * @param  {Event} event
+         */
+        dragComponentMove (event) {
+            let clone = this.drag.componentEl
+
+			// Bounds Rectangle of clone element
+			let rect = clone.getBoundingClientRect()
+			let x = (event.pageX - (rect.width/2)),
+			y = (event.pageY - (rect.height/2))
+
+			// Follow the cursor
+			clone.classList.add('ondrag')
+			clone.style.position = 'absolute'
+			clone.style.top = y + 'px'
+			clone.style.left = x + 'px'
+			clone.style.zIndex = 9999
+            this.drag.move = true
+
+            // Fire components event 'dragmove'
+            if (this.drag.modelValue.events && this.drag.modelValue.events.dragmove) {
+                let coords = {x: x, y: y}
+                this.drag.modelValue.events.dragmove.call(this.drag.modelValue, coords)
             }
         }
     },
@@ -3215,6 +3300,16 @@ export default {
                 document.removeEventListener('mouseup', this[`drag${name}End`], false)
                 this.setUI('dragging', false)
             }
+        },
+
+        /**
+         * Dragging component
+         * @param  {Event} event
+         * @param  {ElementNode} element
+         * @param {Object} data
+         */
+        dragComponent (event, element, data) {
+            this.dragComponentStart(event, element, data)
         }
     },
 
