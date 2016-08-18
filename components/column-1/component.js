@@ -8,12 +8,12 @@ uno.component.add({
         },
 
         join: function (arg1, arg2) {
-            return arg1 + ':' + arg2
+            return arg1 + ':' + arg2 + '>' + this.column
         }
     },
     events: {
-        ready: function () {
-            console.log(this.column)
+        init: function () {
+            console.log('column count', this.column)
         },
 
         dragstart: function () {
@@ -28,5 +28,9 @@ uno.component.add({
             console.log('end')
             this.test('hello', 'world')
         },
+
+        ready: function () {
+            console.log('ready')
+        }
     }
 })
