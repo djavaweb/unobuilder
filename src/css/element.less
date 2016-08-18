@@ -18,6 +18,18 @@
         }
     }
 
+    &.oncanvas {
+        position: absolute;
+        min-width: auto;
+        max-height: auto;
+        width: 2px;
+        height: 2px;
+        padding: 0;
+        z-index: 999;
+        /*visibility: hidden;
+        opacity: 0;*/
+    }
+
     &.no-space-right, &:last-child {
         padding-right: 0;
     }
@@ -45,30 +57,6 @@
 
         &:hover {
             border-color: @white;
-        }
-
-        &.column-1 {
-            background-image: url('../img/column-1.svg');
-        }
-
-        &.column-2 {
-            background-image: url('../img/column-2.svg');
-        }
-
-        &.column-3 {
-            background-image: url('../img/column-3.svg');
-        }
-
-        &.column-4 {
-            background-image: url('../img/column-4.svg');
-        }
-
-        &.column-5 {
-            background-image: url('../img/column-5.svg');
-        }
-
-        &.column-6 {
-            background-image: url('../img/column-6.svg');
         }
     }
 }

@@ -712,7 +712,12 @@ const App = new Vue({
 		 * @return {Node}
 		 */
 		getElement (id, selectOriginal) {
-			let element = document.querySelector(`[data-id="${id}"]`)
+			let selector = `[data-id="${id}"]`
+			if (id === 'body') {
+				selector = `[data-type="body"]`
+			}
+
+			let element = document.querySelector(selector)
 			if (element) {
 				if (! selectOriginal) {
 					element = element.$element()
@@ -720,7 +725,41 @@ const App = new Vue({
 
 				return element
 			}
-		}
+		},
+
+		/**
+		 * Check is drag source overlap with destination element
+		 * @param  {ElementNode} source [element source]
+		 * @param  {ElementNode} dest   [destination element]
+		 * @param  {Function} fn
+		 * @return {void}
+		 */
+		overlap (source, dest, fn) {
+			if (source.getBoundingClientRect && dest.getBoundingClientRect) {
+				let srcRect = source.getBoundingClientRect(),
+				dstRect = dest.getBoundingClientRect()
+
+				const inside = () => {
+					return ((dstRect.top <= srcRect.top) && (srcRect.top <= dstRect.bottom)) &&
+					((dstRect.top <= srcRect.bottom) && (srcRect.bottom <= dstRect.bottom)) &&
+					((dstRect.left <= srcRect.left) && (srcRect.left <= dstRect.right)) &&
+					((dstRect.left <= srcRect.right) && (srcRect.right <= dstRect.right))
+				}
+
+				const collide = () => {
+					return ! (srcRect.top > dstRect.bottom || srcRect.right < dstRect.left || srcRect.bottom < dstRect.top ||srcRect.left > dstRect.right)
+				}
+
+				// Collision information
+				let info = {
+					collide: collide(),
+					inside: inside()
+				}
+
+				// Callback
+				fn && fn.call(this, info)
+			}
+		},
     },
 
 	/**
@@ -980,11 +1019,7 @@ const App = new Vue({
 			this.componentClone = element.cloneNode(true)
 
 			// Set style of cloned element
-			this.componentClone.classList.add('ondrag')
-			this.componentClone.style.position = 'absolute'
-			this.componentClone.style.visibility = 'hidden'
-			this.componentClone.style.opacity = 0
-			this.componentClone.style.zIndex = 999
+			this.componentClone.classList.add('oncanvas')
 			document.body.appendChild(this.componentClone)
 		},
 
@@ -995,16 +1030,15 @@ const App = new Vue({
 			if (this.dragging && this.componentClone) {
 				this.componentClone.remove()
 				this.componentClone = null
-
-
 			}
 		},
 
 		/**
 		 * Event when dragging component from left panel to canvas
-		 * @param  {Object} coords
+		 * @param {Object} coords
+		 * @param {Number} canvasSize
 		 */
-		dragMoveComponent (coords) {
+		dragMoveComponent (coords, canvasSize) {
 			let body = this.getElement('body')
 
 			if (body) {
@@ -1012,7 +1046,55 @@ const App = new Vue({
 				bodyRect = body.getBoundingClientRect(),
 				bodyRectTop = bodyRect.top
 
-				console.log(componentRect, coords);
+				let x = (coords.x - (componentRect.width / 2)) - (canvasSize / 2),
+				y = (coords.y - (componentRect.height / 2)) - bodyRectTop
+
+				// Follow the original component
+				this.componentClone.style.top = `${y}px`
+				this.componentClone.style.left = `${x}px`
+
+
+				// Check overlap for element
+				for (let i in this.elements) {
+					let element = this.getElement(this.elements[i].id)
+					if (element) {
+						// Detect overlap elements
+						this.overlap(this.componentClone, element, (is) => {
+							// If its collide
+							if (is.collide) {
+								let elementRect = element.getBoundingClientRect(),
+								yPos = 8, dragTarget = null,
+								css = {top: 0, left: 0},
+								top, left, width
+
+								// We are dragging component in the top of drop element
+								if (y < elementRect.top + yPos) {
+									dragTarget = 'top'
+									top = elementRect.top
+									left = elementRect.left
+								}
+								// Otherwise
+								else if (y > (elementRect.top + elementRect.height) - yPos) {
+									dragTarget = 'bottom'
+									top = elementRect.top + elementRect.height
+									left = elementRect.left
+								}
+
+								if (left && top) {
+									css.transform = `translate(${left}px, ${top}px)`
+								}
+								css.width = elementRect.width
+
+								console.log('dragTarget', dragTarget, css);
+
+								this.parent().$broadcast('dragTarget', dragTarget, css)
+
+								// Hover it
+								element.$hover()
+							}
+						})
+					}
+				}
 			}
 		}
     },

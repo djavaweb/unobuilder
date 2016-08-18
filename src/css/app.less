@@ -501,6 +501,20 @@ html, body, #app {
         }
     }
 
+    &.orange {
+        border-color: @orange;
+        border-width: 2px;
+        .breadcrumbs {
+            a {
+                background-color: @orange;
+                border-color: @orange;
+                color: @white;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+        }
+    }
+
     .breadcrumbs {
         .flex;
         align-items: flex-end;
@@ -622,6 +636,37 @@ html, body, #app {
             padding-top: 3px;
         }
     }
+}
+
+.hr-line {
+  height: 2px;
+  background: @normal-sky-blue;
+  position: absolute;
+
+  .hr-relative {
+    position: relative;
+    div {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-style: solid;
+    }
+
+    .hr-triangle {
+        &-left {
+          top: -3px;
+          border-width: 4px 0 4px 5px;
+          border-color: transparent transparent transparent @normal-sky-blue;
+        }
+
+        &-right {
+          top: -3px;
+          right: 0;
+          border-width: 4px 5px 4px 0;
+          border-color: transparent @normal-sky-blue transparent transparent;
+        }
+    }
+  }
 }
 
 .flex-layout {

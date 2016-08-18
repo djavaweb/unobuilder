@@ -93,7 +93,7 @@
                 <!-- Outline Wrapper -->
                 <div class="outline-wrapper" v-if="!isUI('editingContent')">
                     <!-- Hover outline selector -->
-                    <div class="outline-tools hovered" :style="outline.hover.css" v-if="outline.hover.id!==outline.select.id">
+                    <div class="outline-tools hovered" :class="{orange: drag.component}" :style="outline.hover.css" v-if="drag.component||(outline.hover.id!==outline.select.id)">
                         <div class="breadcrumbs hover" :class="outlineHoverClass" v-if="outline.hover.breadcrumbs">
                             <div class="selector" v-if="outline.hover.breadcrumbs.length>0">
                                 <a>{{outline.hover.breadcrumbs[0].label}}</a>
@@ -108,7 +108,7 @@
                     <!-- End of hover outline selector -->
 
                     <!-- Select outline -->
-                    <div class="outline-tools selected" :style="outline.select.css" :class="{remove: outline.select.removeOver}">
+                    <div class="outline-tools selected" :style="outline.select.css" :class="{remove: outline.select.removeOver}" v-if="!drag.component||outline.hover.id!==outline.select.id">
 						<div class="breadcrumbs" :class="outlineSelectClass"
                         v-if="outline.select.breadcrumbs">
 							<div class="edit-tools">
@@ -134,6 +134,15 @@
                         v-if="outline.select.type === 'section'||(outline.select.type === 'body' && outline.select.childSize<1)"></a>
 					</div>
                     <!-- end of select outline -->
+
+                    <!-- Top bottom line on dragging component -->
+                    <div class="hr-line" :style="outline.dragTarget.css" v-if="dragTarget">
+                        <div class="hr-relative">
+                            <div class="hr-triangle-left"></div>
+                            <div class="hr-triangle-right"></div>
+                        </div>
+                    </div>
+                    <!-- End of top bottom line on dragging component -->
                 </div>
                 <!-- End of outline wrapper -->
 
@@ -955,6 +964,7 @@ export default {
                 rightPanelPopup: '',
                 colorPickerPopup: '',
                 hoverStatus: '',
+                dragTarget: null,
             },
 
             /**
@@ -2191,6 +2201,18 @@ export default {
 		},
 
         /**
+         * Get real canvas size value, remove canvas builder toolbar and left panel
+         * @return {Number} canvasSize
+         */
+        getRealCanvasSize () {
+            let canvasWidth = document.querySelector('.canvas-builder').getBoundingClientRect().width,
+            layoutViewerWidth = this.getCanvasIframe().getBoundingClientRect().width
+
+            let canvasSize = canvasWidth - layoutViewerWidth
+            return canvasSize
+        },
+
+        /**
 		 * Context Menu
 		 * @param  {String} type
 		 * @param  {Event} event
@@ -2200,14 +2222,9 @@ export default {
 
             switch (type) {
                 case 'breadcrumb':
-                    // Get canvas width and viewer width
-                    let canvasWidth = document.querySelector('.canvas-builder').getBoundingClientRect().width,
-                    layoutViewerWidth = this.getCanvasIframe().getBoundingClientRect().width,
-                    gutter = canvasWidth - layoutViewerWidth
-
                     // Set position
                     let top = event.pageY - this.boundTop - 35,
-                    left = event.pageX - (gutter / 2) - 35
+                    left = event.pageX - (this.getRealCanvasSize() / 2) - 35
 
                     // Show context menu
                     this.$emit('displayContextMenu', {top: top, left: left})
@@ -3135,6 +3152,9 @@ export default {
             if (this.canvas) {
                 this.$emit('dragStart', 'component')
                 this.canvas.$emit('dragStartComponent', element, component)
+                this.$nextTick(() => {
+                    setTimeout(() => this.hideUI('componentPanel'), 350)
+                })
             }
         },
 
@@ -3164,8 +3184,8 @@ export default {
             let clone = this.drag.componentEl
 
 			// Bounds Rectangle of clone element
-			let rect = clone.getBoundingClientRect()
-			let x = (event.pageX - (rect.width/2)),
+			let rect = clone.getBoundingClientRect(),
+            x = (event.pageX - (rect.width/2)),
 			y = (event.pageY - (rect.height/2))
 
 			// Follow the cursor
@@ -3179,7 +3199,7 @@ export default {
             // Fire components event 'dragmove'
             let coords = {x: x, y: y}
             if (this.canvas) {
-                this.canvas.$emit('dragMoveComponent', coords)
+                this.canvas.$emit('dragMoveComponent', coords, this.getRealCanvasSize())
                 this.callComponentEvent(this.drag.modelValue, 'dragmove', [coords])
             }
         }
@@ -3351,6 +3371,14 @@ export default {
          */
         dragComponent (event, element, data) {
             this.dragStartComponent(event, element, data)
+        },
+
+        /**
+         * Show horizontal line a.k.a dragTarget
+         * @param  {String} position
+         */
+        dragTarget (position) {
+            this.setUI('dragTarget', position)
         }
     },
 
