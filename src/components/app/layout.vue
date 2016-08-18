@@ -3098,6 +3098,22 @@ export default {
         },
 
         /**
+         * Call components events
+         * @param {Object} component
+         * @param {String} eventName
+         * @param {String|Object} params
+         */
+        callComponentEvent (component, eventName, params) {
+            if (component.events && component.events[eventName]) {
+                if (! params) {
+                    params = []
+                }
+
+                component.events[eventName].apply(this.componentScope(component), params)
+            }
+        },
+
+        /**
          * Drag start on component
          * @param {Event} event
          * @param {ElementNode} element
@@ -3113,9 +3129,7 @@ export default {
             this.drag.modelValue = component
 
             // Fire components event 'dragstart'
-            if (component.events && component.events.dragstart) {
-                component.events.dragstart.call(this.componentScope(component))
-            }
+            this.callComponentEvent(component, 'dragstart')
 
             // Draggin'
             this.$emit('dragStart', 'component')
@@ -3126,9 +3140,7 @@ export default {
          */
         dragComponentEnd () {
             // Fire components event 'dragend'
-            if (this.drag.modelValue.events && this.drag.modelValue.events.dragend) {
-                this.drag.modelValue.events.dragend.call(this.componentScope(this.drag.modelValue))
-            }
+            this.callComponentEvent(this.drag.modelValue, 'dragend')
 
             // Reset all values
             this.drag.componentEl.remove()
@@ -3159,10 +3171,8 @@ export default {
             this.drag.move = true
 
             // Fire components event 'dragmove'
-            if (this.drag.modelValue.events && this.drag.modelValue.events.dragmove) {
-                let coords = {x: x, y: y}
-                this.drag.modelValue.events.dragmove.call(this.componentScope(this.drag.modelValue), coords)
-            }
+            let coords = {x: x, y: y}
+            this.callComponentEvent(this.drag.modelValue, 'dragmove', [coords])
         }
     },
 
@@ -3346,6 +3356,8 @@ export default {
 
         // Get event when uno add new components
         uno.on('addComponent', (component) => {
+            // Init component
+            this.callComponentEvent(component, 'init')
             this.addComponent(component)
         })
 

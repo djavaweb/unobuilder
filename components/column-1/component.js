@@ -3,8 +3,8 @@ uno.component.add({
         column: 1
     },
     methods: {
-        test: function () {
-            console.log('chuck testa')
+        test: function (arg1, args2) {
+            console.log('chuck testa', args1, args2)
         }
     },
     events: {
@@ -22,7 +22,7 @@ uno.component.add({
 
         dragend: function () {
             console.log('end')
-            this.test()
+            this.test('hello', 'world')
         },
     }
 })
