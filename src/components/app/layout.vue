@@ -1102,7 +1102,9 @@ export default {
 								accept: 'body,section',
 								wrapper: true,
 								selectable: false,
-								attrs: {class: 'uk-container uk-container-center'},
+								attrs: {
+									class: 'uk-container uk-container-center'
+								},
 								elements: [{
 									tag: 'div',
 									type: 'child',
@@ -1995,9 +1997,6 @@ export default {
 		 * @param {Object} component
 		 */
 		componentToObject (component) {
-			let template = this.parsingTemplateMarkup(component.template, 'component')
-			component.template = template
-
 			// Replace icon path
 			if (component.info) {
 				if (component.info.icon) {
@@ -2006,90 +2005,6 @@ export default {
 			}
 
 			return component
-		},
-
-		/**
-		 * Parsing template markup
-		 * @param {String} str
-		 * @param {String} type
-		 * @link https://github.com/djavaweb/unobuilder/wiki/Create-New-Uno-Component
-		 */
-		parsingTemplateMarkup (template, type) {
-			/*{
-				tag: 'section',
-				type: 'section',
-				kind: 'section',
-				append: 'body',
-				accept: 'body,section',
-				elements: [{
-					tag: 'div',
-					type: 'section',
-					kind: 'container',
-					accept: 'body,section',
-					wrapper: true,
-					selectable: false,
-					attrs: {class: 'uk-container uk-container-center'},
-					elements: [{
-						tag: 'div',
-						type: 'child',
-						kind: 'container'
-					}]
-				}],
-			}*/
-			let templateObject = {type: type}
-
-			// Parsing tag to node element
-			template = $($.parseXML(template)).children()
-
-			// Get kind
-			let kind = template.get(0).tagName
-			templateObject.kind = kind
-
-			// Tag name
-			let tagName = template.attr('tag') || 'div'
-			templateObject.tag = tagName
-			template.removeAttr('tag')
-
-			// Get column grid value
-			let column = template.attr('grid') || 1
-			template.removeAttr('grid')
-
-			// Get attributes
-			let attrs = {}
-			_.each(template.get(0).attributes, (attr, index) => {
-				attrs[attr.name] = attr.value
-			})
-			templateObject.attrs = attrs
-
-			// Reinitialize default value
-			switch (kind) {
-				case 'wrapper':
-					templateObject.wrapper = true
-					templateObject.selectable = false
-				break
-
-				case 'column':
-					templateObject.attrs.class = `uk-width-${column}-10`
-				break
-			}
-
-			// Get children
-			let elements = [], childNodes = template.get(0).childNodes,
-			childLength = childNodes.length
-
-			// Parsing child elements if any
-			while (childLength--) {
-				if (childNodes[childLength].nodeType === 1) {
-					elements.unshift(this.parsingTemplateMarkup(childNodes[childLength].outerHTML, type))
-				}
-			}
-
-			// Push to template object
-			if (elements.length>0) {
-				templateObject.elements = elements
-			}
-
-			return templateObject
 		},
 
 		/**
@@ -2929,12 +2844,9 @@ export default {
 		 * @param {Object} event
 		 */
 		dragEndPosition (event) {
-			if (!this.drag.move) {
+			if (this.drag.startCoords.x === event.pageX && this.drag.startCoords.y === event.pageY && !this.drag.move) {
 				this.positionPopup(this.drag.modelValue, this.drag.direction, true)
 			}
-			this.drag.startCoords = {}
-			this.drag.modelValue = ''
-			this.drag.direction = ''
 			this.$emit('dragEnd', 'position')
 		},
 
@@ -3068,9 +2980,6 @@ export default {
 				let position = this.drag.modelValue.replace('borderRadius', '')
 				this.positionPopup('borderRadius' + position, this.capitalize(this.drag.direction), true)
 			}
-			this.drag.startCoords = {}
-			this.drag.modelValue = ''
-			this.drag.direction = ''
 			this.$emit('dragEnd', 'radius')
 		},
 
@@ -3180,11 +3089,9 @@ export default {
 			// Fire components event 'dragend'
 			if (this.canvas) {
 				this.callComponentEvent(this.drag.modelValue, 'dragend')
-				this.$emit('dragEnd', 'component')
 				this.canvas.$emit('dragEndComponent', this.drag.modelValue)
+				this.$emit('dragEnd', 'component')
 			}
-
-			this.drag.modelValue = ''
 		},
 
 		/**
@@ -3255,6 +3162,9 @@ export default {
 		 * @return {void}
 		 */
 		elementSelect (obj) {
+			// Select element
+			this.$set('outline.select', obj)
+
 			// Toggle panel
 			this.hideUI('blockPanel')
 			this.hideUI('componentPanel')
@@ -3264,9 +3174,6 @@ export default {
 			if (this.isUI('hoverStatus', 'centerPanel')) {
 				this.closePopup(true)
 			}
-
-			// Select element
-			this.$set('outline.select', obj)
 
 			/*this.blockPanelReposition(obj)
 
@@ -3370,6 +3277,10 @@ export default {
 				name = this.capitalize(name)
 				document.removeEventListener('mousemove', this[`dragMove${name}`], false)
 				document.removeEventListener('mouseup', this[`dragEnd${name}`], false)
+				this.drag.startCoords = {}
+				this.drag.modelValue = ''
+				this.drag.direction = ''
+				this.drag.move = false
 				this.setUI('dragging', false)
 				this.setUI('dragTarget', null)
 			}

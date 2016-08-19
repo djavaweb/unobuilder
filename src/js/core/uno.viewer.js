@@ -143,12 +143,12 @@ const App = new Vue({
 			// Change properties of data kind
 			switch (data.kind) {
 				case 'column':
-					let width = 100 / data.totalColumn
-					props.width = {value: width, unit: '%'}
+					//let width = 100 / data.totalColumn
+					props.width = {value: 100, unit: '%'}
 					props.minWidth = {value: '60', unit: 'px'}
 					props.maxWidth = {value: '', unit: '%'}
 					props.minHeight = {value: 60, unit: 'px'}
-					delete data.totalColumn
+					//delete data.totalColumn
 				break
 
 				case 'section':
@@ -198,7 +198,12 @@ const App = new Vue({
 				id: el.$id
 			}, el.$structure)
 
-			if (element.selectable) {
+			// Set wrapper
+			// Set default attributes
+			if (element.wrapper) {
+				el.$wrap = true
+				el.$klass.push(this.klass('el-wrapper'))
+			} else {
 				// Apply Attributes and Properties
 				let props = this.cloneObject(constant.PROPERTIES)
 				props = this.setDefaultSize(props, element)
@@ -224,19 +229,16 @@ const App = new Vue({
 				}
 
 				this.elements[el.$id].props = properties
+			}
 
-				// Add class if element is selectable
-				// Set default attributes
+			// Add class if element is selectable
+			if (element.selectable) {
 				el.$selectable = true
 				el.$klass.push(this.klass('el'))
 				el.$klass.push(this.klass('el-' + this.elements[el.$id].kind))
 				el.$klass.push(this.klass('el-' + this.elements[el.$id].type))
-			}
-
-			// Set wrapper
-			if (element.wrapper) {
-				el.$wrap = true
-				el.$klass.push(this.klass('el-wrapper'))
+			} else {
+				el.$klass.push(this.klass('non-el'))
 			}
 
 			// Get data properties
@@ -327,16 +329,16 @@ const App = new Vue({
 					})
 
 					// 2nd parent element
-					let parent = element.$parentElement()
-					if (parent) {
+					if (element.$parentElement) {
+						let parent = element.$selectableParent()
 						breadcrumbs.push({
 							id: parent.$id,
 							label: parent.$kind
 						})
 
 						// 3rd parent element
-						let grandParent = parent.$parentElement()
-						if (grandParent) {
+						if (parent.$parentElement) {
+							let grandParent = parent.$selectableParent()
 							breadcrumbs.push({
 								id: grandParent.$id,
 								label: grandParent.$kind
@@ -350,13 +352,18 @@ const App = new Vue({
 
 			// Kind attributes
 			el.setAttribute('data-kind', this.elements[el.$id].kind)
-			el.$kind = this.elements[el.$id].kind
+			el.$kind = this.elements[el.$id].kind || 'etc'
 
 			// Type attributes
 			el.setAttribute('data-type', this.elements[el.$id].type)
-			el.$type = this.elements[el.$id].type
+			el.$type = this.elements[el.$id].type || 'etc'
 
-			// Accpeted drag and drop
+			// If group id
+			if (this.elements[el.$id].group) {
+				el.$group = this.elements[el.$id].group
+			}
+
+			// Accepted drag and drop
 			el.$accept = this.elements[el.$id].accept
 
 			// Select element
@@ -556,7 +563,7 @@ const App = new Vue({
 
 			// Get parent element
 			el.$parentElement = () => {
-				let element = el.$element()
+				let retElement, element = el.$element()
 				if (element && element.parentElement) {
 					if (element.parentElement.$wrap) {
 						if (element.parentElement.parentElement && element.parentElement.parentElement.$element) {
@@ -567,6 +574,17 @@ const App = new Vue({
 							return element.parentElement.$element()
 						}
 					}
+				}
+			}
+
+			el.$selectableParent = () => {
+				let parent = el.parentElement
+				if (parent) {
+					if (!parent.$selectable && parent.$selectableParent) {
+						return parent.$selectableParent()
+					}
+
+					return parent
 				}
 			}
 
@@ -581,6 +599,19 @@ const App = new Vue({
 				}
 
 				return children
+			}
+
+			el.$groups = () => {
+				let group = el.$group, groups = []
+				if (group) {
+					for (let i in this.elements) {
+						if (this.elements[i].group === group) {
+							groups.push(this.elements[i].id)
+						}
+					}
+				}
+
+				return groups
 			}
 
 			// Prepend element to element.prepend value
@@ -697,7 +728,10 @@ const App = new Vue({
 		 */
 		tryHover () {
 			if (this.hoverElement) {
-				this.getElement(this.hoverElement).$hover()
+				let element = this.getElement(this.hoverElement)
+				if (element) {
+					element.$hover()
+				}
 			}
 		},
 
@@ -706,7 +740,10 @@ const App = new Vue({
 		 */
 		trySelect () {
 			if (this.activeElement) {
-				this.getElement(this.activeElement).$select()
+				let element = this.getElement(this.activeElement)
+				if (element) {
+					element.$select()
+				}
 			}
 		},
 
@@ -763,6 +800,72 @@ const App = new Vue({
 				// Callback
 				fn && fn.call(this, info)
 			}
+		},
+
+		/**
+		 * Parsing template markup
+		 * @param {String} str
+		 * @link https://github.com/djavaweb/unobuilder/wiki/Create-New-Uno-Component
+		 */
+		generateElementFromTemplate (template, type) {
+			// Parsing tag to node element
+			template = $($.parseXML(template)).children()
+			console.log(template);
+
+			/*if (template.get(0))
+			{
+				let templateObject = {type: type}
+
+				// Get kind
+				let kind = template.get(0).tagName
+				templateObject.kind = kind
+
+				// Tag name
+				let tagName = template.attr('tag') || 'div'
+				templateObject.tag = tagName
+				template.removeAttr('tag')
+
+				// Get column grid value
+				let column = template.attr('grid') || 1
+				template.removeAttr('grid')
+
+				// Get attributes
+				let attrs = {}
+				_.each(template.get(0).attributes, (attr, index) => {
+					attrs[attr.name] = attr.value
+				})
+				templateObject.attrs = attrs
+
+				// Reinitialize default value
+				switch (kind) {
+					case 'wrapper':
+						templateObject.wrapper = true
+						templateObject.selectable = false
+					break
+
+					case 'column':
+						templateObject.attrs.class = `uk-width-1-${column}`
+					break
+				}
+
+				// Get children
+				let elements = [], childNodes = template.get(0).childNodes,
+				childLength = childNodes.length
+
+				// Parsing child elements if any
+				while (childLength--) {
+					if (childNodes[childLength].nodeType === 1) {
+						elements.unshift(this.parsingTemplateMarkup(childNodes[childLength].outerHTML, type))
+					}
+				}
+
+				// Push to template object
+				if (elements.length>0) {
+					templateObject.elements = elements
+				}
+
+				return templateObject
+			}*/
 		},
     },
 
@@ -824,28 +927,55 @@ const App = new Vue({
 			let el = this.getElement(id),
 			removeEl = el.$elementWrapper()
 
-			// Prevent delete of body element
-			if (removeEl.$kind && removeEl.$kind !== 'body') {
+			if (el.$group) {
+				let groups = el.$groups(), groupParent
 
-				// Get element sibling
-				let sibling = removeEl.$sibling()
-
-				// Set hover element
-				if (this.hoverElement === removeEl.$id || this.hoverElement === el.$id) {
-					this.hoverElement = sibling.$id
+				let iterate = 0
+				for (let i in groups) {
+					let el = this.getElement(groups[i])
+					if (el) {
+						if (iterate === 0) {
+							groupParent = el.$parentElement()
+						}
+						el.$remove()
+						iterate++
+					}
 				}
 
 				// Remove attributes and element
-				removeEl.$remove()
-
-				// Update elements style
 				this.$emit('elementHasChanged')
 
 				// After remove, select parent element immediately
 				this.$nextTick(() => {
 					this.tryHover()
-					sibling.$select()
+					if (groupParent) {
+						groupParent.$select()
+					}
 				})
+			} else {
+				// Prevent delete of body element
+				if (removeEl.$kind && removeEl.$kind !== 'body') {
+
+					// Get element sibling
+					let sibling = removeEl.$sibling()
+
+					// Set hover element
+					if (this.hoverElement === removeEl.$id || this.hoverElement === el.$id) {
+						this.hoverElement = sibling.$id
+					}
+
+					// Remove attributes and element
+					removeEl.$remove()
+
+					// Update elements style
+					this.$emit('elementHasChanged')
+
+					// After remove, select parent element immediately
+					this.$nextTick(() => {
+						this.tryHover()
+						sibling.$select()
+					})
+				}
 			}
 		},
 
@@ -1035,28 +1165,45 @@ const App = new Vue({
 			if (this.dragging && this.componentClone) {
 				this.componentClone.remove()
 				this.componentClone = null
+				this.generateElementFromTemplate(component.template)
+				this.dropElement = null
 
 				// Create elements
-				switch (component.template.kind) {
+				/*switch (component.template.kind) {
 					case 'column':
-						let element = this.dropElement.$element()
+						let groupId = this.generateId('group')
+
+						let element = this.dropElement.$element(),
+						column = this.cloneObject(component.template)
+
+						column.group = groupId
+						column.wrapper = true
+						column.selectable = false
+						column.elements = [{
+							tag: 'div',
+							type: 'child',
+							kind: 'column',
+							group: groupId
+						}]
+
 						element.$add({
 							tag: 'div',
 							type: 'grid',
 							kind: 'row',
-							wrapper: true,
+							group: groupId,
+							elements: [column],
 							selectable: false,
-							attrs: {class: 'uk-grid'},
-							elements: [this.cloneObject(component.template)]
+							attrs: {
+								class: 'uk-grid'
+							}
+						}, (row) => {
+							row.$select()
 						})
-						//this.cloneObject(component.template)
 					break
 
 					default:
 					break
-				}
-
-				this.dropElement = null
+				}*/
 			}
 		},
 
