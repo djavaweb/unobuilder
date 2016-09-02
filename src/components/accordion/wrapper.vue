@@ -1,5 +1,5 @@
 <template>
-<div class="accordion-panel uk-accordion" :id="id">
+<div class="accordion-panel uk-accordion" data-uk-accordion="{collapse: false}" :id="id">
     <slot></slot>
 </div>
 </template>
@@ -15,13 +15,6 @@ export default {
     },
     ready () {
         this.id = this.$root.generateId('accordion')
-
-        // Init accordion
-        this.$nextTick(function () {
-            this.accordion = UIkit.accordion('#' + this.id, {
-                collapse: false
-            })
-        })
     }
 }
 </script>

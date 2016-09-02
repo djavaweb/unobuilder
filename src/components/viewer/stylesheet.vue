@@ -121,7 +121,7 @@ export default {
 			// Iterate elements
 			_.each(elements, (element, id) => {
 				// Get current element
-				let doc = $root.getElement(id)
+				let doc = $root.getElement(id, true)
 
 				// For every element that is not a wrapper element
 				if (doc && !doc.$wrap) {
@@ -129,7 +129,7 @@ export default {
 					let cssObject = this.cssObject(element)
 
 					// Turn js object into real css properties
-					css += this.cssProperties(element, cssObject[this.screenSize])
+					css += this.cssProperties(element, cssObject[this.screenSize], doc)
 				}
 			})
 
@@ -320,77 +320,93 @@ export default {
 
 		/**
 		 * Render css js-based object into real css properties
+		 * @param {Object} element
+		 * @param {Object} cssObject
+		 * @param {ElementNode} el
 		 * @return {String}
 		 */
-		cssProperties (element, cssObject) {
+		cssProperties (element, cssObject, el) {
 			let $root = this.$root,
 			selector = `[data-id="${element.id}"]`,
-			selectorPrefix = '',
-			cssArrChild = [],
 			cssArr = [],
-			css = ''
+			parentSelector,
+			cssArrParent = [],
+			childSelector,
+			cssArrChild = [],
+			css = '',
+			exclusion = {
+				column: {
+					parent: [
+						'width'
+					]
+				},
+				container: {
+					parent: [
+						'height'
+					]
+				},
+				row: {
+					parent: {
+						display: {self: 'flex', parent: 'block'}
+					}
+				}
+			}
+
 
 			/**
 			 * Filter element style, since we're using uikit it's difficult to
 			 * make a perfect layout, but there is solutions
 			 * we're add child element to uikit element
 			 */
-			for (name in cssObject) {
-				let val = cssObject[name],
-				prop = this.prefixCSS(name)
+			for (let key in cssObject) {
+				let val = cssObject[key],
+				prop = this.prefixCSS(key)
 
 				if (prop && val) {
-					let isImportant = importantRE.test(val)? 'important': ''
-					if (isImportant) {
-						val = val.replace(importantRE, '').trim()
-					}
+					let cssProperty = `${prop.kebab}:${val}`
 
-					switch (element.$kind) {
-						case 'section':
-						case 'column':
-							// Add type to element selector
-							selectorPrefix = '.' + $root.klass(element.type)
+					// If properties are in exclusion list
+					// Set parent properties as self properties
+					if (exclusion.hasOwnProperty(element.kind)) {
+						let parentExclusion = exclusion[element.kind].parent,
+						childExclusion = exclusion[element.kind].child
 
-							// Excludes these css properties
-							let exclusionProps = [
-								'display',
-								'padding-left',
-								'padding-right',
-								'padding-top',
-								'padding-bottom',
-								'background-color',
-								'border-top',
-								'border-bottom',
-								'border-left',
-								'border-right'
-							]
+						if (parentExclusion) {
+							parentSelector = `[data-id="${el.parentElement.$id}"]`
 
-							if (exclusionProps.indexOf(prop.kebab)<0) {
-								cssArr.push(prop.kebab + ':' + val)
+							if (_.isArray(parentExclusion)) {
+								if (parentExclusion.includes(prop.kebab)) {
+									cssArrParent.push(cssProperty)
+								} else {
+									cssArr.push(cssProperty)
+								}
+							} else if (_.isObject(parentExclusion)) {
+								_.each(parentExclusion, (item, key) => {
+									if (key === prop.kebab) {
+										cssArr.push(`${prop.kebab}:${item.self}`)
+										cssArrParent.push(`${prop.kebab}:${item.parent}`)
+									} else {
+										cssArr.push(cssProperty)
+									}
+								})
 							}
-
-							if (exclusionProps.indexOf(prop.kebab)>-1) {
-								cssArrChild.push(prop.kebab + ':' + val)
-							}
-						break;
-
-						default:
-							cssArr.push(prop.kebab + ':' + val)
-						break;
+						}
+					} else {
+						cssArr.push(cssProperty)
 					}
 				}
 			}
 
-			if (selectorPrefix !== undefined) {
-				selector = selectorPrefix + selector
-			}
-
 			if (cssArr.length>0) {
-				css += selector.concat('{' + cssArr.join(';') + '}')
+				css += selector + `{${cssArr.join(';')}}`
 			}
 
-			if (cssArrChild.length>0) {
-				css += selector.concat('>.', $root.klass('el'), '{' + cssArrChild.join(';') + '}')
+			if (cssArrParent.length>0 && parentSelector) {
+				css += parentSelector + `{${cssArrParent.join(';')}}`
+			}
+
+			if (cssArrChild.length>0 && childSelector) {
+				css += childSelector + `{${cssArrChild.join(';')}}`
 			}
 
 			return css

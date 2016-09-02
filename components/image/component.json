@@ -1,6 +1,6 @@
 {
-  "id": "text",
-  "label": "Text",
+  "id": "image",
+  "label": "Image",
   "icon": "img/icon.svg",
   "group": "Component"
 }

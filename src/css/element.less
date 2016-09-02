@@ -39,14 +39,19 @@
         color: @white;
     }
 
+    &.component-grid {
+        .icon {
+            border: 1px solid @transparent-white;
+        }
+    }
+
     .icon {
         height: 50px;
-        border: 1px solid @transparent-white;
         border-radius: 2px;
         background-repeat: no-repeat;
         background-position: 50% 50%;
-        background-size: 100%;
         background-image: url('../img/component-default.svg');
+        opacity: 0.8;
 
         &.no-border {
             border: 1px solid rgba(0,0,0,0);
@@ -56,7 +61,7 @@
         }
 
         &:hover {
-            border-color: @white;
+            opacity: 1
         }
     }
 }

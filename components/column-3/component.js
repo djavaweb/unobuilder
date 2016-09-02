@@ -1,4 +1,4 @@
-uno.component.add("column-1", {
+uno.component.add('column-3', {
     data: {},
     events: {
         init: function () {},

@@ -135,20 +135,28 @@ const App = new Vue({
 		/**
 		 * Set default size (width & height) of an element
 		 * @param {Object} props
-		 * @param {Object} data
+		 * @param {Object} element
 		 *
 		 * @return {Object}
 		 */
-		setDefaultSize (props, data) {
+		setDefaultSize (props, element) {
 			// Change properties of data kind
-			switch (data.kind) {
+			switch (element.kind) {
 				case 'column':
 					//let width = 100 / data.totalColumn
-					props.width = {value: 100, unit: '%'}
-					props.minWidth = {value: '60', unit: 'px'}
+					if (!props.width) {
+						props.width = {value: 100, unit: '%'}
+					}
+					props.minWidth = {value: 60, unit: 'px'}
 					props.maxWidth = {value: '', unit: '%'}
 					props.minHeight = {value: 60, unit: 'px'}
 					//delete data.totalColumn
+				break
+
+				case 'element':
+					props.minWidth = {value: 60, unit: 'px'}
+					props.maxWidth = {value: '', unit: '%'}
+					props.minHeight = {value: 60, unit: 'px'}
 				break
 
 				case 'section':
@@ -181,17 +189,61 @@ const App = new Vue({
 			let el = document.createElement(element.tag),
 			id = this.generateId()
 
-			// Add random ID
+			// Add html
+			if (element.html) {
+				el.innerHTML = element.html
+			}
 
-            el.setAttribute('data-id', id)
+			// Add random ID
             el.$id = element.id || id
-			el.$klass = []
+			el.setAttribute('data-id', id)
+
+			// Element classes
+			el.$klass = ['$klass-']
+
+			// Set Attributes
+			el.$setAttr = (key, value) => {
+				el.setAttribute(key, value)
+			}
+
+			// Join $klass array separated by space
+			el.$klassify = (val) => {
+				let klass = el.$klass.map(item => item.replace('$klass-', ''))
+				klass = _.unique(klass).join(' ')
+				return klass
+			}
+
+			// Render klass
+			el.$renderKlass = () => {
+				el.$setAttr('class', el.$klassify())
+			}
+
+			// Add klass
+			el.$addKlass = (val) => {
+				el.$klass.push(this.klass(val))
+			}
+
+			// Remove klass
+			el.$removeKlass = (val) => {
+				let klass = el.$klass.filter(item => item !== this.klass(val))
+				el.$klass = klass
+			}
+
+			// Set dynamic class
+			el.$setClass = (value) => {
+				let klassVar = '$klass-',
+				classIndex = el.$klass.map(i => i.indexOf(klassVar)>-1).indexOf(true)
+
+				el.$klass[classIndex] = klassVar + value
+				el.$setAttr('class', el.$klassify())
+			}
 
 			// Only for selectable element
 			if (element.selectable === undefined) {
 				element.selectable = true
 			}
 
+			// Clone element to avoid binding
 			let structure = this.cloneObject(element, true)
 			el.$structure = structure
 			this.elements[el.$id] = _.extend({
@@ -202,18 +254,27 @@ const App = new Vue({
 			// Set default attributes
 			if (element.wrapper) {
 				el.$wrap = true
-				el.$klass.push(this.klass('el-wrapper'))
+				el.$addKlass('el-wrapper')
 			} else {
 				// Apply Attributes and Properties
 				let props = this.cloneObject(constant.PROPERTIES)
+				if (this.elements[el.$id].props) {
+					props = _.extend(props, this.elements[el.$id].props)
+				}
 				props = this.setDefaultSize(props, element)
-				props.getParent = () => {
-					let parent = el.$parentElement()
-					if (parent) {
-						return parent.$props()
+				props.getParent = (parentElement) => {
+					if (parentElement) {
+						return el.parentElement
+					} else {
+						let parent = el.$parentElement()
+						if (parent) {
+							return parent.$props()
+						}
 					}
+
 				}
 
+				// Default properties from cloned props
 				let properties = {
 					large: this.cloneObject(props, true),
 					medium: this.cloneObject(props, true),
@@ -221,6 +282,8 @@ const App = new Vue({
 					mini: this.cloneObject(props, true)
 				}
 
+				// If element.propsclone is setted
+				// Override properties
 				if (element.propsclone) {
 					let elementAttributes = this.elements[element.propsclone]
 					if (elementAttributes) {
@@ -228,17 +291,31 @@ const App = new Vue({
 					}
 				}
 
+				// Okie dogie
 				this.elements[el.$id].props = properties
 			}
 
 			// Add class if element is selectable
 			if (element.selectable) {
 				el.$selectable = true
-				el.$klass.push(this.klass('el'))
-				el.$klass.push(this.klass('el-' + this.elements[el.$id].kind))
-				el.$klass.push(this.klass('el-' + this.elements[el.$id].type))
+				el.$addKlass('el')
+				el.$addKlass('el-' + this.elements[el.$id].kind)
+				el.$addKlass('el-' + this.elements[el.$id].type)
 			} else {
-				el.$klass.push(this.klass('non-el'))
+				el.$addKlass('non-el')
+			}
+
+			// Resizable element
+			if (element.resizable === undefined) {
+				element.resizable = false
+			}
+			el.$resizable = element.resizable
+
+			// Subtree is for case like row
+			// Template is wrapper but unselectable
+			// And it's only a shadow
+			if (element.row) {
+				el.$row = true
 			}
 
 			// Get data properties
@@ -250,61 +327,37 @@ const App = new Vue({
 				return this.elements[el.$id].props[screenSize]
 			}
 
-			// Set properties
-			el.$set = (key, val, screenSize) => {
-				if (!screenSize) {
-					screenSize = 'large'
+			// Element offset
+			el.$offset = (prop) => {
+				let rect =  el.getBoundingClientRect()
+				if (prop) {
+					return rect[prop]
 				}
 
-				// If we set properties into large screen
-				// All screen size will update too, so on
-				if (screenSize === 'large') {
-					dot.set(key, val, el.$props('large'))
-				}
-
-				// for medium
-				if (['large', 'medium'].includes(screenSize)) {
-					dot.set(key, val, el.$props('medium'))
-				}
-
-				// for small screen
-				if (['large', 'medium', 'small'].includes(screenSize)) {
-					dot.set(key, val, el.$props('small'))
-				}
-
-				// for mini screen
-				if (['large', 'medium', 'small', 'mini'].includes(screenSize)) {
-					dot.set(key, val, el.$props('mini'))
-				}
-
-				// ID and class
-				if (['id', 'klass'].includes(key)) {
-					el.$attr(key, val)
-				}
-
-				this.$nextTick(() => {
-					this.$emit('elementHasChanged', true)
-				})
+				return rect
 			}
 
-			// Set Attributes
-			el.$attr = (key, value) => {
-				if (key !== 'klass') {
-					el.setAttribute(key, value)
-				} else {
-					el.setAttribute('class', value + ' ' + el.$klass.join(' '))
+			// Get element absolute position
+			el.$coords = (pos) => {
+				let left = el.$offset('left'), top = el.$offset('top'),
+				retval = {
+					left: left,
+					right: left + el.$offset('width'),
+					top: top,
+					bottom: top + el.$offset('height')
 				}
-			}
 
+				if (pos) {
+					return retval[pos]
+				}
 
-			// Get properties
-			el.$get = (key, screenSize) => {
-				return dot.pick(key, el.$props(screenSize))
+				return retval
 			}
 
 			// Traversing child elements
 			el.$find = (id) => {
-				let element = document.querySelector('#' + id)
+				let element = el.querySelector(`[data-id="${id}"]`)
+
 				if (! element) {
 					element = element.firstChild;
 					while (element) {
@@ -323,26 +376,32 @@ const App = new Vue({
 				// Self element
 				let element = el.$element()
 				if (element) {
-					breadcrumbs.push({
-						id: element.$id,
-						label: element.$kind
-					})
-
-					// 2nd parent element
-					if (element.$parentElement) {
-						let parent = element.$selectableParent()
+					if (element.$label) {
 						breadcrumbs.push({
-							id: parent.$id,
-							label: parent.$kind
+							id: element.$id,
+							label: element.$label
 						})
+					}
+					// 2nd parent element
+					if (element.$selectableParent) {
+						let parent = element.$selectableParent()
+						if (parent.$label) {
+							breadcrumbs.push({
+								id: parent.$id,
+								label: parent.$label
+							})
+						}
+
 
 						// 3rd parent element
-						if (parent.$parentElement) {
+						if (parent.$selectableParent) {
 							let grandParent = parent.$selectableParent()
-							breadcrumbs.push({
-								id: grandParent.$id,
-								label: grandParent.$kind
-							})
+							if (grandParent.$label) {
+								breadcrumbs.push({
+									id: grandParent.$id,
+									label: grandParent.$label
+								})
+							}
 						}
 					}
 				}
@@ -358,24 +417,33 @@ const App = new Vue({
 			el.setAttribute('data-type', this.elements[el.$id].type)
 			el.$type = this.elements[el.$id].type || 'etc'
 
-			// If group id
-			if (this.elements[el.$id].group) {
-				el.$group = this.elements[el.$id].group
-			}
+			// Tag Label
+			el.$label = this.elements[el.$id].label || el.$kind
 
-			// Accepted drag and drop
-			el.$accept = this.elements[el.$id].accept
+			// Accepted drag and drop parent
+			el.$dropable = this.elements[el.$id].dropable
 
 			// Select element
 			el.$select = () => {
 				if (el.$selectable) {
+					let parent = el.$parentElement(), index = 0, last = false
+					if (parent) {
+						let parentLength = parent.$childElements().length
+
+						index = $(el).parent().index()
+						if (index === parentLength - 1) {
+							last = true
+						}
+					}
+
 					this.activeElement = el.$id
 					this.$nextTick(() => {
 						this.parent().$broadcast('elementSelect', {
 							id: el.$id,
 							css: this.outline(el),
 							type: el.$type,
-							index: 0,
+							index: index,
+							last: last,
 							childSize: 0,
 							breadcrumbs: el.$breadcrumbs(),
 							showBreadcrumbs: false
@@ -406,8 +474,7 @@ const App = new Vue({
 
 			// Add child elements
 			el.$add = (element, ready) => {
-				let newElement = this.createElement(element, ready)
-				el.appendChild(newElement)
+				el.appendChild(this.createElement(element, ready))
 			}
 
 			// Remove element
@@ -443,18 +510,52 @@ const App = new Vue({
 				return structure
 			}
 
-			// Copy destination
-			el.$copy = (to) => {
-				let structure = el.$structureTree(true),
-				dstElement = this.getElement(to, true),
-				acceptedElement = el.$accept.split(',')
+			// Check accepts of parent elements
+			el.$dropableTo = (kind) => {
+				if (el.$dropable) {
+					if (typeof kind === 'object' && kind.nodeType === 1) {
+						kind = kind.$kind
+					}
 
-				// Only copy if accept arguments passed
-				if (dstElement.$kind && acceptedElement.includes(dstElement.$kind)) {
-					structure.append = dstElement
-					this.createElement(structure, (newEl) => {
-						newEl.$select()
-					})
+					return el.$dropable.split(',').includes(kind)
+				}
+			}
+
+			// Check accepting element
+			el.$accepting = (accepted) => {
+				if (typeof accepted === 'object' && accepted.nodeType === 1) {
+					accepted = accepted.$dropable
+				}
+
+				if (accepted) {
+					return accepted.split(',').includes(el.$kind)
+				}
+			}
+
+			// Copy element to destination
+			el.$copy = (to, callback) => {
+				let copyElement = el.$structureTree(true),
+				pasteElement = this.getElement(to, true),
+				parent = el.parentElement
+
+				if (pasteElement) {
+					// If parent element is a row element
+					// And paste element is not row element
+					// Create new row element, by copying row element
+					if (parent && parent.$row && !pasteElement.$row) {
+						let parentElement = parent.$structureTree(true)
+						parentElement.elements = [copyElement]
+						copyElement = parentElement
+					}
+
+					// Only copy if accept arguments passed
+					if (el.$dropableTo(pasteElement.$kind)) {
+						copyElement.append = `[data-id="${pasteElement.$id}"]`
+						this.createElement(copyElement, (element) => {
+							element.$select()
+							callback && callback.call(this)
+						})
+					}
 				}
 			}
 
@@ -562,21 +663,28 @@ const App = new Vue({
 			}
 
 			// Get parent element
-			el.$parentElement = () => {
+			el.$parentElement = (checkRowElement) => {
 				let retElement, element = el.$element()
 				if (element && element.parentElement) {
 					if (element.parentElement.$wrap) {
 						if (element.parentElement.parentElement && element.parentElement.parentElement.$element) {
-							return element.parentElement.parentElement.$element()
+							retElement = element.parentElement.parentElement.$element()
 						}
 					} else {
 						if (element.parentElement.$element) {
-							return element.parentElement.$element()
+							retElement = element.parentElement.$element()
 						}
 					}
+
+					if (retElement && retElement.$row && checkRowElement) {
+						retElement = retElement.parentElement
+					}
+
+					return retElement
 				}
 			}
 
+			// Select parent until we found selectable element
 			el.$selectableParent = () => {
 				let parent = el.parentElement
 				if (parent) {
@@ -588,6 +696,31 @@ const App = new Vue({
 				}
 			}
 
+			// Select child until we found selectable element
+			el.$selectableChild = () => {
+				let child = el.firstChild
+				if (child) {
+					if (!child.$selectable && child.$selectableChild) {
+						return child.$selectableChild()
+					}
+
+					return child
+				}
+			}
+
+			// Select parent until we found row element
+			el.$rowParent = () => {
+				let parent = el.parentElement
+				if (parent) {
+					if (!parent.$row && parent.$rowParent) {
+						return parent.$rowParent()
+					}
+
+					return parent
+				}
+			}
+
+			// Get child elements
 			el.$childElements = () => {
 				let childNodes = el.childNodes, children = [],
 				i = childNodes.length
@@ -601,17 +734,71 @@ const App = new Vue({
 				return children
 			}
 
-			el.$groups = () => {
-				let group = el.$group, groups = []
-				if (group) {
-					for (let i in this.elements) {
-						if (this.elements[i].group === group) {
-							groups.push(this.elements[i].id)
-						}
-					}
+			// Update klass if element has no child
+			el.$updateEmptiness = () => {
+				if (el.$kind === 'body') return
+
+				let element = el
+				if (element.$type === 'child' && element.$kind !== 'column') {
+					element = element.parentElement
 				}
 
-				return groups
+				let children = el.$selectableChild()
+				if (! children) {
+					element.$addKlass('el-empty')
+				} else {
+					element.$removeKlass('el-empty')
+				}
+
+				element.$renderKlass()
+				if (element.parentElement) {
+					element.parentElement.$updateEmptiness()
+				}
+			}
+
+			// Set properties
+			el.$set = (key, val, screenSize) => {
+				if (!screenSize) {
+					screenSize = 'large'
+				}
+
+				// If we set properties into large screen
+				// All screen size will update too, so on
+				if (screenSize === 'large') {
+					dot.set(key, val, el.$props('large'))
+				}
+
+				// for medium
+				if (['large', 'medium'].includes(screenSize)) {
+					dot.set(key, val, el.$props('medium'))
+				}
+
+				// for small screen
+				if (['large', 'medium', 'small'].includes(screenSize)) {
+					dot.set(key, val, el.$props('small'))
+				}
+
+				// for mini screen
+				if (['large', 'medium', 'small', 'mini'].includes(screenSize)) {
+					dot.set(key, val, el.$props('mini'))
+				}
+
+				// Update custom attributes
+				if (key === 'klass') {
+					el.$setClass(val)
+				} else if (key === 'id') {
+					el.$setAttr(key, val)
+				}
+
+				// Mayday, mayday element has changed
+				this.$nextTick(() => {
+					this.$emit('elementHasChanged', true)
+				})
+			}
+
+			// Get properties
+			el.$get = (key, screenSize) => {
+				return dot.pick(key, el.$props(screenSize))
 			}
 
 			// Prepend element to element.prepend value
@@ -622,7 +809,8 @@ const App = new Vue({
 
 			// Append element to element.append value
 			if (element.append) {
-				$(element.append).get(0).appendChild(el)
+				let appendElement = $(element.append).get(0)
+				appendElement.appendChild(el)
 			}
 
 			// Finish
@@ -632,28 +820,32 @@ const App = new Vue({
 					for (let key in element.attrs) {
 						let value = element.attrs[key]
 						if (key === 'class') {
-							value += ' ' + el.$klass.join(' ')
+							el.$setClass(value)
+						} else {
+							el.$setAttr(key, value)
 						}
-
-						el.setAttribute(key, value)
 					}
 				} else {
-					// Add class
-					el.setAttribute('class', el.$get('klass') + ' ' + el.$klass.join(' '))
+					el.$setClass('')
 				}
 
 				// Rehover element
 				this.tryHover()
 
-				// fire ready event
-				ready && ready.call(this, el)
-
 				// If element has child
 				// Add child elements
 				if (element.elements && element.elements.length>0) {
-					for (let i in element.elements) {
-						el.$add(element.elements[i], ready)
+					for (let i = 0; i<element.elements.length;i++) {
+						if (i === element.elements.length-1) {
+							el.$add(element.elements[i], ready)
+						} else {
+							el.$add(element.elements[i])
+						}
 					}
+				} else {
+					// fire ready event
+					ready && ready.call(this, el)
+					el.$updateEmptiness()
 				}
 
 				// Fire events ready
@@ -807,65 +999,217 @@ const App = new Vue({
 		 * @param {String} str
 		 * @link https://github.com/djavaweb/unobuilder/wiki/Create-New-Uno-Component
 		 */
-		generateElementFromTemplate (template, type) {
+		templateToElement (template, nestedDeep) {
+			const isJSON = (json) => {
+				try {
+					JSON.parse(json)
+					return true
+				} catch (e) {
+					return false
+				}
+			}
+
 			// Parsing tag to node element
 			template = $($.parseXML(template)).children()
-			console.log(template);
+			nestedDeep = nestedDeep || 0
 
-			/*if (template.get(0))
+			// Convert template markup to elements
+			if (template.get(0))
 			{
-				let templateObject = {type: type}
+				let element = {attrs: {}, type: 'component', elements: []}
 
 				// Get kind
 				let kind = template.get(0).tagName
-				templateObject.kind = kind
+				element.kind = kind
 
-				// Tag name
+				// Tag name for <element> and <wrapper>
+				// @default 'div'
 				let tagName = template.attr('tag') || 'div'
-				templateObject.tag = tagName
 				template.removeAttr('tag')
+				element.tag = tagName
 
-				// Get column grid value
-				let column = template.attr('grid') || 1
-				template.removeAttr('grid')
-
-				// Get attributes
-				let attrs = {}
-				_.each(template.get(0).attributes, (attr, index) => {
-					attrs[attr.name] = attr.value
-				})
-				templateObject.attrs = attrs
+				// Tag name for <element> and <wrapper>
+				// @default 'div'
+				let tagLabel = template.attr('label')
+				template.removeAttr('tag')
+				if (tagLabel && tagLabel !== '') {
+					element.label = tagLabel
+				}
 
 				// Reinitialize default value
 				switch (kind) {
 					case 'wrapper':
-						templateObject.wrapper = true
-						templateObject.selectable = false
+						element.wrapper = true
+						element.selectable = false
+					break
+
+					case 'element':
+						element.kind = 'element'
+						element.wrapper = false
+						element.selectable = true
+						element.dropable = 'section,container,row,column'
+						element.props = {
+							height: {
+								value: 100,
+								unit: '%'
+							}
+						}
+					break
+
+
+					case 'content':
+						element.kind = 'content'
+						element.wrapper = false
+						element.selectable = true
+						setupElement.s
+						element.dropable = 'section,container,row,column'
+						if (template.html().trim().length>0) {
+							element.html = _.escape(template.html().trim())
+						}
+						element.props = {
+							minHeight: {
+								value: '',
+								unit: 'px'
+							}
+						}
+					break
+
+					// Child is for internal wrapper
+					// It has no documentation
+					// Child only parse all attributes into props
+					case 'child':
+						element.type = 'child'
+
+						let kind = template.attr('kind')
+						template.removeAttr('kind')
+						if (kind && kind !== '') {
+							element.kind = kind
+						}
+
+						let resizable = template.attr('resizable') || false
+						template.removeAttr('resizable')
+						element.resizable = JSON.parse(resizable)
+
+						var props = template.attr('props')
+						template.removeAttr('props')
+						if (isJSON(props)) {
+							element.props = JSON.parse(props)
+						}
+
+					break
+
+					case 'row':
+						// Get gutter value
+						let gutter = template.attr('gutter') || 'medium',
+						klass = ['uk-grid', `uk-grid-${gutter}`]
+
+						// Default properties
+						element.attrs.class = klass.join(' ')
+						element.dropable = 'section,container,row,column'
+
+						// Set row as wrapper
+						element.row = true
+						element.selectable = false
+
+						// Remove tag other than <column>
+						template.children(':not(column)').remove()
+
+						// Set width to column
+						let columns = template.children('column')
+						columns.each((index, column) => {
+							$(column).attr('totalColumn', columns.size())
+						})
 					break
 
 					case 'column':
-						templateObject.attrs.class = `uk-width-1-${column}`
+						// Get column grid value
+						// @default 1
+						let totalColumn = parseInt(template.attr('totalColumn'))
+						template.removeAttr('totalColumn')
+
+						// Get column width value
+						// @default is 1 it's mean 100%
+						let width = parseInt(template.attr('width'))
+						template.removeAttr('width')
+
+						if (! isNaN(width)) {
+							width = width * 10
+						} else {
+							width = 100 / totalColumn
+						}
+
+						// Default properties
+						element.attrs.class = `uk-width-1-${totalColumn}`
+						element.dropable = 'section,container,row,column'
+
+						// Set column as wrapper and unselectable element
+						element.wrapper = true
+						element.selectable = false
+
+						var props = {}
+						props.width = {
+							value: width,
+							unit: '%'
+						}
+
+						if (template.get(0).childNodes.length>0) {
+							props.height = {value: 60, unit: 'px'}
+						}
+
+						// Since we're using uikit,
+						// We must add wrapper to column
+						// to avoid margin-left property
+						props = JSON.stringify(props)
+						template.wrapInner(`<child resizable="true" tag="div" kind="column" props='${props}'></child>`)
 					break
+
+					default:
+						return null
+						break
 				}
 
-				// Get children
-				let elements = [], childNodes = template.get(0).childNodes,
+				// Get attributes
+				_.each(template.get(0).attributes, (attr, index) => {
+					let attrValue = attr.value
+					if (isJSON(attrValue)) {
+						attrValue = JSON.parse(attr.value)
+					}
+
+					element.attrs[attr.name] = attrValue
+					//template.removeAttr(attr.name)
+				})
+
+				// If there is no attributes remove `attrs` object
+				if (_.size(element.attrs) === 0) {
+					delete element.attrs
+				}
+
+				// Get element children
+				let elements = [],
+				childNodes = template.get(0).childNodes,
 				childLength = childNodes.length
 
 				// Parsing child elements if any
 				while (childLength--) {
 					if (childNodes[childLength].nodeType === 1) {
-						elements.unshift(this.parsingTemplateMarkup(childNodes[childLength].outerHTML, type))
+						let template = this.templateToElement(childNodes[childLength].outerHTML, nestedDeep + 1)
+						if (template) {
+							elements.unshift(template)
+						}
 					}
 				}
 
 				// Push to template object
 				if (elements.length>0) {
-					templateObject.elements = elements
+					if (element.elements>0) {
+						element.elements[0].elements = elements
+					} else {
+						element.elements = elements
+					}
 				}
 
-				return templateObject
-			}*/
+				return element
+			}
 		},
     },
 
@@ -889,6 +1233,7 @@ const App = new Vue({
 		 * @param {Boolean} reselect
 		 */
 		elementHasChanged (reselect) {
+			// Broadcast to stylesheet
 			this.$broadcast('elementHasChanged', this.elements, this.screenSize)
 
 			// Reselec element
@@ -927,73 +1272,70 @@ const App = new Vue({
 			let el = this.getElement(id),
 			removeEl = el.$elementWrapper()
 
-			if (el.$group) {
-				let groups = el.$groups(), groupParent
+			// Prevent delete of body element
+			if (removeEl.$kind && removeEl.$kind !== 'body') {
 
-				let iterate = 0
-				for (let i in groups) {
-					let el = this.getElement(groups[i])
-					if (el) {
-						if (iterate === 0) {
-							groupParent = el.$parentElement()
-						}
-						el.$remove()
-						iterate++
-					}
+				// Get element sibling
+				let sibling = removeEl.$sibling()
+
+				// Set hover element
+				if (this.hoverElement === removeEl.$id || this.hoverElement === el.$id) {
+					this.hoverElement = sibling.$id
 				}
 
+				// If parent element is a row element
+				// Remove it, but if it has a children, cancel.
+				let parent = removeEl.parentElement
+
 				// Remove attributes and element
+				removeEl.$remove()
+
+				// Update elements style
 				this.$emit('elementHasChanged')
 
 				// After remove, select parent element immediately
 				this.$nextTick(() => {
-					this.tryHover()
-					if (groupParent) {
-						groupParent.$select()
-					}
-				})
-			} else {
-				// Prevent delete of body element
-				if (removeEl.$kind && removeEl.$kind !== 'body') {
-
-					// Get element sibling
-					let sibling = removeEl.$sibling()
-
-					// Set hover element
-					if (this.hoverElement === removeEl.$id || this.hoverElement === el.$id) {
-						this.hoverElement = sibling.$id
-					}
-
-					// Remove attributes and element
-					removeEl.$remove()
-
-					// Update elements style
-					this.$emit('elementHasChanged')
-
-					// After remove, select parent element immediately
-					this.$nextTick(() => {
+					// If a row element has no children
+					// Remove it
+					if (parent && parent.$row) {
+						let childs = parent.$childElements()
+						if (childs.length===0) {
+							this.$emit('removeElement', parent.$id)
+						} else {
+							this.tryHover()
+							sibling.$select()
+						}
+					} else {
 						this.tryHover()
 						sibling.$select()
-					})
-				}
+					}
+
+					parent.$updateEmptiness()
+				})
 			}
 		},
 
 		/**
 		 * Copy element by id
-		 * @param  {String} id
+		 * @param {String} id
+		 * @param {String} dstId
+		 * @param {Boolean} sameCopy
 		 * @return {}
 		 */
-		copyElement (id, dstId) {
+		copyElement (id, dstId, sameCopy) {
 			let el = this.getElement(id),
 			copyEl = el.$elementWrapper(),
-			parent = el.$parentElement().$id
+			pasteEl = el.$parentElement().$id
 
 			if (dstId) {
-				parent = dstId
+				pasteEl = dstId
 			}
 
-			copyEl.$copy(parent)
+			copyEl.$copy(pasteEl, () => {
+				if (sameCopy) {
+					this.$emit('keyCapture', 'copy')
+				}
+			})
 		},
 
 
@@ -1006,7 +1348,7 @@ const App = new Vue({
 				element.append = '[data-type="body"]'
 			}
 
-			/** Override attribute */
+			// Override attribute
 			this.createElement(element, el => {
 				el.$select()
 			})
@@ -1035,29 +1377,47 @@ const App = new Vue({
 				case 'paste':
 					// Prevent to copy body element, skip it
 					if (this.copiedElement && this.copiedElement !== 'body') {
-						let copiedElement = this.getElement(this.copiedElement),
-						copyParentId = copiedElement.$parentElement().$id,
-						dstElement = activeElement.$id
+						let copyElement = this.getElement(this.copiedElement)
+						if (copyElement) {
+							let copyParentId = copyElement.$parentElement().$id,
+							pasteElement = activeElement.$id, sameCopy
 
-						// If copy element is the same with active element
-						// set destination element as parent
-						if (copiedElement.$id === activeElement.$id) {
-							dstElement = copyParentId
-						}
+							// If active element has parent element such as container
+							let parentElement = activeElement.$parentElement()
+							if (parentElement) {
+								// If it's a row element
+								// After paste, copy again current element
+								if (parentElement.$row) {
+									sameCopy = true
+								} else {
+									// set destination element as parent of parent
+									let activeParentId = parentElement.$id
 
-						// If active element has parent element such as container
-						let parentElement = activeElement.$parentElement()
-						if (parentElement) {
-							// set destination element as parent of parent
-							let activeParentId = parentElement.$id
-							if (copyParentId === activeParentId) {
-								dstElement = copyParentId
+									if (copyParentId === activeParentId) {
+										pasteElement = copyParentId
+									}
+								}
 							}
-						}
 
-						// Roger that!
-						this.$emit('copyElement', copiedElement.$id, dstElement)
-						copiedElement.$select()
+							// If copy element is the same with active element
+							// set destination element as parent
+							if (copyElement.$id === activeElement.$id) {
+								pasteElement = copyParentId
+							}
+
+							// If copy element is column
+							// And paste element is container or anything that has row
+							// Set paste element as row
+							if (copyElement.$kind === 'column') {
+								let firstChild = this.getElement(pasteElement).firstChild
+								if (firstChild && firstChild.$kind === 'row') {
+									pasteElement = firstChild.$id
+								}
+							}
+
+							// Roger that!
+							this.$emit('copyElement', copyElement.$id, pasteElement, sameCopy)
+						}
 					}
 				break;
 
@@ -1117,15 +1477,12 @@ const App = new Vue({
 				break;
 
 				case 'copyStyle':
-
 				break;
 
 				case 'pasteStyle':
-
 				break;
 
 				case 'clearStyle':
-
 				break;
 			}
 		},
@@ -1164,46 +1521,22 @@ const App = new Vue({
 		dragEndComponent (component) {
 			if (this.dragging && this.componentClone) {
 				this.componentClone.remove()
-				this.componentClone = null
-				this.generateElementFromTemplate(component.template)
-				this.dropElement = null
 
-				// Create elements
-				/*switch (component.template.kind) {
-					case 'column':
-						let groupId = this.generateId('group')
-
-						let element = this.dropElement.$element(),
-						column = this.cloneObject(component.template)
-
-						column.group = groupId
-						column.wrapper = true
-						column.selectable = false
-						column.elements = [{
-							tag: 'div',
-							type: 'child',
-							kind: 'column',
-							group: groupId
-						}]
-
-						element.$add({
-							tag: 'div',
-							type: 'grid',
-							kind: 'row',
-							group: groupId,
-							elements: [column],
-							selectable: false,
-							attrs: {
-								class: 'uk-grid'
-							}
-						}, (row) => {
-							row.$select()
+				if (this.dropElement) {
+					let element = this.templateToElement(component.template)
+					if (this.dropElement.$accepting(element.dropable)) {
+						this.dropElement.$element().$add(element, (el) => {
+							el.$select()
+							this.parent().$broadcast(
+								'callComponentEvent', component, 'ready'
+							)
+							this.dropElement = null
 						})
-					break
+					}
+				}
 
-					default:
-					break
-				}*/
+				this.componentClone = null
+				this.dropElement = null
 			}
 		},
 

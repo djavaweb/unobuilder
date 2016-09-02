@@ -15,6 +15,66 @@ var uno = (function unobuilder () {
 
 	};
 
+	/* Register instance */
+	_root.viewer = null
+	_root.component = new component();
+	_root.utils = new utils();
+	_root.list = {};
+	_root.on = on;
+	_root.off = off;
+	_root.emit = emit;
+	_root.events = events;
+	_root.resetEvents = resetEvents;
+
+	/* Defalut Events */
+	_root.on('initComponent', function (componentPath) {
+		var path = {}
+		path.root = componentPath
+		path.img = path.root + 'img/',
+		path.css = path.root + 'css/'
+		path.js = path.root + 'js/'
+		path.json = path.root + 'component.json'
+		path.template = path.root + 'component.html'
+
+		// Get package information
+		$.getJSON(path.json, function (data) {
+			if (data.id) {
+				var componentObj = {}
+				componentObj.info = data
+				componentObj.path = path
+
+				// Get template
+				$.get(path.template, function (response) {
+					if (response) {
+						componentObj.template = response
+					}
+
+					_root.emit('addComponentObject', {
+						id: data.id,
+						obj: componentObj,
+						ready: true
+					})
+				})
+			}
+		})
+	})
+
+	_root.on('addComponentObject', function (component) {
+		if (component) {
+			if (! _root.list[component.id]) {
+				_root.list[component.id] = {}
+			}
+
+			for (var key in component.obj) {
+				_root.list[component.id][key] = component.obj[key]
+			}
+
+			if (component.ready) {
+				_root.emit('addComponent', _root.list[component.id])
+			}
+		}
+	})
+
 	/**
 	* Current Script Path
 	*
@@ -28,7 +88,9 @@ var uno = (function unobuilder () {
 		path = scriptSrc.split( '/' );
 
 		path = path[path.length - 1];
-		return scriptSrc.replace(path, '' );
+		path = scriptSrc.replace(path, '' );
+
+		return path
 	}
 
 
@@ -50,6 +112,8 @@ var uno = (function unobuilder () {
 			if(params === null)	params = [];
 			return params;
 		}
+
+		self.lastScriptPath = componentPath
 	}
 
 
@@ -58,50 +122,28 @@ var uno = (function unobuilder () {
 	 */
 	function component () {
 		var self = this;
-		self.list = [];
 
 		/**
 		 * Add component into list
 		 * @param {Objects} objects
 		 */
-		self.add = function (objects) {
-			var path = {}
-			path.root = componentPath()
-			path.img = path.root + 'img/',
-			path.css = path.root + 'css/'
-			path.js = path.root + 'js/'
-			path.json = path.root + 'component.json'
-			path.template = path.root + 'component.html'
+		self.add = function (id, objects) {
+			var componentObj = {}
+			if (objects.methods) {
+				componentObj.methods = objects.methods
+			}
 
-			// Get package information
-			$.getJSON(path.json, function (json) {
-				var componentObj = {
-					info: json,
-					path: path
-				}
+			if (objects.data) {
+				componentObj.data = objects.data
+			}
 
-				if (objects.methods) {
-					componentObj.methods = objects.methods
-				}
+			if (objects.events) {
+				componentObj.events = objects.events
+			}
 
-				if (objects.data) {
-					componentObj.data = objects.data
-				}
-
-				if (objects.events) {
-					componentObj.events = objects.events
-				}
-
-
-				// Get template
-				$.get(path.template, function (response) {
-					if (response) {
-						componentObj.template = response
-					}
-
-					self.list.push(componentObj)
-					_root.emit('addComponent', componentObj)
-				})
+			_root.emit('addComponentObject', {
+				id: id,
+				obj: componentObj
 			})
 		};
 
@@ -210,17 +252,6 @@ var uno = (function unobuilder () {
         evenList = {};
         return evenList;
     }
-
-
-	/* Register instance */
-	_root.viewer = null
-	_root.component = new component();
-	_root.utils = new utils();
-	_root.on = on;
-	_root.off = off;
-	_root.emit = emit;
-	_root.events = events;
-	_root.resetEvents = resetEvents;
 
 	return _root
 }).call(this)

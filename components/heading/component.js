@@ -1,5 +1,5 @@
-uno.component.add("column-1", {
-    data: {},
+uno.component.add('heading', {
+	data: {},
     events: {
         init: function () {},
         dragstart: function () {},

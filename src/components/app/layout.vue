@@ -37,7 +37,7 @@
 			<!-- Component collections -->
 			<accordion-wrapper v-if="componentSize>0">
 				<accordion-item :title="name" v-for="(name, elements) in components">
-					<component-item v-for="element in elements|filterBy filter.searchComponent" :data="element" :class="{'no-space-right': ($index + 1) % 3 === 0}"></component-item>
+					<component-item v-for="element in elements|filterBy filter.searchComponent" :data="element" :class="[,'component-' + dasherize(name),{'no-space-right': ($index + 1) % 3 === 0}]"></component-item>
 				</accordion-item>
 			</accordion-wrapper>
 			<!-- End of collections -->
@@ -96,14 +96,16 @@
 					<div class="outline-tools hovered" :class="{orange: drag.component}" :style="outline.hover.css" v-if="drag.component||(outline.hover.id!==outline.select.id)">
 						<div class="breadcrumbs hover" :class="outlineHoverClass" v-if="outline.hover.breadcrumbs">
 							<div class="selector" v-if="outline.hover.breadcrumbs.length>0">
-								<a>{{outline.hover.breadcrumbs[0].label}}</a>
+								<a @click="displayBreadcrumbs(outline.hover.breadcrumbs[0])">{{outline.hover.breadcrumbs[0].label}}</a>
 							</div>
 						</div>
 
+						<!-- Add block button -->
 						<a class="add-block"
 						:class="outlineHoverClass"
 						@click="showUI('blockPanel')"
 						v-if="outline.hover.type === 'section'"></a>
+						<!-- End of add block button -->
 					</div>
 					<!-- End of hover outline selector -->
 
@@ -128,10 +130,23 @@
 							@mouseleave="outlineRemoveLeave()"
 							@click="removeElement()"></a>
 						</div>
+
+						<div class="resizer" v-if="isElement('resizable')" :class="{active: isUI('dragging')&&(drag.modelValue==='width'||drag.modelValue==='height')}">
+							<div class="resizer-h resizer-h--r" v-if="isElement('resizable')===true || isElement('resizable').width" :class="{active: drag.direction=='right'}" @mousedown="dragStartResizeElement($event, 'right')"></div>
+
+							<div class="resizer-h resizer-h--l" v-if="isElement('resizable')===true || isElement('resizable').width" :class="{active: drag.direction=='left'}" @mousedown="dragStartResizeElement($event, 'left')"></div>
+
+							<div class="resizer-v resizer-v--t" v-if="isElement('resizable')===true || isElement('resizable').height" :class="{active: drag.direction=='top'}" @mousedown="dragStartResizeElement($event, 'top')"></div>
+
+							<div class="resizer-v resizer-v--b" v-if="isElement('resizable')===true || isElement('resizable').height" :class="{active: drag.direction=='bottom'}" @mousedown="dragStartResizeElement($event, 'bottom')"></div>
+						</div>
+
+						<!-- Add block button -->
 						<a class="add-block"
 						:class="outlineSelectClass"
 						@click="showUI('blockPanel')"
 						v-if="outline.select.type === 'section'||(outline.select.type === 'body' && outline.select.childSize<1)"></a>
+						<!-- End of add block button -->
 					</div>
 					<!-- end of select outline -->
 
@@ -207,13 +222,13 @@
 		<!-- Position popup -->
 		<div class="right-panel-popup" v-if="isUI('rightPanelPopup', 'position') || isUI('rightPanelPopup', 'all')">
 			<popup :title="`All ${this.popupModel.all} Properties`"  v-if="isUI('rightPanelPopup', 'all')" v-if="isUI('rightPanelPopup', 'all')" :close="closePopup()">
-				<!-- All argin, padding, border radius properties -->
+				<!-- All margin, padding, border radius properties -->
 				<div class="uk-grid uk-grid-small" v-if="!isPopupAll('border')">
 					<div class="uk-width-4-10">
 						<number :value.sync="popupAllValue" :unit.sync="popupAllUnit" :max="1000" label="" :input-width="30"></number>
 					</div>
 				</div>
-				<!-- End of margin, padding, border radius properties -->
+				<!-- End of all margin, padding, border radius properties -->
 
 				<!-- All border properties -->
 				<div v-if="isPopupAll('border')">
@@ -265,7 +280,7 @@
 				<button @click="closeAllPopup(true)">OK</button>
 			</popup>
 
-			<popup :title="humanize(`${this.popupModel.position.type} ${this.popupModel.position.pos}`)" v-if="isUI('rightPanelPopup', 'position')" :close="closePopup()">
+			<popup :title="popupModel.position.type.indexOf('Radius')<0?humanize(`${this.popupModel.position.type} ${this.popupModel.position.pos}`):humanize(`${this.popupModel.position.type}`)" v-if="isUI('rightPanelPopup', 'position')" :close="closePopup()">
 				<!-- Margin, padding, border radius properties -->
 				<div class="uk-grid uk-grid-small" v-if="!isPopupPosition('border')">
 					<div class="uk-width-6-10">
@@ -319,6 +334,30 @@
 		</div>
 		<!-- End of position popup -->
 		<!-- End of popup -->
+
+		<div class="right-panel-container" v-if="hasProps() && isUI('rightPanel', 'edit')">
+			<accordion-wrapper>
+				<!-- Custom Attributes -->
+				<accordion-item title="Attributes">
+					<accordion-item-view>
+						<div class="uk-grid">
+							<label class="uk-width-2-10">Class</label>
+							<div class="uk-width-8-10">
+								<input class="input-text uk-width-1-1" v-model="propClass" />
+							</div>
+						</div>
+
+						<div class="uk-grid">
+							<label class="uk-width-2-10">ID</label>
+							<div class="uk-width-8-10">
+								<input class="input-text uk-width-1-1" v-model="propId" />
+							</div>
+						</div>
+					</accordion-item-view>
+				</accordion-item>
+				<!-- End of custom attributes -->
+			</accordion-wrapper>
+		</div>
 
 		<!-- Settings panel -->
 		<div class="right-panel-container" v-if="hasProps() && isUI('rightPanel', 'settings')">
@@ -523,7 +562,7 @@
 				<!-- End of display properties -->
 
 				<!-- Position properties -->
-				<accordion-item title="Position">
+				<accordion-item title="Position, Border &amp; Spacings">
 					<div class="prop-position-outline"
 					:class="[positionPosClass, {over: positionOver.position}]"
 					@mouseover.self="propPositionOver('position')"
@@ -556,7 +595,7 @@
 									<dt class="right" v-html="marginValue('right')" @mousedown="dragStartPosition($event, 'margin', 'right')"></dt>
 
 									<dt class="bottom-resize" @mousedown="dragStartPosition($event, 'margin', 'bottom')" @mouseover.self="propPositionOver('margin', 'bottom')"></dt>
-									<dt class="bottom" v-html="marginValue('bottom')" @click="positionPopup('margin', 'bottom', true)" @mousedown="dragStartPosition($event, 'margin', 'bottom')"></dt>
+									<dt class="bottom" v-html="marginValue('bottom')" @mousedown="dragStartPosition($event, 'margin', 'bottom')"></dt>
 
 									<dt class="left-resize" @mousedown="dragStartPosition($event, 'margin', 'left')" @mouseover.self="propPositionOver('margin', 'left')"></dt>
 									<dt class="left" v-html="marginValue('left')" @mousedown="dragStartPosition($event, 'margin', 'left')"></dt>
@@ -567,10 +606,10 @@
 									@mouseover.self="propPositionOver('border')">
 										<label><a @click="allPopup('border', true)">Border</a></label>
 
-										<a class="radius top left" @mousedown="dragRadiusStart($event, 'top', 'left')"></a>
-										<a class="radius top right" @mousedown="dragRadiusStart($event, 'top', 'right')"></a>
-										<a class="radius bottom left" @mousedown="dragRadiusStart($event, 'bottom', 'left')"></a>
-										<a class="radius bottom right" @mousedown="dragRadiusStart($event, 'bottom', 'right')"></a>
+										<a class="radius top left" @mousedown="dragStartRadius($event, 'top', 'left')"></a>
+										<a class="radius top right" @mousedown="dragStartRadius($event, 'top', 'right')"></a>
+										<a class="radius bottom left" @mousedown="dragStartRadius($event, 'bottom', 'left')"></a>
+										<a class="radius bottom right" @mousedown="dragStartRadius($event, 'bottom', 'right')"></a>
 
 										<dl>
 											<dt class="top-resize" @mousedown="dragStartPosition($event, 'border', 'top')" @mouseover.self="propPositionOver('border', 'top')"></dt>
@@ -640,26 +679,6 @@
 					</accordion-item-view>
 				</accordion-item>
 				<!-- End of size -->
-
-				<!-- Custom Attributes -->
-				<accordion-item title="Attributes">
-					<accordion-item-view>
-						<div class="uk-grid">
-							<label class="uk-width-2-10">Class</label>
-							<div class="uk-width-8-10">
-								<input class="input-text uk-width-1-1" v-model="propClass" />
-							</div>
-						</div>
-
-						<div class="uk-grid">
-							<label class="uk-width-2-10">ID</label>
-							<div class="uk-width-8-10">
-								<input class="input-text uk-width-1-1" v-model="propId" />
-							</div>
-						</div>
-					</accordion-item-view>
-				</accordion-item>
-				<!-- End of custom attributes -->
 			</accordion-wrapper>
 		</div>
 		<!-- End of settings panel -->
@@ -867,6 +886,7 @@
 
 <script>
 // Modules
+import async from 'async'
 import dot from 'dot-object'
 import _ from 'underscore'
 import Mousetrap from '../../js/lib/mousetrap.min.js'
@@ -980,7 +1000,7 @@ export default {
 				modelValue: null,
 				direction: false,
 				move: false,
-				startCoords: {}
+				initialValue: {}
 			},
 
 			/**
@@ -1072,6 +1092,52 @@ export default {
 			 * @type {Object}
 			 */
 			components: {},
+			nativeComponents: [
+				{
+					label: "1 Column",
+					url: "./components/column-1/component.js"
+				},
+
+				{
+					label: "2 Columns",
+					url: "./components/column-2/component.js"
+				},
+
+				{
+					label: "3 Columns",
+					url: "./components/column-3/component.js"
+				},
+
+				{
+					label: "4 Columns",
+					url: "./components/column-4/component.js"
+				},
+
+				{
+					label: "5 Columns",
+					url: "./components/column-5/component.js"
+				},
+
+				{
+					label: "6 Columns",
+					url: "./components/column-6/component.js"
+				},
+
+				{
+					label: "Text",
+					url: "./components/text/component.js"
+				},
+
+				{
+					label: "Image",
+					url: "./components/image/component.js"
+				},
+
+				{
+					label: "Heading",
+					url: "./components/heading/component.js"
+				}
+			],
 
 			/**
 			 * Block list
@@ -1087,19 +1153,21 @@ export default {
 							type: 'section',
 							kind: 'section',
 							append: 'body',
-							accept: 'body,section'
+							dropable: 'body',
+							resizable: {height: true}
 						},
 						{
 							tag: 'section',
 							type: 'section',
 							kind: 'section',
 							append: 'body',
-							accept: 'body,section',
+							dropable: 'body',
+							resizable: {height: true},
 							elements: [{
 								tag: 'div',
 								type: 'section',
 								kind: 'container',
-								accept: 'body,section',
+								dropable: 'body,section',
 								wrapper: true,
 								selectable: false,
 								attrs: {
@@ -1246,6 +1314,8 @@ export default {
 				let key
 				if (type === 'position') {
 					key = `position.settings.${this.getProps('position.value')}.${pos}`
+				} else if (type.toLowerCase().indexOf('radius')>-1) {
+					key = type
 				} else {
 					key = type + this.capitalize(pos)
 				}
@@ -1946,27 +2016,44 @@ export default {
 		},
 
 		/**
-		 * Load component, basically it's just append script tag
+		 * Register component, basically it's just append script tag
 		 * @param  {String} url
 		 */
-		loadComponent (url) {
-			let script = document.createElement('script')
+		registerComponent (url, callback) {
+			let componentTagId = this.$root.generateId('component'),
+			script = document.createElement('script')
 			script.src = url
+			script.onload = () => {
+				uno.emit(componentTagId)
+			}
 			document.body.appendChild(script)
+
+			let scriptPath = uno.utils.lastScriptPath()
+			uno.on(componentTagId, () => {
+				uno.emit('initComponent', scriptPath)
+				callback && callback()
+			})
 		},
 
 		/**
-		 * Register Components
+		 * Register Components From Rest API and native list
 		 */
 		registerComponents () {
+			const queue = async.queue((url, callback) => {
+				this.registerComponent(url, () => {
+					callback()
+				})
+			})
+
 			$.getJSON(constant.COMPONENT_REST_URL)
 			.then((response) => {
+				let items =this.nativeComponents
 				if (response.items) {
-					let itemCount = 0
-					_.each(response.items, (item, index) => {
-						this.loadComponent(item.url)
-					})
+					items = _.extend(items, response.items)
 				}
+				_.each(items, (item, index) => {
+					queue.push(item.url)
+				})
 			})
 		},
 
@@ -2279,6 +2366,23 @@ export default {
 			if (this.canvas && this.outline.select) {
 				let activeElement = this.canvas.getElement(this.outline.select.id)
 				return activeElement
+			}
+		},
+
+		/**
+		 * Check element
+		 * @param  {String}  key
+		 * @param  {String|Object|Array|Number}  equals
+		 * @return {Boolean}
+		 */
+		isElement (key, equals) {
+			let activeElement = this.activeElement()
+			if (activeElement && activeElement.$props) {
+				if (equals === undefined) {
+					return activeElement[`$${key}`]
+				}
+
+				return activeElement[`$${key}`] === equals
 			}
 		},
 
@@ -2666,11 +2770,24 @@ export default {
 		 * @return {String}
 		 */
 		capitalize (str) {
-			return str.toLowerCase().replace(/\b[a-z]/g, letter => letter.toUpperCase())
+			return str.replace(/\b[a-z]/g, letter => letter.toUpperCase())
+		},
+
+		dasherize (str) {
+			return str.toLowerCase()
+			.replace(/(^\s*|\s*$)/g, '')
+			.replace(/[_\s]+/g, '-')
+			.replace(/([A-Z])/g, '-$1')
+			.replace(/-+/g, '-')
 		},
 
 		humanize (str) {
-			return str.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/([A-Z\d]+)([A-Z][a-z])/g,'$1_$2').replace(/[-\s]+/g, '_').toLowerCase().replace(/_id$/,'').replace(/_/g, ' ')
+			return str.replace(/([a-z\d])([A-Z]+)/g, '$1_$2')
+			.replace(/([A-Z\d]+)([A-Z][a-z])/g,'$1_$2')
+			.replace(/[-\s]+/g, '_')
+			.toLowerCase()
+			.replace(/_id$/,'')
+			.replace(/_/g, ' ')
 		},
 
 		/**
@@ -2831,7 +2948,7 @@ export default {
 			// Set init variable before move
 			this.drag.modelValue = prop
 			this.drag.direction = direction
-			this.drag.startCoords = {
+			this.drag.initialValue = {
 				x: event.pageX,
 				y: event.pageY,
 				value: value
@@ -2844,7 +2961,7 @@ export default {
 		 * @param {Object} event
 		 */
 		dragEndPosition (event) {
-			if (this.drag.startCoords.x === event.pageX && this.drag.startCoords.y === event.pageY && !this.drag.move) {
+			if (this.drag.initialValue.x === event.pageX && this.drag.initialValue.y === event.pageY && !this.drag.move) {
 				this.positionPopup(this.drag.modelValue, this.drag.direction, true)
 			}
 			this.$emit('dragEnd', 'position')
@@ -2866,8 +2983,8 @@ export default {
 
 			// Border value must larger than 0
 			const fixValue = () => {
-				x += this.drag.startCoords.value
-				y += this.drag.startCoords.value
+				x += this.drag.initialValue.value
+				y += this.drag.initialValue.value
 
 				if (['border', 'padding'].includes(this.drag.modelValue)) {
 					if (x<0) {
@@ -2881,13 +2998,13 @@ export default {
 			}
 
 			// Get y coords by decreasing from start coords
-			if (this.drag.startCoords.y) {
-				y = parseInt((this.drag.startCoords.y - event.pageY)/2)
+			if (this.drag.initialValue.y) {
+				y = parseInt((this.drag.initialValue.y - event.pageY)/2)
 			}
 
 			// Get x coords by decreasing from start coords
-			if (this.drag.startCoords.x) {
-				x = parseInt((this.drag.startCoords.x - event.pageX)/2)
+			if (this.drag.initialValue.x) {
+				x = parseInt((this.drag.initialValue.x - event.pageX)/2)
 			}
 
 			if (this.drag.direction === 'left') {
@@ -2963,7 +3080,7 @@ export default {
 			// Set init variable before move
 			this.drag.modelValue = key
 			this.drag.direction = direction
-			this.drag.startCoords = {
+			this.drag.initialValue = {
 				x: event.pageX,
 				y: event.pageY,
 				value: value
@@ -2991,8 +3108,8 @@ export default {
 			let y
 
 			// Get y coords by decreasing from start coords
-			if (this.drag.startCoords.y) {
-				y = parseInt((this.drag.startCoords.y - event.pageY)/2)
+			if (this.drag.initialValue.y) {
+				y = parseInt((this.drag.initialValue.y - event.pageY)/2)
 				y = parseInt(y * Math.tan(45 * Math.PI / 180))
 
 				let position = this.drag.modelValue.replace('borderRadius', '').toLowerCase()
@@ -3119,6 +3236,126 @@ export default {
 			if (this.canvas) {
 				this.canvas.$emit('dragMoveComponent', coords, this.getRealCanvasSize())
 				this.callComponentEvent(this.drag.modelValue, 'dragmove', [coords])
+			}
+		},
+
+		/**
+		 * Start to resize element
+		 * @param {Event} event
+		 * @param {String} direction
+		 */
+		dragStartResizeElement (event, direction) {
+			let element = this.activeElement()
+
+			if (element.$resizable) {
+				let dimension = 'width'
+				if (['top', 'bottom'].includes(direction)) {
+					dimension = 'height'
+				}
+
+				let value = parseInt(element.$get(`${dimension}.value`)),
+				unit = element.$get(`${dimension}.unit`)
+
+				if (isNaN(value)) {
+					let minDimension = `min${this.capitalize(dimension)}`
+					value = parseInt(element.$get(`${minDimension}.value`))
+				}
+
+				// Set init variable before move
+				this.drag.modelValue = dimension
+				this.drag.direction = direction
+				this.drag.initialValue = {
+					x: event.pageX,
+					y: event.pageY,
+					value: value,
+					unit: unit
+				}
+				this.$emit('dragStart', 'resizeElement')
+			}
+		},
+
+		/**
+		 * Drag end on element
+		 * @param {Object} event
+		 */
+		dragEndResizeElement (event) {
+			this.$emit('dragEnd', 'resizeElement')
+		},
+
+		/**
+		 * On resizing column
+		 * @param  {Event} event
+		 */
+		dragMoveResizeElement (event) {
+			let element = this.activeElement()
+			if (element.$resizable) {
+				let value = this.drag.initialValue.value,
+				unit = this.drag.initialValue.unit,
+				parentElement = element.$parentElement(),
+				parent = element.$parentElement(true)
+
+				if (parent && parent.$row) {
+					parent = parent.parentElement
+				}
+
+				if (this.drag.modelValue==='width') {
+					let x = -parseInt(this.drag.initialValue.x - event.pageX)
+
+					// If it's first element
+					// You can't resize
+					if (this.outline.select.index === 0 &&
+						this.drag.direction === 'left') {
+						return
+					}
+
+					// If it's last element
+					// You can't resize if your right position
+					// is collision with right parent
+					if (this.drag.direction === 'right') {
+						let childs = parentElement.$childElements(), childsWidth = 0
+						for (let i in childs) {
+							if (childs[i].$offset) {
+								let width = parseInt(childs[i].$offset('width'))
+								childsWidth += width
+							}
+						}
+
+						if (x > 0 && parentElement.$offset('width') - childsWidth < 2) {
+							return
+						}
+					}
+
+					if (unit === '%') {
+						if (parent) {
+							let widthPercent = x / parent.getBoundingClientRect().width * 100
+							widthPercent = parseFloat(widthPercent.toFixed(2))
+							value += widthPercent
+
+							if (value<10) {
+								value = 10
+							} else if (value>100) {
+								value = 100
+							}
+						}
+					} else {
+						value += x
+						if (value<60) {
+							value = 60
+						}
+					}
+				} else {
+					let y = -parseInt(this.drag.initialValue.y - event.pageY)
+					if (unit === '%') {
+					} else {
+						value += y
+						if (value<60) {
+							value = 60
+						}
+					}
+				}
+
+				this.drag.move = true
+				element.$set(`${this.drag.modelValue}.value`, value)
 			}
 		}
 	},
@@ -3277,10 +3514,10 @@ export default {
 				name = this.capitalize(name)
 				document.removeEventListener('mousemove', this[`dragMove${name}`], false)
 				document.removeEventListener('mouseup', this[`dragEnd${name}`], false)
-				this.drag.startCoords = {}
+				this.drag.move = false
+				this.drag.initialValue = {}
 				this.drag.modelValue = ''
 				this.drag.direction = ''
-				this.drag.move = false
 				this.setUI('dragging', false)
 				this.setUI('dragTarget', null)
 			}
@@ -3304,6 +3541,16 @@ export default {
 		dragTarget (position, css) {
 			this.setUI('dragTarget', position)
 			this.$set('outline.dragTarget.css', css)
+		},
+
+		/**
+		 * Call components events
+		 * @param {Object} component
+		 * @param {String} eventName
+		 * @param {String|Object} params
+		 */
+		callComponentEvent (component, eventName, params) {
+			this.callComponentEvent(component, eventName, params)
 		}
 	},
 
