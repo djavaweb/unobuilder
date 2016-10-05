@@ -7,6 +7,10 @@
       "fontSize": {
           "value": 24,
           "unit": "px"
+      },
+      "lineHeight": {
+          "value": 27,
+          "unit": "px"
       }
   }
 }
