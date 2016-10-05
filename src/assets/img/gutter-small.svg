@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="24px" height="17px" viewBox="0 0 24 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 39.1 (31720) - http://www.bohemiancoding.com/sketch -->
+    <title>934F82DB-E856-4450-8EC2-AC61BD83F4A1</title>
+    <desc>Created with sketchtool.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Full-View" transform="translate(-1373.000000, -526.000000)">
+            <g id="Right-Panel" transform="translate(1197.000000, 72.000000)">
+                <g id="Settings" transform="translate(0.000000, 10.000000)">
+                    <g id="Display-option">
+                        <g id="Flex-settings" transform="translate(0.000000, 104.000000)">
+                            <g id="Grid-Gutter" transform="translate(13.000000, 324.000000)">
+                                <g id="Small" transform="translate(155.000000, 10.000000)">
+                                    <g id="Group-45" transform="translate(8.000000, 5.000000)">
+                                        <g id="left-col-copy-2">
+                                            <path d="M10.5,1.5 L10.5,17.5" id="Line" stroke="#FFFFFF" stroke-linecap="square"></path>
+                                            <path d="M0.555555556,1.5 L9.55555556,1.5" id="Line" stroke="#FFFFFF" stroke-linecap="square"></path>
+                                            <path d="M0.555555556,17.5 L9.55555556,17.5" id="Line-Copy-17" stroke="#FFFFFF" stroke-linecap="square"></path>
+                                            <rect id="Rectangle-7" fill-opacity="0.3" fill="#FFFFFF" x="0" y="2" width="10" height="15"></rect>
+                                        </g>
+                                        <g id="right-col-copy-2" transform="translate(12.000000, 0.000000)">
+                                            <path d="M1.5,1.5 L1.5,17.5" id="Line" stroke="#FFFFFF" stroke-linecap="square"></path>
+                                            <path d="M2,1.5 L11.5,1.5" id="Line" stroke="#FFFFFF" stroke-linecap="square"></path>
+                                            <path d="M2,17.5 L11.5,17.5" id="Line-Copy-17" stroke="#FFFFFF" stroke-linecap="square"></path>
+                                            <rect id="Rectangle-7" fill-opacity="0.3" fill="#FFFFFF" x="2" y="2" width="10" height="15"></rect>
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
