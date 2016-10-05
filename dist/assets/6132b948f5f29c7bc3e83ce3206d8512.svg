@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="17px" height="21px" viewBox="0 0 17 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>752546C6-767E-4EE7-9C65-764BC0A85491</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="21" height="17"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="21" height="17" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <rect id="path-3" x="2" y="2" width="8" height="13"></rect>
+        <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="8" height="13" fill="white">
+            <use xlink:href="#path-3"></use>
+        </mask>
+        <rect id="path-5" x="11" y="2" width="8" height="13"></rect>
+        <mask id="mask-6" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="8" height="13" fill="white">
+            <use xlink:href="#path-5"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-175.000000, -199.000000)">
+            <g id="flex:-column-sub-buttons" transform="translate(45.000000, 199.000000)">
+                <g id="Selector-button" transform="translate(130.000000, 0.000000)">
+                    <g id="icon" transform="translate(8.500000, 10.500000) rotate(-90.000000) translate(-8.500000, -10.500000) translate(-2.000000, 2.000000)">
+                        <use id="Rectangle-130" stroke="#FFFFFF" mask="url(#mask-2)" stroke-width="2" xlink:href="#path-1"></use>
+                        <use id="Rectangle-127" stroke="#E2E3E4" mask="url(#mask-4)" stroke-width="2" fill-opacity="0.7" fill="#FFFFFF" xlink:href="#path-3"></use>
+                        <use id="Rectangle-127-Copy" stroke="#E2E3E4" mask="url(#mask-6)" stroke-width="2" fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-5"></use>
+                        <polyline id="right-arrow" fill="#505C60" transform="translate(6.669905, 8.550000) rotate(-360.000000) translate(-6.669905, -8.550000) " points="5.60589389 7.95833329 7.72406053 5.83424999 6.88981054 5 3.33981059 8.54999995 6.88981054 12.0999999 7.72406053 11.2657499 5.60589389 9.14166661 10 9.14166668 10 7.95833343"></polyline>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
