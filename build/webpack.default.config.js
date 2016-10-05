@@ -1,7 +1,9 @@
 const webpack = require('webpack'),
 path = require('path')
 
-let appDir = path.resolve(__dirname, '..', 'src', 'app')
+let appDir = path.resolve(__dirname, '..', 'src', 'app'),
+distDir = path.resolve(__dirname, '..', 'dist')
+
 module.exports = {
     entry: {
         unobuilder: path.join(appDir, 'main.js'),
@@ -9,8 +11,8 @@ module.exports = {
     },
 
     output: {
-        path: '../app',
-        publicPath: 'app/',
+        path: distDir,
+        publicPath: 'dist/',
         filename: "[name].js"
     },
 
@@ -57,7 +59,7 @@ module.exports = {
             }
         ]
     },
-    
+
     babel: {
         presets: ['es2015'],
         plugins: ['transform-runtime']

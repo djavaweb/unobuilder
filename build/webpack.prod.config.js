@@ -1,5 +1,5 @@
 const config = require('./webpack.default.config'),
-WebpackShellPlugin = require('./webpack.shell.js')
+webpack = require('webpack')
 
 module.exports = config
 module.exports.plugins = [

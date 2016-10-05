@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="24px" height="12px" viewBox="0 0 24 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>B011BA4C-8C96-4EC7-9C02-58D1AE8C1B68</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <rect id="path-1" x="5" y="2" width="6" height="10"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="6" height="10" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <rect id="path-3" x="13" y="0" width="6" height="10"></rect>
+        <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="6" height="10" fill="white">
+            <use xlink:href="#path-3"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-168.000000, -71.000000)">
+            <g id="flex:-row-sub-buttons" transform="translate(45.000000, 5.000000)">
+                <g id="align:baseline" transform="translate(120.000000, 55.000000)">
+                    <g id="icon" transform="translate(3.000000, 11.000000)">
+                        <g id="shape" transform="translate(12.000000, 6.000000) rotate(-180.000000) translate(-12.000000, -6.000000) ">
+                            <use id="Rectangle-99" stroke-opacity="0.7" stroke="#FFFFFF" mask="url(#mask-2)" stroke-width="2" xlink:href="#path-1"></use>
+                            <rect id="Rectangle-176" fill-opacity="0.2" fill="#FFFFFF" x="14" y="1" width="4" height="7"></rect>
+                            <rect id="Rectangle-176-Copy" fill-opacity="0.7" fill="#FFFFFF" x="6" y="3" width="4" height="5"></rect>
+                            <use id="Rectangle-99-Copy" stroke-opacity="0.7" stroke="#FFFFFF" mask="url(#mask-4)" stroke-width="2" xlink:href="#path-3"></use>
+                            <rect id="Rectangle-86" fill-opacity="0.499433877" fill="#FFFFFF" x="19" y="7" width="5" height="1"></rect>
+                            <rect id="Rectangle-86-Copy" fill-opacity="0.499433877" fill="#FFFFFF" x="11" y="7" width="2" height="1"></rect>
+                            <rect id="Rectangle-86-Copy-2" fill-opacity="0.499433877" fill="#FFFFFF" x="0" y="7" width="5" height="1"></rect>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

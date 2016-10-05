@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="22px" height="15px" viewBox="0 0 22 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>C9550EAC-CE3F-41CE-B308-B14A76D647EA</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <rect id="path-1" x="4" y="2" width="6" height="6"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="6" height="6" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <rect id="path-3" x="12" y="2" width="6" height="6"></rect>
+        <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="6" height="6" fill="white">
+            <use xlink:href="#path-3"></use>
+        </mask>
+        <rect id="path-5" x="4" y="9" width="6" height="6"></rect>
+        <mask id="mask-6" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="6" height="6" fill="white">
+            <use xlink:href="#path-5"></use>
+        </mask>
+        <rect id="path-7" x="12" y="9" width="6" height="6"></rect>
+        <mask id="mask-8" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="6" height="6" fill="white">
+            <use xlink:href="#path-7"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icons" transform="translate(-94.000000, -493.000000)" fill="#FFFFFF">
+            <g id="row:-reverse-wrap-children-sub-buttons" transform="translate(19.000000, 465.000000)">
+                <g id="align-rows(rev):-end" transform="translate(71.000000, 23.000000)">
+                    <g id="icon" transform="translate(15.000000, 12.500000) rotate(-180.000000) translate(-15.000000, -12.500000) translate(4.000000, 5.000000)">
+                        <g id="shape" transform="translate(11.000000, 7.500000) rotate(-180.000000) translate(-11.000000, -7.500000) ">
+                            <use id="Rectangle-99" stroke-opacity="0.7" stroke="#FFFFFF" mask="url(#mask-2)" stroke-width="2" fill-opacity="0.7" xlink:href="#path-1"></use>
+                            <use id="Rectangle-99-Copy" stroke-opacity="0.7" stroke="#FFFFFF" mask="url(#mask-4)" stroke-width="2" fill-opacity="0.7" xlink:href="#path-3"></use>
+                            <use id="Rectangle-99-Copy-5" stroke-opacity="0.7" stroke="#FFFFFF" mask="url(#mask-6)" stroke-width="2" fill-opacity="0.2" xlink:href="#path-5"></use>
+                            <use id="Rectangle-99-Copy-4" stroke-opacity="0.7" stroke="#FFFFFF" mask="url(#mask-8)" stroke-width="2" fill-opacity="0.2" xlink:href="#path-7"></use>
+                            <rect id="Rectangle-101" fill-opacity="0.502717391" transform="translate(11.000000, 0.500000) rotate(-270.000000) translate(-11.000000, -0.500000) " x="10.5" y="-10.5" width="1" height="22"></rect>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
