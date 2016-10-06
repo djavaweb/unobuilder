@@ -12,43 +12,43 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
         dl
             dt.top-resize(
             v-if="!isPositionValue('relative')",
-            @mousedown="dragStartPosition($event, 'position', 'top')",
+            @mousedown="dragStart($event, 'position', 'top')",
             @mouseover.self="over('position', 'top')")
 
             dt.top(
             v-if="!isPositionValue('relative')",
             v-html="positionTop",
-            @mousedown="dragStartPosition($event, 'position', 'top')")
+            @mousedown="dragStart($event, 'position', 'top')")
 
             dt.right-resize(
             v-if="!isPositionValue('relative')",
-            @mousedown="dragStartPosition($event, 'position', 'right')",
+            @mousedown="dragStart($event, 'position', 'right')",
             @mouseover.self="over('position', 'right')")
 
             dt.right(
             v-if="!isPositionValue('relative')",
             v-html="positionRight",
-            @mousedown="dragStartPosition($event, 'position', 'right')")
+            @mousedown="dragStart($event, 'position', 'right')")
 
             dt.bottom-resize(
             v-if="!isPositionValue('relative')",
-            @mousedown="dragStartPosition($event, 'position', 'bottom')",
+            @mousedown="dragStart($event, 'position', 'bottom')",
             @mouseover.self="over('position', 'bottom')")
 
             dt.bottom(
             v-if="!isPositionValue('relative')",
             v-html="positionBottom",
-            @mousedown="dragStartPosition($event, 'position', 'bottom')")
+            @mousedown="dragStart($event, 'position', 'bottom')")
 
             dt.left-resize(
             v-if="!isPositionValue('relative')",
-            @mousedown="dragStartPosition($event, 'position', 'left')",
+            @mousedown="dragStart($event, 'position', 'left')",
             @mouseover.self="over('position', 'left')")
 
             dt.left(
             v-if="!isPositionValue('relative')",
             v-html="positionLeft",
-            @mousedown="dragStartPosition($event, 'position', 'left')")
+            @mousedown="dragStart($event, 'position', 'left')")
 
         // Margin
         .inner
@@ -59,23 +59,23 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     a(@click="") Margin
                 dl
                     dt.top-resize(
-                    @mousedown="dragStartPosition($event, 'margin', 'top')",
+                    @mousedown="dragStart($event, 'margin', 'top')",
                     @mouseover.self="over('margin', 'top')")
 
                     dt.top(
                     v-html="marginTop",
-                    @mousedown="dragStartPosition($event, 'margin', 'top')")
+                    @mousedown="dragStart($event, 'margin', 'top')")
 
                     dt.right-resize(
-                    @mousedown="dragStartPosition($event, 'margin', 'right')",
+                    @mousedown="dragStart($event, 'margin', 'right')",
                     @mouseover.self="over('margin', 'right')")
 
                     dt.right(
                     v-html="marginRight",
-                    @mousedown="dragStartPosition($event, 'margin', 'right')")
+                    @mousedown="dragStart($event, 'margin', 'right')")
 
                     dt.bottom-resize(
-                    @mousedown="dragStartPosition($event, 'margin', 'bottom')",
+                    @mousedown="dragStart($event, 'margin', 'bottom')",
                     @mouseover.self="over('margin', 'bottom')")
 
                     dt.bottom(
@@ -83,12 +83,12 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mousedown="over($event, 'margin', 'bottom')")
 
                     dt.left-resize(
-                    @mousedown="dragStartPosition($event, 'margin', 'left')",
+                    @mousedown="dragStart($event, 'margin', 'left')",
                     @mouseover.self="over('margin', 'left')")
 
                     dt.left(
                     v-html="marginLeft",
-                    @mousedown="dragStartPosition($event, 'margin', 'left')")
+                    @mousedown="dragStart($event, 'margin', 'left')")
 
                 .inner
                     .box-outline.border(
@@ -104,36 +104,36 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
 
                         dl
                             dt.top-resize(
-                            @mousedown="dragStartPosition($event, 'border', 'top')",
+                            @mousedown="dragStart($event, 'border', 'top')",
                             @mouseover.self="over('border', 'top')")
 
                             dt.top(
                             v-html="borderTop",
-                            @mousedown="dragStartPosition($event, 'border', 'top')")
+                            @mousedown="dragStart($event, 'border', 'top')")
 
                             dt.right-resize.border(
-                            @mousedown="dragStartPosition($event, 'border', 'right')",
+                            @mousedown="dragStart($event, 'border', 'right')",
                             @mouseover.self="over('border', 'right')")
 
                             dt.right(
                             v-html="borderRight",
-                            @mousedown="dragStartPosition($event, 'border', 'right')")
+                            @mousedown="dragStart($event, 'border', 'right')")
 
                             dt.bottom-resize(
-                            @mousedown="dragStartPosition($event, 'border', 'bottom')",
+                            @mousedown="dragStart($event, 'border', 'bottom')",
                             @mouseover.self="over('border', 'bottom')")
 
                             dt.bottom(
                             v-html="borderBottom",
-                            @mousedown="dragStartPosition($event, 'border', 'bottom')")
+                            @mousedown="dragStart($event, 'border', 'bottom')")
 
                             dt.left-resize.border(
-                            @mousedown="dragStartPosition($event, 'border', 'left')",
+                            @mousedown="dragStart($event, 'border', 'left')",
                             @mouseover.self="over('border', 'left')")
 
                             dt.left(
                             v-html="borderLeft",
-                            @mousedown="dragStartPosition($event, 'border', 'left')")
+                            @mousedown="dragStart($event, 'border', 'left')")
 
                         .inner
                             .box-outline.padding(
@@ -144,28 +144,28 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
 
                                 dl
                                     dt.top-resize.padding(
-                                    @mousedown="dragStartPosition($event, 'padding', 'top')", @mouseover.self="over('padding', 'top')")
+                                    @mousedown="dragStart($event, 'padding', 'top')", @mouseover.self="over('padding', 'top')")
 
                                     dt.top(
                                     v-html="paddingTop",
-                                    @mousedown="dragStartPosition($event, 'padding', 'top')")
+                                    @mousedown="dragStart($event, 'padding', 'top')")
 
                                     dt.right-resize.padding(
-                                    @mousedown="dragStartPosition($event, 'padding', 'right')" @mouseover.self="over('padding', 'right')")
+                                    @mousedown="dragStart($event, 'padding', 'right')" @mouseover.self="over('padding', 'right')")
 
                                     dt.right(
                                     v-html="paddingRight",
-                                    @mousedown="dragStartPosition($event, 'padding', 'right')")
+                                    @mousedown="dragStart($event, 'padding', 'right')")
 
                                     dt.bottom-resize.padding(
-                                    @mousedown="dragStartPosition($event, 'padding', 'bottom')" @mouseover.self="over('padding', 'bottom')")
+                                    @mousedown="dragStart($event, 'padding', 'bottom')" @mouseover.self="over('padding', 'bottom')")
 
                                     dt.bottom(
                                     v-html="paddingBottom",
-                                    @mousedown="dragStartPosition($event, 'padding', 'bottom')")
+                                    @mousedown="dragStart($event, 'padding', 'bottom')")
 
                                     dt.left-resize.padding(
-                                    @mousedown="dragStartPosition($event, 'padding', 'left')",
+                                    @mousedown="dragStart($event, 'padding', 'left')",
                                     @mouseover.self="over('padding', 'left')")
 
                                     dt.left(
@@ -182,7 +182,14 @@ export default {
     data () {
         return {
             mouseState: '',
-            dragState: false,
+            dragState: {
+                y: 0,
+                x: 0,
+                move: false,
+                layout: '',
+                direction: '',
+                initialValue: 0
+            },
             overOutline: {
                 position: {
                     hover: false,
@@ -283,10 +290,16 @@ export default {
          * Margin top value
          * @return {String}
          */
-        marginTop () {
-            let marginTop = this.getMarginProp('top')
-            if (marginTop) {
-                return marginTop.value + marginTop.unit
+        marginTop: {
+            get () {
+                let marginTop = this.getMarginProp('top')
+                if (marginTop) {
+                    return marginTop.value + marginTop.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp('top', val)
             }
         },
 
@@ -294,10 +307,16 @@ export default {
          * Margin right value
          * @return {String}
          */
-        marginRight () {
-            let marginRight = this.getMarginProp('right')
-            if (marginRight) {
-                return marginRight.value + ' ' + marginRight.unit
+        marginRight: {
+            get () {
+                let marginRight = this.getMarginProp('right')
+                if (marginRight) {
+                    return marginRight.value + ' ' + marginRight.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp('right', val)
             }
         },
 
@@ -305,10 +324,16 @@ export default {
          * Margin bottom value
          * @return {String}
          */
-        marginBottom () {
-            let marginBottom = this.getMarginProp('bottom')
-            if (marginBottom) {
-                return marginBottom.value + marginBottom.unit
+        marginBottom: {
+            get () {
+                let marginBottom = this.getMarginProp('bottom')
+                if (marginBottom) {
+                    return marginBottom.value + marginBottom.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp('bottom', val)
             }
         },
 
@@ -316,10 +341,16 @@ export default {
          * Margin left value
          * @return {String}
          */
-        marginLeft () {
-            let marginLeft = this.getMarginProp('left')
-            if (marginLeft) {
-                return marginLeft.value + ' ' + marginLeft.unit
+        marginLeft: {
+            get () {
+                let marginLeft = this.getMarginProp('left')
+                if (marginLeft) {
+                    return marginLeft.value + ' ' + marginLeft.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp('left', val)
             }
         },
 
@@ -341,10 +372,16 @@ export default {
          * Border top value
          * @return {String}
          */
-        borderTop () {
-            let borderTop = this.getMarginProp('top')
-            if (borderTop) {
-                return borderTop.value + borderTop.unit
+        borderTop: {
+            get () {
+                let borderTop = this.getMarginProp('top')
+                if (borderTop) {
+                    return borderTop.value + borderTop.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp('top', val)
             }
         },
 
@@ -352,10 +389,16 @@ export default {
          * Border right value
          * @return {String}
          */
-        borderRight () {
-            let borderRight = this.getMarginProp('right')
-            if (borderRight) {
-                return borderRight.value + ' ' + borderRight.unit
+        borderRight: {
+            get () {
+                let borderRight = this.getMarginProp('right')
+                if (borderRight) {
+                    return borderRight.value + ' ' + borderRight.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp('right', val)
             }
         },
 
@@ -363,10 +406,16 @@ export default {
          * Border bottom value
          * @return {String}
          */
-        borderBottom () {
-            let borderBottom = this.getMarginProp('bottom')
-            if (borderBottom) {
-                return borderBottom.value + borderBottom.unit
+        borderBottom: {
+            get () {
+                let borderBottom = this.getMarginProp('bottom')
+                if (borderBottom) {
+                    return borderBottom.value + borderBottom.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp('bottom', val)
             }
         },
 
@@ -374,10 +423,16 @@ export default {
          * Border left value
          * @return {String}
          */
-        borderLeft () {
-            let borderLeft = this.getMarginProp('left')
-            if (borderLeft) {
-                return borderLeft.value + ' ' + borderLeft.unit
+        borderLeft: {
+            get () {
+               let borderLeft = this.getMarginProp('left')
+               if (borderLeft) {
+                   return borderLeft.value + ' ' + borderLeft.unit
+               }
+            },
+
+            set (val) {
+                this.setBorderProp('left', val)
             }
         },
 
@@ -399,10 +454,16 @@ export default {
          * Padding top value
          * @return {String}
          */
-        paddingTop () {
-            let paddingTop = this.getMarginProp('top')
-            if (paddingTop) {
-                return paddingTop.value + paddingTop.unit
+        paddingTop: {
+            get () {
+                let paddingTop = this.getMarginProp('top')
+                if (paddingTop) {
+                    return paddingTop.value + paddingTop.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp('top', val)
             }
         },
 
@@ -410,10 +471,16 @@ export default {
          * Padding right value
          * @return {String}
          */
-        paddingRight () {
-            let paddingRight = this.getMarginProp('right')
-            if (paddingRight) {
-                return paddingRight.value + ' ' + paddingRight.unit
+        paddingRight: {
+            get () {
+                let paddingRight = this.getMarginProp('right')
+                if (paddingRight) {
+                    return paddingRight.value + ' ' + paddingRight.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp('right', val)
             }
         },
 
@@ -421,10 +488,16 @@ export default {
          * Padding bottom value
          * @return {String}
          */
-        paddingBottom () {
-            let paddingBottom = this.getMarginProp('bottom')
-            if (paddingBottom) {
-                return paddingBottom.value + paddingBottom.unit
+        paddingBottom: {
+            get () {
+                let paddingBottom = this.getMarginProp('bottom')
+                if (paddingBottom) {
+                    return paddingBottom.value + paddingBottom.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp('bottom', val)
             }
         },
 
@@ -432,10 +505,16 @@ export default {
          * Padding left value
          * @return {String}
          */
-        paddingLeft () {
-            let paddingLeft = this.getMarginProp('left')
-            if (paddingLeft) {
-                return paddingLeft.value + ' ' + paddingLeft.unit
+        paddingLeft: {
+            get () {
+                let paddingLeft = this.getMarginProp('left')
+                if (paddingLeft) {
+                    return paddingLeft.value + ' ' + paddingLeft.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp('left', val)
             }
         },
 
@@ -516,6 +595,16 @@ export default {
         },
 
         /**
+         * Set margin properties
+         * @param {String} key
+         * @param {String} value
+         */
+        setMarginProp (key, value) {
+            let propKey = 'margin' + utils.capitalize(key)
+            this.$root.elementSelector().setProp(`${propKey}.value`, value, this.mouseState)
+        },
+
+        /**
          * Get border properties
          * @param  {String} value
          * @return {Object} [{value: Integer, unit: String}]
@@ -523,6 +612,16 @@ export default {
         getBorderProp (value) {
             let key = 'border' + utils.capitalize(value)
             return this.$root.elementSelector().getProp(`${key}`, this.mouseState)
+        },
+
+        /**
+         * Set border properties
+         * @param {String} key
+         * @param {String} value
+         */
+        setBorderProp (key, value) {
+            let propKey = 'border' + utils.capitalize(key)
+            this.$root.elementSelector().setProp(`${propKey}.value`, value, this.mouseState)
         },
 
         /**
@@ -536,13 +635,23 @@ export default {
         },
 
         /**
+         * Set padding properties
+         * @param {String} key
+         * @param {String} value
+         */
+        setPaddingProp (key, value) {
+            let propKey = 'padding' + utils.capitalize(key)
+            this.$root.elementSelector().setProp(`${propKey}.value`, value, this.mouseState)
+        },
+
+        /**
          * When mouse hovering layout
          * @param  {String} layout
          * @param  {String} direction
          * @return {void}
          */
         over (layout, direction = '') {
-            if (! this.dragState) {
+            if (! this.dragState.move) {
                 for (let item in this.overOutline) {
                     if (layout !== item) {
     					this.overOutline[item].hover = false
@@ -560,7 +669,7 @@ export default {
          * @return {void}
          */
         leave () {
-            if (! this.dragState) {
+            if (! this.dragState.move) {
                 for (let item in this.overOutline) {
                     this.overOutline[item].hover = false
                     this.overOutline[item].direction = ''
@@ -568,7 +677,121 @@ export default {
             }
         },
 
-        dragStartPosition () {},
+        /**
+         * Reset drag state
+         */
+        resetDragState () {
+            this.dragState = {
+                y: 0,
+                x: 0,
+                move: false,
+                layout: '',
+                direction: '',
+                initialValue: 0
+            }
+        },
+
+        /**
+         * Start drag state
+         * @return {void}
+         */
+        dragStart (event, layout, direction) {
+            let value = this[layout + utils.capitalize(direction)].replace('px', '')
+            value = parseInt(value)
+
+            // Start dragging
+			this.dragState.x = event.pageX
+			this.dragState.y = event.pageY
+            this.dragState.layout = layout
+            this.dragState.direction = direction
+            this.dragState.initialValue = value
+            utils.addEvent(document, 'mousemove', this.dragMove, false)
+			utils.addEvent(document, 'mouseup', this.dragEnd, false)
+        },
+
+        /**
+         * Dragging
+         * @return {void}
+         */
+        dragMove (event) {
+            let x, y
+
+            // Border and Padding value must larger than zero
+			const fixValue = () => {
+				x += this.dragState.initialValue
+				y += this.dragState.initialValue
+
+				if (['border', 'padding'].includes(this.dragState.layout)) {
+					if (x<0) {
+						x = 0
+					}
+
+					if (y<0) {
+						y = 0
+					}
+				}
+			}
+
+
+            // Get y coords by decreasing from start coords
+			if (this.dragState.y) {
+				y = parseInt((this.dragState.y - event.pageY)/2)
+			}
+
+			// Get x coords by decreasing from start coords
+			if (this.dragState.x) {
+				x = parseInt((this.dragState.x - event.pageX)/2)
+			}
+
+
+            // Tell that i'm on draggin'
+            this.dragState.move = true
+
+            // If drag direction left, flip x
+            if (this.dragState.direction === 'left') {
+				x = -x
+			}
+
+
+            // If it's on shift mode
+            if (1 === 2) {
+
+            } else {
+                // If drag direction is top or bottom, flip y
+                if (['top', 'bottom'].includes(this.dragState.direction)) {
+                	y = -y
+                }
+
+                // fix value
+                fixValue()
+
+                // Set value
+                let propKey = this.dragState.layout + utils.capitalize(this.dragState.direction)
+                if (['top', 'bottom'].includes(this.dragState.direction)) {
+                	this[propKey] = y
+                } else {
+                	this[propKey] = x
+                }
+            }
+        },
+
+        /**
+         * Drag state ended
+         * @return {void}
+         */
+        dragEnd (event) {
+            // If it's not moving at all show popup
+            if (this.dragState.x === event.pageX &&
+                this.dragState.y === event.pageY &&
+                ! this.dragState.move) {
+				// popup
+			}
+
+            // Stop dragging
+            this.resetDragState()
+            utils.removeEvent(document, 'mousemove', this.dragMove, false)
+			utils.removeEvent(document, 'mouseup', this.dragEnd, false)
+        }
     }
 }
 </script>
