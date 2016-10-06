@@ -2,6 +2,7 @@
 accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
     // Position
     .box-outline(
+    :class="positionClass"
     @mouseover.self="over('position')",
     @mouseleave="leave('position')")
         label
@@ -51,7 +52,9 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
 
         // Margin
         .inner
-            .box-outline.margin(@mouseover.self="over('margin')")
+            .box-outline.margin(
+            :class="marginClass",
+            @mouseover.self="over('margin')")
                 label
                     a(@click="") Margin
                 dl
@@ -88,7 +91,9 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mousedown="dragStartPosition($event, 'margin', 'left')")
 
                 .inner
-                    .box-outline.border(@mouseover.self="over('border')")
+                    .box-outline.border(
+                    :class="borderClass",
+                    @mouseover.self="over('border')")
                         label
                             a(@click="") Border
 
@@ -131,7 +136,9 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mousedown="dragStartPosition($event, 'border', 'left')")
 
                         .inner
-                            .box-outline.padding(@mouseover.self="over('padding')")
+                            .box-outline.padding(
+                            :class="paddingClass",
+                            @mouseover.self="over('padding')")
                                 label
                                     a(@click="") Padding
 
@@ -174,15 +181,42 @@ export default {
     components: {accordionItem},
     data () {
         return {
-            mouseState: 'none'
+            mouseState: 'none',
+            dragState: false,
+            overOutline: {
+                position: {
+                    hover: false,
+                    direction: ''
+                },
+                margin: {
+                    hover: false,
+                    direction: ''
+                },
+                border: {
+                    hover: false,
+                    direction: ''
+                },
+                padding: {
+                    hover: false,
+                    direction: ''
+                }
+            }
         }
     },
 
     computed: {
+        /**
+         * Position value
+         * @return {String}
+         */
         positionValue () {
             return this.getPositionProp('value')
         },
 
+        /**
+         * Position top value based on settings (absolute|fixed)
+         * @return {String}
+         */
         positionTop () {
             if (this.positionValue !== 'relative') {
                 let positionTop = this.getPositionProp(`settings.${this.positionValue}.top`)
@@ -192,6 +226,10 @@ export default {
             }
         },
 
+        /**
+         * Position right value based on settings (absolute|fixed)
+         * @return {String}
+         */
         positionRight () {
             if (this.positionValue !== 'relative') {
                 let positionRight = this.getPositionProp(`settings.${this.positionValue}.right`)
@@ -201,6 +239,10 @@ export default {
             }
         },
 
+        /**
+         * Position bottom value based on settings (absolute|fixed)
+         * @return {String}
+         */
         positionBottom () {
             if (this.positionValue !== 'relative') {
                 let positionBottom = this.getPositionProp(`settings.${this.positionValue}.bottom`)
@@ -210,6 +252,10 @@ export default {
             }
         },
 
+        /**
+         * Position left value based on settings (absolute|fixed)
+         * @return {String}
+         */
         positionLeft () {
             if (this.positionValue !== 'relative') {
                 let positionLeft = this.getPositionProp(`settings.${this.positionValue}.left`)
@@ -219,6 +265,24 @@ export default {
             }
         },
 
+        /**
+         * Position class
+         * @return {Array}
+         */
+        positionClass () {
+            let klass = []
+
+            if (this.overOutline.position.hover) {
+                klass.push('over')
+            }
+
+            return klass
+        },
+
+        /**
+         * Margin top value
+         * @return {String}
+         */
         marginTop () {
             let marginTop = this.getMarginProp('top')
             if (marginTop) {
@@ -226,6 +290,10 @@ export default {
             }
         },
 
+        /**
+         * Margin right value
+         * @return {String}
+         */
         marginRight () {
             let marginRight = this.getMarginProp('right')
             if (marginRight) {
@@ -233,6 +301,10 @@ export default {
             }
         },
 
+        /**
+         * Margin bottom value
+         * @return {String}
+         */
         marginBottom () {
             let marginBottom = this.getMarginProp('bottom')
             if (marginBottom) {
@@ -240,6 +312,10 @@ export default {
             }
         },
 
+        /**
+         * Margin left value
+         * @return {String}
+         */
         marginLeft () {
             let marginLeft = this.getMarginProp('left')
             if (marginLeft) {
@@ -247,6 +323,24 @@ export default {
             }
         },
 
+        /**
+         * Margin class
+         * @return {Array}
+         */
+        marginClass () {
+            let klass = []
+
+            if (this.overOutline.margin.hover) {
+                klass.push('over')
+            }
+
+            return klass
+        },
+
+        /**
+         * Border top value
+         * @return {String}
+         */
         borderTop () {
             let borderTop = this.getMarginProp('top')
             if (borderTop) {
@@ -254,6 +348,10 @@ export default {
             }
         },
 
+        /**
+         * Border right value
+         * @return {String}
+         */
         borderRight () {
             let borderRight = this.getMarginProp('right')
             if (borderRight) {
@@ -261,6 +359,10 @@ export default {
             }
         },
 
+        /**
+         * Border bottom value
+         * @return {String}
+         */
         borderBottom () {
             let borderBottom = this.getMarginProp('bottom')
             if (borderBottom) {
@@ -268,6 +370,10 @@ export default {
             }
         },
 
+        /**
+         * Border left value
+         * @return {String}
+         */
         borderLeft () {
             let borderLeft = this.getMarginProp('left')
             if (borderLeft) {
@@ -275,6 +381,24 @@ export default {
             }
         },
 
+        /**
+         * Border class
+         * @return {Array}
+         */
+        borderClass () {
+            let klass = []
+
+            if (this.overOutline.border.hover) {
+                klass.push('over')
+            }
+
+            return klass
+        },
+
+        /**
+         * Padding top value
+         * @return {String}
+         */
         paddingTop () {
             let paddingTop = this.getMarginProp('top')
             if (paddingTop) {
@@ -282,6 +406,10 @@ export default {
             }
         },
 
+        /**
+         * Padding right value
+         * @return {String}
+         */
         paddingRight () {
             let paddingRight = this.getMarginProp('right')
             if (paddingRight) {
@@ -289,6 +417,10 @@ export default {
             }
         },
 
+        /**
+         * Padding bottom value
+         * @return {String}
+         */
         paddingBottom () {
             let paddingBottom = this.getMarginProp('bottom')
             if (paddingBottom) {
@@ -296,27 +428,67 @@ export default {
             }
         },
 
+        /**
+         * Padding left value
+         * @return {String}
+         */
         paddingLeft () {
             let paddingLeft = this.getMarginProp('left')
             if (paddingLeft) {
                 return paddingLeft.value + ' ' + paddingLeft.unit
             }
+        },
+
+        /**
+         * Padding class
+         * @return {Array}
+         */
+        paddingClass () {
+            let klass = []
+
+            if (this.overOutline.padding.hover) {
+                klass.push('over')
+            }
+
+            return klass
         }
     },
 
     methods: {
+        /**
+         * Get position properties
+         * @param  {String} value
+         * @return {String}
+         */
         getPositionProp (value) {
             return this.$root.elementSelector().getProp(`position.${value}`, this.mouseState)
         },
 
+        /**
+         * Set position properties
+         * @param {String} key
+         * @param {String} value
+         */
         setPositionProp (key, value) {
             this.$root.elementSelector().setProp(`position.${key}`, value, this.mouseState)
         },
 
+        /**
+         * Check position value
+         * @param  {String} position
+         * @return {Boolean}
+         */
         isPositionValue (position) {
             return this.positionValue === position
         },
 
+        /**
+         * Switch position value
+         * from relative to absolute
+         * from absolute to fixed
+         * from fixed to relative
+         * @return {void}
+         */
         switchPosition () {
             switch (this.positionValue) {
                 case 'relative':
@@ -333,24 +505,70 @@ export default {
             }
         },
 
+        /**
+         * Get margin properties
+         * @param  {String} value
+         * @return {Object} [{value: Integer, unit: String}]
+         */
         getMarginProp (value) {
             let key = 'margin' + utils.capitalize(value)
             return this.$root.elementSelector().getProp(`${key}`, this.mouseState)
         },
 
+        /**
+         * Get border properties
+         * @param  {String} value
+         * @return {Object} [{value: Integer, unit: String}]
+         */
         getBorderProp (value) {
             let key = 'border' + utils.capitalize(value)
             return this.$root.elementSelector().getProp(`${key}`, this.mouseState)
         },
 
+        /**
+         * Get padding properties
+         * @param  {String} value
+         * @return {Object} [{value: Integer, unit: String}]
+         */
         getPaddingProp (value) {
             let key = 'padding' + utils.capitalize(value)
             return this.$root.elementSelector().getProp(`${key}`, this.mouseState)
         },
 
+        /**
+         * When mouse hovering layout
+         * @param  {String} layout
+         * @param  {String} direction
+         * @return {void}
+         */
+        over (layout, direction = '') {
+            if (! this.dragState) {
+                for (let item in this.overOutline) {
+                    if (layout !== item) {
+    					this.overOutline[item].hover = false
+                        this.overOutline[item].direction = ''
+    				} else {
+                        this.overOutline[layout].hover = true
+                        this.overOutline[layout].direction = direction
+                    }
+                }
+            }
+        },
+
+        /**
+         * When mouse leave layout
+         * @return {void}
+         */
+        leave () {
+            if (! this.dragState) {
+                for (let item in this.overOutline) {
+                    this.overOutline[item].hover = false
+                    this.overOutline[item].direction = ''
+                }
+            }
+        },
+
         dragStartPosition () {},
-        over () {},
-        leave () {}
     }
 }
 </script>
