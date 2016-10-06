@@ -181,7 +181,7 @@ export default {
     components: {accordionItem},
     data () {
         return {
-            mouseState: 'none',
+            mouseState: '',
             dragState: false,
             overOutline: {
                 position: {
