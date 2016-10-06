@@ -224,12 +224,18 @@ export default {
          * Position top value based on settings (absolute|fixed)
          * @return {String}
          */
-        positionTop () {
-            if (this.positionValue !== 'relative') {
-                let positionTop = this.getPositionProp(`settings.${this.positionValue}.top`)
-                if (positionTop) {
-                    return positionTop.value + positionTop.unit
+        positionTop: {
+            get () {
+                if (this.positionValue !== 'relative') {
+                    let positionTop = this.getPositionProp(`settings.${this.positionValue}.top`)
+                    if (positionTop) {
+                        return positionTop.value + positionTop.unit
+                    }
                 }
+            },
+
+            set (val) {
+                this.setPositionProp(`settings.${this.positionValue}.top.value`, val)
             }
         },
 
@@ -237,12 +243,18 @@ export default {
          * Position right value based on settings (absolute|fixed)
          * @return {String}
          */
-        positionRight () {
-            if (this.positionValue !== 'relative') {
-                let positionRight = this.getPositionProp(`settings.${this.positionValue}.right`)
-                if (positionRight) {
-                    return positionRight.value + positionRight.unit
+        positionRight: {
+            get () {
+                if (this.positionValue !== 'relative') {
+                    let positionRight = this.getPositionProp(`settings.${this.positionValue}.right`)
+                    if (positionRight) {
+                        return positionRight.value + positionRight.unit
+                    }
                 }
+            },
+
+            set (val) {
+                this.setPositionProp(`settings.${this.positionValue}.right.value`, val)
             }
         },
 
@@ -250,12 +262,18 @@ export default {
          * Position bottom value based on settings (absolute|fixed)
          * @return {String}
          */
-        positionBottom () {
-            if (this.positionValue !== 'relative') {
-                let positionBottom = this.getPositionProp(`settings.${this.positionValue}.bottom`)
-                if (positionBottom) {
-                    return positionBottom.value + positionBottom.unit
+        positionBottom: {
+            get () {
+                if (this.positionValue !== 'relative') {
+                    let positionBottom = this.getPositionProp(`settings.${this.positionValue}.bottom`)
+                    if (positionBottom) {
+                        return positionBottom.value + positionBottom.unit
+                    }
                 }
+            },
+
+            set (val) {
+                this.setPositionProp(`settings.${this.positionValue}.bottom.value`, val)
             }
         },
 
@@ -263,12 +281,18 @@ export default {
          * Position left value based on settings (absolute|fixed)
          * @return {String}
          */
-        positionLeft () {
-            if (this.positionValue !== 'relative') {
-                let positionLeft = this.getPositionProp(`settings.${this.positionValue}.left`)
-                if (positionLeft) {
-                    return positionLeft.value + positionLeft.unit
+        positionLeft: {
+            get () {
+                if (this.positionValue !== 'relative') {
+                    let positionLeft = this.getPositionProp(`settings.${this.positionValue}.left`)
+                    if (positionLeft) {
+                        return positionLeft.value + positionLeft.unit
+                    }
                 }
+            },
+
+            set (val) {
+                this.setPositionProp(`settings.${this.positionValue}.left.value`, val)
             }
         },
 
@@ -374,7 +398,7 @@ export default {
          */
         borderTop: {
             get () {
-                let borderTop = this.getMarginProp('top')
+                let borderTop = this.getBorderProp('top')
                 if (borderTop) {
                     return borderTop.value + borderTop.unit
                 }
@@ -391,7 +415,7 @@ export default {
          */
         borderRight: {
             get () {
-                let borderRight = this.getMarginProp('right')
+                let borderRight = this.getBorderProp('right')
                 if (borderRight) {
                     return borderRight.value + ' ' + borderRight.unit
                 }
@@ -408,7 +432,7 @@ export default {
          */
         borderBottom: {
             get () {
-                let borderBottom = this.getMarginProp('bottom')
+                let borderBottom = this.getBorderProp('bottom')
                 if (borderBottom) {
                     return borderBottom.value + borderBottom.unit
                 }
@@ -425,7 +449,7 @@ export default {
          */
         borderLeft: {
             get () {
-               let borderLeft = this.getMarginProp('left')
+               let borderLeft = this.getBorderProp('left')
                if (borderLeft) {
                    return borderLeft.value + ' ' + borderLeft.unit
                }
@@ -456,7 +480,7 @@ export default {
          */
         paddingTop: {
             get () {
-                let paddingTop = this.getMarginProp('top')
+                let paddingTop = this.getPaddingProp('top')
                 if (paddingTop) {
                     return paddingTop.value + paddingTop.unit
                 }
@@ -473,7 +497,7 @@ export default {
          */
         paddingRight: {
             get () {
-                let paddingRight = this.getMarginProp('right')
+                let paddingRight = this.getPaddingProp('right')
                 if (paddingRight) {
                     return paddingRight.value + ' ' + paddingRight.unit
                 }
@@ -490,7 +514,7 @@ export default {
          */
         paddingBottom: {
             get () {
-                let paddingBottom = this.getMarginProp('bottom')
+                let paddingBottom = this.getPaddingProp('bottom')
                 if (paddingBottom) {
                     return paddingBottom.value + paddingBottom.unit
                 }
@@ -507,7 +531,7 @@ export default {
          */
         paddingLeft: {
             get () {
-                let paddingLeft = this.getMarginProp('left')
+                let paddingLeft = this.getPaddingProp('left')
                 if (paddingLeft) {
                     return paddingLeft.value + ' ' + paddingLeft.unit
                 }
