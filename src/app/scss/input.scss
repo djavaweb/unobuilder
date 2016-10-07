@@ -194,7 +194,7 @@ $assets_path: "../../assets";
 	        position: absolute;
 	        font-size: 11px;
 	        color: rgba(255, 255, 255, 0.7);
-			cursor: url('#{$assets_path}/cursor/up-down.cur') 12 12, row-resize !important;
+			cursor: url('#{$assets_path}/cursor/resize-vertical.cur') 12 12, ns-resize !important;
 	    }
 
 	    .increase {
