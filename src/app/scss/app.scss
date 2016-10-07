@@ -656,7 +656,7 @@ html, body, #app {
     }
 }
 
-.prop-position-outline {
+.box-outline {
     border: 1px dotted $warm-grey;
     top: 0;
     left: 0;
@@ -686,7 +686,8 @@ html, body, #app {
     }
 
     &.margin {
-        height: 130px;
+        height: 100%;
+        width: auto;
         border-style: dashed;
         background-color: $prop-bg-margin;
         &.updown {
@@ -704,7 +705,8 @@ html, body, #app {
     }
 
     &.border {
-        height: 85px;
+        height: 100%;
+        width: auto;
         border-style: solid;
         background-color: $prop-bg-border;
         &.updown {
@@ -722,7 +724,8 @@ html, body, #app {
     }
 
     &.padding {
-        height: 40px;
+        height: 100%;
+        width: auto;
         border-style: solid;
         background-color: $prop-bg-padding;
         label {
