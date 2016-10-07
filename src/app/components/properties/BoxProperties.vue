@@ -56,14 +56,14 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
             :class="marginClass",
             @mouseover.self="over('margin')")
                 label
-                    a(@click="") Margin
+                    a(@click="showPopup('margin', 'all')") Margin
                 dl
                     dt.top-resize(
                     @mousedown="dragStart($event, 'margin', 'top')",
                     @mouseover.self="over('margin', 'top')")
 
                     dt.top(
-                    v-html="marginTop",
+                    v-html="marginTop.string",
                     @mousedown="dragStart($event, 'margin', 'top')")
 
                     dt.right-resize(
@@ -71,7 +71,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mouseover.self="over('margin', 'right')")
 
                     dt.right(
-                    v-html="marginRight",
+                    v-html="marginRight.string",
                     @mousedown="dragStart($event, 'margin', 'right')")
 
                     dt.bottom-resize(
@@ -79,7 +79,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mouseover.self="over('margin', 'bottom')")
 
                     dt.bottom(
-                    v-html="marginBottom",
+                    v-html="marginBottom.string",
                     @mousedown="dragStart($event, 'margin', 'bottom')")
 
                     dt.left-resize(
@@ -87,7 +87,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mouseover.self="over('margin', 'left')")
 
                     dt.left(
-                    v-html="marginLeft",
+                    v-html="marginLeft.string",
                     @mousedown="dragStart($event, 'margin', 'left')")
 
                 .inner
@@ -187,7 +187,24 @@ v-if="popupState.margin.display")
             input-number(
             :value.sync="marginPopupValue",
             :unit.sync="marginPopupUnit",
-            :input-width="30",
+            :width="30",
+            :min="-1000",
+            :max="1000")
+    button(@click="hidePopup()") OK
+
+// Popup all margin
+popup.popup-right-panel(
+title="All Margin",
+:close="hidePopup",
+v-if="popupState.marginAll.display")
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Margin Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="marginAllValue",
+            :unit.sync="marginAllUnit",
+            :width="30",
             :min="-1000",
             :max="1000")
     button(@click="hidePopup()") OK
@@ -388,8 +405,13 @@ export default {
         marginTop: {
             get () {
                 let marginTop = this.getMarginProp('top')
-                if (marginTop) {
-                    return marginTop.value + marginTop.unit
+                if (! marginTop) {
+                    return {}
+                }
+
+                return {
+                    number: marginTop.value,
+                    string: marginTop.value + marginTop.unit
                 }
             },
 
@@ -405,8 +427,13 @@ export default {
         marginRight: {
             get () {
                 let marginRight = this.getMarginProp('right')
-                if (marginRight) {
-                    return marginRight.value + ' ' + marginRight.unit
+                if (! marginRight) {
+                    return {}
+                }
+
+                return {
+                    number: marginRight.value,
+                    string: marginRight.value + ' ' + marginRight.unit
                 }
             },
 
@@ -422,8 +449,13 @@ export default {
         marginBottom: {
             get () {
                 let marginBottom = this.getMarginProp('bottom')
-                if (marginBottom) {
-                    return marginBottom.value + marginBottom.unit
+                if (! marginBottom) {
+                    return {}
+                }
+
+                return {
+                    number: marginBottom.value,
+                    string: marginBottom.value + marginBottom.unit
                 }
             },
 
@@ -439,8 +471,13 @@ export default {
         marginLeft: {
             get () {
                 let marginLeft = this.getMarginProp('left')
-                if (marginLeft) {
-                    return marginLeft.value + ' ' + marginLeft.unit
+                if (! marginLeft) {
+                    return {}
+                }
+
+                return {
+                    number: marginLeft.value,
+                    string: marginLeft.value + ' ' + marginLeft.unit
                 }
             },
 
@@ -471,6 +508,61 @@ export default {
          * @return {String}
          */
         marginPopupUnit: {
+            get () {
+                let marginValue = this.getMarginProp(this.popupState.margin.direction)
+                if (marginValue) {
+                    return marginValue.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp(`${this.popupState.margin.direction}.unit`, val)
+            }
+        },
+
+        /**
+         * Margin popup value
+         * @return {String}
+         */
+        marginAllValue: {
+            get () {
+                let margin = [
+                    this.marginTop.number,
+                    this.marginRight.number,
+                    this.marginBottom.number,
+                    this.marginLeft.number
+                ]
+
+                // If it's already initialised
+                let value = 0
+                if (margin[0]) {
+                    for (let i in margin) {
+    					if (margin[i]>value) {
+    						value = margin[i]
+    					}
+    				}
+                }
+                return value
+            },
+
+            set (val) {
+                val = parseInt(val)
+                if (isNaN(val)) {
+                    val = 0
+                }
+
+                this.marginTop = val
+                this.marginRight = val
+                this.marginBottom = val
+                this.marginLeft = val
+            }
+        },
+
+        /**
+         * Margin popup unit
+         * @return {String}
+         */
+        marginAllUnit: {
             get () {
                 let marginValue = this.getMarginProp(this.popupState.margin.direction)
                 if (marginValue) {
@@ -864,7 +956,7 @@ export default {
          * @return {void}
          */
         dragStart (event, layout, direction) {
-            let value = this[layout + utils.capitalize(direction)].replace('px', '')
+            let value = this[layout + utils.capitalize(direction)].number
             value = parseInt(value)
 
             // Start dragging
@@ -961,12 +1053,26 @@ export default {
 			utils.removeEvent(document, 'mouseup', this.dragEnd, false)
         },
 
+        /**
+         * Display popup
+         * @param  {String} state State can be position|margin|border|padding
+         * @param  {String} direction top|bottom|left|right
+         * @return {void}
+         */
         showPopup (state, direction) {
+            if (direction === 'all') {
+                state = `${state}All`
+            }
+
             this.popupState[state].display = true
             this.popupState[state].direction = direction
             this.displayOverlay = true
         },
 
+        /**
+         * Hide popup
+         * @return {void}
+         */
         hidePopup () {
             for (let i in this.popupState) {
                 this.resetObject(this.popupState[i])
