@@ -45,10 +45,10 @@ accordion-item(title="Typography", :mouse-state.sync="mouseState", :advanced.syn
                             i.font-size
 
                     .uk-width-7-10
-                        number(:input-width="18",
+                        input-number(:width="18",
                         :value.sync="fontSize",
                         :unit.sync="fontSizeUnit",
-                        :min="0", label="")
+                        :min="0")
 
             .uk-width-2-6
                 .uk-grid.uk-grid-collapse
@@ -57,10 +57,10 @@ accordion-item(title="Typography", :mouse-state.sync="mouseState", :advanced.syn
                             .line-height
 
                     .uk-width-7-10
-                        number(:input-width="20",
+                        input-number(:width="20",
                         :value.sync="lineHeight",
                         :unit.sync="lineHeightUnit",
-                        :min="0" label="")
+                        :min="0")
     // End of font size
 
     // Font style
@@ -112,7 +112,10 @@ accordion-item(title="Typography", :mouse-state.sync="mouseState", :advanced.syn
                             i.letter-spacing
 
                     .uk-width-7-10
-                        number(:input-width="20", :value.sync="letterSpacing", :unit.sync="letterSpacingUnit", :min="-100", label="")
+                        input-number(:width="20",
+                        :value.sync="letterSpacing",
+                        :unit.sync="letterSpacingUnit",
+                        :min="-100")
     // End of font align
 // End of typography
 </template>
@@ -123,7 +126,7 @@ import multiSelect from 'vue-multiselect'
 import config from '../../config.js'
 import accordionItem from '../accordion/Item.vue'
 import accordionItemView from '../accordion/ItemView.vue'
-import number from '../form/Number.vue'
+import inputNumber from '../form/InputNumber.vue'
 import buttons from '../form/Buttons.vue'
 
 export default {
@@ -132,7 +135,7 @@ export default {
         accordionItem,
         accordionItemView,
         multiSelect,
-        number,
+        inputNumber,
         buttons
     },
 
