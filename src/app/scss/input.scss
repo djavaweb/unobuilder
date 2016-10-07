@@ -1,3 +1,7 @@
+$assets_path: "../../assets";
+
+@import "mixins.scss";
+
 .input {
 	&-align {
 		&-right {
@@ -190,6 +194,7 @@
 	        position: absolute;
 	        font-size: 11px;
 	        color: rgba(255, 255, 255, 0.7);
+			cursor: url('#{$assets_path}/cursor/up-down.cur') 12 12, row-resize !important;
 	    }
 
 	    .increase {
@@ -211,7 +216,10 @@
 }
 
 .multiselect {
-	min-height: auto !important
+	min-height: auto !important;
+	&.no-events {
+		@include no-pointer-events;
+	}
 }
 
 .multiselect_ {

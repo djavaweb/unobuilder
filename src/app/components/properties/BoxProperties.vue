@@ -184,10 +184,10 @@ v-if="popupState.margin.display")
         .uk-width-6-10
             label Margin Value
         .uk-width-4-10
-            number(
+            input-number(
             :value.sync="marginPopupValue",
-            unit="px",
-            :input-width="30",
+            :unit.sync="marginPopupUnit",
+            :width="30",
             :max="1000",
             label="")
 
@@ -210,13 +210,13 @@ v-if="popupState.padding.display")
 import utils from '../../utils.js'
 import accordionItem from '../accordion/Item.vue'
 import popup from '../tools/screen/Popup.vue'
-import number from '../form/Number.vue'
+import inputNumber from '../form/InputNumber.vue'
 export default {
     name: 'BoxProperties',
     components: {
         accordionItem,
-        popup,
-        number
+        inputNumber,
+        popup
     },
     data () {
         return {
@@ -454,14 +454,31 @@ export default {
          */
         marginPopupValue: {
             get () {
-                let marginLeft = this.getMarginProp(this.popupState.margin.direction)
-                if (marginLeft) {
-                    return marginLeft.value
+                let marginValue = this.getMarginProp(this.popupState.margin.direction)
+                if (marginValue) {
+                    return marginValue.value
                 }
             },
 
             set (val) {
                 this.setMarginProp(`${this.popupState.margin.direction}.value`, val)
+            }
+        },
+
+        /**
+         * Margin popup unit
+         * @return {String}
+         */
+        marginPopupUnit: {
+            get () {
+                let marginValue = this.getMarginProp(this.popupState.margin.direction)
+                if (marginValue) {
+                    return marginValue.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp(`${this.popupState.margin.direction}.unit`, val)
             }
         },
 

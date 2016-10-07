@@ -33,3 +33,7 @@
     cursor: -moz-grabbing;
     cursor: grabbing;
 }
+
+@mixin no-pointer-events {
+    pointer-events: none;
+}
