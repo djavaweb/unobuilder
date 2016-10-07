@@ -95,7 +95,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     :class="borderClass",
                     @mouseover.self="over('border')")
                         label
-                            a(@click="") Border
+                            a(@click="showPopup('border', 'all')") Border
 
                         a.radius.top.left(@mousedown="dragStartRadius($event, 'top', 'left')")
                         a.radius.top.right(@mousedown="dragStartRadius($event, 'top', 'right')")
@@ -108,7 +108,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mouseover.self="over('border', 'top')")
 
                             dt.top(
-                            v-html="borderTop",
+                            v-html="borderTop.string",
                             @mousedown="dragStart($event, 'border', 'top')")
 
                             dt.right-resize.border(
@@ -116,7 +116,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mouseover.self="over('border', 'right')")
 
                             dt.right(
-                            v-html="borderRight",
+                            v-html="borderRight.string",
                             @mousedown="dragStart($event, 'border', 'right')")
 
                             dt.bottom-resize(
@@ -124,7 +124,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mouseover.self="over('border', 'bottom')")
 
                             dt.bottom(
-                            v-html="borderBottom",
+                            v-html="borderBottom.string",
                             @mousedown="dragStart($event, 'border', 'bottom')")
 
                             dt.left-resize.border(
@@ -132,7 +132,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mouseover.self="over('border', 'left')")
 
                             dt.left(
-                            v-html="borderLeft",
+                            v-html="borderLeft.string",
                             @mousedown="dragStart($event, 'border', 'left')")
 
                         .inner
@@ -202,7 +202,7 @@ v-if="popupState.marginAll.display")
             label Margin Value
         .uk-width-4-10
             input-number(
-            :value.sync="marginAllValue",
+            :value.sync="marginAll",
             :unit.sync="marginAllUnit",
             :width="30",
             :min="-1000",
@@ -219,7 +219,7 @@ v-if="popupState.padding.display")
             label Padding Value
         .uk-width-4-10
             input-number(
-            :value.sync="paddingPopupValue",
+            :value.sync="paddingPopup",
             :unit.sync="paddingPopupUnit",
             :width="30",
             :min="0",
@@ -236,39 +236,63 @@ v-if="popupState.paddingAll.display")
             label Padding Value
         .uk-width-4-10
             input-number(
-            :value.sync="paddingAllValue",
+            :value.sync="paddingAll",
             :unit.sync="paddingAllUnit",
             :width="30",
             :min="0",
             :max="1000")
     button(@click="hidePopup()") OK
 
-// Popup Border
+// Popup border
 popup.popup-right-panel(
 :title="popupBorderTitle",
 :close="hidePopup",
 v-if="popupState.border.display")
-    | border
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="borderPopup",
+            :unit.sync="borderPopupUnit",
+            :width="30",
+            :min="0",
+            :max="1000")
 
-// Popup Border
-popup.popup-right-panel(
-:title="popupPaddingTitle",
-:close="hidePopup",
-v-if="popupState.padding.display")
-    | padding
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Type
+        .uk-width-4-10
+            multi-select(
+            :multiple="false",
+            :show-labels="false",
+            :selected="borderStyle",
+            @update="setBorderStyle",
+            :max-height="250",
+            :options="['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outside']|orderBy 1",
+            placeholder="Style")
+                span(slot="noResult") No border style have been found!
+
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Color
+        .uk-width-4-10
+    button(@click="hidePopup()") OK
 </template>
 
 <script>
 import utils from '../../utils.js'
-import accordionItem from '../accordion/Item.vue'
 import popup from '../tools/screen/Popup.vue'
+import accordionItem from '../accordion/Item.vue'
 import inputNumber from '../form/InputNumber.vue'
+import multiSelect from 'vue-multiselect'
 export default {
     name: 'BoxProperties',
     components: {
-        accordionItem,
         popup,
-        inputNumber
+        inputNumber,
+        multiSelect,
+        accordionItem
     },
     data () {
         return {
@@ -558,7 +582,7 @@ export default {
          * Margin popup value
          * @return {String}
          */
-        marginAllValue: {
+        marginAll: {
             get () {
                 let margin = [
                     this.marginTop.number,
@@ -630,13 +654,18 @@ export default {
         borderTop: {
             get () {
                 let borderTop = this.getBorderProp('top')
-                if (borderTop) {
-                    return borderTop.value + borderTop.unit
+                if (! borderTop) {
+                    return {}
+                }
+
+                return {
+                    number: borderTop.value,
+                    string: borderTop.value + borderTop.unit
                 }
             },
 
             set (val) {
-                this.setBorderProp('top', val)
+                this.setBorderProp('top.value', val)
             }
         },
 
@@ -647,13 +676,18 @@ export default {
         borderRight: {
             get () {
                 let borderRight = this.getBorderProp('right')
-                if (borderRight) {
-                    return borderRight.value + ' ' + borderRight.unit
+                if (! borderRight) {
+                    return {}
+                }
+
+                return {
+                    number: borderRight.value,
+                    string: borderRight.value + ' ' + borderRight.unit
                 }
             },
 
             set (val) {
-                this.setBorderProp('right', val)
+                this.setBorderProp('right.value', val)
             }
         },
 
@@ -664,13 +698,18 @@ export default {
         borderBottom: {
             get () {
                 let borderBottom = this.getBorderProp('bottom')
-                if (borderBottom) {
-                    return borderBottom.value + borderBottom.unit
+                if (! borderBottom) {
+                    return {}
+                }
+
+                return {
+                    number: borderBottom.value,
+                    string: borderBottom.value + borderBottom.unit
                 }
             },
 
             set (val) {
-                this.setBorderProp('bottom', val)
+                this.setBorderProp('bottom.value', val)
             }
         },
 
@@ -681,13 +720,18 @@ export default {
         borderLeft: {
             get () {
                let borderLeft = this.getBorderProp('left')
-               if (borderLeft) {
-                   return borderLeft.value + ' ' + borderLeft.unit
+               if (! borderLeft) {
+                   return {}
+               }
+
+               return {
+                   number: borderLeft.value,
+                   string: borderLeft.value + ' ' + borderLeft.unit
                }
             },
 
             set (val) {
-                this.setBorderProp('left', val)
+                this.setBorderProp('left.value', val)
             }
         },
 
@@ -703,6 +747,108 @@ export default {
             }
 
             return klass
+        },
+
+        borderStyle: {
+            get () {
+                let border = this.getBorderProp(this.popupState.border.direction)
+                if (border) {
+                    return border.style
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`${this.popupState.border.direction}.style`, val)
+            }
+        },
+
+        /**
+         * Border popup value
+         * @return {String}
+         */
+        borderPopup: {
+            get () {
+                let borderValue = this.getBorderProp(this.popupState.border.direction)
+                if (borderValue) {
+                    return borderValue.value
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`${this.popupState.border.direction}.value`, val)
+            }
+        },
+
+        /**
+         * Border popup unit
+         * @return {String}
+         */
+        borderPopupUnit: {
+            get () {
+                let borderValue = this.getBorderProp(this.popupState.border.direction)
+                if (borderValue) {
+                    return borderValue.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`${this.popupState.border.direction}.unit`, val)
+            }
+        },
+
+        /**
+         * Border popup value
+         * @return {String}
+         */
+        borderAll: {
+            get () {
+                let border = [
+                    this.borderTop.number,
+                    this.borderRight.number,
+                    this.borderBottom.number,
+                    this.borderLeft.number
+                ]
+
+                // If it's already initialised
+                let value = 0
+                if (border[0]) {
+                    for (let i in border) {
+    					if (border[i]>value) {
+    						value = border[i]
+    					}
+    				}
+                }
+                return value
+            },
+
+            set (val) {
+                val = parseInt(val)
+                if (isNaN(val)) {
+                    val = 0
+                }
+
+                this.borderTop = val
+                this.borderRight = val
+                this.borderBottom = val
+                this.borderLeft = val
+            }
+        },
+
+        /**
+         * Border popup unit
+         * @return {String}
+         */
+        borderAllUnit: {
+            get () {
+                let borderValue = this.getMarginProp(this.popupState.border.direction)
+                if (borderValue) {
+                    return borderValue.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp(`${this.popupState.border.direction}.unit`, val)
+            }
         },
 
         /**
@@ -811,7 +957,7 @@ export default {
          * Padding popup value
          * @return {String}
          */
-        paddingAllValue: {
+        paddingAll: {
             get () {
                 let padding = [
                     this.paddingTop.number,
@@ -974,8 +1120,8 @@ export default {
          * @param {String} value
          */
         setBorderProp (key, value) {
-            let propKey = 'border' + utils.capitalize(key)
-            this.$root.elementSelector().setProp(`${propKey}.value`, value, this.mouseState)
+            let propKey = 'border' + utils.capitalize(key, false)
+            this.$root.elementSelector().setProp(`${propKey}`, value, this.mouseState)
         },
 
         /**
@@ -984,7 +1130,7 @@ export default {
          * @return {Object} [{value: Integer, unit: String}]
          */
         getPaddingProp (value) {
-            let key = 'padding' + utils.capitalize(value)
+            let key = 'padding' + utils.capitalize(value, false)
             return this.$root.elementSelector().getProp(`${key}`, this.mouseState)
         },
 
@@ -995,7 +1141,7 @@ export default {
          */
         setPaddingProp (key, value) {
             let propKey = 'padding' + utils.capitalize(key)
-            this.$root.elementSelector().setProp(`${propKey}.value`, value, this.mouseState)
+            this.$root.elementSelector().setProp(`${propKey}`, value, this.mouseState)
         },
 
         /**
@@ -1187,6 +1333,10 @@ export default {
                 this.resetObject(this.popupState[i])
             }
             this.displayOverlay = false
+        },
+
+        setBorderStyle (value) {
+            this.borderStyle = value
         }
     }
 }

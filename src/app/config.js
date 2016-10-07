@@ -164,7 +164,7 @@ const constant = {
     	borderTop: {
     		value: 0,
     		unit: 'px',
-    		borderStyle: 'solid',
+    		style: 'solid',
     		color: {
     			hex: '#000000',
     			hsl: {
@@ -191,7 +191,7 @@ const constant = {
     	borderRight: {
     		value: 0,
     		unit: 'px',
-    		borderStyle: 'solid',
+    		style: 'solid',
     		color: {
     			hex: '#000000',
     			hsl: {
@@ -218,7 +218,7 @@ const constant = {
     	borderBottom: {
     		value: 0,
     		unit: 'px',
-    		borderStyle: 'solid',
+    		style: 'solid',
     		color: {
     			hex: '#000000',
     			hsl: {
@@ -245,7 +245,7 @@ const constant = {
     	borderLeft: {
     		value: 0,
     		unit: 'px',
-    		borderStyle: 'solid',
+    		style: 'solid',
     		color: {
     			hex: '#000000',
     			hsl: {
