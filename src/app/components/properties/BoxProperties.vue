@@ -188,6 +188,7 @@ v-if="popupState.margin.display")
             :value.sync="marginPopupValue",
             :unit.sync="marginPopupUnit",
             :input-width="30",
+            :min="-1000",
             :max="1000")
 
 // Popup Border
