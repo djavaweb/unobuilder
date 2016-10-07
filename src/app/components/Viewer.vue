@@ -147,10 +147,10 @@ export default {
 				paddingLeft: utils.autoUnit(properties.paddingLeft),
 
 				/* Border */
-				borderTop: `${utils.autoUnit(properties.borderTop, false)} ${properties.borderTop.borderStyle} ${utils.rgbaColor(properties.borderTop.color)}`,
-				borderRight: `${utils.autoUnit(properties.borderRight, false)} ${properties.borderRight.borderStyle} ${utils.rgbaColor(properties.borderRight.color)}`,
-				borderBottom: `${utils.autoUnit(properties.borderBottom, false)} ${properties.borderBottom.borderStyle} ${utils.rgbaColor(properties.borderBottom.color)}`,
-				borderLeft: `${utils.autoUnit(properties.borderLeft, false)} ${properties.borderLeft.borderStyle} ${utils.rgbaColor(properties.borderLeft.color)}`,
+				borderTop: `${utils.autoUnit(properties.borderTop, false)} ${properties.borderTop.style} ${utils.rgbaColor(properties.borderTop.color)}`,
+				borderRight: `${utils.autoUnit(properties.borderRight, false)} ${properties.borderRight.style} ${utils.rgbaColor(properties.borderRight.color)}`,
+				borderBottom: `${utils.autoUnit(properties.borderBottom, false)} ${properties.borderBottom.style} ${utils.rgbaColor(properties.borderBottom.color)}`,
+				borderLeft: `${utils.autoUnit(properties.borderLeft, false)} ${properties.borderLeft.style} ${utils.rgbaColor(properties.borderLeft.color)}`,
 
 				/* Border Radius */
 				borderTopLeftRadius: utils.autoUnit(properties.borderRadiusTopLeft),
