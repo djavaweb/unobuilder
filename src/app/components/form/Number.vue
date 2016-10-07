@@ -30,7 +30,7 @@
 <script>
 import utils from '../../utils.js'
 export default {
-	name: 'Number',
+	name: 'number',
 	props: {
 		value: {
 			required: true,

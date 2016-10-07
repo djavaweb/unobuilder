@@ -181,9 +181,14 @@ const utils = {
     /**
 	 * Capitalize string
 	 * @param  {String} str
+	 * @param  {Boolean} all
 	 * @return {String}
 	 */
-	capitalize (str) {
+	capitalize (str, all = true) {
+        if (! all) {
+            return str.charAt(0).toUpperCase() + str.slice(1)
+        }
+
 		return str.replace(/\b[a-z]/g, letter => letter.toUpperCase())
 	},
 

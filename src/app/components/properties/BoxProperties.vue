@@ -80,7 +80,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
 
                     dt.bottom(
                     v-html="marginBottom",
-                    @mousedown="over($event, 'margin', 'bottom')")
+                    @mousedown="dragStart($event, 'margin', 'bottom')")
 
                     dt.left-resize(
                     @mousedown="dragStart($event, 'margin', 'left')",
@@ -170,15 +170,54 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
 
                                     dt.left(
                                     v-html="paddingLeft",
-                                    @mousedown="over($event, 'padding', 'left')")
+                                    @mousedown="dragStart($event, 'padding', 'left')")
+
+// Popup Overlay
+.popup-overlay(v-if="displayOverlay" @click="hidePopup()")
+
+// Popup margin
+popup.popup-right-panel(
+:title="popupMarginTitle",
+:close="hidePopup",
+v-if="popupState.margin.display")
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Margin Value
+        .uk-width-4-10
+            number(
+            :value.sync="marginPopupValue",
+            unit="px",
+            :input-width="30",
+            :max="1000",
+            label="")
+
+// Popup Border
+popup.popup-right-panel(
+:title="popupBorderTitle",
+:close="hidePopup",
+v-if="popupState.border.display")
+    | border
+
+// Popup Border
+popup.popup-right-panel(
+:title="popupPaddingTitle",
+:close="hidePopup",
+v-if="popupState.padding.display")
+    | padding
 </template>
 
 <script>
 import utils from '../../utils.js'
 import accordionItem from '../accordion/Item.vue'
+import popup from '../tools/screen/Popup.vue'
+import number from '../form/Number.vue'
 export default {
     name: 'BoxProperties',
-    components: {accordionItem},
+    components: {
+        accordionItem,
+        popup,
+        number
+    },
     data () {
         return {
             mouseState: '',
@@ -206,6 +245,37 @@ export default {
                 padding: {
                     hover: false,
                     direction: ''
+                }
+            },
+            displayOverlay: false,
+            popupState: {
+                margin: {
+                    direction: '',
+                    display: false
+                },
+                marginAll: {
+                    direction: '',
+                    display: false
+                },
+                border: {
+                    direction: '',
+                    display: false
+                },
+                borderRadius: {
+                    direction: '',
+                    display: false
+                },
+                borderAll: {
+                    direction: '',
+                    display: false
+                },
+                padding: {
+                    direction: '',
+                    display: false
+                },
+                paddingAll: {
+                    direction: '',
+                    display: false
                 }
             }
         }
@@ -323,7 +393,7 @@ export default {
             },
 
             set (val) {
-                this.setMarginProp('top', val)
+                this.setMarginProp('top.value', val)
             }
         },
 
@@ -340,7 +410,7 @@ export default {
             },
 
             set (val) {
-                this.setMarginProp('right', val)
+                this.setMarginProp('right.value', val)
             }
         },
 
@@ -357,7 +427,7 @@ export default {
             },
 
             set (val) {
-                this.setMarginProp('bottom', val)
+                this.setMarginProp('bottom.value', val)
             }
         },
 
@@ -374,7 +444,24 @@ export default {
             },
 
             set (val) {
-                this.setMarginProp('left', val)
+                this.setMarginProp('left.value', val)
+            }
+        },
+
+        /**
+         * Margin popup value
+         * @return {String}
+         */
+        marginPopupValue: {
+            get () {
+                let marginLeft = this.getMarginProp(this.popupState.margin.direction)
+                if (marginLeft) {
+                    return marginLeft.value
+                }
+            },
+
+            set (val) {
+                this.setMarginProp(`${this.popupState.margin.direction}.value`, val)
             }
         },
 
@@ -554,6 +641,30 @@ export default {
             }
 
             return klass
+        },
+
+        /**
+         * Popup Title for Margin
+         * @return {String}
+         */
+        popupMarginTitle () {
+            return `Margin ${utils.capitalize(this.popupState.margin.direction)}`
+        },
+
+        /**
+         * Popup Title for Border
+         * @return {String}
+         */
+        popupBorderTitle () {
+            return `Border ${utils.capitalize(this.popupState.border.direction)}`
+        },
+
+        /**
+         * Popup Title for Border
+         * @return {String}
+         */
+        popupPaddingTitle () {
+            return `Padding ${utils.capitalize(this.popupState.padding.direction)}`
         }
     },
 
@@ -624,8 +735,8 @@ export default {
          * @param {String} value
          */
         setMarginProp (key, value) {
-            let propKey = 'margin' + utils.capitalize(key)
-            this.$root.elementSelector().setProp(`${propKey}.value`, value, this.mouseState)
+            let propKey = 'margin' + utils.capitalize(key, false)
+            this.$root.elementSelector().setProp(`${propKey}`, value, this.mouseState)
         },
 
         /**
@@ -702,17 +813,32 @@ export default {
         },
 
         /**
+         * Reset object by type
+         * @param {Object} object
+         */
+        resetObject (object) {
+            for (let i in object) {
+                switch (typeof object[i]) {
+                    case 'string':
+                        object[i] = ''
+                    break
+
+                    case 'number':
+                        object[i] = 0
+                    break
+
+                    case 'boolean':
+                        object[i] = false
+                    break
+                }
+            }
+        },
+
+        /**
          * Reset drag state
          */
         resetDragState () {
-            this.dragState = {
-                y: 0,
-                x: 0,
-                move: false,
-                layout: '',
-                direction: '',
-                initialValue: 0
-            }
+            this.resetObject(this.dragState)
         },
 
         /**
@@ -808,13 +934,26 @@ export default {
             if (this.dragState.x === event.pageX &&
                 this.dragState.y === event.pageY &&
                 ! this.dragState.move) {
-				// popup
+				this.showPopup(this.dragState.layout, this.dragState.direction)
 			}
 
             // Stop dragging
             this.resetDragState()
             utils.removeEvent(document, 'mousemove', this.dragMove, false)
 			utils.removeEvent(document, 'mouseup', this.dragEnd, false)
+        },
+
+        showPopup (state, direction) {
+            this.popupState[state].display = true
+            this.popupState[state].direction = direction
+            this.displayOverlay = true
+        },
+
+        hidePopup () {
+            for (let i in this.popupState) {
+                this.resetObject(this.popupState[i])
+            }
+            this.displayOverlay = false
         }
     }
 }

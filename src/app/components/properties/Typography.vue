@@ -123,8 +123,8 @@ import multiSelect from 'vue-multiselect'
 import config from '../../config.js'
 import accordionItem from '../accordion/Item.vue'
 import accordionItemView from '../accordion/ItemView.vue'
-import number from '../form/number.vue'
-import buttons from '../form/buttons.vue'
+import number from '../form/Number.vue'
+import buttons from '../form/Buttons.vue'
 
 export default {
     name: 'Typography',
