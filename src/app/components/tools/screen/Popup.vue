@@ -1,36 +1,33 @@
 <template lang="pug">
-.popup(v-if="display")
+.popup
     .popup-inner
-        a.popup-close.uk-icon-close(@click="hide()")
-        .popup-title(v-html="title")
+        a.popup-close.uk-icon-close(@click="onClose()")
+        .popup-title(v-if="title", v-html="title")
         .popup-html
             slot
 </template>
+
+<style lang="sass">
+@import "../../../scss/popup.scss"
+</style>
 
 <script>
 export default {
     name: 'popup',
     props: {
         title: {
-            required: true,
             type: String,
             default: 'Untitled Popup'
-        }
-    },
+        },
 
-    data () {
-        return {
-            display: false
+        close: {
+            type: Function
         }
     },
 
     methods: {
-        show () {
-            this.display = true
-        },
-
-        hide () {
-            this.display = false
+        onClose () {
+            this.close && this.close()
         }
     }
 }
