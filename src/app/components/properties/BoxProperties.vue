@@ -869,7 +869,7 @@ export default {
             },
 
             set (val) {
-                this.setPaddingProp('top', val)
+                this.setPaddingProp('top.value', val)
             }
         },
 
@@ -891,7 +891,7 @@ export default {
             },
 
             set (val) {
-                this.setPaddingProp('right', val)
+                this.setPaddingProp('right.value', val)
             }
         },
 
@@ -913,7 +913,7 @@ export default {
             },
 
             set (val) {
-                this.setPaddingProp('bottom', val)
+                this.setPaddingProp('bottom.value', val)
             }
         },
 
@@ -935,7 +935,7 @@ export default {
             },
 
             set (val) {
-                this.setPaddingProp('left', val)
+                this.setPaddingProp('left.value', val)
             }
         },
 
@@ -951,6 +951,40 @@ export default {
             }
 
             return klass
+        },
+
+        /**
+         * Padding popup value
+         * @return {String}
+         */
+        paddingPopup: {
+            get () {
+                let paddingValue = this.getPaddingProp(this.popupState.padding.direction)
+                if (paddingValue) {
+                    return paddingValue.value
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp(`${this.popupState.padding.direction}.value`, val)
+            }
+        },
+
+        /**
+         * Padding popup unit
+         * @return {String}
+         */
+        paddingPopupUnit: {
+            get () {
+                let paddingValue = this.getPaddingProp(this.popupState.padding.direction)
+                if (paddingValue) {
+                    return paddingValue.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp(`${this.popupState.padding.direction}.unit`, val)
+            }
         },
 
         /**
@@ -1140,7 +1174,7 @@ export default {
          * @param {String} value
          */
         setPaddingProp (key, value) {
-            let propKey = 'padding' + utils.capitalize(key)
+            let propKey = 'padding' + utils.capitalize(key, false)
             this.$root.elementSelector().setProp(`${propKey}`, value, this.mouseState)
         },
 
