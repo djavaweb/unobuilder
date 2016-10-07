@@ -190,6 +190,7 @@ v-if="popupState.margin.display")
             :input-width="30",
             :min="-1000",
             :max="1000")
+    button(@click="hidePopup()") OK
 
 // Popup Border
 popup.popup-right-panel(
