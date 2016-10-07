@@ -63,7 +63,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mouseover.self="over('margin', 'top')")
 
                     dt.top(
-                    v-html="marginTop.string",
+                    v-html="marginTop",
                     @mousedown="dragStart($event, 'margin', 'top')")
 
                     dt.right-resize(
@@ -71,7 +71,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mouseover.self="over('margin', 'right')")
 
                     dt.right(
-                    v-html="marginRight.string",
+                    v-html="marginRight",
                     @mousedown="dragStart($event, 'margin', 'right')")
 
                     dt.bottom-resize(
@@ -79,7 +79,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mouseover.self="over('margin', 'bottom')")
 
                     dt.bottom(
-                    v-html="marginBottom.string",
+                    v-html="marginBottom",
                     @mousedown="dragStart($event, 'margin', 'bottom')")
 
                     dt.left-resize(
@@ -87,7 +87,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     @mouseover.self="over('margin', 'left')")
 
                     dt.left(
-                    v-html="marginLeft.string",
+                    v-html="marginLeft",
                     @mousedown="dragStart($event, 'margin', 'left')")
 
                 .inner
@@ -460,16 +460,11 @@ export default {
          * Margin top value
          * @return {String}
          */
-        marginTop: {
+        marginTopValue: {
             get () {
                 let marginTop = this.getMarginProp('top')
-                if (! marginTop) {
-                    return {}
-                }
-
-                return {
-                    number: marginTop.value,
-                    string: marginTop.value + marginTop.unit
+                if (marginTop) {
+                    return marginTop.value
                 }
             },
 
@@ -478,20 +473,38 @@ export default {
             }
         },
 
+        marginTopUnit: {
+            get () {
+                let marginTop = this.getMarginProp('top')
+                if (marginTop) {
+                    return marginTop.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp('top.unit', val)
+            }
+        },
+
+        marginTop: {
+            get () {
+                return this.marginTopValue + this.marginTopUnit
+            },
+
+            set (value) {
+                this.marginTopValue = value
+            }
+        },
+
         /**
          * Margin right value
          * @return {String}
          */
-        marginRight: {
+        marginRightValue: {
             get () {
                 let marginRight = this.getMarginProp('right')
-                if (! marginRight) {
-                    return {}
-                }
-
-                return {
-                    number: marginRight.value,
-                    string: marginRight.value + ' ' + marginRight.unit
+                if (marginRight) {
+                    return marginRight.value
                 }
             },
 
@@ -500,25 +513,66 @@ export default {
             }
         },
 
-        /**
-         * Margin bottom value
-         * @return {String}
-         */
-        marginBottom: {
+        marginRightUnit: {
             get () {
-                let marginBottom = this.getMarginProp('bottom')
-                if (! marginBottom) {
-                    return {}
-                }
-
-                return {
-                    number: marginBottom.value,
-                    string: marginBottom.value + marginBottom.unit
+                let marginRight = this.getMarginProp('right')
+                if (marginRight) {
+                    return marginRight.unit
                 }
             },
 
             set (val) {
-                this.setMarginProp('bottom.value', val)
+                this.setMarginProp('right.unit', val)
+            }
+        },
+
+        marginRight: {
+            get () {
+                return this.marginRightValue +' '+ this.marginRightUnit
+            },
+
+            set (value) {
+                this.marginRightValue = value
+            }
+        },
+
+        /**
+         * Margin bottom value
+         * @return {String}
+         */
+         marginBottomValue: {
+             get () {
+                 let marginBottom = this.getMarginProp('bottom')
+                 if (marginBottom) {
+                     return marginBottom.value
+                 }
+             },
+
+             set (val) {
+                 this.setMarginProp('bottom.value', val)
+             }
+         },
+
+         marginBottomUnit: {
+            get () {
+                let marginBottom = this.getMarginProp('bottom')
+                if (marginBottom) {
+                    return marginBottom.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp('bottom.unit', val)
+            }
+        },
+
+        marginBottom: {
+            get () {
+                return this.marginBottomValue + this.marginBottomUnit
+            },
+
+            set (value) {
+                this.marginBottomValue = value
             }
         },
 
@@ -526,21 +580,39 @@ export default {
          * Margin left value
          * @return {String}
          */
-        marginLeft: {
+         marginLeftValue: {
+             get () {
+                 let marginLeft = this.getMarginProp('left')
+                 if (marginLeft) {
+                     return marginLeft.value
+                 }
+             },
+
+             set (val) {
+                 this.setMarginProp('left.value', val)
+             }
+         },
+
+         marginLeftUnit: {
             get () {
                 let marginLeft = this.getMarginProp('left')
-                if (! marginLeft) {
-                    return {}
-                }
-
-                return {
-                    number: marginLeft.value,
-                    string: marginLeft.value + ' ' + marginLeft.unit
+                if (marginLeft) {
+                    return marginLeft.unit
                 }
             },
 
             set (val) {
-                this.setMarginProp('left.value', val)
+                this.setMarginProp('left.unit', val)
+            }
+        },
+
+        marginLeft: {
+            get () {
+                return this.marginLeftValue +' '+ this.marginLeftUnit
+            },
+
+            set (value) {
+                this.marginLeftValue = value
             }
         },
 
@@ -585,10 +657,10 @@ export default {
         marginAll: {
             get () {
                 let margin = [
-                    this.marginTop.number,
-                    this.marginRight.number,
-                    this.marginBottom.number,
-                    this.marginLeft.number
+                    this.marginTopValue,
+                    this.marginRightValue,
+                    this.marginBottomValue,
+                    this.marginLeftValue
                 ]
 
                 // If it's already initialised
@@ -622,14 +694,28 @@ export default {
          */
         marginAllUnit: {
             get () {
-                let marginValue = this.getMarginProp(this.popupState.margin.direction)
-                if (marginValue) {
-                    return marginValue.unit
+                let units = [
+                    this.marginTopUnit,
+                    this.marginRightUnit,
+                    this.marginBottomUnit,
+                    this.marginLeftUnit
+                ]
+
+                let unit = ''
+                for (let i in units) {
+                    if (unit !== units[i]) {
+                        unit = units[i]
+                    }
                 }
+
+                return unit
             },
 
-            set (val) {
-                this.setMarginProp(`${this.popupState.margin.direction}.unit`, val)
+            set (value) {
+                this.marginTopUnit = value
+                this.marginRightUnit = value
+                this.marginBottomUnit = value
+                this.marginLeftUnit = value
             }
         },
 
@@ -1245,7 +1331,7 @@ export default {
          * @return {void}
          */
         dragStart (event, layout, direction) {
-            let value = this[layout + utils.capitalize(direction)].number
+            let value = this[`${layout}${utils.capitalize(direction)}Value`]
             value = parseInt(value)
 
             // Start dragging
