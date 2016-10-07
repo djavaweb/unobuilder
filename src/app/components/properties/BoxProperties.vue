@@ -147,21 +147,21 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                                     @mousedown="dragStart($event, 'padding', 'top')", @mouseover.self="over('padding', 'top')")
 
                                     dt.top(
-                                    v-html="paddingTop.string",
+                                    v-html="paddingTop",
                                     @mousedown="dragStart($event, 'padding', 'top')")
 
                                     dt.right-resize.padding(
                                     @mousedown="dragStart($event, 'padding', 'right')" @mouseover.self="over('padding', 'right')")
 
                                     dt.right(
-                                    v-html="paddingRight.string",
+                                    v-html="paddingRight",
                                     @mousedown="dragStart($event, 'padding', 'right')")
 
                                     dt.bottom-resize.padding(
                                     @mousedown="dragStart($event, 'padding', 'bottom')" @mouseover.self="over('padding', 'bottom')")
 
                                     dt.bottom(
-                                    v-html="paddingBottom.string",
+                                    v-html="paddingBottom",
                                     @mousedown="dragStart($event, 'padding', 'bottom')")
 
                                     dt.left-resize.padding(
@@ -169,7 +169,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                                     @mouseover.self="over('padding', 'left')")
 
                                     dt.left(
-                                    v-html="paddingLeft.string",
+                                    v-html="paddingLeft",
                                     @mousedown="dragStart($event, 'padding', 'left')")
 
 // Popup Overlay
@@ -580,7 +580,7 @@ export default {
          * Margin left value
          * @return {String}
          */
-         marginLeftValue: {
+        marginLeftValue: {
              get () {
                  let marginLeft = this.getMarginProp('left')
                  if (marginLeft) {
@@ -593,7 +593,7 @@ export default {
              }
          },
 
-         marginLeftUnit: {
+        marginLeftUnit: {
             get () {
                 let marginLeft = this.getMarginProp('left')
                 if (marginLeft) {
@@ -656,23 +656,12 @@ export default {
          */
         marginAll: {
             get () {
-                let margin = [
+                return Math.max(
                     this.marginTopValue,
                     this.marginRightValue,
                     this.marginBottomValue,
                     this.marginLeftValue
-                ]
-
-                // If it's already initialised
-                let value = 0
-                if (margin[0]) {
-                    for (let i in margin) {
-    					if (margin[i]>value) {
-    						value = margin[i]
-    					}
-    				}
-                }
-                return value
+                )
             },
 
             set (val) {
@@ -681,10 +670,10 @@ export default {
                     val = 0
                 }
 
-                this.marginTop = val
-                this.marginRight = val
-                this.marginBottom = val
-                this.marginLeft = val
+                this.marginTopValue = val
+                this.marginRightValue = val
+                this.marginBottomValue = val
+                this.marginLeftValue = val
             }
         },
 
@@ -941,16 +930,11 @@ export default {
          * Padding top value
          * @return {String}
          */
-        paddingTop: {
+        paddingTopValue: {
             get () {
                 let paddingTop = this.getPaddingProp('top')
-                if (! paddingTop) {
-                    return {}
-                }
-
-                return {
-                    number: paddingTop.value,
-                    string: paddingTop.value + paddingTop.unit
+                if (paddingTop) {
+                    return paddingTop.value
                 }
             },
 
@@ -959,20 +943,38 @@ export default {
             }
         },
 
+        paddingTopUnit: {
+            get () {
+                let paddingTop = this.getPaddingProp('top')
+                if (paddingTop) {
+                    return paddingTop.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp('top.unit', val)
+            }
+        },
+
+        paddingTop: {
+            get () {
+                return this.paddingTopValue + this.paddingTopUnit
+            },
+
+            set (value) {
+                this.paddingTopValue = value
+            }
+        },
+
         /**
          * Padding right value
          * @return {String}
          */
-        paddingRight: {
+        paddingRightValue: {
             get () {
                 let paddingRight = this.getPaddingProp('right')
-                if (! paddingRight) {
-                    return {}
-                }
-
-                return {
-                    number: paddingRight.value,
-                    string: paddingRight.value + ' ' + paddingRight.unit
+                if (paddingRight) {
+                    return paddingRight.value
                 }
             },
 
@@ -981,25 +983,66 @@ export default {
             }
         },
 
-        /**
-         * Padding bottom value
-         * @return {String}
-         */
-        paddingBottom: {
+        paddingRightUnit: {
             get () {
-                let paddingBottom = this.getPaddingProp('bottom')
-                if (! paddingBottom) {
-                    return {}
-                }
-
-                return {
-                    number: paddingBottom.value,
-                    string: paddingBottom.value + paddingBottom.unit
+                let paddingRight = this.getPaddingProp('right')
+                if (paddingRight) {
+                    return paddingRight.unit
                 }
             },
 
             set (val) {
-                this.setPaddingProp('bottom.value', val)
+                this.setPaddingProp('right.unit', val)
+            }
+        },
+
+        paddingRight: {
+            get () {
+                return this.paddingRightValue + ' ' + this.paddingRightUnit
+            },
+
+            set (value) {
+                this.paddingRightValue = value
+            }
+        },
+
+        /**
+         * Padding bottom value
+         * @return {String}
+         */
+        paddingBottomValue: {
+             get () {
+                 let paddingBottom = this.getPaddingProp('bottom')
+                 if (paddingBottom) {
+                     return paddingBottom.value
+                 }
+             },
+
+             set (val) {
+                 this.setPaddingProp('bottom.value', val)
+             }
+        },
+
+        paddingBottomUnit: {
+             get () {
+                 let paddingBottom = this.getPaddingProp('bottom')
+                 if (paddingBottom) {
+                     return paddingBottom.unit
+                 }
+             },
+
+             set (val) {
+                 this.setPaddingProp('bottom.unit', val)
+             }
+        },
+
+        paddingBottom: {
+            get () {
+                return this.paddingBottomValue + this.paddingBottomUnit
+            },
+
+            set (value) {
+                this.paddingBottomValue = value
             }
         },
 
@@ -1007,21 +1050,39 @@ export default {
          * Padding left value
          * @return {String}
          */
+        paddingLeftValue: {
+              get () {
+                  let paddingLeft = this.getPaddingProp('left')
+                  if (paddingLeft) {
+                      return paddingLeft.value
+                  }
+              },
+
+              set (val) {
+                  this.setPaddingProp('left.value', val)
+              }
+         },
+
+         paddingLeftUnit: {
+              get () {
+                  let paddingLeft = this.getPaddingProp('left')
+                  if (paddingLeft) {
+                      return paddingLeft.unit
+                  }
+              },
+
+              set (val) {
+                  this.setPaddingProp('left.unit', val)
+              }
+        },
+
         paddingLeft: {
             get () {
-                let paddingLeft = this.getPaddingProp('left')
-                if (! paddingLeft) {
-                    return {}
-                }
-
-                return {
-                    number: paddingLeft.value,
-                    string: paddingLeft.value + ' ' + paddingLeft.unit
-                }
+                return this.paddingLeftValue + ' ' + this.paddingLeftUnit
             },
 
-            set (val) {
-                this.setPaddingProp('left.value', val)
+            set (value) {
+                this.paddingLeftValue = value
             }
         },
 
@@ -1079,23 +1140,12 @@ export default {
          */
         paddingAll: {
             get () {
-                let padding = [
-                    this.paddingTop.number,
-                    this.paddingRight.number,
-                    this.paddingBottom.number,
-                    this.paddingLeft.number
-                ]
-
-                // If it's already initialised
-                let value = 0
-                if (padding[0]) {
-                    for (let i in padding) {
-    					if (padding[i]>value) {
-    						value = padding[i]
-    					}
-    				}
-                }
-                return value
+                return Math.max(
+                    this.paddingTopValue,
+                    this.paddingRightValue,
+                    this.paddingBottomValue,
+                    this.paddingLeftValue
+                )
             },
 
             set (val) {
@@ -1104,10 +1154,10 @@ export default {
                     val = 0
                 }
 
-                this.paddingTop = val
-                this.paddingRight = val
-                this.paddingBottom = val
-                this.paddingLeft = val
+                this.paddingTopValue = val
+                this.paddingRightValue = val
+                this.paddingBottomValue = val
+                this.paddingLeftValue = val
             }
         },
 
@@ -1117,14 +1167,28 @@ export default {
          */
         paddingAllUnit: {
             get () {
-                let paddingValue = this.getMarginProp(this.popupState.padding.direction)
-                if (paddingValue) {
-                    return paddingValue.unit
+                let units = [
+                    this.paddingTopUnit,
+                    this.paddingRightUnit,
+                    this.paddingBottomUnit,
+                    this.paddingLeftUnit
+                ]
+
+                let unit = ''
+                for (let i in units) {
+                    if (unit !== units[i]) {
+                        unit = units[i]
+                    }
                 }
+
+                return unit
             },
 
-            set (val) {
-                this.setMarginProp(`${this.popupState.padding.direction}.unit`, val)
+            set (value) {
+                this.paddingTopUnit = value
+                this.paddingRightUnit = value
+                this.paddingBottomUnit = value
+                this.paddingLeftUnit = value
             }
         },
 
