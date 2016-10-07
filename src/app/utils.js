@@ -135,6 +135,19 @@ const utils = {
     },
 
     /**
+     * Auto value
+     * @param  {Number|String} value
+     * @return {String}
+     */
+    autoValue (value, unit, delimiter = '') {
+        if (value === '' || isNaN(parseInt(value)) || isNaN(parseFloat(value))) {
+            return 'auto'
+        }
+
+        return value + delimiter + unit
+    },
+
+    /**
      * Render rgba color
      * @param  {colors} value
      * @return {void}

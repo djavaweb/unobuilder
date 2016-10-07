@@ -56,7 +56,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
             :class="marginClass",
             @mouseover.self="over('margin')")
                 label
-                    a(@click="") Margin
+                    a(@click="showPopup('margin', 'all')") Margin
                 dl
                     dt.top-resize(
                     @mousedown="dragStart($event, 'margin', 'top')",
@@ -95,7 +95,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     :class="borderClass",
                     @mouseover.self="over('border')")
                         label
-                            a(@click="") Border
+                            a(@click="showPopup('border', 'all')") Border
 
                         a.radius.top.left(@mousedown="dragStartRadius($event, 'top', 'left')")
                         a.radius.top.right(@mousedown="dragStartRadius($event, 'top', 'right')")
@@ -140,7 +140,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             :class="paddingClass",
                             @mouseover.self="over('padding')")
                                 label
-                                    a(@click="") Padding
+                                    a(@click="showPopup('padding', 'all')") Padding
 
                                 dl
                                     dt.top-resize.padding(
@@ -187,35 +187,112 @@ v-if="popupState.margin.display")
             input-number(
             :value.sync="marginPopupValue",
             :unit.sync="marginPopupUnit",
-            :input-width="30",
+            :width="30",
+            :min="-1000",
             :max="1000")
+    button(@click="hidePopup()") OK
 
-// Popup Border
+// Popup all margin
 popup.popup-right-panel(
-:title="popupBorderTitle",
+title="All Margin",
 :close="hidePopup",
-v-if="popupState.border.display")
-    | border
+v-if="popupState.marginAll.display")
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Margin Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="marginAll",
+            :unit.sync="marginAllUnit",
+            :width="30",
+            :min="-1000",
+            :max="1000")
+    button(@click="hidePopup()") OK
 
-// Popup Border
+// Popup padding
 popup.popup-right-panel(
 :title="popupPaddingTitle",
 :close="hidePopup",
 v-if="popupState.padding.display")
-    | padding
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Padding Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="paddingPopup",
+            :unit.sync="paddingPopupUnit",
+            :width="30",
+            :min="0",
+            :max="1000")
+    button(@click="hidePopup()") OK
+
+// Popup all padding
+popup.popup-right-panel(
+title="All Padding",
+:close="hidePopup",
+v-if="popupState.paddingAll.display")
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Padding Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="paddingAll",
+            :unit.sync="paddingAllUnit",
+            :width="30",
+            :min="0",
+            :max="1000")
+    button(@click="hidePopup()") OK
+
+// Popup border
+popup.popup-right-panel(
+:title="popupBorderTitle",
+:close="hidePopup",
+v-if="popupState.border.display")
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="borderPopup",
+            :unit.sync="borderPopupUnit",
+            :width="30",
+            :min="0",
+            :max="1000")
+
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Type
+        .uk-width-4-10
+            multi-select(
+            :multiple="false",
+            :show-labels="false",
+            :selected="borderStyle",
+            @update="setBorderStyle",
+            :max-height="250",
+            :options="['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outside']|orderBy 1",
+            placeholder="Style")
+                span(slot="noResult") No border style have been found!
+
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Color
+        .uk-width-4-10
+    button(@click="hidePopup()") OK
 </template>
 
 <script>
 import utils from '../../utils.js'
-import accordionItem from '../accordion/Item.vue'
 import popup from '../tools/screen/Popup.vue'
+import accordionItem from '../accordion/Item.vue'
 import inputNumber from '../form/InputNumber.vue'
+import multiSelect from 'vue-multiselect'
 export default {
     name: 'BoxProperties',
     components: {
-        accordionItem,
         popup,
-        inputNumber
+        inputNumber,
+        multiSelect,
+        accordionItem
     },
     data () {
         return {
@@ -383,11 +460,11 @@ export default {
          * Margin top value
          * @return {String}
          */
-        marginTop: {
+        marginTopValue: {
             get () {
                 let marginTop = this.getMarginProp('top')
                 if (marginTop) {
-                    return marginTop.value + marginTop.unit
+                    return marginTop.value
                 }
             },
 
@@ -396,15 +473,38 @@ export default {
             }
         },
 
+        marginTopUnit: {
+            get () {
+                let marginTop = this.getMarginProp('top')
+                if (marginTop) {
+                    return marginTop.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp('top.unit', val)
+            }
+        },
+
+        marginTop: {
+            get () {
+                return utils.autoValue(this.marginTopValue, this.marginTopUnit)
+            },
+
+            set (value) {
+                this.marginTopValue = value
+            }
+        },
+
         /**
          * Margin right value
          * @return {String}
          */
-        marginRight: {
+        marginRightValue: {
             get () {
                 let marginRight = this.getMarginProp('right')
                 if (marginRight) {
-                    return marginRight.value + ' ' + marginRight.unit
+                    return marginRight.value
                 }
             },
 
@@ -413,20 +513,66 @@ export default {
             }
         },
 
-        /**
-         * Margin bottom value
-         * @return {String}
-         */
-        marginBottom: {
+        marginRightUnit: {
             get () {
-                let marginBottom = this.getMarginProp('bottom')
-                if (marginBottom) {
-                    return marginBottom.value + marginBottom.unit
+                let marginRight = this.getMarginProp('right')
+                if (marginRight) {
+                    return marginRight.unit
                 }
             },
 
             set (val) {
-                this.setMarginProp('bottom.value', val)
+                this.setMarginProp('right.unit', val)
+            }
+        },
+
+        marginRight: {
+            get () {
+                return utils.autoValue(this.marginRightValue, this.marginRightUnit, ' ')
+            },
+
+            set (value) {
+                this.marginRightValue = value
+            }
+        },
+
+        /**
+         * Margin bottom value
+         * @return {String}
+         */
+         marginBottomValue: {
+             get () {
+                 let marginBottom = this.getMarginProp('bottom')
+                 if (marginBottom) {
+                     return marginBottom.value
+                 }
+             },
+
+             set (val) {
+                 this.setMarginProp('bottom.value', val)
+             }
+         },
+
+         marginBottomUnit: {
+            get () {
+                let marginBottom = this.getMarginProp('bottom')
+                if (marginBottom) {
+                    return marginBottom.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp('bottom.unit', val)
+            }
+        },
+
+        marginBottom: {
+            get () {
+                return utils.autoValue(this.marginBottomValue, this.marginBottomUnit)
+            },
+
+            set (value) {
+                this.marginBottomValue = value
             }
         },
 
@@ -434,16 +580,39 @@ export default {
          * Margin left value
          * @return {String}
          */
-        marginLeft: {
+        marginLeftValue: {
+             get () {
+                 let marginLeft = this.getMarginProp('left')
+                 if (marginLeft) {
+                     return marginLeft.value
+                 }
+             },
+
+             set (val) {
+                 this.setMarginProp('left.value', val)
+             }
+         },
+
+        marginLeftUnit: {
             get () {
                 let marginLeft = this.getMarginProp('left')
                 if (marginLeft) {
-                    return marginLeft.value + ' ' + marginLeft.unit
+                    return marginLeft.unit
                 }
             },
 
             set (val) {
-                this.setMarginProp('left.value', val)
+                this.setMarginProp('left.unit', val)
+            }
+        },
+
+        marginLeft: {
+            get () {
+                return utils.autoValue(this.marginLeftValue, this.marginLeftUnit, ' ')
+            },
+
+            set (value) {
+                this.marginLeftValue = value
             }
         },
 
@@ -482,6 +651,64 @@ export default {
         },
 
         /**
+         * Margin popup value
+         * @return {String}
+         */
+        marginAll: {
+            get () {
+                return Math.max(
+                    this.marginTopValue,
+                    this.marginRightValue,
+                    this.marginBottomValue,
+                    this.marginLeftValue
+                )
+            },
+
+            set (val) {
+                val = parseInt(val)
+                if (isNaN(val)) {
+                    val = 0
+                }
+
+                this.marginTopValue = val
+                this.marginRightValue = val
+                this.marginBottomValue = val
+                this.marginLeftValue = val
+            }
+        },
+
+        /**
+         * Margin popup unit
+         * @return {String}
+         */
+        marginAllUnit: {
+            get () {
+                let units = [
+                    this.marginTopUnit,
+                    this.marginRightUnit,
+                    this.marginBottomUnit,
+                    this.marginLeftUnit
+                ]
+
+                let unit = ''
+                for (let i in units) {
+                    if (unit !== units[i]) {
+                        unit = units[i]
+                    }
+                }
+
+                return unit
+            },
+
+            set (value) {
+                this.marginTopUnit = value
+                this.marginRightUnit = value
+                this.marginBottomUnit = value
+                this.marginLeftUnit = value
+            }
+        },
+
+        /**
          * Margin class
          * @return {Array}
          */
@@ -499,16 +726,39 @@ export default {
          * Border top value
          * @return {String}
          */
+        borderTopValue: {
+             get () {
+                 let borderTop = this.getBorderProp('top')
+                 if (borderTop) {
+                     return borderTop.value
+                 }
+             },
+
+             set (val) {
+                 this.setBorderProp('top.value', val)
+             }
+        },
+
+        borderTopUnit: {
+             get () {
+                 let borderTop = this.getBorderProp('top')
+                 if (borderTop) {
+                     return borderTop.unit
+                 }
+             },
+
+             set (val) {
+                 this.setBorderProp('top.unit', val)
+             }
+        },
+
         borderTop: {
             get () {
-                let borderTop = this.getBorderProp('top')
-                if (borderTop) {
-                    return borderTop.value + borderTop.unit
-                }
+                return utils.autoValue(this.borderTopValue, this.borderTopUnit)
             },
 
-            set (val) {
-                this.setBorderProp('top', val)
+            set (value) {
+                this.borderTopValue = value
             }
         },
 
@@ -516,16 +766,39 @@ export default {
          * Border right value
          * @return {String}
          */
+        borderRightValue: {
+              get () {
+                  let borderRight = this.getBorderProp('right')
+                  if (borderRight) {
+                      return borderRight.value
+                  }
+              },
+
+              set (val) {
+                  this.setBorderProp('right.value', val)
+              }
+        },
+
+        borderRightUnit: {
+              get () {
+                  let borderRight = this.getBorderProp('right')
+                  if (borderRight) {
+                      return borderRight.unit
+                  }
+              },
+
+              set (val) {
+                  this.setBorderProp('right.unit', val)
+              }
+        },
+
         borderRight: {
             get () {
-                let borderRight = this.getBorderProp('right')
-                if (borderRight) {
-                    return borderRight.value + ' ' + borderRight.unit
-                }
+                return utils.autoValue(this.borderRightValue, this.borderRightUnit, ' ')
             },
 
-            set (val) {
-                this.setBorderProp('right', val)
+            set (value) {
+                this.borderRightValue = value
             }
         },
 
@@ -533,16 +806,39 @@ export default {
          * Border bottom value
          * @return {String}
          */
+        borderBottomValue: {
+               get () {
+                   let borderBottom = this.getBorderProp('bottom')
+                   if (borderBottom) {
+                       return borderBottom.value
+                   }
+               },
+
+               set (val) {
+                   this.setBorderProp('bottom.value', val)
+               }
+        },
+
+        borderBottomUnit: {
+               get () {
+                   let borderBottom = this.getBorderProp('bottom')
+                   if (borderBottom) {
+                       return borderBottom.unit
+                   }
+               },
+
+               set (val) {
+                   this.setBorderProp('bottom.unit', val)
+               }
+        },
+
         borderBottom: {
             get () {
-                let borderBottom = this.getBorderProp('bottom')
-                if (borderBottom) {
-                    return borderBottom.value + borderBottom.unit
-                }
+                return utils.autoValue(this.borderBottomValue, this.borderBottomUnit)
             },
 
-            set (val) {
-                this.setBorderProp('bottom', val)
+            set (value) {
+                this.borderBottomValue = value
             }
         },
 
@@ -550,16 +846,39 @@ export default {
          * Border left value
          * @return {String}
          */
+        borderLeftValue: {
+                get () {
+                    let borderLeft = this.getBorderProp('left')
+                    if (borderLeft) {
+                        return borderLeft.value
+                    }
+                },
+
+                set (val) {
+                    this.setBorderProp('left.value', val)
+                }
+        },
+
+        borderLeftUnit: {
+                get () {
+                    let borderLeft = this.getBorderProp('left')
+                    if (borderLeft) {
+                        return borderLeft.unit
+                    }
+                },
+
+                set (val) {
+                    this.setBorderProp('left.unit', val)
+                }
+        },
+
         borderLeft: {
             get () {
-               let borderLeft = this.getBorderProp('left')
-               if (borderLeft) {
-                   return borderLeft.value + ' ' + borderLeft.unit
-               }
+               return utils.autoValue(this.borderLeftValue, this.borderLeftUnit, ' ')
             },
 
-            set (val) {
-                this.setBorderProp('left', val)
+            set (value) {
+                this.borderLeftValue = value
             }
         },
 
@@ -577,20 +896,148 @@ export default {
             return klass
         },
 
-        /**
-         * Padding top value
-         * @return {String}
-         */
-        paddingTop: {
+        borderStyle: {
             get () {
-                let paddingTop = this.getPaddingProp('top')
-                if (paddingTop) {
-                    return paddingTop.value + paddingTop.unit
+                let border = this.getBorderProp(this.popupState.border.direction)
+                if (border) {
+                    return border.style
                 }
             },
 
             set (val) {
-                this.setPaddingProp('top', val)
+                this.setBorderProp(`${this.popupState.border.direction}.style`, val)
+            }
+        },
+
+        /**
+         * Border popup value
+         * @return {String}
+         */
+        borderPopup: {
+            get () {
+                let borderValue = this.getBorderProp(this.popupState.border.direction)
+                if (borderValue) {
+                    return borderValue.value
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`${this.popupState.border.direction}.value`, val)
+            }
+        },
+
+        /**
+         * Border popup unit
+         * @return {String}
+         */
+        borderPopupUnit: {
+            get () {
+                let borderValue = this.getBorderProp(this.popupState.border.direction)
+                if (borderValue) {
+                    return borderValue.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`${this.popupState.border.direction}.unit`, val)
+            }
+        },
+
+        /**
+         * Border popup value
+         * @return {String}
+         */
+        borderAll: {
+            get () {
+                return Math.max(
+                    this.borderTopValue,
+                    this.borderRightValue,
+                    this.borderBottomValue,
+                    this.borderLeftValue
+                )
+            },
+
+            set (val) {
+                val = parseInt(val)
+                if (isNaN(val)) {
+                    val = 0
+                }
+
+                this.borderTopValue = val
+                this.borderRightValue = val
+                this.borderBottomValue = val
+                this.borderLeftValue = val
+            }
+        },
+
+        /**
+         * Border popup unit
+         * @return {String}
+         */
+        borderAllUnit: {
+            get () {
+                let units = [
+                    this.borderTopUnit,
+                    this.borderRightUnit,
+                    this.borderBottomUnit,
+                    this.borderLeftUnit
+                ]
+
+                let unit = ''
+                for (let i in units) {
+                    if (unit !== units[i]) {
+                        unit = units[i]
+                    }
+                }
+
+                return unit
+            },
+
+            set (value) {
+                this.borderTopUnit = value
+                this.borderRightUnit = value
+                this.borderBottomUnit = value
+                this.borderLeftUnit = value
+            }
+        },
+
+        /**
+         * Padding top value
+         * @return {String}
+         */
+        paddingTopValue: {
+            get () {
+                let paddingTop = this.getPaddingProp('top')
+                if (paddingTop) {
+                    return paddingTop.value
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp('top.value', val)
+            }
+        },
+
+        paddingTopUnit: {
+            get () {
+                let paddingTop = this.getPaddingProp('top')
+                if (paddingTop) {
+                    return paddingTop.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp('top.unit', val)
+            }
+        },
+
+        paddingTop: {
+            get () {
+                return utils.autoValue(this.paddingTopValue, this.paddingTopUnit)
+            },
+
+            set (value) {
+                this.paddingTopValue = value
             }
         },
 
@@ -598,16 +1045,39 @@ export default {
          * Padding right value
          * @return {String}
          */
-        paddingRight: {
+        paddingRightValue: {
             get () {
                 let paddingRight = this.getPaddingProp('right')
                 if (paddingRight) {
-                    return paddingRight.value + ' ' + paddingRight.unit
+                    return paddingRight.value
                 }
             },
 
             set (val) {
-                this.setPaddingProp('right', val)
+                this.setPaddingProp('right.value', val)
+            }
+        },
+
+        paddingRightUnit: {
+            get () {
+                let paddingRight = this.getPaddingProp('right')
+                if (paddingRight) {
+                    return paddingRight.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp('right.unit', val)
+            }
+        },
+
+        paddingRight: {
+            get () {
+                return utils.autoValue(this.paddingRightValue, this.paddingRightUnit)
+            },
+
+            set (value) {
+                this.paddingRightValue = value
             }
         },
 
@@ -615,16 +1085,39 @@ export default {
          * Padding bottom value
          * @return {String}
          */
+        paddingBottomValue: {
+             get () {
+                 let paddingBottom = this.getPaddingProp('bottom')
+                 if (paddingBottom) {
+                     return paddingBottom.value
+                 }
+             },
+
+             set (val) {
+                 this.setPaddingProp('bottom.value', val)
+             }
+        },
+
+        paddingBottomUnit: {
+             get () {
+                 let paddingBottom = this.getPaddingProp('bottom')
+                 if (paddingBottom) {
+                     return paddingBottom.unit
+                 }
+             },
+
+             set (val) {
+                 this.setPaddingProp('bottom.unit', val)
+             }
+        },
+
         paddingBottom: {
             get () {
-                let paddingBottom = this.getPaddingProp('bottom')
-                if (paddingBottom) {
-                    return paddingBottom.value + paddingBottom.unit
-                }
+                return utils.autoValue(this.paddingBottomValue, this.paddingBottomUnit)
             },
 
-            set (val) {
-                this.setPaddingProp('bottom', val)
+            set (value) {
+                this.paddingBottomValue = value
             }
         },
 
@@ -632,16 +1125,39 @@ export default {
          * Padding left value
          * @return {String}
          */
+        paddingLeftValue: {
+              get () {
+                  let paddingLeft = this.getPaddingProp('left')
+                  if (paddingLeft) {
+                      return paddingLeft.value
+                  }
+              },
+
+              set (val) {
+                  this.setPaddingProp('left.value', val)
+              }
+         },
+
+         paddingLeftUnit: {
+              get () {
+                  let paddingLeft = this.getPaddingProp('left')
+                  if (paddingLeft) {
+                      return paddingLeft.unit
+                  }
+              },
+
+              set (val) {
+                  this.setPaddingProp('left.unit', val)
+              }
+        },
+
         paddingLeft: {
             get () {
-                let paddingLeft = this.getPaddingProp('left')
-                if (paddingLeft) {
-                    return paddingLeft.value + ' ' + paddingLeft.unit
-                }
+                return utils.autoValue(this.paddingLeftValue, this.paddingLeftUnit)
             },
 
-            set (val) {
-                this.setPaddingProp('left', val)
+            set (value) {
+                this.paddingLeftValue = value
             }
         },
 
@@ -657,6 +1173,98 @@ export default {
             }
 
             return klass
+        },
+
+        /**
+         * Padding popup value
+         * @return {String}
+         */
+        paddingPopup: {
+            get () {
+                let paddingValue = this.getPaddingProp(this.popupState.padding.direction)
+                if (paddingValue) {
+                    return paddingValue.value
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp(`${this.popupState.padding.direction}.value`, val)
+            }
+        },
+
+        /**
+         * Padding popup unit
+         * @return {String}
+         */
+        paddingPopupUnit: {
+            get () {
+                let paddingValue = this.getPaddingProp(this.popupState.padding.direction)
+                if (paddingValue) {
+                    return paddingValue.unit
+                }
+            },
+
+            set (val) {
+                this.setPaddingProp(`${this.popupState.padding.direction}.unit`, val)
+            }
+        },
+
+        /**
+         * Padding popup value
+         * @return {String}
+         */
+        paddingAll: {
+            get () {
+                return Math.max(
+                    this.paddingTopValue,
+                    this.paddingRightValue,
+                    this.paddingBottomValue,
+                    this.paddingLeftValue
+                )
+            },
+
+            set (val) {
+                val = parseInt(val)
+                if (isNaN(val)) {
+                    val = 0
+                }
+
+                this.paddingTopValue = val
+                this.paddingRightValue = val
+                this.paddingBottomValue = val
+                this.paddingLeftValue = val
+            }
+        },
+
+        /**
+         * Padding popup unit
+         * @return {String}
+         */
+        paddingAllUnit: {
+            get () {
+                let units = [
+                    this.paddingTopUnit,
+                    this.paddingRightUnit,
+                    this.paddingBottomUnit,
+                    this.paddingLeftUnit
+                ]
+
+                let unit = ''
+                for (let i in units) {
+                    if (unit !== units[i]) {
+                        unit = units[i]
+                    }
+                }
+
+                return unit
+            },
+
+            set (value) {
+                this.paddingTopUnit = value
+                this.paddingRightUnit = value
+                this.paddingBottomUnit = value
+                this.paddingLeftUnit = value
+            }
         },
 
         /**
@@ -771,8 +1379,8 @@ export default {
          * @param {String} value
          */
         setBorderProp (key, value) {
-            let propKey = 'border' + utils.capitalize(key)
-            this.$root.elementSelector().setProp(`${propKey}.value`, value, this.mouseState)
+            let propKey = 'border' + utils.capitalize(key, false)
+            this.$root.elementSelector().setProp(`${propKey}`, value, this.mouseState)
         },
 
         /**
@@ -791,8 +1399,8 @@ export default {
          * @param {String} value
          */
         setPaddingProp (key, value) {
-            let propKey = 'padding' + utils.capitalize(key)
-            this.$root.elementSelector().setProp(`${propKey}.value`, value, this.mouseState)
+            let propKey = 'padding' + utils.capitalize(key, false)
+            this.$root.elementSelector().setProp(`${propKey}`, value, this.mouseState)
         },
 
         /**
@@ -862,7 +1470,7 @@ export default {
          * @return {void}
          */
         dragStart (event, layout, direction) {
-            let value = this[layout + utils.capitalize(direction)].replace('px', '')
+            let value = this[`${layout}${utils.capitalize(direction)}Value`]
             value = parseInt(value)
 
             // Start dragging
@@ -959,17 +1567,59 @@ export default {
 			utils.removeEvent(document, 'mouseup', this.dragEnd, false)
         },
 
+        /**
+         * Display popup
+         * @param  {String} state State can be position|margin|border|padding
+         * @param  {String} direction top|bottom|left|right
+         * @return {void}
+         */
         showPopup (state, direction) {
+            if (direction === 'all') {
+                state = `${state}All`
+            }
+
             this.popupState[state].display = true
             this.popupState[state].direction = direction
             this.displayOverlay = true
         },
 
+        /**
+         * Hide popup
+         * @return {void}
+         */
         hidePopup () {
+            // Reset popup state
             for (let i in this.popupState) {
                 this.resetObject(this.popupState[i])
             }
+
+            // Fix auto number
+            [
+                'marginTopValue', 'marginRightValue',
+                'marginBottomValue', 'marginLeftValue',
+                'paddingTopValue', 'paddingRightValue',
+                'paddingBottomValue', 'paddingLeftValue',
+                'borderTopValue', 'borderRightValue',
+                'borderBottomValue', 'borderLeftValue'
+            ].forEach((propKey) => {
+                if (isNaN(parseInt(this[propKey])) || isNaN(parseFloat(this[propKey]))) {
+                    // If key is margin, it's okay if value is auto
+                    // But it's a shame, if key is border or padding
+                    if (propKey.indexOf('margin')) {
+                        if (this[propKey] !== 'auto') {
+                            this[propKey] = 0
+                        }
+                    } else {
+                        this[propKey] = 0
+                    }
+                }
+            })
+
             this.displayOverlay = false
+        },
+
+        setBorderStyle (value) {
+            this.borderStyle = value
         }
     }
 }
