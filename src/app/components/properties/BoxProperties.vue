@@ -140,28 +140,28 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             :class="paddingClass",
                             @mouseover.self="over('padding')")
                                 label
-                                    a(@click="") Padding
+                                    a(@click="showPopup('padding', 'all')") Padding
 
                                 dl
                                     dt.top-resize.padding(
                                     @mousedown="dragStart($event, 'padding', 'top')", @mouseover.self="over('padding', 'top')")
 
                                     dt.top(
-                                    v-html="paddingTop",
+                                    v-html="paddingTop.string",
                                     @mousedown="dragStart($event, 'padding', 'top')")
 
                                     dt.right-resize.padding(
                                     @mousedown="dragStart($event, 'padding', 'right')" @mouseover.self="over('padding', 'right')")
 
                                     dt.right(
-                                    v-html="paddingRight",
+                                    v-html="paddingRight.string",
                                     @mousedown="dragStart($event, 'padding', 'right')")
 
                                     dt.bottom-resize.padding(
                                     @mousedown="dragStart($event, 'padding', 'bottom')" @mouseover.self="over('padding', 'bottom')")
 
                                     dt.bottom(
-                                    v-html="paddingBottom",
+                                    v-html="paddingBottom.string",
                                     @mousedown="dragStart($event, 'padding', 'bottom')")
 
                                     dt.left-resize.padding(
@@ -169,7 +169,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                                     @mouseover.self="over('padding', 'left')")
 
                                     dt.left(
-                                    v-html="paddingLeft",
+                                    v-html="paddingLeft.string",
                                     @mousedown="dragStart($event, 'padding', 'left')")
 
 // Popup Overlay
@@ -206,6 +206,40 @@ v-if="popupState.marginAll.display")
             :unit.sync="marginAllUnit",
             :width="30",
             :min="-1000",
+            :max="1000")
+    button(@click="hidePopup()") OK
+
+// Popup padding
+popup.popup-right-panel(
+:title="popupPaddingTitle",
+:close="hidePopup",
+v-if="popupState.padding.display")
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Padding Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="paddingPopupValue",
+            :unit.sync="paddingPopupUnit",
+            :width="30",
+            :min="0",
+            :max="1000")
+    button(@click="hidePopup()") OK
+
+// Popup all padding
+popup.popup-right-panel(
+title="All Padding",
+:close="hidePopup",
+v-if="popupState.paddingAll.display")
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Padding Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="paddingAllValue",
+            :unit.sync="paddingAllUnit",
+            :width="30",
+            :min="0",
             :max="1000")
     button(@click="hidePopup()") OK
 
@@ -678,8 +712,13 @@ export default {
         paddingTop: {
             get () {
                 let paddingTop = this.getPaddingProp('top')
-                if (paddingTop) {
-                    return paddingTop.value + paddingTop.unit
+                if (! paddingTop) {
+                    return {}
+                }
+
+                return {
+                    number: paddingTop.value,
+                    string: paddingTop.value + paddingTop.unit
                 }
             },
 
@@ -695,8 +734,13 @@ export default {
         paddingRight: {
             get () {
                 let paddingRight = this.getPaddingProp('right')
-                if (paddingRight) {
-                    return paddingRight.value + ' ' + paddingRight.unit
+                if (! paddingRight) {
+                    return {}
+                }
+
+                return {
+                    number: paddingRight.value,
+                    string: paddingRight.value + ' ' + paddingRight.unit
                 }
             },
 
@@ -712,8 +756,13 @@ export default {
         paddingBottom: {
             get () {
                 let paddingBottom = this.getPaddingProp('bottom')
-                if (paddingBottom) {
-                    return paddingBottom.value + paddingBottom.unit
+                if (! paddingBottom) {
+                    return {}
+                }
+
+                return {
+                    number: paddingBottom.value,
+                    string: paddingBottom.value + paddingBottom.unit
                 }
             },
 
@@ -729,8 +778,13 @@ export default {
         paddingLeft: {
             get () {
                 let paddingLeft = this.getPaddingProp('left')
-                if (paddingLeft) {
-                    return paddingLeft.value + ' ' + paddingLeft.unit
+                if (! paddingLeft) {
+                    return {}
+                }
+
+                return {
+                    number: paddingLeft.value,
+                    string: paddingLeft.value + ' ' + paddingLeft.unit
                 }
             },
 
@@ -751,6 +805,61 @@ export default {
             }
 
             return klass
+        },
+
+        /**
+         * Padding popup value
+         * @return {String}
+         */
+        paddingAllValue: {
+            get () {
+                let padding = [
+                    this.paddingTop.number,
+                    this.paddingRight.number,
+                    this.paddingBottom.number,
+                    this.paddingLeft.number
+                ]
+
+                // If it's already initialised
+                let value = 0
+                if (padding[0]) {
+                    for (let i in padding) {
+    					if (padding[i]>value) {
+    						value = padding[i]
+    					}
+    				}
+                }
+                return value
+            },
+
+            set (val) {
+                val = parseInt(val)
+                if (isNaN(val)) {
+                    val = 0
+                }
+
+                this.paddingTop = val
+                this.paddingRight = val
+                this.paddingBottom = val
+                this.paddingLeft = val
+            }
+        },
+
+        /**
+         * Padding popup unit
+         * @return {String}
+         */
+        paddingAllUnit: {
+            get () {
+                let paddingValue = this.getMarginProp(this.popupState.padding.direction)
+                if (paddingValue) {
+                    return paddingValue.unit
+                }
+            },
+
+            set (val) {
+                this.setMarginProp(`${this.popupState.padding.direction}.unit`, val)
+            }
         },
 
         /**
