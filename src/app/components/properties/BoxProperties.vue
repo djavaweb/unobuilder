@@ -108,7 +108,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mouseover.self="over('border', 'top')")
 
                             dt.top(
-                            v-html="borderTop.string",
+                            v-html="borderTop",
                             @mousedown="dragStart($event, 'border', 'top')")
 
                             dt.right-resize.border(
@@ -116,7 +116,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mouseover.self="over('border', 'right')")
 
                             dt.right(
-                            v-html="borderRight.string",
+                            v-html="borderRight",
                             @mousedown="dragStart($event, 'border', 'right')")
 
                             dt.bottom-resize(
@@ -124,7 +124,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mouseover.self="over('border', 'bottom')")
 
                             dt.bottom(
-                            v-html="borderBottom.string",
+                            v-html="borderBottom",
                             @mousedown="dragStart($event, 'border', 'bottom')")
 
                             dt.left-resize.border(
@@ -132,7 +132,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             @mouseover.self="over('border', 'left')")
 
                             dt.left(
-                            v-html="borderLeft.string",
+                            v-html="borderLeft",
                             @mousedown="dragStart($event, 'border', 'left')")
 
                         .inner
@@ -488,7 +488,7 @@ export default {
 
         marginTop: {
             get () {
-                return this.marginTopValue + this.marginTopUnit
+                return utils.autoValue(this.marginTopValue, this.marginTopUnit)
             },
 
             set (value) {
@@ -528,7 +528,7 @@ export default {
 
         marginRight: {
             get () {
-                return this.marginRightValue +' '+ this.marginRightUnit
+                return utils.autoValue(this.marginRightValue, this.marginRightUnit, ' ')
             },
 
             set (value) {
@@ -568,7 +568,7 @@ export default {
 
         marginBottom: {
             get () {
-                return this.marginBottomValue + this.marginBottomUnit
+                return utils.autoValue(this.marginBottomValue, this.marginBottomUnit)
             },
 
             set (value) {
@@ -608,7 +608,7 @@ export default {
 
         marginLeft: {
             get () {
-                return this.marginLeftValue +' '+ this.marginLeftUnit
+                return utils.autoValue(this.marginLeftValue, this.marginLeftUnit, ' ')
             },
 
             set (value) {
@@ -726,21 +726,39 @@ export default {
          * Border top value
          * @return {String}
          */
+        borderTopValue: {
+             get () {
+                 let borderTop = this.getBorderProp('top')
+                 if (borderTop) {
+                     return borderTop.value
+                 }
+             },
+
+             set (val) {
+                 this.setBorderProp('top.value', val)
+             }
+        },
+
+        borderTopUnit: {
+             get () {
+                 let borderTop = this.getBorderProp('top')
+                 if (borderTop) {
+                     return borderTop.unit
+                 }
+             },
+
+             set (val) {
+                 this.setBorderProp('top.unit', val)
+             }
+        },
+
         borderTop: {
             get () {
-                let borderTop = this.getBorderProp('top')
-                if (! borderTop) {
-                    return {}
-                }
-
-                return {
-                    number: borderTop.value,
-                    string: borderTop.value + borderTop.unit
-                }
+                return utils.autoValue(this.borderTopValue, this.borderTopUnit)
             },
 
-            set (val) {
-                this.setBorderProp('top.value', val)
+            set (value) {
+                this.borderTopValue = value
             }
         },
 
@@ -748,21 +766,39 @@ export default {
          * Border right value
          * @return {String}
          */
+        borderRightValue: {
+              get () {
+                  let borderRight = this.getBorderProp('right')
+                  if (borderRight) {
+                      return borderRight.value
+                  }
+              },
+
+              set (val) {
+                  this.setBorderProp('right.value', val)
+              }
+        },
+
+        borderRightUnit: {
+              get () {
+                  let borderRight = this.getBorderProp('right')
+                  if (borderRight) {
+                      return borderRight.unit
+                  }
+              },
+
+              set (val) {
+                  this.setBorderProp('right.unit', val)
+              }
+        },
+
         borderRight: {
             get () {
-                let borderRight = this.getBorderProp('right')
-                if (! borderRight) {
-                    return {}
-                }
-
-                return {
-                    number: borderRight.value,
-                    string: borderRight.value + ' ' + borderRight.unit
-                }
+                return utils.autoValue(this.borderRightValue, this.borderRightUnit, ' ')
             },
 
-            set (val) {
-                this.setBorderProp('right.value', val)
+            set (value) {
+                this.borderRightValue = value
             }
         },
 
@@ -770,21 +806,39 @@ export default {
          * Border bottom value
          * @return {String}
          */
+        borderBottomValue: {
+               get () {
+                   let borderBottom = this.getBorderProp('bottom')
+                   if (borderBottom) {
+                       return borderBottom.value
+                   }
+               },
+
+               set (val) {
+                   this.setBorderProp('bottom.value', val)
+               }
+        },
+
+        borderBottomUnit: {
+               get () {
+                   let borderBottom = this.getBorderProp('bottom')
+                   if (borderBottom) {
+                       return borderBottom.unit
+                   }
+               },
+
+               set (val) {
+                   this.setBorderProp('bottom.unit', val)
+               }
+        },
+
         borderBottom: {
             get () {
-                let borderBottom = this.getBorderProp('bottom')
-                if (! borderBottom) {
-                    return {}
-                }
-
-                return {
-                    number: borderBottom.value,
-                    string: borderBottom.value + borderBottom.unit
-                }
+                return utils.autoValue(this.borderBottomValue, this.borderBottomUnit)
             },
 
-            set (val) {
-                this.setBorderProp('bottom.value', val)
+            set (value) {
+                this.borderBottomValue = value
             }
         },
 
@@ -792,21 +846,39 @@ export default {
          * Border left value
          * @return {String}
          */
+        borderLeftValue: {
+                get () {
+                    let borderLeft = this.getBorderProp('left')
+                    if (borderLeft) {
+                        return borderLeft.value
+                    }
+                },
+
+                set (val) {
+                    this.setBorderProp('left.value', val)
+                }
+        },
+
+        borderLeftUnit: {
+                get () {
+                    let borderLeft = this.getBorderProp('left')
+                    if (borderLeft) {
+                        return borderLeft.unit
+                    }
+                },
+
+                set (val) {
+                    this.setBorderProp('left.unit', val)
+                }
+        },
+
         borderLeft: {
             get () {
-               let borderLeft = this.getBorderProp('left')
-               if (! borderLeft) {
-                   return {}
-               }
-
-               return {
-                   number: borderLeft.value,
-                   string: borderLeft.value + ' ' + borderLeft.unit
-               }
+               return utils.autoValue(this.borderLeftValue, this.borderLeftUnit, ' ')
             },
 
-            set (val) {
-                this.setBorderProp('left.value', val)
+            set (value) {
+                this.borderLeftValue = value
             }
         },
 
@@ -877,23 +949,12 @@ export default {
          */
         borderAll: {
             get () {
-                let border = [
-                    this.borderTop.number,
-                    this.borderRight.number,
-                    this.borderBottom.number,
-                    this.borderLeft.number
-                ]
-
-                // If it's already initialised
-                let value = 0
-                if (border[0]) {
-                    for (let i in border) {
-    					if (border[i]>value) {
-    						value = border[i]
-    					}
-    				}
-                }
-                return value
+                return Math.max(
+                    this.borderTopValue,
+                    this.borderRightValue,
+                    this.borderBottomValue,
+                    this.borderLeftValue
+                )
             },
 
             set (val) {
@@ -902,10 +963,10 @@ export default {
                     val = 0
                 }
 
-                this.borderTop = val
-                this.borderRight = val
-                this.borderBottom = val
-                this.borderLeft = val
+                this.borderTopValue = val
+                this.borderRightValue = val
+                this.borderBottomValue = val
+                this.borderLeftValue = val
             }
         },
 
@@ -915,14 +976,28 @@ export default {
          */
         borderAllUnit: {
             get () {
-                let borderValue = this.getMarginProp(this.popupState.border.direction)
-                if (borderValue) {
-                    return borderValue.unit
+                let units = [
+                    this.borderTopUnit,
+                    this.borderRightUnit,
+                    this.borderBottomUnit,
+                    this.borderLeftUnit
+                ]
+
+                let unit = ''
+                for (let i in units) {
+                    if (unit !== units[i]) {
+                        unit = units[i]
+                    }
                 }
+
+                return unit
             },
 
-            set (val) {
-                this.setMarginProp(`${this.popupState.border.direction}.unit`, val)
+            set (value) {
+                this.borderTopUnit = value
+                this.borderRightUnit = value
+                this.borderBottomUnit = value
+                this.borderLeftUnit = value
             }
         },
 
@@ -958,7 +1033,7 @@ export default {
 
         paddingTop: {
             get () {
-                return this.paddingTopValue + this.paddingTopUnit
+                return utils.autoValue(this.paddingTopValue, this.paddingTopUnit)
             },
 
             set (value) {
@@ -998,7 +1073,7 @@ export default {
 
         paddingRight: {
             get () {
-                return this.paddingRightValue + ' ' + this.paddingRightUnit
+                return utils.autoValue(this.paddingRightValue, this.paddingRightUnit)
             },
 
             set (value) {
@@ -1038,7 +1113,7 @@ export default {
 
         paddingBottom: {
             get () {
-                return this.paddingBottomValue + this.paddingBottomUnit
+                return utils.autoValue(this.paddingBottomValue, this.paddingBottomUnit)
             },
 
             set (value) {
@@ -1078,7 +1153,7 @@ export default {
 
         paddingLeft: {
             get () {
-                return this.paddingLeftValue + ' ' + this.paddingLeftUnit
+                return utils.autoValue(this.paddingLeftValue, this.paddingLeftUnit)
             },
 
             set (value) {
@@ -1314,7 +1389,7 @@ export default {
          * @return {Object} [{value: Integer, unit: String}]
          */
         getPaddingProp (value) {
-            let key = 'padding' + utils.capitalize(value, false)
+            let key = 'padding' + utils.capitalize(value)
             return this.$root.elementSelector().getProp(`${key}`, this.mouseState)
         },
 
@@ -1513,9 +1588,33 @@ export default {
          * @return {void}
          */
         hidePopup () {
+            // Reset popup state
             for (let i in this.popupState) {
                 this.resetObject(this.popupState[i])
             }
+
+            // Fix auto number
+            [
+                'marginTopValue', 'marginRightValue',
+                'marginBottomValue', 'marginLeftValue',
+                'paddingTopValue', 'paddingRightValue',
+                'paddingBottomValue', 'paddingLeftValue',
+                'borderTopValue', 'borderRightValue',
+                'borderBottomValue', 'borderLeftValue'
+            ].forEach((propKey) => {
+                if (isNaN(parseInt(this[propKey])) || isNaN(parseFloat(this[propKey]))) {
+                    // If key is margin, it's okay if value is auto
+                    // But it's a shame, if key is border or padding
+                    if (propKey.indexOf('margin')) {
+                        if (this[propKey] !== 'auto') {
+                            this[propKey] = 0
+                        }
+                    } else {
+                        this[propKey] = 0
+                    }
+                }
+            })
+
             this.displayOverlay = false
         },
 
