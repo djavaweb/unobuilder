@@ -1,10 +1,14 @@
 <template lang="pug">
-.popup
-    .popup-inner
-        a.popup-close.uk-icon-close(@click="onClose()")
-        .popup-title(v-if="title", v-html="title")
-        .popup-html
-            slot
+.popup(v-if="display")
+    .popup-window(:class="class")
+        .popup-inner
+            a.popup-close.uk-icon-close(@click="hide()")
+            .popup-title(v-if="title", v-html="title")
+            .popup-html
+                slot
+                button(v-if="button", @click="hide()") {{button}}
+
+    .popup-overlay(v-if="overlay", @click="hide()")
 </template>
 
 <style lang="sass">
@@ -20,14 +24,38 @@ export default {
             default: 'Untitled Popup'
         },
 
-        close: {
+        class: {
+            type: String,
+        },
+
+        overlay: {
+            type: Boolean,
+            default: false
+        },
+
+        button: {
+            type: String
+        },
+
+        onClose: {
             type: Function
         }
     },
 
+    data () {
+        return {
+            display: false
+        }
+    },
+
     methods: {
-        onClose () {
-            this.close && this.close()
+        show () {
+            this.display = true
+        },
+
+        hide () {
+            this.display = false
+            this.onClose && this.onClose()
         }
     }
 }

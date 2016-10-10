@@ -171,15 +171,13 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                                     dt.left(
                                     v-html="paddingLeft",
                                     @mousedown="dragStart($event, 'padding', 'left')")
-
-// Popup Overlay
-.popup-overlay(v-if="displayOverlay" @click="hidePopup()")
-
 // Popup margin
-popup.popup-right-panel(
+popup(
 :title="popupMarginTitle",
-:close="hidePopup",
-v-if="popupState.margin.display")
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-margin)
     .uk-grid.uk-grid-small
         .uk-width-6-10
             label Margin Value
@@ -190,13 +188,14 @@ v-if="popupState.margin.display")
             :width="30",
             :min="-1000",
             :max="1000")
-    button(@click="hidePopup()") OK
 
 // Popup all margin
-popup.popup-right-panel(
+popup(
 title="All Margin",
-:close="hidePopup",
-v-if="popupState.marginAll.display")
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-all-margin)
     .uk-grid.uk-grid-small
         .uk-width-6-10
             label Margin Value
@@ -207,13 +206,14 @@ v-if="popupState.marginAll.display")
             :width="30",
             :min="-1000",
             :max="1000")
-    button(@click="hidePopup()") OK
 
 // Popup padding
-popup.popup-right-panel(
+popup(
 :title="popupPaddingTitle",
-:close="hidePopup",
-v-if="popupState.padding.display")
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-padding)
     .uk-grid.uk-grid-small
         .uk-width-6-10
             label Padding Value
@@ -224,13 +224,14 @@ v-if="popupState.padding.display")
             :width="30",
             :min="0",
             :max="1000")
-    button(@click="hidePopup()") OK
 
 // Popup all padding
-popup.popup-right-panel(
+popup(
 title="All Padding",
-:close="hidePopup",
-v-if="popupState.paddingAll.display")
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-all-padding)
     .uk-grid.uk-grid-small
         .uk-width-6-10
             label Padding Value
@@ -241,13 +242,14 @@ v-if="popupState.paddingAll.display")
             :width="30",
             :min="0",
             :max="1000")
-    button(@click="hidePopup()") OK
 
 // Popup border
-popup.popup-right-panel(
+popup(
 :title="popupBorderTitle",
-:close="hidePopup",
-v-if="popupState.border.display")
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-border)
     .uk-grid.uk-grid-small
         .uk-width-6-10
             label Border Value
@@ -277,22 +279,33 @@ v-if="popupState.border.display")
         .uk-width-6-10
             label Border Color
         .uk-width-4-10
-    button(@click="hidePopup()") OK
+            color-box(:color="borderPopupColor.hex", @click="$refs.borderColorPopup.show()")
+
+// Popup: Border Color
+popup-color-picker(
+:colors.sync="borderPopupColor",
+:overlay="true",
+button="OK",
+v-ref:border-color-popup)
 </template>
 
 <script>
+import multiSelect from 'vue-multiselect'
 import utils from '../../utils.js'
 import popup from '../tools/screen/Popup.vue'
+import popupColorPicker from '../tools/screen/PopupColorPicker.vue'
 import accordionItem from '../accordion/Item.vue'
 import inputNumber from '../form/InputNumber.vue'
-import multiSelect from 'vue-multiselect'
+import colorBox from '../tools/element/ColorBox.vue'
 export default {
     name: 'BoxProperties',
     components: {
         popup,
+        colorBox,
         inputNumber,
         multiSelect,
-        accordionItem
+        accordionItem,
+        popupColorPicker
     },
     data () {
         return {
@@ -323,35 +336,27 @@ export default {
                     direction: ''
                 }
             },
-            displayOverlay: false,
             popupState: {
                 margin: {
-                    direction: '',
-                    display: false
+                    direction: ''
                 },
-                marginAll: {
-                    direction: '',
-                    display: false
+                allMargin: {
+                    direction: ''
                 },
                 border: {
-                    direction: '',
-                    display: false
+                    direction: ''
                 },
                 borderRadius: {
-                    direction: '',
-                    display: false
+                    direction: ''
                 },
-                borderAll: {
-                    direction: '',
-                    display: false
+                allBorder: {
+                    direction: ''
                 },
                 padding: {
-                    direction: '',
-                    display: false
+                    direction: ''
                 },
-                paddingAll: {
-                    direction: '',
-                    display: false
+                allPadding: {
+                    direction: ''
                 }
             }
         }
@@ -940,6 +945,23 @@ export default {
 
             set (val) {
                 this.setBorderProp(`${this.popupState.border.direction}.unit`, val)
+            }
+        },
+
+        /**
+         * Border popup color value
+         * @return {String}
+         */
+        borderPopupColor: {
+            get () {
+                let borderValue = this.getBorderProp(this.popupState.border.direction)
+                if (borderValue) {
+                    return borderValue.color
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`${this.popupState.border.direction}.color`, val)
             }
         },
 
@@ -1575,12 +1597,11 @@ export default {
          */
         showPopup (state, direction) {
             if (direction === 'all') {
-                state = `${state}All`
+                state = `all${utils.capitalize(state)}`
             }
 
-            this.popupState[state].display = true
             this.popupState[state].direction = direction
-            this.displayOverlay = true
+            this.$refs[`popup${utils.capitalize(state)}`].show()
         },
 
         /**
@@ -1614,8 +1635,6 @@ export default {
                     }
                 }
             })
-
-            this.displayOverlay = false
         },
 
         setBorderStyle (value) {

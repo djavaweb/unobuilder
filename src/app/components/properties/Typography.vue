@@ -73,6 +73,7 @@ accordion-item(title="Typography", :mouse-state.sync="mouseState", :advanced.syn
                             i.font-color
 
                     .uk-width-7-10(style="padding-left:5px")
+                        color-box(:color="fontColorHex", @click="$refs.fontColorPopup.show()")
 
             .uk-width-3-10
                 .uk-grid.uk-grid-small
@@ -118,6 +119,13 @@ accordion-item(title="Typography", :mouse-state.sync="mouseState", :advanced.syn
                         :min="-100")
     // End of font align
 // End of typography
+
+// Popup: Font color picker
+popup-color-picker(
+:colors.sync="fontColor",
+:overlay="true",
+button="OK",
+v-ref:font-color-popup)
 </template>
 
 <script>
@@ -128,14 +136,18 @@ import accordionItem from '../accordion/Item.vue'
 import accordionItemView from '../accordion/ItemView.vue'
 import inputNumber from '../form/InputNumber.vue'
 import buttons from '../form/Buttons.vue'
+import colorBox from '../tools/element/ColorBox.vue'
+import popupColorPicker from '../tools/screen/PopupColorPicker.vue'
 
 export default {
     name: 'Typography',
     components: {
         accordionItem,
+        popupColorPicker,
         accordionItemView,
         multiSelect,
         inputNumber,
+        colorBox,
         buttons
     },
 
@@ -203,6 +215,26 @@ export default {
          */
         fontFamilies () {
             return this.fonts.concat(this.googleFonts)
+        },
+
+        fontColor: {
+            get () {
+                return this.$root
+                .elementSelector()
+                .getProp('fontColor', this.mouseState)
+            },
+
+            set (val) {
+                this.$root
+                .elementSelector()
+                .setProp('fontColor', val, this.mouseState)
+            }
+        },
+
+        fontColorHex () {
+            if (this.fontColor) {
+                return this.fontColor.hex
+            }
         },
 
         fontFamily: {
