@@ -4,6 +4,7 @@
         .popup-inner
             .popup-html
                 color-picker(:colors.sync="colors", scheme="dark", v-ref:color-picker)
+                button(v-if="button", @click="hide()") {{button}}
 
     .popup-overlay(v-if="overlay", @click="hide()")
 </template>
@@ -50,6 +51,10 @@ export default {
         overlay: {
             type: Boolean,
             default: false
+        },
+
+        button: {
+            type: String
         },
 
         onClose: {

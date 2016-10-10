@@ -279,21 +279,33 @@ v-ref:popup-border)
         .uk-width-6-10
             label Border Color
         .uk-width-4-10
+            color-box(:color="borderPopupColor.hex", @click="$refs.borderColorPopup.show()")
+
+// Popup: Border Color
+popup-color-picker(
+:colors.sync="borderPopupColor",
+:overlay="true",
+button="OK",
+v-ref:border-color-popup)
 </template>
 
 <script>
+import multiSelect from 'vue-multiselect'
 import utils from '../../utils.js'
 import popup from '../tools/screen/Popup.vue'
+import popupColorPicker from '../tools/screen/PopupColorPicker.vue'
 import accordionItem from '../accordion/Item.vue'
 import inputNumber from '../form/InputNumber.vue'
-import multiSelect from 'vue-multiselect'
+import colorBox from '../tools/element/ColorBox.vue'
 export default {
     name: 'BoxProperties',
     components: {
         popup,
+        colorBox,
         inputNumber,
         multiSelect,
-        accordionItem
+        accordionItem,
+        popupColorPicker
     },
     data () {
         return {
@@ -933,6 +945,23 @@ export default {
 
             set (val) {
                 this.setBorderProp(`${this.popupState.border.direction}.unit`, val)
+            }
+        },
+
+        /**
+         * Border popup color value
+         * @return {String}
+         */
+        borderPopupColor: {
+            get () {
+                let borderValue = this.getBorderProp(this.popupState.border.direction)
+                if (borderValue) {
+                    return borderValue.color
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`${this.popupState.border.direction}.color`, val)
             }
         },
 

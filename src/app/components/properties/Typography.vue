@@ -121,7 +121,11 @@ accordion-item(title="Typography", :mouse-state.sync="mouseState", :advanced.syn
 // End of typography
 
 // Popup: Font color picker
-popup-color-picker(:colors.sync="fontColor", :overlay="true", v-ref:font-color-popup)
+popup-color-picker(
+:colors.sync="fontColor",
+:overlay="true",
+button="OK",
+v-ref:font-color-popup)
 </template>
 
 <script>
