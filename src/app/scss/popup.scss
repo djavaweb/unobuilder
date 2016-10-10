@@ -2,11 +2,6 @@
 @import "button.scss";
 
 .popup {
-    padding: 10px;
-    background-color: $charcoal-grey-four;
-    box-shadow: 0 1px 2px 5px rgba(0,0,0,0.2);
-    border-radius: 3px;
-
     &-inner {
         position: relative;
     }
@@ -58,12 +53,21 @@
         }
     }
 
-    &-right-panel {
+    &-window {
+        padding: 10px;
+        background-color: $charcoal-grey-four;
+        box-shadow: 0 1px 2px 5px rgba(0,0,0,0.2);
+        border-radius: 3px;
         z-index: 999;
         width: 85%;
         top: 50%;
         left: 50%;
         position: absolute;
         transform: translate(-50%, -50%);
+        height: auto;
+        &.color-picker {
+            background: none;
+            box-shadow: none;
+        }
     }
 }
