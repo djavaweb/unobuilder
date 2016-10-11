@@ -1,6 +1,6 @@
 <template lang="pug">
 .right-panel-container
-    accordion
+    accordion(v-ref:accordion-wrapper)
         prop-display(v-ref:display)
         prop-box-properties(v-ref:box)
         prop-attr(v-ref:attribute)

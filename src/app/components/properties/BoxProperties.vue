@@ -56,7 +56,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
             :class="marginClass",
             @mouseover.self="over('margin')")
                 label
-                    a(@click="showPopup('margin', 'all')") Margin
+                    a(@click="showPopup($event, 'margin', 'all')") Margin
                 dl
                     dt.top-resize(
                     @mousedown="dragStart($event, 'margin', 'top')",
@@ -95,7 +95,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     :class="borderClass",
                     @mouseover.self="over('border')")
                         label
-                            a(@click="showPopup('border', 'all')") Border
+                            a(@click="showPopup($event, 'border', 'all')") Border
 
                         a.radius.top.left(@mousedown="dragStartRadius($event, 'top', 'left')")
                         a.radius.top.right(@mousedown="dragStartRadius($event, 'top', 'right')")
@@ -140,7 +140,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             :class="paddingClass",
                             @mouseover.self="over('padding')")
                                 label
-                                    a(@click="showPopup('padding', 'all')") Padding
+                                    a(@click="showPopup($event, 'padding', 'all')") Padding
 
                                 dl
                                     dt.top-resize.padding(
@@ -279,7 +279,7 @@ v-ref:popup-border)
         .uk-width-6-10
             label Border Color
         .uk-width-4-10
-            color-box(:color="borderPopupColor.hex", @click="$refs.borderColorPopup.show()")
+            color-box(:color="borderPopupColor.hex", @click="$refs.borderColorPopup.show(popupOption($event))")
 
 // Popup: Border Color
 popup-color-picker(
@@ -324,7 +324,7 @@ v-ref:popup-all-border)
         .uk-width-6-10
             label Border Color
         .uk-width-4-10
-            color-box(:color="borderColorAll.hex", @click="$refs.borderColorAllPopup.show()")
+            color-box(:color="borderColorAll.hex", @click="$refs.borderColorAllPopup.show(popupOption($event))")
 
 // Popup: Border Color
 popup-color-picker(
@@ -1869,7 +1869,7 @@ export default {
             if (this.dragState.x === event.pageX &&
                 this.dragState.y === event.pageY &&
                 ! this.dragState.move) {
-				this.showPopup(this.dragState.layout, this.dragState.direction)
+				this.showPopup(event, this.dragState.layout, this.dragState.direction)
 			}
 
             // Stop dragging
@@ -1923,8 +1923,6 @@ export default {
                 xAxis = utils.capitalize(this.dragRadiusState.xAxis),
                 propKey = `borderRadius${yAxis + xAxis}`
 
-                console.log(propKey, delta);
-
                 this.dragRadiusState.move = true
 				this[propKey] = delta
 			}
@@ -1939,7 +1937,7 @@ export default {
             if (this.dragRadiusState.x === event.pageX &&
                 this.dragRadiusState.y === event.pageY &&
                 ! this.dragRadiusState.move) {
-				//this.showPopup(this.dragState.layout, this.dragState.direction)
+				//this.showPopup($event, this.dragState.layout, this.dragState.direction)
 			}
 
             // Stop dragging
@@ -1948,18 +1946,31 @@ export default {
         },
 
         /**
+         * Default option
+         * @param  {Event} event
+         * @return {Object}
+         */
+        popupOption (event) {
+            return {
+                y: event.pageY,
+                dependOnScroll: this.$root.ref('rightPanel.properties').$el
+            }
+        },
+
+        /**
          * Display popup
+         * @param  {Event} event
          * @param  {String} state State can be position|margin|border|padding
          * @param  {String} direction top|bottom|left|right
          * @return {void}
          */
-        showPopup (state, direction) {
+        showPopup (event, state, direction) {
             if (direction === 'all') {
                 state = `all${utils.capitalize(state)}`
             }
 
             this.popupState[state].direction = direction
-            this.$refs[`popup${utils.capitalize(state)}`].show()
+            this.$refs[`popup${utils.capitalize(state)}`].show(this.popupOption(event))
         },
 
         /**
