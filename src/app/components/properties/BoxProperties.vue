@@ -326,6 +326,18 @@ v-ref:popup-all-border)
         .uk-width-4-10
             color-box(:color="borderColorAll.hex", @click="$refs.borderColorAllPopup.show(popupOption($event))")
 
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Radius
+        .uk-width-4-10
+            input-number(
+            :value.sync="borderRadiusAll",
+            :unit.sync="borderRadiusAllUnit",
+            :width="30",
+            :units="['px', '%']",
+            :min="0",
+            :max="100")
+
 // Popup: Border Color
 popup-color-picker(
 :colors.sync="borderColorAll",
@@ -1557,6 +1569,64 @@ export default {
 
             set (val) {
                 this.setBorderProp(`radiusBottomRight.unit`, val)
+            }
+        },
+
+        /**
+         * Border radius popup unit
+         * @return {String}
+         */
+        borderRadiusAll: {
+            get () {
+                return Math.max(
+                    this.borderRadiusTopLeft,
+                    this.borderRadiusTopRight,
+                    this.borderRadiusBottomLeft,
+                    this.borderRadiusBottomRight
+                )
+            },
+
+            set (val) {
+                val = parseInt(val)
+                if (isNaN(val)) {
+                    val = 0
+                }
+
+                this.borderRadiusTopLeft = val
+                this.borderRadiusTopRight = val
+                this.borderRadiusBottomLeft = val
+                this.borderRadiusBottomRight = val
+            }
+        },
+
+        /**
+         * Border radius popup unit
+         * @return {String}
+         */
+        borderRadiusAllUnit: {
+            get () {
+                let units = [
+                    this.borderRadiusTopLeftUnit,
+                    this.borderRadiusTopRightUnit,
+                    this.borderRadiusBottomLeftUnit,
+                    this.borderRadiusBottomRightUnit
+                ]
+
+                let unit = ''
+                for (let i in units) {
+                    if (unit !== units[i]) {
+                        unit = units[i]
+                    }
+                }
+
+                return unit
+            },
+
+            set (value) {
+                this.borderRadiusTopLeftUnit = value
+                this.borderRadiusTopRightUnit = value
+                this.borderRadiusBottomLeftUnit = value
+                this.borderRadiusBottomRightUnit = value
             }
         },
 
