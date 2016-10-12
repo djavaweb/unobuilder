@@ -1,6 +1,6 @@
 <template lang="pug">
 .popup(v-if="display")
-    .popup-window.color-picker
+    .popup-window.color-picker(:style="positionStyle")
         .popup-inner
             .popup-html
                 color-picker(:colors.sync="colors", scheme="dark", v-ref:color-picker)
@@ -64,13 +64,48 @@ export default {
 
     data () {
         return {
-            display: false
+            display: false,
+            position: {x: 0, y: 0}
+        }
+    },
+
+    computed: {
+        positionStyle () {
+            let transform = [],
+            x = (! this.position.x) ? '50%': `${this.position.x}%`,
+            y = (! this.position.y) ? '50%': `${this.position.y}%`
+
+            return {
+                top: y,
+                left: x
+            }
         }
     },
 
     methods: {
-        show () {
+        show (obj) {
             this.display = true
+            this.$nextTick(() => {
+                if (obj && this.$els.popup) {
+                    let parent = this.$els.popup.parentElement,
+                    parentWidth = parent.offsetWidth,
+                    parentHeight = parent.offsetHeight
+
+                    if (obj.x) {
+                        if (obj.dependOnScroll) {
+                            obj.x += obj.dependOnScroll.scrollLeft
+                        }
+                        this.position.x = (parseFloat(obj.x/parentWidth) * 100).toFixed(2)
+                    }
+
+                    if (obj.y) {
+                        if (obj.dependOnScroll) {
+                            obj.y += obj.dependOnScroll.scrollTop
+                        }
+                        this.position.y = (parseFloat(obj.y/parentHeight) * 100).toFixed(2)
+                    }
+                }
+            })
         },
 
         hide () {

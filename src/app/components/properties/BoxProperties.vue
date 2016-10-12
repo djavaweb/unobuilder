@@ -56,7 +56,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
             :class="marginClass",
             @mouseover.self="over('margin')")
                 label
-                    a(@click="showPopup('margin', 'all')") Margin
+                    a(@click="showPopup($event, 'margin', 'all')") Margin
                 dl
                     dt.top-resize(
                     @mousedown="dragStart($event, 'margin', 'top')",
@@ -95,7 +95,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                     :class="borderClass",
                     @mouseover.self="over('border')")
                         label
-                            a(@click="showPopup('border', 'all')") Border
+                            a(@click="showPopup($event, 'border', 'all')") Border
 
                         a.radius.top.left(@mousedown="dragStartRadius($event, 'top', 'left')")
                         a.radius.top.right(@mousedown="dragStartRadius($event, 'top', 'right')")
@@ -140,7 +140,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                             :class="paddingClass",
                             @mouseover.self="over('padding')")
                                 label
-                                    a(@click="showPopup('padding', 'all')") Padding
+                                    a(@click="showPopup($event, 'padding', 'all')") Padding
 
                                 dl
                                     dt.top-resize.padding(
@@ -225,7 +225,7 @@ v-ref:popup-padding)
             :min="0",
             :max="1000")
 
-// Popup all padding
+// Popup: all padding
 popup(
 title="All Padding",
 :overlay="true",
@@ -279,7 +279,7 @@ v-ref:popup-border)
         .uk-width-6-10
             label Border Color
         .uk-width-4-10
-            color-box(:color="borderPopupColor.hex", @click="$refs.borderColorPopup.show()")
+            color-box(:color="borderPopupColor.hex", @click="$refs.borderColorPopup.show(popupOption($event))")
 
 // Popup: Border Color
 popup-color-picker(
@@ -287,6 +287,63 @@ popup-color-picker(
 :overlay="true",
 button="OK",
 v-ref:border-color-popup)
+
+// Popup: all border
+popup(
+title="All Border",
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-all-border)
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Width
+        .uk-width-4-10
+            input-number(
+            :value.sync="borderWidthAll",
+            :unit.sync="borderWidthAllUnit",
+            :width="30",
+            :min="0",
+            :max="1000")
+
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Type
+        .uk-width-4-10
+            multi-select(
+            :multiple="false",
+            :show-labels="false",
+            :selected="borderStyleAll",
+            @update="setAllBorderStyle",
+            :max-height="250",
+            :options="['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outside']|orderBy 1",
+            placeholder="Style")
+                span(slot="noResult") No border style have been found!
+
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Color
+        .uk-width-4-10
+            color-box(:color="borderColorAll.hex", @click="$refs.borderColorAllPopup.show(popupOption($event))")
+
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Border Radius
+        .uk-width-4-10
+            input-number(
+            :value.sync="borderRadiusAll",
+            :unit.sync="borderRadiusAllUnit",
+            :width="30",
+            :units="['px', '%']",
+            :min="0",
+            :max="100")
+
+// Popup: Border Color
+popup-color-picker(
+:colors.sync="borderColorAll",
+:overlay="true",
+button="OK",
+v-ref:border-color-all-popup)
 </template>
 
 <script>
@@ -315,6 +372,13 @@ export default {
                 x: 0,
                 move: false,
                 layout: '',
+                direction: '',
+                initialValue: 0
+            },
+            dragRadiusState: {
+                x: 0,
+                y: 0,
+                move: false,
                 direction: '',
                 initialValue: 0
             },
@@ -969,7 +1033,7 @@ export default {
          * Border popup value
          * @return {String}
          */
-        borderAll: {
+        borderWidthAll: {
             get () {
                 return Math.max(
                     this.borderTopValue,
@@ -996,7 +1060,7 @@ export default {
          * Border popup unit
          * @return {String}
          */
-        borderAllUnit: {
+        borderWidthAllUnit: {
             get () {
                 let units = [
                     this.borderTopUnit,
@@ -1020,6 +1084,89 @@ export default {
                 this.borderRightUnit = value
                 this.borderBottomUnit = value
                 this.borderLeftUnit = value
+            }
+        },
+
+        /**
+         * All border style popup
+         * @return {String}
+         */
+        borderStyleAll: {
+            get () {
+                let borderTop = this.getBorderProp('top'),
+                borderRight = this.getBorderProp('right'),
+                borderBottom =  this.getBorderProp('bottom'),
+                borderLeft = this.getBorderProp('left')
+
+                if (borderTop && borderRight && borderBottom && borderLeft) {
+                    let styles = [
+                        borderTop.style,
+                        borderRight.style,
+                        borderBottom.style,
+                        borderLeft.style
+                    ]
+
+                    let style = ''
+                    for (let i in styles) {
+                        if (style !== styles[i]) {
+                            style = styles[i]
+                        }
+                    }
+
+                    return style
+                }
+            },
+
+            set (value) {
+                this.setBorderProp('top.style', value)
+                this.setBorderProp('right.style', value)
+                this.setBorderProp('bottom.style', value)
+                this.setBorderProp('left.style', value)
+            }
+        },
+
+        /**
+         * All border color
+         * @return {String}
+         */
+        borderColorAll: {
+            cache: true,
+            get () {
+                let borderTop = this.getBorderProp('top'),
+                borderRight = this.getBorderProp('right'),
+                borderBottom =  this.getBorderProp('bottom'),
+                borderLeft = this.getBorderProp('left')
+
+                if (borderTop && borderRight && borderBottom && borderLeft) {
+                    let colors = [
+                        borderTop.color,
+                        borderRight.color,
+                        borderBottom.color,
+                        borderLeft.color
+                    ]
+
+                    let colorHex = '', color = {}
+                    for (let i in colors) {
+                        if (colorHex !== colors[i].hex) {
+                            colorHex = colors[i].hex
+                            color = colors[i]
+                        }
+                    }
+
+                    return color
+                }
+
+                return {}
+            },
+
+            set (value) {
+                // Only changes when popup opened
+                if (this.$refs.borderColorAllPopup.display) {
+                    this.setBorderProp('top.color', value)
+                    this.setBorderProp('right.color', value)
+                    this.setBorderProp('bottom.color', value)
+                    this.setBorderProp('left.color', value)
+                }
             }
         },
 
@@ -1290,6 +1437,200 @@ export default {
         },
 
         /**
+         * Border radius top left value
+         * @type {Object}
+         */
+        borderRadiusTopLeft: {
+            get () {
+                let radiusValue = this.getBorderProp('radiusTopLeft')
+                if (radiusValue) {
+                    return radiusValue.value
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`radiusTopLeft.value`, val)
+            }
+        },
+
+        /**
+         * Border radius top left unit
+         * @type {Object}
+         */
+        borderRadiusTopLeftUnit: {
+            get () {
+                let radiusValue = this.getBorderProp('radiusTopLeft')
+                if (radiusValue) {
+                    return radiusValue.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`radiusTopLeft.unit`, val)
+            }
+        },
+
+        /**
+         * Border radius top right value
+         * @type {Object}
+         */
+        borderRadiusTopRight: {
+            get () {
+                let radiusValue = this.getBorderProp('radiusTopRight')
+                if (radiusValue) {
+                    return radiusValue.value
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`radiusTopRight.value`, val)
+            }
+        },
+
+        /**
+         * Border radius top right unit
+         * @type {Object}
+         */
+        borderRadiusTopRightUnit: {
+            get () {
+                let radiusValue = this.getBorderProp('radiusTopRight')
+                if (radiusValue) {
+                    return radiusValue.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`radiusTopRight.unit`, val)
+            }
+        },
+
+        /**
+         * Border radius bottom right value
+         * @type {Object}
+         */
+        borderRadiusBottomLeft: {
+            get () {
+                let radiusValue = this.getBorderProp('radiusBottomLeft')
+                if (radiusValue) {
+                    return radiusValue.value
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`radiusBottomLeft.value`, val)
+            }
+        },
+
+        /**
+         * Border radius bottom right unit
+         * @type {Object}
+         */
+        borderRadiusBottomLeftUnit: {
+            get () {
+                let radiusValue = this.getBorderProp('radiusBottomLeft')
+                if (radiusValue) {
+                    return radiusValue.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`radiusBottomLeft.unit`, val)
+            }
+        },
+
+        /**
+         * Border radius bottom right value
+         * @type {Object}
+         */
+        borderRadiusBottomRight: {
+            get () {
+                let radiusValue = this.getBorderProp('radiusBottomRight')
+                if (radiusValue) {
+                    return radiusValue.value
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`radiusBottomRight.value`, val)
+            }
+        },
+
+        /**
+         * Border radius bottom right unit
+         * @type {Object}
+         */
+        borderRadiusBottomRightUnit: {
+            get () {
+                let radiusValue = this.getBorderProp('radiusBottomRight')
+                if (radiusValue) {
+                    return radiusValue.unit
+                }
+            },
+
+            set (val) {
+                this.setBorderProp(`radiusBottomRight.unit`, val)
+            }
+        },
+
+        /**
+         * Border radius popup unit
+         * @return {String}
+         */
+        borderRadiusAll: {
+            get () {
+                return Math.max(
+                    this.borderRadiusTopLeft,
+                    this.borderRadiusTopRight,
+                    this.borderRadiusBottomLeft,
+                    this.borderRadiusBottomRight
+                )
+            },
+
+            set (val) {
+                val = parseInt(val)
+                if (isNaN(val)) {
+                    val = 0
+                }
+
+                this.borderRadiusTopLeft = val
+                this.borderRadiusTopRight = val
+                this.borderRadiusBottomLeft = val
+                this.borderRadiusBottomRight = val
+            }
+        },
+
+        /**
+         * Border radius popup unit
+         * @return {String}
+         */
+        borderRadiusAllUnit: {
+            get () {
+                let units = [
+                    this.borderRadiusTopLeftUnit,
+                    this.borderRadiusTopRightUnit,
+                    this.borderRadiusBottomLeftUnit,
+                    this.borderRadiusBottomRightUnit
+                ]
+
+                let unit = ''
+                for (let i in units) {
+                    if (unit !== units[i]) {
+                        unit = units[i]
+                    }
+                }
+
+                return unit
+            },
+
+            set (value) {
+                this.borderRadiusTopLeftUnit = value
+                this.borderRadiusTopRightUnit = value
+                this.borderRadiusBottomLeftUnit = value
+                this.borderRadiusBottomRightUnit = value
+            }
+        },
+
+        /**
          * Popup Title for Margin
          * @return {String}
          */
@@ -1423,6 +1764,24 @@ export default {
         setPaddingProp (key, value) {
             let propKey = 'padding' + utils.capitalize(key, false)
             this.$root.elementSelector().setProp(`${propKey}`, value, this.mouseState)
+        },
+
+        /**
+         * Set current boder style in popup
+         * @param {String} key
+         * @param {String} value
+         */
+        setBorderStyle (value) {
+            this.borderStyle = value
+        },
+
+        /**
+         * Set all border properties at the same time
+         * @param {String} key
+         * @param {String} value
+         */
+        setAllBorderStyle (value) {
+            this.borderStyleAll = value
         },
 
         /**
@@ -1580,7 +1939,7 @@ export default {
             if (this.dragState.x === event.pageX &&
                 this.dragState.y === event.pageY &&
                 ! this.dragState.move) {
-				this.showPopup(this.dragState.layout, this.dragState.direction)
+				this.showPopup(event, this.dragState.layout, this.dragState.direction)
 			}
 
             // Stop dragging
@@ -1590,18 +1949,98 @@ export default {
         },
 
         /**
+         * Start dragging radius
+         * @param {Event} event
+         * @param {String} yAxis
+         * @param {String} xAxis
+         */
+        dragStartRadius (event, yAxis, xAxis) {
+            this.dragRadiusState.x = event.pageX
+			this.dragRadiusState.y = event.pageY
+            this.dragRadiusState.xAxis = xAxis
+            this.dragRadiusState.yAxis = yAxis
+            utils.addEvent(document, 'mousemove', this.dragMoveRadius, false)
+			utils.addEvent(document, 'mouseup', this.dragEndRadius, false)
+        },
+
+        /**
+         * Dragging radius
+         * @param  {Event} event
+         */
+        dragMoveRadius (event) {
+            let delta
+
+			// Get y coords by decreasing from start coords
+			if (this.dragRadiusState.y) {
+				delta = parseInt((this.dragRadiusState.y - event.pageY)/2)
+				delta = parseInt(delta * Math.tan(45 * Math.PI / 180))
+
+                // Flip value if yAxis is top
+				if (this.dragRadiusState.yAxis === 'top') {
+					delta = -delta
+				}
+
+                // Value below 0 is not allowed
+				if (delta<0) {
+					delta = 0
+				}
+			}
+
+            // Set value
+			if (delta) {
+
+                let yAxis = utils.capitalize(this.dragRadiusState.yAxis),
+                xAxis = utils.capitalize(this.dragRadiusState.xAxis),
+                propKey = `borderRadius${yAxis + xAxis}`
+
+                this.dragRadiusState.move = true
+				this[propKey] = delta
+			}
+        },
+
+        /**
+         * Draggin' radius ended
+         * @param  {Event} event
+         */
+        dragEndRadius (event) {
+            // If it's not moving at all show popup
+            if (this.dragRadiusState.x === event.pageX &&
+                this.dragRadiusState.y === event.pageY &&
+                ! this.dragRadiusState.move) {
+				//this.showPopup($event, this.dragState.layout, this.dragState.direction)
+			}
+
+            // Stop dragging
+            utils.removeEvent(document, 'mousemove', this.dragMoveRadius, false)
+			utils.removeEvent(document, 'mouseup', this.dragEndRadius, false)
+        },
+
+        /**
+         * Default option
+         * @param  {Event} event
+         * @return {Object}
+         */
+        popupOption (event) {
+            return {
+                y: event.pageY,
+                dependOnScroll: this.$root.ref('rightPanel.properties').$el
+            }
+        },
+
+        /**
          * Display popup
+         * @param  {Event} event
          * @param  {String} state State can be position|margin|border|padding
          * @param  {String} direction top|bottom|left|right
          * @return {void}
          */
-        showPopup (state, direction) {
+        showPopup (event, state, direction) {
             if (direction === 'all') {
                 state = `all${utils.capitalize(state)}`
             }
 
             this.popupState[state].direction = direction
-            this.$refs[`popup${utils.capitalize(state)}`].show()
+            this.$refs[`popup${utils.capitalize(state)}`].show(this.popupOption(event))
         },
 
         /**
@@ -1635,10 +2074,6 @@ export default {
                     }
                 }
             })
-        },
-
-        setBorderStyle (value) {
-            this.borderStyle = value
         }
     }
 }
