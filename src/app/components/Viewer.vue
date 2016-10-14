@@ -55,65 +55,188 @@ export default {
 			let parent = this.$root.ref(),
 			screenSize = parent.screenSize,
 			globalCSS = parent.global,
+			elements = parent.elements,
 			css = []
 
 			// Iterate, iterate, iterate your boat
-			// Iterate for global css
+			// Generate global css
 			for (let elementKind in globalCSS) {
 				if (globalCSS[elementKind]) {
 					//Render css based on breakpoints
 					let breakpoints = globalCSS[elementKind],
-					defaultProps = breakpoints.large
-
-					// Get the breakpoint size
-					switch (screenSize) {
-						// If medium was not found, get the large
-						case 'medium':
-							if (breakpoints.medium) {
-								defaultProps = breakpoints.medium
-							}
-						break
-
-						// If small was not found, get the medium
-						case 'small':
-							if (breakpoints.small) {
-								defaultProps = breakpoints.small
-							} else if (breakpoints.medium) {
-								defaultProps = breakpoints.medium
-							}
-						break
-
-						// If tiny was not found, get the small
-						case 'tiny':
-							if (breakpoints.tiny) {
-								defaultProps = breakpoints.tiny
-							} else if (breakpoints.small) {
-								defaultProps = breakpoints.small
-							} else if (breakpoints.medium) {
-								defaultProps = breakpoints.medium
-							}
-						break
-					}
+					defaultProps = this.getAvailableProps(screenSize, breakpoints),
+					hoverProps = this.getAvailableProps(screenSize, breakpoints, 'hover'),
+					activeProps = this.getAvailableProps(screenSize, breakpoints, 'active'),
+					focusProps = this.getAvailableProps(screenSize, breakpoints, 'focus')
 
 					// Render css
-					let cssObj = this.cssObject(elementKind, defaultProps),
-					selectorClass = utils.klass(`el-${elementKind}`),
-					cssPropObj = {
-						css: cssObj,
-						selector: `.${selectorClass}`,
-						elementKind: elementKind,
+					// Default state
+					let defaultCSSObj = this.generateCssSelector({
+						props: defaultProps,
+						global: true,
+						selector: '.' + utils.klass(`el-${elementKind}`),
+						elementKind: elementKind
+					})
+					if (defaultCSSObj) {
+						css.push(this.renderCSS(defaultCSSObj))
 					}
 
-					if (elementKind === 'container') {
-						cssPropObj.parentSelector = `.${utils.klass(`el-wrapper`)}`
+					// Hover state
+					let hoverCSSObj = this.generateCssSelector({
+						props: hoverProps,
+						global: true,
+						pseudo: ':hover',
+						selector: '.' + utils.klass(`el-${elementKind}`),
+						elementKind: elementKind
+					})
+					if (hoverCSSObj) {
+						css.push(this.renderCSS(hoverCSSObj))
 					}
 
-					css.push(this.cssProperties(cssPropObj))
+					// Active state
+					let activeCSSObj = this.generateCssSelector({
+						props: activeProps,
+						global: true,
+						pseudo: ':active',
+						selector: '.' + utils.klass(`el-${elementKind}`),
+						elementKind: elementKind
+					})
+					if (activeCSSObj) {
+						css.push(this.renderCSS(activeCSSObj))
+					}
+
+					// Focus state
+					let focusCSSObj = this.generateCssSelector({
+						props: focusProps,
+						global: true,
+						pseudo: ':focus',
+						selector: '.' + utils.klass(`el-${elementKind}`),
+						elementKind: elementKind
+					})
+					if (focusCSSObj) {
+						css.push(this.renderCSS(focusCSSObj))
+					}
+				}
+			}
+
+			// Generate css for self-properties
+			for (let id in elements) {
+				if (elements[id].props) {
+					//Render css based on breakpoints
+					let breakpoints = elements[id].props.self,
+					defaultProps = this.getAvailableProps(screenSize, breakpoints),
+					hoverProps = this.getAvailableProps(screenSize, breakpoints, 'hover'),
+					activeProps = this.getAvailableProps(screenSize, breakpoints, 'active'),
+					focusProps = this.getAvailableProps(screenSize, breakpoints, 'focus')
+
+					// Render css
+					// Default state
+					let defaultCSSObj = this.generateCssSelector({
+						props: defaultProps,
+						selector: `[data-id="${id}"]`,
+						elementKind: elements[id].kind,
+					})
+					if (defaultCSSObj) {
+						css.push(this.renderCSS(defaultCSSObj))
+					}
+
+					// Hover state
+					let hoverCSSObj = this.generateCssSelector({
+						props: hoverProps,
+						pseudo: ':hover',
+						selector: `[data-id="${id}"]`,
+						elementKind: elements[id].kind
+					})
+					if (hoverCSSObj) {
+						css.push(this.renderCSS(hoverCSSObj))
+					}
+
+					// Active state
+					let activeCSSObj = this.generateCssSelector({
+						props: activeProps,
+						psudo: ':active',
+						selector: `[data-id="${id}"]`,
+						elementKind: elements[id].kind,
+					})
+					if (activeCSSObj) {
+						css.push(this.renderCSS(activeCSSObj))
+					}
+
+					// Focus state
+					let focusCSSObj = this.generateCssSelector({
+						props: focusProps,
+						pseudo: ':focus',
+						selector: `[data-id="${id}"]`,
+						elementKind: elements[id].kind
+					})
+					if (focusCSSObj) {
+						css.push(this.renderCSS(focusCSSObj))
+					}
 				}
 			}
 
 			// Okie dogie, let's render
 			this.css = css.join('')
+		},
+
+		getAvailableProps (screenSize, breakpoints, mouseState = '') {
+			let availableProps = breakpoints[`large${mouseState}`]
+
+			// Get the breakpoint size
+			switch (screenSize) {
+				// If medium was not found, get the large
+				case 'medium':
+					if (breakpoints[`medium${mouseState}`]) {
+						availableProps = breakpoints[`medium${mouseState}`]
+					}
+				break
+
+				// If small was not found, get the medium
+				case 'small':
+					if (breakpoints[`small${mouseState}`]) {
+						availableProps = breakpoints[`small${mouseState}`]
+					} else if (breakpoints[`medium${mouseState}`]) {
+						availableProps = breakpoints[`medium${mouseState}`]
+					}
+				break
+
+				// If mini was not found, get the small
+				case 'mini':
+					if (breakpoints[`mini${mouseState}`]) {
+						availableProps = breakpoints[`mini${mouseState}`]
+					} else if (breakpoints[`small${mouseState}`]) {
+						availableProps = breakpoints[`small${mouseState}`]
+					} else if (breakpoints[`medium${mouseState}`]) {
+						availableProps = breakpoints[`medium${mouseState}`]
+					}
+				break
+			}
+
+			if (availableProps) {
+				return availableProps
+			}
+		},
+
+		generateCssSelector (options) {
+			if (options.elementKind && options.props) {
+				let pseudoSelector = (options.pseudo)? options.pseudo: '',
+				cssObj = this.cssObject(options.elementKind, options.props),
+				cssPropObj = {
+					css: cssObj,
+					selector: options.selector + pseudoSelector,
+					elementKind: options.elementKind,
+				}
+
+				if (options.elementKind === 'container') {
+					let selector = options.selector
+					if (options.global) {
+						selector = '.' + utils.klass(`el-wrapper`)
+					}
+					cssPropObj.parentSelector = `${selector}${pseudoSelector}`
+				}
+
+				return cssPropObj
+			}
 		},
 
 
@@ -178,9 +301,15 @@ export default {
 			/**
 			 * Background
 			 */
-			 if (properties.background.value === 'color') {
-				style.backgroundColor = utils.rgbaColor(properties.background.settings.color)
-			 }
+			switch (properties.background.value) {
+				 case 'color':
+				 	style.backgroundColor = utils.rgbaColor(properties.background.settings.color)
+				 break
+
+				 case 'none':
+				 	style.background = 'none'
+				 break
+			}
 
 			// Dimension
 			// Width
@@ -271,7 +400,7 @@ export default {
 		 * @param {Object} object [kind, selector, parentSelector, css]
 		 * @return {String}
 		 */
-		cssProperties (object) {
+		renderCSS (object) {
 			let $root = this.$root,
 			cssArr = [],
 			cssArrParent = [],
