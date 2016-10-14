@@ -1,10 +1,11 @@
-uno.component.add('column-4', {
+uno.registerComponent('column-4', {
     data: {},
     events: {
-        init: function () {},
-        dragstart: function () {},
-        dragmove: function (coords) {},
-        dragend: function () {},
+        beforeInit: function () {},
+        afterInit: function () {},
+        dragStart: function () {},
+        dragMove: function (coords) {},
+        dragEnd: function () {},
         ready: function () {}
     }
 })

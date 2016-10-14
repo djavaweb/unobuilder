@@ -7,7 +7,9 @@ style(type="text/css",v-el:css) {{{css}}}
 </style>
 
 <script>
-import _ from 'underscore'
+import _each from 'lodash/each'
+import _isArray from 'lodash/isArray'
+import _isObject from 'lodash/isObject'
 import config from '../config.js'
 import utils from '../utils.js'
 
@@ -379,7 +381,7 @@ export default {
 				style.height = '100%'
 
 				// Delete position and other unnecesery style
-				_.each(['position',
+				_each(['position',
 					'minWidth', 'maxWidth', 'minHeight', 'maxHeight',
 					'marginTop', 'marginLeft', 'marginRight', 'marginBottom',
 					'paddingTop', 'paddingLeft', 'paddingRight', 'paddingBottom',
@@ -449,14 +451,14 @@ export default {
 						childExclusion = exclusion[object.elementKind].child
 
 						if (parentExclusion) {
-							if (_.isArray(parentExclusion)) {
+							if (_isArray(parentExclusion)) {
 								if (parentExclusion.includes(prop.kebab)) {
 									cssArrParent.push(cssProperty)
 								} else {
 									cssArr.push(cssProperty)
 								}
-							} else if (_.isObject(parentExclusion)) {
-								_.each(parentExclusion, (item, key) => {
+							} else if (_isObject(parentExclusion)) {
+								_each(parentExclusion, (item, key) => {
 									if (key === prop.kebab) {
 										cssArr.push(`${prop.kebab}:${item.self}`)
 										cssArrParent.push(`${prop.kebab}:${item.parent}`)

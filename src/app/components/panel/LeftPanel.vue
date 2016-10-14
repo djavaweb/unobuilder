@@ -33,12 +33,68 @@
             v-model="search",
             placeholder="Search Elements"
             )
+
+        // Component List
+        accordion(v-if="componentLoaded", v-ref:accordion)
+            accordion-item(v-for="(groupName, items) in components|filterBy search", :title="groupName")
+                component-item(
+                v-for="component in items|filterBy search",
+                :component="component",
+                :class="componentClass(component.settings.id, $index)",
+                v-ref:component.settings.id)
 // End of left panel
 </template>
 
 <script>
+import _each from 'lodash/each'
+import _size from 'lodash/size'
+import accordion from '../accordion/Wrapper.vue'
+import accordionItem from '../accordion/Item.vue'
+import componentItem from './LeftPanelComponent.vue'
+import utils from '../../utils.js'
+import client from '../../client.js'
 export default {
     name: 'leftPanel',
+
+    components: {
+        accordion,
+        accordionItem,
+        componentItem
+    },
+
+    data () {
+        return {
+            search: null,
+            componentLoaded: false,
+            components: {},
+            panels: {
+                component: {
+                    icon: 'uk-icon-plus',
+                    selected: true,
+                    active: false
+                },
+
+                cssEditor: {
+                    icon: 'icon-code-editor',
+                    active: false
+                }
+            }
+        }
+    },
+
+    computed: {
+        /**
+         * Get active panel
+         * @return {String}
+         */
+        activePanel () {
+            for (let name in this.panels) {
+                if (this.panels[name].active) {
+                    return name
+                }
+            }
+        }
+    },
 
     methods: {
         /**
@@ -77,39 +133,46 @@ export default {
          */
         isActivePanel (panelName) {
             return this.panels[panelName].active
-        }
-    },
+        },
 
-    computed: {
         /**
-         * Get active panel
-         * @return {String}
+         * Generate component class
+         * @param  {String} id
+         * @param  {Number} index
+         * @return {Array}
          */
-        activePanel () {
-            for (let name in this.panels) {
-                if (this.panels[name].active) {
-                    return name
-                }
+        componentClass (id, index) {
+            let klass = []
+            klass.push(`component-${utils.slugify(name)}`)
+
+            if ((index + 1) % 3 === 0) {
+                klass.push('no-space-right')
             }
+
+            return klass
         }
     },
 
-    data () {
-        return {
-            search: null,
-            panels: {
-                component: {
-                    icon: 'uk-icon-plus',
-                    selected: true,
-                    active: false
-                },
-
-                cssEditor: {
-                    icon: 'icon-code-editor',
-                    active: false
+    ready () {
+        /**
+         * Event when add component called
+         */
+        client.on('componentAdded', (component) => {
+            this.componentLoaded = false
+            this.$nextTick(() => {
+                // Create new group if not defined
+                if (! this.components[component.settings.group]) {
+                    this.components[component.settings.group] = []
                 }
-            }
-        }
+
+                // Push component to group of components
+                this.components[component.settings.group].push(component)
+
+                // Component is ready
+                component.ready && component.ready.apply(component)
+                this.componentLoaded = true
+            })
+        })
     }
 }
 </script>
