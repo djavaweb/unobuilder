@@ -1,18 +1,19 @@
 <template>
-<div class="element-item" @mousedown="drag($event)">
+<div class="element-item">
 	<div class="icon" :style="style"></div>
-	<div class="label">{{data.info.label}}</div>
+	<div class="label">{{component.settings.label}}</div>
 </div>
 </template>
 
 <script>
+import utils from '../../utils.js'
 export default {
 	name: 'componentItem',
 	props: {
-		data: {
-			required: true,
+		component: {
 			type: Object,
-			default: null
+			required: true,
+			default: () => {}
 		}
 	},
 
@@ -25,8 +26,8 @@ export default {
 			let styles = {}
 
 			// Change default icon if any
-			if (this.data.info && this.data.info.icon) {
-				styles.backgroundImage = `url(${this.data.info.icon})`
+			if (this.component.settings.icon) {
+				styles.backgroundImage = `url(${this.component.settings.icon})`
 			}
 
 			return styles
@@ -40,8 +41,8 @@ export default {
 		 * @return {void}
 		 */
 		drag (event) {
-			this.$dispatch('dragComponent', event, this.$el, this.data)
-		}
+
+		},
 	}
 }
 </script>

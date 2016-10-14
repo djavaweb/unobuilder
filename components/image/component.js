@@ -1,12 +1,11 @@
-uno.component.add('image', {
+uno.registerComponent('image', {
 	data: {},
     events: {
-        init: function () {},
-        dragstart: function () {},
-        dragmove: function (coords) {},
-        dragend: function () {},
-        ready: function () {
-			console.log('image ready');
-		}
+		beforeInit: function () {},
+        afterInit: function () {},
+        dragStart: function () {},
+        dragMove: function (coords) {},
+        dragEnd: function () {},
+        ready: function () {}
     }
 })

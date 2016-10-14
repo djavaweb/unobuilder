@@ -1,3 +1,9 @@
+import _mapValues from 'lodash/mapValues'
+import _isObject from 'lodash/isObject'
+import _isArray from 'lodash/isArray'
+import _each from 'lodash/each'
+import _map from 'lodash/map'
+
 const classPrefix = 'uno',
 cssPrefixes = ['-webkit-', '-moz-', '-ms-'],
 camelPrefixes = ['Webkit', 'Moz', 'ms'],
@@ -231,6 +237,57 @@ const utils = {
 		.replace(/_id$/,'')
 		.replace(/_/g, ' ')
 	},
+
+    /**
+	* Current Script Data last path and init id
+	*/
+	lastScriptInitId () {
+		let scripts = document.querySelectorAll('script[src]'),
+        script = scripts[scripts.length - 1],
+        initId = script.getAttribute('data-uno-register-id')
+		return initId
+	},
+
+    /**
+     * Check if json is valid
+     * @param  {String}  json
+     * @param  {String}  message
+     * @return {Boolean}
+     */
+    isJSON (json, message = 'Invalid JSON') {
+        try {
+            return JSON.parse(json)
+        } catch (e) {
+            throw Error(message)
+        }
+    },
+
+    /**
+     * Replace object deep
+     * @param {Object} object
+     * @param {Array} replace
+     * @return {Object}
+     */
+    replaceDeep (obj, replace) {
+        const replaceItem = (_item) => {
+            _each(replace, (obj) => {
+                _item = _item.replace(obj.regex, obj.value)
+            })
+
+            return _item
+        }
+
+        return _mapValues(obj, (item) => {
+            if (typeof item === 'string') {
+                item = replaceItem(item)
+            } else if (_isArray(item)) {
+                item = _map(item, (value) => replaceItem(value))
+            } else if (_isObject(item)) {
+                item = this.replaceDeep(item, replace)
+            }
+            return item
+        })
+    }
 }
 
 export default utils

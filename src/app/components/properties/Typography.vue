@@ -129,7 +129,7 @@ v-ref:font-color-popup)
 </template>
 
 <script>
-import _ from 'underscore'
+import _each from 'lodash/each'
 import multiSelect from 'vue-multiselect'
 import config from '../../config.js'
 import accordionItem from '../accordion/Item.vue'
@@ -166,7 +166,7 @@ export default {
 		$.getJSON(url, (response) => {
 			if (response.items && response.items.length > 0) {
                 let googleFonts = []
-				_.each(response.items, (item) => {
+				_each(response.items, (item) => {
 					googleFonts.push(item.family)
 				})
                 this.googleFonts = googleFonts

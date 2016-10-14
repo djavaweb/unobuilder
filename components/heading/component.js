@@ -1,10 +1,11 @@
-uno.component.add('heading', {
+uno.registerComponent('heading', {
 	data: {},
     events: {
-        init: function () {},
-        dragstart: function () {},
-        dragmove: function (coords) {},
-        dragend: function () {},
+		beforeInit: function () {},
+        afterInit: function () {},
+        dragStart: function () {},
+        dragMove: function (coords) {},
+        dragEnd: function () {},
         ready: function () {}
     }
 })

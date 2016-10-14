@@ -1,4 +1,5 @@
 <template lang="pug">
+#uno-builder
 	screen-detector(v-ref:screen-detector)
 	css-editor(v-ref:css-editor)
 

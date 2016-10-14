@@ -1,10 +1,11 @@
-uno.component.add('text', {
+uno.registerComponent('text', {
 	data: {},
     events: {
-        init: function () {},
-        dragstart: function () {},
-        dragmove: function (coords) {},
-        dragend: function () {},
+		beforeInit: function () {},
+        afterInit: function () {},
+        dragStart: function () {},
+        dragMove: function (coords) {},
+        dragEnd: function () {},
         ready: function () {}
     }
 })

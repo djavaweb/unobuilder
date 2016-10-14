@@ -1,7 +1,7 @@
 /* Our Applications */
 import Vue from 'vue'
 import viewer from './components/Viewer.vue'
-import _ from 'underscore'
+import _ from 'lodash'
 import dot from 'dot-object'
 import classList from './lib/classlist.js'
 import Mousetrap from './lib/mousetrap.min.js'
@@ -185,7 +185,7 @@ const App = new Vue({
 			// Join $klass array separated by space
 			el.$klassify = (val) => {
 				let klass = el.$klass.map(item => item.replace('$klass-', ''))
-				klass = _.unique(klass).join(' ')
+				klass = _.uniq(klass).join(' ')
 				return klass
 			}
 
@@ -1022,7 +1022,7 @@ const App = new Vue({
 			return window
 			.parent
 			.document
-			.querySelector('#app')
+			.querySelector('body')
 			.__vue__
 			.ref(ref)
 		},

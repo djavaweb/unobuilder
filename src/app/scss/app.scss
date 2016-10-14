@@ -19,7 +19,7 @@ html, body, #app {
     @include grabbing;
 }
 
-#app {
+#uno-builder {
     @include flex;
     @include user-select;
     font-family: 'Open Sans', sans-serif;
@@ -124,7 +124,7 @@ html, body, #app {
         @include flex;
         flex-grow: 1;
         overflow: hidden;
-        height: 100vh;
+        height: 100%;
         position: relative;
         background: #cccccc;
 

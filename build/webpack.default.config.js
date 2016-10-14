@@ -51,11 +51,6 @@ module.exports = {
                 test: /\.js$/,
                 exclude: /node_modules|vue\/dist|vue-router\/|vue-loader\/|vue-hot-reload-api\//,
                 loader: 'babel'
-            },
-
-            {
-                test: require.resolve(path.resolve(appDir, 'client.js')),
-                loader: "expose?uno"
             }
         ]
     },
