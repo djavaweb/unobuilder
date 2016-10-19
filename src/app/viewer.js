@@ -451,7 +451,7 @@ Viewer.mixins = {
 			}
 
 			// Select element
-			el.$select = (isRightClick) => {
+			el.$select = (isRightClick = false) => {
 				if (el.$selectable) {
 					let parent = el.$parentElement(), index = 0, last = false
 
@@ -476,8 +476,8 @@ Viewer.mixins = {
 					this.activeElement = el.$id
 
 					// Notify to element selector
+					let selector = this.canvasBuilder('elementSelector')
 					this.$nextTick(() => {
-						let selector = this.canvasBuilder('elementSelector')
 						selector.setState({
 							state: 'select',
 							id: el.$id,
@@ -1035,6 +1035,15 @@ Viewer.mixins = {
 		},
 
 		/**
+		 * Get builder leftpanel
+		 * @param {String} ref
+		 * @param {String} el
+		 */
+		leftPanel (ref, el) {
+			return utils.ref(this.builder('leftPanel'), ref, el)
+		},
+
+		/**
 		 * On mouse over
 		 *
 		 * @param  {Event} event
@@ -1063,11 +1072,23 @@ Viewer.mixins = {
 
 		/**
 		 * Element clicked
-		 * @param  {Event} event
+		 * @param  {Event} e
 		 * @return {void}
 		 */
-		click (event) {
-			let element = event.target
+		click (e) {
+			let element = e.target
+
+			// Hide context menu first
+			this.canvasBuilder('contextMenu').hide()
+
+			// Hide block
+			this.canvasBuilder('block').hide()
+
+			// Hide left panel
+			let leftPanel = this.leftPanel()
+			if (leftPanel.isActivePanel('component')) {
+				leftPanel.setPanel('component')
+			}
 
 			if (element.$selectable) {
 				element.$select()
@@ -1080,10 +1101,10 @@ Viewer.mixins = {
 
 		/**
 		 * Element on double clcik
-		 * @param {Event} event
+		 * @param {Event} e
 		 */
-		dblclick (event) {
-			let element = event.target
+		dblclick (e) {
+			let element = e.target
 			if (element.$editable) {
 				element.$edit(true)
 			} else {
@@ -1095,22 +1116,19 @@ Viewer.mixins = {
 
 		/**
 		 * Right click event, will show context menu
-		 * @param  {Event} event
+		 * @param  {Event} e
 		 */
-		rightclick (event) {
-			if ((! event.target.$editable || ! this.editComponent) &&
-				event.target.$select) {
+		rightclick (e) {
+			if ((! e.target.$editable || ! this.editComponent) && e.target.$select) {
+				e.preventDefault()
 
-				event.preventDefault()
-				event.target.$select(true)
+				// Select element
+				e.target.$select(true)
 
 				// Notify parent to show context menu
-				let contextMenu = this.canvasBuilder('contextMenu')
-				this.$nextTick(() => {
-					contextMenu.setPosition({
-						x: event.pageX,
-						y: event.pageY
-					})
+				this.canvasBuilder('contextMenu').setPosition({
+					x: e.pageX,
+					y: e.pageY
 				})
 			}
 		},
@@ -1130,12 +1148,13 @@ Viewer.mixins = {
 
 		/**
 		 * Update hover outline element
+		 * @param {Boolean} isRightclick
 		 */
-		trySelect () {
+		trySelect (isRightclick) {
 			if (this.activeElement) {
 				let element = this.getElement(this.activeElement)
 				if (element) {
-					element.$select()
+					element.$select(isRightclick)
 				}
 			}
 		},

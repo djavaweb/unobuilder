@@ -181,23 +181,9 @@ export default {
 
 			// Hide all tools
 			if (object.state === 'select') {
+				
+				// Set expanded breadcrumb to collapse
 				this.$nextTick(() => {
-					// Hide left panel
-					let leftPanel = this.$root.ref('leftPanel')
-					if (leftPanel.isActivePanel('component')) {
-						leftPanel.setPanel('component')
-					}
-
-					// Hide block
-					this.$root.canvasBuilder('block').hide()
-
-					// Hide context menu
-					let contextMenu = this.$root.canvasBuilder('contextMenu')
-					if (!object.rightClick && contextMenu.display) {
-						contextMenu.hide()
-					}
-
-					// Set expanded breadcrumb to collapse
 					this.$refs.selectBreadcrumb.expand = false
 				})
 			}
