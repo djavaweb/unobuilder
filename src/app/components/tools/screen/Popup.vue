@@ -11,10 +11,6 @@
     .popup-overlay(v-if="overlay", @click="hide()")
 </template>
 
-<style lang="sass">
-@import "../../../scss/popup.scss"
-</style>
-
 <script>
 export default {
     name: 'popup',

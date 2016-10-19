@@ -6,18 +6,21 @@
         block(v-ref:block)
 
     iframe(
+    src="about:blank",
     v-el:iframe,
-    src="./viewer.html",
     :class="viewerClass",
     :style="viewerWidth"
     )
 </template>
 
 <script>
+import Vue from 'vue'
 import contextMenu from '../tools/screen/ContextMenu.vue'
 import elementSelector from '../tools/selector/ElementSelector.vue'
 import block from '../tools/block/Block.vue'
 import utils from '../../utils.js'
+import unoViewer from '../../viewer.js'
+
 export default {
     name: 'canvasBuilder',
     components: {
@@ -85,16 +88,16 @@ export default {
          * Get DOM of viewer
          */
         viewerDOM (query) {
-            let doc = this.$els.iframe.contentWindow.document
+            let win = this.$els.iframe.contentWindow
             if (typeof query !== 'undefined') {
                 if (query === null) {
-                    doc = this.$els.iframe
+                    win = this.$els.iframe
                 } else {
-                    doc = doc.querySelector(query)
+                    win = win.document.querySelector(query)
                 }
             }
 
-            return doc
+            return win
         },
 
         /**
@@ -136,6 +139,43 @@ export default {
         offset (offset) {
             return this.$els.canvasBuilder.getBoundingClientRect()[offset]
         }
+    },
+
+    ready () {
+        this.viewerDOM(null).onload = () => {
+            // Attach Vue Events
+            this.viewerDOM('body').outerHTML = '<body @mouseleave="leave($event)" @mouseover="over($event)" @click="click($event)" @dblclick="dblclick($event)" @contextmenu="rightclick($event)">'+ this.viewerDOM('body').innerHTML +'</body>'
+
+            // Viewer stylesheet
+            let viewerElement = document.createElement('viewer')
+            this.viewerDOM('body').appendChild(viewerElement)
+            viewerElement.outerHTML = '<viewer v-ref:viewer></viewer>'
+
+            // Google webfont
+            let webfont = document.createElement('script')
+            webfont.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js'
+            this.viewerDOM('body').appendChild(webfont)
+
+            // Attach important js modules
+            unoViewer.window = this.viewerDOM()
+            unoViewer.window.jQuery = require('jquery')
+            unoViewer.window.UIKit = require('uikit')
+            unoViewer.element = window.__uno__.element
+
+            // UIKit CSS
+            let uikitCss = document.createElement('style')
+            this.viewerDOM('head').appendChild(uikitCss)
+            uikitCss.innerHTML = require('raw!uikit/dist/css/uikit.min.css?hack') +
+            require('raw!sass!../../../assets/scss/canvas.scss')
+
+            new Vue({
+                el: this.viewerDOM('body'),
+                mixins: [unoViewer.mixins]
+            })
+        }
+
+        // Set source based on uno url
+        this.viewerDOM(null).src = window.__uno__.url
     }
 }
 </script>

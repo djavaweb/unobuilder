@@ -1,0 +1,427 @@
+.button {
+    line-height: 0;
+    border-radius: 1px;
+    border-top: 1px solid rgba(74,143,226,0.18);
+    background-color: $windows-blue;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    box-shadow: inset 1px 1px 0px 0px rgba(74,143,226,0.18), 1px 2px 0 0 rgba(41, 41, 41, 0.5);
+    cursor: default;
+    border: none;
+    border-top: 1px solid rgba(243, 243, 243, 0.18);
+    font-weight: bold;
+    text-decoration: none;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    &-group {
+        @include flex;
+        flex-grow: 1;
+        &.center {
+            justify-content: center;
+        }
+        &.right {
+            justify-content: flex-end;
+        }
+    }
+
+    &:hover {
+        background-color: $dusk-blue;
+        text-decoration: none;
+    }
+
+    &:active, &.active {
+        background-color: $dark;
+        border-top: 1px solid $dark;
+        box-shadow: inset 1px 1px 0px 0px rgba(37, 37, 37, 0.18), 1px 1px 0 0 rgba(64, 64, 64, 0.5);
+    }
+}
+
+.rect-button {
+    @extend .button;
+    width: 30px;
+    height: 30px;
+    margin: 0 1px 2px 0;
+    background-color: $gunmetal;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-bottom: 1px solid transparent;
+
+    &.group {
+		color: #ffffff;
+		vertical-align: middle;
+	    margin: 0;
+		padding: 5px;
+		font-size: 11px;
+		text-align: center;
+		display: inline-block;
+		height: 10px;
+		width: auto;
+		span {
+			vertical-align: -5px;
+		}
+    }
+
+    &.active {
+        border-top: 1px solid transparent;
+        box-shadow: inset 1px 1px 0px 0px rgba(23, 23, 23, 0.18), 1px 2px 0 0 rgba(41, 41, 41, 0.5);
+        border-bottom: 1px solid #171d1f;
+    }
+
+    &.disabled, &.disabled:hover {
+        opacity: 0.5;
+        background-color: $gunmetal;
+        box-shadow: none;
+    }
+
+    &.display-block {
+        background-image: url('#{$assets_path}/img/display-block.svg');
+    }
+
+    &.display-flex {
+        background-image: url('#{$assets_path}/img/display-flex.svg');
+    }
+
+    &.display-none {
+        background-image: url('#{$assets_path}/img/display-none.svg');
+    }
+
+    &.flex-row {
+        background-image: url('#{$assets_path}/img/flex-row.svg');
+        &--reverse {
+            background-image: url('#{$assets_path}/img/flex-row-reverse.svg');
+        }
+    }
+
+    &.flex-column {
+        background-image: url('#{$assets_path}/img/flex-col.svg');
+        &--reverse {
+            background-image: url('#{$assets_path}/img/flex-col-reverse.svg');
+        }
+    }
+
+    &.flex-reverse {
+        &--row, &--wrap-col {
+            background-image: url('#{$assets_path}/img/flex-row-dir-reverse.svg');
+        }
+        &--col, &--wrap-row {
+            background-image: url('#{$assets_path}/img/flex-col-dir-reverse.svg');
+        }
+    }
+
+    &.row-justify {
+        &--start {
+            background-image: url('#{$assets_path}/img/flex-row-justify-start.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-justify-start-reverse.svg');
+            }
+        }
+
+        &--center {
+            background-image: url('#{$assets_path}/img/flex-row-justify-center.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-justify-center-reverse.svg');
+            }
+        }
+
+        &--end {
+            background-image: url('#{$assets_path}/img/flex-row-justify-end.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-justify-end-reverse.svg');
+            }
+        }
+
+        &--space-between {
+            background-image: url('#{$assets_path}/img/flex-row-justify-space-between.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-justify-space-between-reverse.svg');
+            }
+        }
+
+        &--space-around {
+            background-image: url('#{$assets_path}/img/flex-row-justify-space-around.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-justify-space-around-reverse.svg');
+            }
+        }
+    }
+
+    &.row-align {
+        &--start {
+            background-image: url('#{$assets_path}/img/flex-row-align-start.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-align-start-reverse.svg');
+            }
+        }
+
+        &--center {
+            background-image: url('#{$assets_path}/img/flex-row-align-center.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-align-center-reverse.svg');
+            }
+        }
+
+        &--end {
+            background-image: url('#{$assets_path}/img/flex-row-align-end.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-align-end-reverse.svg');
+            }
+        }
+
+        &--stretch {
+            background-image: url('#{$assets_path}/img/flex-row-align-stretch.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-align-stretch-reverse.svg');
+            }
+        }
+
+        &--baseline {
+            background-image: url('#{$assets_path}/img/flex-row-align-baseline.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-row-align-baseline-reverse.svg');
+            }
+        }
+    }
+
+    &.col-justify {
+        &--start {
+            background-image: url('#{$assets_path}/img/flex-col-justify-start.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-justify-start-reverse.svg');
+            }
+        }
+
+        &--center {
+            background-image: url('#{$assets_path}/img/flex-col-justify-center.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-justify-center-reverse.svg');
+            }
+        }
+
+        &--end {
+            background-image: url('#{$assets_path}/img/flex-col-justify-end.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-justify-end-reverse.svg');
+            }
+        }
+
+        &--space-between {
+            background-image: url('#{$assets_path}/img/flex-col-justify-space-between.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-justify-space-between-reverse.svg');
+            }
+        }
+
+        &--space-around {
+            background-image: url('#{$assets_path}/img/flex-col-justify-space-around.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-justify-space-around-reverse.svg');
+            }
+        }
+    }
+
+    &.col-align {
+        &--start {
+            background-image: url('#{$assets_path}/img/flex-col-align-start.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-align-start-reverse.svg');
+            }
+        }
+
+        &--center {
+            background-image: url('#{$assets_path}/img/flex-col-align-center.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-align-center-reverse.svg');
+            }
+        }
+
+        &--end {
+            background-image: url('#{$assets_path}/img/flex-col-align-end.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-align-end-reverse.svg');
+            }
+        }
+
+        &--stretch {
+            background-image: url('#{$assets_path}/img/flex-col-align-stretch.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-align-stretch-reverse.svg');
+            }
+        }
+
+        &--baseline {
+            background-image: url('#{$assets_path}/img/flex-col-align-baseline.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-align-baseline-reverse.svg');
+            }
+        }
+    }
+
+    &.flex-wrap {
+        background-image: url('#{$assets_path}/img/flex-row-wrap-children.svg');
+
+        &.row-wrap-reverse {
+            background-image: url('#{$assets_path}/img/flex-row-wrap-children-reverse.svg');
+        }
+
+        &.col-wrap {
+            background-image: url('#{$assets_path}/img/flex-col-wrap-children.svg');
+            &-reverse {
+                background-image: url('#{$assets_path}/img/flex-col-wrap-children-reverse.svg');
+            }
+        }
+
+        &-row {
+            &--align {
+                &-start {
+                    background-image: url('#{$assets_path}/img/flex-row-wrap-align-start.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-row-wrap-align-start-reverse.svg');
+                    }
+                }
+                &-center {
+                    background-image: url('#{$assets_path}/img/flex-row-wrap-align-center.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-row-wrap-align-center-reverse.svg');
+                    }
+                }
+                &-end {
+                    background-image: url('#{$assets_path}/img/flex-row-wrap-align-end.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-row-wrap-align-end-reverse.svg');
+                    }
+                }
+                &-stretch {
+                    background-image: url('#{$assets_path}/img/flex-row-wrap-align-stretch.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-row-wrap-align-stretch-reverse.svg');
+                    }
+                }
+                &-space-between {
+                    background-image: url('#{$assets_path}/img/flex-row-wrap-align-space-between.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-row-wrap-align-space-between-reverse.svg');
+                    }
+                }
+                &-space-around {
+                    background-image: url('#{$assets_path}/img/flex-row-wrap-align-space-around.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-row-wrap-align-space-around-reverse.svg');
+                    }
+                }
+            }
+        }
+
+        &-column {
+            &--align {
+                &-start {
+                    background-image: url('#{$assets_path}/img/flex-col-wrap-align-start.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-col-wrap-align-start-reverse.svg');
+                    }
+                }
+                &-center {
+                    background-image: url('#{$assets_path}/img/flex-col-wrap-align-center.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-col-wrap-align-center-reverse.svg');
+                    }
+                }
+                &-end {
+                    background-image: url('#{$assets_path}/img/flex-col-wrap-align-end.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-col-wrap-align-end-reverse.svg');
+                    }
+                }
+                &-stretch {
+                    background-image: url('#{$assets_path}/img/flex-col-wrap-align-stretch.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-col-wrap-align-stretch-reverse.svg');
+                    }
+                }
+                &-space-between {
+                    background-image: url('#{$assets_path}/img/flex-col-wrap-align-space-between.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-col-wrap-align-space-between-reverse.svg');
+                    }
+                }
+
+                &-space-around {
+                    background-image: url('#{$assets_path}/img/flex-col-wrap-align-space-around.svg');
+                    &-reverse {
+                        background-image: url('#{$assets_path}/img/flex-col-wrap-align-space-around-reverse.svg');
+                    }
+                }
+            }
+        }
+    }
+
+    &.shrink-if-needed {
+        background-image: url('#{$assets_path}/img/shrink-if-needed.svg');
+    }
+    &.fill-empty-space {
+        background-image: url('#{$assets_path}/img/fill-empty-space.svg');
+    }
+    &.dont-shrink {
+        background-image: url('#{$assets_path}/img/dont-shrink.svg');
+    }
+    &.settings {
+        background-image: url('#{$assets_path}/img/settings-small.svg');
+    }
+    &.align-self-start {
+        background-image: url('#{$assets_path}/img/align-self-start.svg');
+    }
+    &.align-self-center  {
+        background-image: url('#{$assets_path}/img/align-self-center.svg');
+    }
+    &.align-self-end  {
+        background-image: url('#{$assets_path}/img/align-self-end.svg');
+    }
+    &.align-self-stretch {
+        background-image: url('#{$assets_path}/img/align-self-stretch.svg');
+    }
+    &.align-self-baseline {
+        background-image: url('#{$assets_path}/img/align-self-baseline.svg');
+    }
+    &.auto {
+        background-image: url('#{$assets_path}/img/auto.svg');
+    }
+    &.order-first {
+        background-image: url('#{$assets_path}/img/order-first.svg');
+    }
+    &.order-last {
+        background-image: url('#{$assets_path}/img/order-last.svg');
+    }
+
+    &.background {
+        &-none {
+            background-image: url('#{$assets_path}/img/background-none.svg');
+        }
+        &-color {
+            background-image: url('#{$assets_path}/img/background-color.svg');
+        }
+        &-image {
+            background-image: url('#{$assets_path}/img/background-image.svg');
+        }
+        &-video {
+            background-image: url('#{$assets_path}/img/background-video.svg');
+        }
+        &-gradient {
+            background-image: url('#{$assets_path}/img/background-gradient.svg');
+        }
+    }
+
+    &.gutter {
+        &-large {
+            background-image: url('#{$assets_path}/img/gutter-large.svg');
+        }
+        &-medium {
+            background-image: url('#{$assets_path}/img/gutter-medium.svg');
+        }
+        &-small {
+            background-image: url('#{$assets_path}/img/gutter-small.svg');
+        }
+        &-collapse {
+            background-image: url('#{$assets_path}/img/gutter-none.svg');
+        }
+    }
+}

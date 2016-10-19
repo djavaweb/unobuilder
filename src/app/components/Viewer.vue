@@ -3,7 +3,7 @@ style(type="text/css",v-el:css) {{{css}}}
 </template>
 
 <style lang="sass">
-@import "../scss/viewer.scss"
+@import "../../assets/scss/canvas.scss"
 </style>
 
 <script>

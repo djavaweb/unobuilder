@@ -16,7 +16,7 @@
         a.link.uk-icon-link(v-if="state==='select' && link", @click="editLink()")
 
     a.remove.uk-icon-remove(
-    v-if="state==='select'",
+    v-if="displayRemove",
     @mouseover="$parent.removeOver()"
     @mouseleave="$parent.removeLeave()"
     @click="$parent.removeElement()"
@@ -52,6 +52,12 @@ export default {
     data () {
         return {
             expand: false
+        }
+    },
+
+    computed: {
+        displayRemove () {
+            return this.state === 'select' && this.$parent.elementKind !== 'body'
         }
     },
 

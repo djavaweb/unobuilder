@@ -13,10 +13,6 @@
 				span.cm-shortcut {{{menu.shortcut}}}
 </template>
 
-<style lang="sass">
-@import "../../../scss/contextmenu.scss"
-</style>
-
 <script>
 export default {
 	name: 'contextMenu',

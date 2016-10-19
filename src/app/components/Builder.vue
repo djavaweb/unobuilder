@@ -20,10 +20,13 @@
 </template>
 
 <style lang="sass">
-@import "../scss/app.scss"
+@import "../../assets/scss/main.scss"
 </style>
 
 <script>
+import jquery from 'jquery'
+import uikit from 'uikit'
+import UIKitCSS from 'UIKitCSS'
 import config from '../config.js'
 import screenDetector from './tools/screen/ScreenDetector.vue'
 import cssEditor from './editor/CssEditor.vue'

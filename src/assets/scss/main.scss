@@ -1,0 +1,31 @@
+/**
+ * Load mixins and vendor
+ */
+@import "utils/mixins.scss";
+@import "vendors/animate/animate.scss";
+
+/**
+ * Base
+ */
+@import "base/vars.scss";
+@import "base/colors.scss";
+@import "base/fonts.scss";
+
+/**
+ * Layout
+ */
+@import "layouts/builder.scss";
+@import "layouts/selector.scss";
+
+/**
+ * Components
+ */
+@import "components/accordion.scss";
+@import "components/block.scss";
+@import "components/box.scss";
+@import "components/button.scss";
+@import "components/contextmenu.scss";
+@import "components/element.scss";
+@import "components/input.scss";
+@import "components/popup.scss";
+@import "components/switcher.scss";

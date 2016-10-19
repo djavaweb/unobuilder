@@ -1,8 +1,8 @@
 // Import important modules
-import _extend from 'lodash/extend'
-import _omit from 'lodash/omit'
-import _each from 'lodash/each'
-import utils from './utils.js'
+const _extend = require('lodash/extend')
+const _omit = require('lodash/omit')
+const _each = require('lodash/each')
+const utils = require('./utils.js')
 
 // Define static vars
 const rStripComments = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg
@@ -14,7 +14,8 @@ const errorMessages = {
 	typeAndCallbackRequired: 'Event type and callback must be specified',
 	allRequired: 'Event type, route and callback function must be specified',
 	JSONNotfound: 'component.json not found',
-	invalidJSON: 'Your JSON is invalid'
+	invalidJSON: 'Your JSON is invalid',
+	optionsUndefined: 'Options Undefined'
 }
 const actionObjectException = ['path', 'settings', 'beforeInit', 'afterInit', 'dragStart', 'dragMove', 'dragEnd', 'ready']
 
@@ -22,23 +23,30 @@ const actionObjectException = ['path', 'settings', 'beforeInit', 'afterInit', 'd
  * Unobuilder global framework to register components
  */
 const unoBuilder = function () {
-	if (! window.__uno__) {
-		window.__uno__ = {}
+	if (! global.__uno__) {
+		global.__uno__ = {}
 	}
 
-	window.__uno__.eventList = {}
-	window.__uno__.components = {}
+	global.__uno__.eventList = {}
+	global.__uno__.components = {}
+	global.__uno__.url = null
+	global.__uno__.element = null
 	const $root = this
 
 	/**
-	* Uno on initialization
-	* @param {String} element
-	* @param {Function} fn
+	* Uno load URL or uno initialization
+	* @param {Object} options
 	*/
-	$root.init = (element, fn) => {
-		$root.emit('init', element)
+	$root.loadUrl = (options) => {
+		if (options.url && options.element) {
+			global.__uno__.url = options.url
+			global.__uno__.element = options.element
+			$root.emit('init', options.element)
+		} else {
+			throw Error(errorMessages.optionsUndefined)
+		}
 		return $root
-	};
+	}
 
 	/**
 	* Uno event register
@@ -67,11 +75,11 @@ const unoBuilder = function () {
         }
 
         // eventType doesn't exist, create new one
-        if(!window.__uno__.eventList[eventType]) {
-            window.__uno__.eventList[eventType] = []
+        if(!global.__uno__.eventList[eventType]) {
+            global.__uno__.eventList[eventType] = []
         }
 
-        window.__uno__.eventList[eventType].push({
+        global.__uno__.eventList[eventType].push({
             callback: callback
         })
 
@@ -97,8 +105,8 @@ const unoBuilder = function () {
                 break
         }
 
-		if (window.__uno__.eventList[eventType]) {
-			delete window.__uno__.eventList[eventType]
+		if (global.__uno__.eventList[eventType]) {
+			delete global.__uno__.eventList[eventType]
 		}
 
 		return $root
@@ -126,8 +134,8 @@ const unoBuilder = function () {
                 break
         }
 
-        if (window.__uno__.eventList[eventType]) {
-			var arr = window.__uno__.eventList[eventType];
+        if (global.__uno__.eventList[eventType]) {
+			var arr = global.__uno__.eventList[eventType];
             emitCallbacks(arr);
         }
     }
@@ -137,15 +145,15 @@ const unoBuilder = function () {
 	 * @return {Object} eventList
 	 */
 	$root.events = () => {
-        return window.__uno__.eventList;
+        return global.__uno__.eventList;
     }
 
 	/**
 	 * Reset Events
 	 */
 	$root.resetEvents = () => {
-        window.__uno__.eventList = {};
-        return window.__uno__.eventList;
+        global.__uno__.eventList = {};
+        return global.__uno__.eventList;
     }
 
 	/**
@@ -187,7 +195,7 @@ const unoBuilder = function () {
 						])
 
 						// Add component to list
-						window.__uno__.components[json.id] = componentObj
+						global.__uno__.components[json.id] = componentObj
 
 						// Register script
 						$root.registerScript(url)
@@ -200,11 +208,11 @@ const unoBuilder = function () {
 			}
 		})
 
-		return $root;
+		return $root
 	}
 
 	$root.getComponentList = () => {
-		return window.__uno__.components
+		return global.__uno__.components
 	}
 
 	$root.registerScript = (url) => {
@@ -221,24 +229,24 @@ const unoBuilder = function () {
 	 * @param {Object} options
 	 */
 	$root.registerComponent = (name, options) => {
-		if (window.__uno__.components[name]) {
+		if (global.__uno__.components[name]) {
 
 			// Call before init event
 			if (options.events.beforeInit) {
-				options.events.beforeInit.apply(window.__uno__.components[name])
+				options.events.beforeInit.apply(global.__uno__.components[name])
 			}
 
 			// Duplicate data that doesn't have events name
 			if (options.data) {
 				let data = _omit(options.data, actionObjectException)
-				_extend(window.__uno__.components[name], data)
+				_extend(global.__uno__.components[name], data)
 			}
 
 			// Duplicate all events
 			if (options.events) {
 				_each(actionObjectException, (eventName) => {
 					if (options.events[eventName]) {
-						window.__uno__.components[name][eventName] = options.events[eventName]
+						global.__uno__.components[name][eventName] = options.events[eventName]
 					}
 				})
 			}
@@ -246,12 +254,12 @@ const unoBuilder = function () {
 			// Call after init event
 			$root.on('componentAdded', (component) => {
 				if (options.events.afterInit) {
-					options.events.afterInit.apply(window.__uno__.components[name])
+					options.events.afterInit.apply(global.__uno__.components[name])
 				}
 			})
 
 			// Broadcast component has been added
-			$root.emit('componentAdded', window.__uno__.components[name])
+			$root.emit('componentAdded', global.__uno__.components[name])
 		}
 
 		return $root
@@ -260,5 +268,4 @@ const unoBuilder = function () {
 	return $root
 }
 
-const client = new unoBuilder();
-module.exports = client;
+module.exports = new unoBuilder()

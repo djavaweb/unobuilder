@@ -28,10 +28,6 @@ a.add-block(
 // End of blocks
 </template>
 
-<style lang="sass">
-@import "../../../scss/block.scss"
-</style>
-
 <script>
 export default {
 	name: 'block',

@@ -1,10 +1,10 @@
-/* Our Applications */
+// Expose uno to window
+require('expose?uno!expose?uno!uno')
+
+/* Important Modules */
 import Vue from 'vue'
 import builder from './components/Builder.vue'
 import utils from './utils.js'
-import client from './client.js'
-
-window.uno = client
 
 /* Vue Config */
 Vue.config.debug = true
@@ -26,7 +26,7 @@ Vue.transition('slidey', {
 })
 
 // When uno builder init element
-client.on('init', (element) => {
+uno.on('init', (element) => {
 	// Main app
 	const App = new Vue({
 		el: 'body',
@@ -55,7 +55,7 @@ client.on('init', (element) => {
 
 		ready () {
 			this.$nextTick(() => {
-				client.emit('ready')
+				uno.emit('ready')
 			})
 		}
 	})

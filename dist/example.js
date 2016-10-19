@@ -1,4 +1,8 @@
-uno.init('#app').on('ready', function () {
+uno.loadUrl({
+    url: './example.html',
+    element: '.entry-content'
+}).on('ready', function () {
+
     /**
      * Add native components
      */

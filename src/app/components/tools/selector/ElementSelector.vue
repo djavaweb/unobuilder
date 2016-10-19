@@ -58,10 +58,6 @@
 	// End of select element selector
 </template>
 
-<style lang="sass">
-@import "../../../scss/element-selector.scss"
-</style>
-
 <script>
 import breadcrumb from './Breadcrumb.vue'
 export default {

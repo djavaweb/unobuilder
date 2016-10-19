@@ -1,0 +1,240 @@
+.box-outline {
+    border: 1px dotted $warm-grey;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 175px;
+    background-color: $prop-bg;
+    color: $white;
+    font-size: 11px;
+    padding: 2px 5px;
+    position: relative;
+
+    &.over {
+        border-color: $sky-blue;
+    }
+
+    &.updown {
+        border-top-color: $pastel-red !important;
+        border-bottom-color: $pastel-red !important;
+        border-left-color: $prop-bg !important;
+        border-right-color: $prop-bg !important;
+    }
+    &.leftright {
+        border-left-color: $pastel-red !important;
+        border-right-color: $pastel-red !important;
+        border-top-color: $prop-bg !important;
+        border-bottom-color: $prop-bg !important;
+    }
+
+    &.margin {
+        height: 100%;
+        width: auto;
+        border-style: dashed;
+        background-color: $prop-bg-margin;
+        &.updown {
+            border-top-color: $pastel-red;
+            border-bottom-color: $pastel-red;
+            border-left-color: $prop-bg-margin;
+            border-right-color: $prop-bg-margin;
+        }
+        &.leftright {
+            border-left-color: $pastel-red;
+            border-right-color: $pastel-red;
+            border-top-color: $prop-bg-margin;
+            border-bottom-color: $prop-bg-margin;
+        }
+    }
+
+    &.border {
+        height: 100%;
+        width: auto;
+        border-style: solid;
+        background-color: $prop-bg-border;
+        &.updown {
+            border-top-color: $pastel-red;
+            border-bottom-color: $pastel-red;
+            border-left-color: $prop-bg-border;
+            border-right-color: $prop-bg-border;
+        }
+        &.leftright {
+            border-left-color: $pastel-red;
+            border-right-color: $pastel-red;
+            border-top-color: $prop-bg-border;
+            border-bottom-color: $prop-bg-border;
+        }
+    }
+
+    &.padding {
+        height: 100%;
+        width: auto;
+        border-style: solid;
+        background-color: $prop-bg-padding;
+        label {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            position: absolute;
+        }
+        &.updown {
+            border-top-color: $pastel-red;
+            border-bottom-color: $pastel-red;
+            border-left-color: $prop-bg-padding;
+            border-right-color: $prop-bg-padding;
+        }
+        &.leftright {
+            border-left-color: $pastel-red;
+            border-right-color: $pastel-red;
+            border-top-color: $prop-bg-padding;
+            border-bottom-color: $prop-bg-padding;
+        }
+    }
+
+    label, a {
+        color: $white;
+        font-weight: bold;
+        font-size: 10px;
+        z-index: 99;
+        position: relative;
+    }
+
+    dl {
+        margin: 0;
+    }
+    dt {
+        position: absolute;
+        width: 15px;
+        white-space: pre-line;
+        line-height: 10px;
+        text-align: center;
+        font-weight: normal;
+        cursor: pointer;
+
+        &.top {
+            top: 5px;
+            left: 50%;
+            -webkit-transform: translate(-50%, 0);
+            transform: translate(-50%, 0);
+            white-space: nowrap;
+            &-resize {
+                top: 0;
+                left: 0;
+                height: 25px;
+                width: 100%;
+                cursor: url('#{$assets_path}/cursor/up-down.cur') 12 12, row-resize;
+                &.padding {
+                    height: 15px;
+                }
+            }
+        }
+        &.right {
+            right: 2px;
+            top: 50%;
+            transform: translate(0, -50%);
+            &-resize {
+                top: 25px;
+                right: 0;
+                height: 90px;
+                width: 20px;
+                cursor: url('#{$assets_path}/cursor/left-right.cur') 12 12, col-resize;
+                &.border {
+                    height: 46px;
+                }
+                &.padding {
+                    top: 15px;
+                    width: 15px;
+                    height: 15px;
+                }
+            }
+        }
+        &.left {
+            left: 2px;
+            top: 50%;
+            transform: translate(0, -50%);
+            &-resize {
+                top: 25px;
+                left: 0;
+                height: 90px;
+                width: 20px;
+                cursor: url('#{$assets_path}/cursor/left-right.cur') 12 12, col-resize;
+                &.border {
+                    height: 46px;
+                }
+                &.padding {
+                    top: 15px;
+                    width: 15px;
+                    height: 15px;
+                }
+            }
+        }
+        &.bottom {
+            left: 50%;
+            bottom: 5px;
+            -webkit-transform: translate(-50%, 0);
+            transform: translate(-50%, 0);
+            white-space: nowrap;
+            &-resize {
+                bottom: 0;
+                left: 0;
+                height: 18px;
+                width: 100%;
+                cursor: url('#{$assets_path}/cursor/up-down.cur') 12 12, row-resize;
+                &.padding {
+                    height: 15px;
+                }
+            }
+        }
+    }
+
+    .radius {
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        background: $white;
+        z-index: 99;
+        cursor: default;
+
+        &:hover {
+            background: $sky-blue;
+        }
+
+        &.top {
+            top: 0;
+
+            &.left {
+                border-bottom-right-radius: 100%;
+                left: 0;
+            }
+
+            &.right {
+                border-bottom-left-radius: 100%;
+                right: 0;
+            }
+        }
+
+        &.bottom {
+            bottom: 0;
+
+            &.left {
+                border-top-right-radius: 100%;
+                left: 0;
+            }
+
+            &.right {
+                border-top-left-radius: 100%;
+                right: 0;
+            }
+        }
+    }
+
+    .inner {
+        position: absolute;
+        left: 20px;
+        top: 25px;
+        right: 20px;
+        bottom: 25px;
+        .prop-position-outline {
+            width: auto;
+        }
+    }
+}

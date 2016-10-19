@@ -1,5 +1,4 @@
 /* Our Applications */
-import Vue from 'vue'
 import viewer from './components/Viewer.vue'
 import _ from 'lodash'
 import dot from 'dot-object'
@@ -8,12 +7,11 @@ import Mousetrap from './lib/mousetrap.min.js'
 import utils from './utils.js'
 import config from './config.js'
 
-/* Vue Config */
-Vue.config.debug = true
-
 /* Main app */
-const App = new Vue({
-	el: 'body',
+const Viewer = {}
+Viewer.window = null
+Viewer.element = null
+Viewer.mixins = {
 	components: {viewer},
 
 	/**
@@ -167,7 +165,7 @@ const App = new Vue({
          * @return {Node}
          */
         createElement (element, ready) {
-			let el = document.createElement(element.tag),
+			let el = Viewer.window.document.createElement(element.tag),
 			id = utils.generateId()
 
 			// Add random ID
@@ -939,13 +937,13 @@ const App = new Vue({
 
 			// Prepend element to element.prepend value
 			if (element.prepend) {
-				let elementPrepend = $(element.prepend).get(0)
+				let elementPrepend = Viewer.window.document.querySelector(element.prepend)
 				elementPrepend.insertBefore(el, elementPrepend.firstChild)
 			}
 
 			// Append element to element.append value
 			if (element.append) {
-				let appendElement = $(element.append).get(0)
+				let appendElement = Viewer.window.document.querySelector(element.append)
 				appendElement.appendChild(el)
 			}
 
@@ -1047,7 +1045,9 @@ const App = new Vue({
 			if (element.$selectable) {
 				element.$hover()
 			} else {
-				element.parentElement.$hover()
+				if (element.parentElement.$hover) {
+					element.parentElement.$hover()
+				}
 			}
 		},
 
@@ -1072,7 +1072,9 @@ const App = new Vue({
 			if (element.$selectable) {
 				element.$select()
 			} else {
-				element.parentElement.$select()
+				if (element.parentElement.$select) {
+					element.parentElement.$select()
+				}
 			}
 		},
 
@@ -1098,7 +1100,10 @@ const App = new Vue({
 		rightclick (event) {
 			if (!event.target.$editable || ! this.editComponent) {
 				event.preventDefault()
-				event.target.$select(true)
+
+				if (event.target.$select) {
+					event.target.$select(true)
+				}
 
 				// Notify parent to show context menu
 				let contextMenu = this.canvasBuilder('contextMenu')
@@ -1147,7 +1152,7 @@ const App = new Vue({
 				selector = `[data-type="body"]`
 			}
 
-			let element = document.querySelector(selector)
+			let element = Viewer.window.document.querySelector(selector)
 			if (element) {
 				if (! selectOriginal) {
 					element = element.$element()
@@ -1486,7 +1491,7 @@ const App = new Vue({
 		 * Disable editor
 		 */
 		disableEditor () {
-			let editableElement = document.querySelectorAll('[contenteditable]')
+			let editableElement = Viewer.window.document.querySelectorAll('[contenteditable]')
 			for (let el in editableElement) {
 				if (editableElement[el].$editable) {
 					editableElement[el].$edit(false)
@@ -1598,9 +1603,10 @@ const App = new Vue({
 				case 'paste':
 					// Prevent to copy body element, skip it
 					if (this.copiedElement && this.copiedElement !== 'body') {
-						let copyElement = this.getElement(this.copiedElement)
-						if (copyElement) {
-							let copyParentId = copyElement.$parentElement().$id,
+						let copyElement = this.getElement(this.copiedElement),
+						parentElement = copyElement.$parentElement()
+						if (copyElement && parentElement) {
+							let copyParentId = parentElement.$id,
 							pasteElement = activeElement.$id, sameCopy
 
 							// If active element has parent element such as container
@@ -1732,7 +1738,7 @@ const App = new Vue({
 
 			// Set style of cloned element
 			this.componentClone.classList.add('oncanvas')
-			document.body.appendChild(this.componentClone)
+			Viewer.window.document.body.appendChild(this.componentClone)
 		},
 
 		/**
@@ -1866,15 +1872,15 @@ const App = new Vue({
 		 * Window scroll observer, when change notify the parent to set canvas top position as viewer top scroll
 		 * @return {void}
 		 */
-		window.addEventListener('scroll', () => {
-			this.builder().$broadcast('scrolling', document.body.getBoundingClientRect())
+		Viewer.window.addEventListener('scroll', () => {
+			this.builder().$broadcast('scrolling', Viewer.window.document.body.getBoundingClientRect())
 		})
 
 		/**
 		 * When window resize reselect element
 		 * @return {void}
 		 */
-		window.addEventListener('resize', () => {
+		Viewer.window.addEventListener('resize', () => {
 			this.tryHover()
 			this.trySelect()
 		})
@@ -1883,10 +1889,11 @@ const App = new Vue({
          * Create body
          */
         this.createElement({
-            prepend: document.body,
+            append: Viewer.element,
             tag: 'div',
             type: 'body',
-            kind: 'body'
+            kind: 'body',
+			label: (Viewer.element === 'body')? undefined: 'layout'
         }, (el) => {
 			el.$set('display.disabled', true)
 	        el.$select()
@@ -1952,4 +1959,6 @@ const App = new Vue({
 			this.builder().$broadcast('keyCapture', 'releaseShift')
 		}, 'keyup')
     }
-})
+}
+
+module.exports = Viewer

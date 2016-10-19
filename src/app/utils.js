@@ -1,8 +1,8 @@
-import _mapValues from 'lodash/mapValues'
-import _isObject from 'lodash/isObject'
-import _isArray from 'lodash/isArray'
-import _each from 'lodash/each'
-import _map from 'lodash/map'
+const _mapValues = require('lodash/mapValues')
+const _isObject = require('lodash/isObject')
+const _isArray = require('lodash/isArray')
+const _each = require('lodash/each')
+const _map = require('lodash/map')
 
 const classPrefix = 'uno',
 cssPrefixes = ['-webkit-', '-moz-', '-ms-'],
@@ -290,4 +290,4 @@ const utils = {
     }
 }
 
-export default utils
+module.exports = utils
