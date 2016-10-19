@@ -96,6 +96,9 @@
         font-size: 10px;
         z-index: 99;
         position: relative;
+        &:hover {
+            color: $white
+        }
     }
 
     dl {

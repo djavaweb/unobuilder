@@ -1,6 +1,6 @@
 <template lang="pug">
 .canvas-builder(v-el:canvas-builder)
-    .tools(:style="scrollValue,viewerWidth")
+    .tools(:style="[scrollValue, viewerWidth]")
         context-menu(v-ref:context-menu)
         element-selector(v-ref:element-selector)
         block(v-ref:block)
@@ -31,7 +31,7 @@ export default {
 
     data () {
         return {
-            scrollValue: {}
+            bodyBoundRect: null
         }
     },
 
@@ -81,6 +81,16 @@ export default {
 
             return style
         },
+
+        scrollValue () {
+            let style = {}
+
+            if (this.bodyBoundRect) {
+                style.top = `${this.bodyBoundRect.top}px`
+            }
+
+            return style
+        }
     },
 
     methods: {
@@ -142,7 +152,15 @@ export default {
     },
 
     ready () {
-        this.viewerDOM(null).onload = () => {
+        // Onload
+        utils.addEvent(this.viewerDOM(null), 'load', () => {
+
+            // Window on scroll
+            utils.addEvent(this.viewerDOM(), 'scroll', (e) => {
+                let bodyBoundRect = this.viewerDOM('body').getBoundingClientRect()
+                this.bodyBoundRect = bodyBoundRect
+            })
+
             // Attach Vue Events
             this.viewerDOM('body').outerHTML = '<body @mouseleave="leave($event)" @mouseover="over($event)" @click="click($event)" @dblclick="dblclick($event)" @contextmenu="rightclick($event)">'+ this.viewerDOM('body').innerHTML +'</body>'
 
@@ -172,7 +190,7 @@ export default {
                 el: this.viewerDOM('body'),
                 mixins: [unoViewer.mixins]
             })
-        }
+        })
 
         // Set source based on uno url
         this.viewerDOM(null).src = window.__uno__.url
