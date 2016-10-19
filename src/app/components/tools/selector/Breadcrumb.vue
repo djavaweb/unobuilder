@@ -67,8 +67,7 @@ export default {
          * @param  {Object} breadcrumb
          */
         showOutline (breadcrumb) {
-            let canvasBuilder = this.$root.ref('centerPanel.canvasBuilder')
-			canvasBuilder.viewer().elementHover(breadcrumb)
+            this.$root.canvasBuilder().layout().elementHover(breadcrumb)
         },
 
         /**
@@ -79,13 +78,11 @@ export default {
          * @param  {Number} index
          */
         breadcrumbAction (breadcrumb, index) {
-            let canvasBuilder = this.$root.ref('centerPanel.canvasBuilder')
-
             if (! this.expand && this.state === 'select') {
-                canvasBuilder.$refs.contextMenu.hide()
+                this.$root.canvasBuilder('contextMenu').hide()
                 this.expand = true
             } else {
-    			canvasBuilder.viewer().elementSelect(breadcrumb)
+    			this.$root.canvasBuilder().layout().elementSelect(breadcrumb)
             }
         },
 

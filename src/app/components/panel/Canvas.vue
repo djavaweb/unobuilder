@@ -97,7 +97,7 @@ export default {
         /**
          * Get DOM of viewer
          */
-        viewerDOM (query) {
+        layoutDOM (query) {
             let win = this.$els.iframe.contentWindow
             if (typeof query !== 'undefined') {
                 if (query === null) {
@@ -111,11 +111,13 @@ export default {
         },
 
         /**
-         * Get viewer object
+         * Get layout object
+         * @param {String} ref
+         * @param {String} el
          * @return {Object}
          */
-        viewer () {
-            return this.viewerDOM('body').__vue__.ref()
+        layout (ref, el) {
+            return this.layoutDOM('body').__vue__.ref(ref, el)
         },
 
         /**
@@ -124,8 +126,8 @@ export default {
          */
         viewerSize (dimension) {
             let size = 0,
-            html = this.viewerDOM(null),
-            body = this.viewerDOM('body')
+            html = this.layoutDOM(null),
+            body = this.layoutDOM('body')
 
             if (dimension === 'height') {
                 size = Math.max(
@@ -153,47 +155,47 @@ export default {
 
     ready () {
         // Onload
-        utils.addEvent(this.viewerDOM(null), 'load', () => {
+        utils.addEvent(this.layoutDOM(null), 'load', () => {
 
             // Window on scroll
-            utils.addEvent(this.viewerDOM(), 'scroll', (e) => {
-                let bodyBoundRect = this.viewerDOM('body').getBoundingClientRect()
+            utils.addEvent(this.layoutDOM(), 'scroll', (e) => {
+                let bodyBoundRect = this.layoutDOM('body').getBoundingClientRect()
                 this.bodyBoundRect = bodyBoundRect
             })
 
             // Attach Vue Events
-            this.viewerDOM('body').outerHTML = '<body @mouseleave="leave($event)" @mouseover="over($event)" @click="click($event)" @dblclick="dblclick($event)" @contextmenu="rightclick($event)">'+ this.viewerDOM('body').innerHTML +'</body>'
+            this.layoutDOM('body').outerHTML = '<body @mouseleave="leave($event)" @mouseover="over($event)" @click="click($event)" @dblclick="dblclick($event)" @contextmenu="rightclick($event)">'+ this.layoutDOM('body').innerHTML +'</body>'
 
             // Viewer stylesheet
-            let viewerElement = document.createElement('viewer')
-            this.viewerDOM('body').appendChild(viewerElement)
-            viewerElement.outerHTML = '<viewer v-ref:viewer></viewer>'
+            let viewerElement = document.createElement('css-renderer')
+            this.layoutDOM('body').appendChild(viewerElement)
+            viewerElement.outerHTML = '<css-renderer v-ref:css-renderer></css-renderer>'
 
             // Google webfont
             let webfont = document.createElement('script')
             webfont.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js'
-            this.viewerDOM('body').appendChild(webfont)
+            this.layoutDOM('body').appendChild(webfont)
 
-            // Attach important js modules
-            unoViewer.window = this.viewerDOM()
+            // Attach important js modules to iframe
+            unoViewer.window = this.layoutDOM()
             unoViewer.window.jQuery = require('jquery')
             unoViewer.window.UIKit = require('uikit')
             unoViewer.element = window.__uno__.element
 
             // UIKit CSS
             let uikitCss = document.createElement('style')
-            this.viewerDOM('head').appendChild(uikitCss)
+            this.layoutDOM('head').appendChild(uikitCss)
             uikitCss.innerHTML = require('raw!uikit/dist/css/uikit.min.css?hack') +
             require('raw!sass!../../../assets/scss/canvas.scss')
 
             new Vue({
-                el: this.viewerDOM('body'),
+                el: this.layoutDOM('body'),
                 mixins: [unoViewer.mixins]
             })
         })
 
         // Set source based on uno url
-        this.viewerDOM(null).src = window.__uno__.url
+        this.layoutDOM(null).src = window.__uno__.url
     }
 }
 </script>

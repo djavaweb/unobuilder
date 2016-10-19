@@ -1,5 +1,5 @@
 /* Our Applications */
-import viewer from './components/Viewer.vue'
+import cssRenderer from './components/CSSRenderer.vue'
 import _ from 'lodash'
 import dot from 'dot-object'
 import classList from './lib/classlist.js'
@@ -12,7 +12,7 @@ const Viewer = {}
 Viewer.window = null
 Viewer.element = null
 Viewer.mixins = {
-	components: {viewer},
+	components: {cssRenderer},
 
 	/**
 	 * Main Data
@@ -1486,7 +1486,7 @@ Viewer.mixins = {
 		 * @param {Boolean} reselect
 		 */
 		updateStylesheet (reselectEl) {
-			this.$refs.viewer.updateStylesheet()
+			this.$refs.cssRenderer.updateStylesheet()
 
 			// Reselect element
 			if (reselectEl) {
@@ -1495,6 +1495,15 @@ Viewer.mixins = {
 					this.trySelect()
 				})
 			}
+		},
+
+		/**
+		 * Save custom CSS
+		 * @param  {String} css
+		 */
+		saveCSS (css) {
+			this.customCSS = css
+			this.updateStylesheet(true)
 		}
     },
 
@@ -1730,18 +1739,6 @@ Viewer.mixins = {
 				case 'clearStyle':
 				break;
 			}
-		},
-
-		/**
-		 * Save custom CSS
-		 * @param  {String} css
-		 */
-		saveCSS (css) {
-			this.customCSS = css
-			this.$nextTick(() => {
-				this.tryHover()
-				this.trySelect()
-			})
 		},
 
 		/**

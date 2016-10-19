@@ -46,20 +46,17 @@ export default {
 				editorElement.style.height = editorElement.parentElement.offsetHeight + 'px'
 
 				// Init editor
+				let layout = this.$root.canvasBuilder().layout()
 				this.editor = ace.edit('css-editor')
 
 				// Get custom css from canvas
-				// if (this.canvas) {
-				// 	editor.setValue(this.ref('canvasBuilder'))
-				// }
+				this.editor.setValue(layout.customCSS)
 
 				// Set custom css when any changes
-				// this.editor.on('change', () => {
-				// 	let value = this.editor.getValue()
-				// 	if (this.canvas) {
-				// 		this.canvas.$emit('saveCSS', value)
-				// 	}
-				// })
+				this.editor.on('change', () => {
+					let value = this.editor.getValue()
+					layout.saveCSS(value)
+				})
 
 				// Editor options
 				this.editor.$blockScrolling = Infinity

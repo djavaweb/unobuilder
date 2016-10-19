@@ -1,5 +1,5 @@
 <template lang="pug">
-style(type="text/css",v-el:css) {{{css}}}
+style(type="text/css",v-el:css) {{{renderOutput}}}
 </template>
 
 <style lang="sass">
@@ -14,10 +14,10 @@ import config from '../config.js'
 import utils from '../utils.js'
 
 export default {
-	name: 'Viewer',
+	name: 'cssRenderer',
 	data () {
 		return {
-			css: '',
+			renderOutput: '',
 			loadedFonts: []
 		}
 	},
@@ -178,7 +178,9 @@ export default {
 			}
 
 			// Okie dogie, let's render
-			this.css = css.join('')
+			let renderOutput = css.join('')
+			renderOutput += this.$parent.customCSS
+			this.renderOutput = renderOutput
 		},
 
 		getAvailableProps (screenSize, breakpoints, mouseState = '') {

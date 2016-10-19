@@ -78,7 +78,7 @@ export default {
 			if (this.select.id) {
 				return this.$root
 				.canvasBuilder()
-				.viewer()
+				.layout()
 				.getElement(this.select.id)
 			}
 		},
@@ -181,7 +181,7 @@ export default {
 
 			// Hide all tools
 			if (object.state === 'select') {
-				
+
 				// Set expanded breadcrumb to collapse
 				this.$nextTick(() => {
 					this.$refs.selectBreadcrumb.expand = false
@@ -230,7 +230,7 @@ export default {
 		removeElement () {
 			this.$root
 			.canvasBuilder()
-			.viewer()
+			.layout()
 			.$emit('removeElement', this.select.id)
 		},
 
@@ -256,12 +256,12 @@ export default {
 			if (inMemory) {
 				this.$root
 				.canvasBuilder()
-				.viewer()
+				.layout()
 				.$emit('keyCapture', 'copy', this.select.id)
 			} else {
 				this.$root
 				.canvasBuilder()
-				.viewer()
+				.layout()
 				.$emit('copyElement', this.select.id)
 			}
 		},
@@ -272,7 +272,7 @@ export default {
 		pasteElement () {
 			this.$root
 			.canvasBuilder()
-			.viewer()
+			.layout()
 			.$emit('keyCapture', 'paste')
 		},
 

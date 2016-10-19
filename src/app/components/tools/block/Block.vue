@@ -114,13 +114,12 @@ export default {
 		},
 
 		addBlock (block) {
-			let canvasBuilder = this.$root.ref('centerPanel.canvasBuilder')
-			canvasBuilder.viewer().addBlock(block)
+			this.$root.canvasBuilder().layout().addBlock(block)
 			this.hide()
 		},
 
 		toggle () {
-			this.$root.ref('centerPanel.canvasBuilder.contextMenu').hide()
+			this.$root.canvasBuilder('contextMenu').hide()
 			this.showBlock = !this.showBlock
 		},
 
