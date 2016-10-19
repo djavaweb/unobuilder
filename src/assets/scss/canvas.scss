@@ -11,6 +11,11 @@
 @import "base/fonts.scss";
 
 /**
+ * Mixins
+ */
+@import "utils/mixins.scss";
+
+/**
  * Import layouts
  */
 @import "layouts/viewer.scss";

@@ -325,6 +325,10 @@ html, body, #app {
         cursor: default;
         text-decoration: none;
 
+        &:hover {
+            color: $white;
+        }
+
         &:first-child {
             margin-left: 0
         }
