@@ -1621,10 +1621,10 @@ Viewer.mixins = {
 				case 'paste':
 					// Prevent to copy body element, skip it
 					if (this.copiedElement && this.copiedElement !== 'body') {
-						let copyElement = this.getElement(this.copiedElement),
-						parentElement = copyElement.$parentElement()
-						if (copyElement && parentElement) {
-							let copyParentId = parentElement.$id,
+						let copyElement = this.getElement(this.copiedElement)
+
+						if (copyElement) {
+							let copyParentId = copyElement.$parentElement().$id,
 							pasteElement = activeElement.$id, sameCopy
 
 							// If active element has parent element such as container
