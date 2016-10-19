@@ -1098,12 +1098,11 @@ Viewer.mixins = {
 		 * @param  {Event} event
 		 */
 		rightclick (event) {
-			if (!event.target.$editable || ! this.editComponent) {
-				event.preventDefault()
+			if ((! event.target.$editable || ! this.editComponent) &&
+				event.target.$select) {
 
-				if (event.target.$select) {
-					event.target.$select(true)
-				}
+				event.preventDefault()
+				event.target.$select(true)
 
 				// Notify parent to show context menu
 				let contextMenu = this.canvasBuilder('contextMenu')
