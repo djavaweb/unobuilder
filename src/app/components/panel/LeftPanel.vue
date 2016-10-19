@@ -24,7 +24,7 @@
         // Close component panel
         .title
             | Add Elements
-            a.uk-icon-close(@click="setPanel('component')")
+            a.uk-icon-x(@click="setPanel('component')")
 
         // Search component panel
         .search

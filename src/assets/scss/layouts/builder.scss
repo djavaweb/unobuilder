@@ -172,6 +172,7 @@ html, body, #app {
         pointer-events: all;
         width: 100%;
         opacity: 0.95;
+        border-top: 1px solid $prop-bg-border;
 
         &.ace-monokai {
             background-color: $dark-grey;
@@ -271,7 +272,7 @@ html, body, #app {
         font-size: 12px;
         font-weight: bold;
         text-transform: uppercase;
-        a.uk-icon-close {
+        a.uk-icon-x {
             float: right;
             color: $white;
             opacity: 1;
@@ -542,7 +543,7 @@ label.icon i {
         @extend .uk-icon-text-style;
         background-image: url('#{$assets_path}/img/x.svg');
         background-size: 60%;
-        width: 14px;
+        width: 14px !important;
     }
     &-text-style {
         &-normal {
