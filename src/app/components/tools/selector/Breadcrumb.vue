@@ -12,11 +12,11 @@
             ) {{item.label}}
 
         // Copy and link editor
-        a.copy.uk-icon-copy(v-if="state==='select'", @click="$parent.copyElement()")
-        a.link.uk-icon-link(v-if="state==='select' && link", @click="editLink()")
+        a.copy.uk-icon-copy(v-if="shouldDisplay", @click="$parent.copyElement()")
+        a.link.uk-icon-link(v-if="shouldDisplay && link", @click="editLink()")
 
     a.remove.uk-icon-remove(
-    v-if="displayRemove",
+    v-if="shouldDisplay",
     @mouseover="$parent.removeOver()"
     @mouseleave="$parent.removeLeave()"
     @click="$parent.removeElement()"
@@ -56,7 +56,7 @@ export default {
     },
 
     computed: {
-        displayRemove () {
+        shouldDisplay () {
             return this.state === 'select' && this.$parent.elementKind !== 'body'
         }
     },
