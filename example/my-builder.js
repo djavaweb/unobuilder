@@ -1,5 +1,5 @@
 uno.loadUrl({
-    url: './example.html',
+    url: './example/index.html',
     element: '.entry-content'
 }).on('ready', function () {
 
