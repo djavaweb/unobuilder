@@ -228,6 +228,14 @@
                 right: 0;
             }
         }
+
+        &.top.left, &.bottom.right {
+            cursor: url('#{$assets_path}/cursor/nw-se.cur') 12 12, nwse-resize;
+        }
+
+        &.top.right, &.bottom.left {
+            cursor: url('#{$assets_path}/cursor/ne-sw.cur') 12 12, nesw-resize;
+        }
     }
 
     .inner {

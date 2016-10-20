@@ -10,11 +10,19 @@ html, body, #app {
     @include grabbing;
 }
 
-#uno-builder {
-    @include flex;
-    @include no-user-select;
-    font-family: 'Open Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
+.uno-builder {
+    &__container {
+        @include flex;
+        @include no-user-select;
+        font-family: 'Open Sans', sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    &--dragging {
+        iframe {
+            @include no-pointer-events;
+        }
+    }
 }
 
 .uk-icon {

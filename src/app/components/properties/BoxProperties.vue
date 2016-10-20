@@ -338,7 +338,26 @@ v-ref:popup-all-border)
             :min="0",
             :max="100")
 
-// Popup: Border Color
+// Popup border radius
+popup(
+:title="popupBorderRadiusTitle",
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-border-radius)
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Radius Width
+        .uk-width-4-10
+            input-number(
+            :value.sync="borderRadiusPopupValue",
+            :unit.sync="borderRadiusPopupUnit",
+            :width="30",
+            :units="['px', '%']",
+            :min="-1000",
+            :max="1000")
+
+// Popup: All border Color
 popup-color-picker(
 :colors.sync="borderColorAll",
 :overlay="true",
@@ -411,7 +430,8 @@ export default {
                     direction: ''
                 },
                 borderRadius: {
-                    direction: ''
+                    yAxis: '',
+                    xAxis: ''
                 },
                 allBorder: {
                     direction: ''
@@ -1573,6 +1593,46 @@ export default {
         },
 
         /**
+         * Border radius popup value
+         * @type {Object}
+         */
+        borderRadiusPopupValue: {
+            get () {
+                let borderRadiusState = this.popupState.borderRadius,
+                yAxis = utils.capitalize(borderRadiusState.yAxis),
+                xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+                return this[`borderRadius${yAxis + xAxis}`]
+            },
+
+            set (val) {
+                let borderRadiusState = this.popupState.borderRadius,
+                yAxis = utils.capitalize(borderRadiusState.yAxis),
+                xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+                this[`borderRadius${yAxis + xAxis}`] = val
+            }
+        },
+
+        borderRadiusPopupUnit: {
+            get () {
+                let borderRadiusState = this.popupState.borderRadius,
+                yAxis = utils.capitalize(borderRadiusState.yAxis),
+                xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+                return this[`borderRadius${yAxis + xAxis}Unit`]
+            },
+
+            set (val) {
+                let borderRadiusState = this.popupState.borderRadius,
+                yAxis = utils.capitalize(borderRadiusState.yAxis),
+                xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+                this[`borderRadius${yAxis + xAxis}Unit`] = val
+            }
+        },
+
+        /**
          * Border radius popup unit
          * @return {String}
          */
@@ -1652,7 +1712,19 @@ export default {
          */
         popupPaddingTitle () {
             return `Padding ${utils.capitalize(this.popupState.padding.direction)}`
-        }
+        },
+
+        /**
+         * Popup Title for Border
+         * @return {String}
+         */
+        popupBorderRadiusTitle () {
+            let borderRadiusState = this.popupState.borderRadius,
+            yAxis = utils.capitalize(borderRadiusState.yAxis),
+            xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+            return `Border ${yAxis} ${xAxis} Radius`
+        },
     },
 
     methods: {
@@ -1847,6 +1919,13 @@ export default {
         },
 
         /**
+         * Reset drag radius state
+         */
+        resetDragRadiusState () {
+            this.resetObject(this.dragRadiusState)
+        },
+
+        /**
          * Start drag state
          * @return {void}
          */
@@ -2007,10 +2086,14 @@ export default {
             if (this.dragRadiusState.x === event.pageX &&
                 this.dragRadiusState.y === event.pageY &&
                 ! this.dragRadiusState.move) {
-				//this.showPopup($event, this.dragState.layout, this.dragState.direction)
+
+                this.popupState.borderRadius.xAxis = this.dragRadiusState.xAxis
+                this.popupState.borderRadius.yAxis = this.dragRadiusState.yAxis
+                this.$refs.popupBorderRadius.show(this.popupOption(event))
 			}
 
             // Stop dragging
+            this.resetDragRadiusState()
             utils.removeEvent(document, 'mousemove', this.dragMoveRadius, false)
 			utils.removeEvent(document, 'mouseup', this.dragEndRadius, false)
         },
