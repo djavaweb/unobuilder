@@ -18,5 +18,8 @@ uno.loadUrl({
     // Basic component
     uno.addComponent('../components/text/component.js')
     uno.addComponent('../components/heading/component.js')
+    uno.addComponent('../components/button/component.js')
     uno.addComponent('../components/image/component.js')
+    uno.addComponent('../components/video/component.js')
+    uno.addComponent('../components/map/component.js')
 })
