@@ -34,10 +34,10 @@ const unoBuilder = function () {
 	const $root = this
 
 	/**
-	* Uno load URL or uno initialization
+	* Uno load URL to uno canvas
 	* @param {Object} options
 	*/
-	$root.loadUrl = (options) => {
+	$root.loadCanvas = (options) => {
 		if (options.url && options.element) {
 			global.__uno__.url = options.url
 			global.__uno__.element = options.element

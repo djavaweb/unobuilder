@@ -1,4 +1,4 @@
-uno.loadUrl({
+uno.loadCanvas({
     url: './example/index.html',
     element: '.entry-content'
 }).on('ready', function () {
