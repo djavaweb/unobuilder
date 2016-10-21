@@ -161,10 +161,17 @@ Viewer.mixins = {
         /**
          * Create element
          * @param  {Object} element
-         * @param  {Function} ready
+         * @param  {Number|Function} insertAt, fn
          * @return {Node}
          */
-        createElement (element, ready) {
+        createElement (element, insertAt, fn) {
+			// Fix arguments
+			let ready = fn
+			if (typeof insertAt === 'function') {
+				ready = insertAt
+			}
+
+
 			let el = Viewer.window.document.createElement(element.tag),
 			id = utils.generateId()
 
@@ -453,18 +460,7 @@ Viewer.mixins = {
 			// Select element
 			el.$select = (isRightClick = false) => {
 				if (el.$selectable) {
-					let parent = el.$parentElement(), index = 0, last = false
-
-					// Get element index,
-					// and child size
-					if (parent) {
-						let parentLength = parent.$childElements().length
-
-						index = $(el).parent().index()
-						if (index === parentLength - 1) {
-							last = true
-						}
-					}
+					let parent = el.$parentElement(),last = false
 
 					// If parent is editable content, and in edit mode
 					// Cancel it dont select outline
@@ -484,7 +480,7 @@ Viewer.mixins = {
 							css: el.$outline(),
 							type: el.$type,
 							last: last,
-							index: index,
+							index: el.$index(),
 							expand: false,
 							childSize: 0,
 							removeOver: false,
@@ -795,15 +791,32 @@ Viewer.mixins = {
 			// Get element's parent, until met first child's node of body
 			// for example: If we're in section>container>element>element
 			// find section, section is first child's node of body/layout
-			el.$parentOfLayout = () => {
+			el.$firstParentFromLayout = () => {
 				let parent = el.$selectableParent()
 				if (parent) {
 					if (parent.$type !== 'body') {
-						return parent.$parentOfLayout()
+						return parent.$firstParentFromLayout()
 					}
 
 					return el
 				}
+			}
+
+			// Get element's index from it's parent
+			el.$index = () => {
+				let index = 0,
+				parent = el.$parentElement()
+
+				if (parent) {
+					let prevSibling = el
+					while ((prevSibling = prevSibling.previousElementSibling) !== null) {
+						if (prevSibling.nodeType === 1) {
+							index++
+						}
+					}
+				}
+
+				return index
 			}
 
 			// Select child until we found selectable element
@@ -887,49 +900,13 @@ Viewer.mixins = {
 					if (! this.elements[el.$id].props.self[propKey]) {
 						this.elements[el.$id].props.self[propKey] = props
 					}
+
 					dot.set(key, val, this.elements[el.$id].props.self[propKey])
 				}
 
 				this.$nextTick(() => {
 					this.updateStylesheet(true)
 				})
-
-				/*if (!screenSize) {
-					screenSize = 'large'
-				}
-
-				// If we set properties into large screen
-				// All screen size will update too, so on
-				if (screenSize === 'large') {
-					dot.set(key, val, el.$props('large'))
-				}
-
-				// for medium
-				if (['large', 'medium'].includes(screenSize)) {
-					dot.set(key, val, el.$props('medium'))
-				}
-
-				// for small screen
-				if (['large', 'medium', 'small'].includes(screenSize)) {
-					dot.set(key, val, el.$props('small'))
-				}
-
-				// for mini screen
-				if (['large', 'medium', 'small', 'mini'].includes(screenSize)) {
-					dot.set(key, val, el.$props('mini'))
-				}
-
-				// Update custom attributes
-				if (key === 'klass') {
-					el.$setClass(val)
-				} else if (key === 'id') {
-					el.$setAttr(key, val)
-				}
-
-				// Mayday, mayday element has changed
-				this.$nextTick(() => {
-					this.$emit('elementHasChanged', true)
-				})*/
 			}
 
 			// Get properties
@@ -951,14 +928,36 @@ Viewer.mixins = {
 
 			// Prepend element to element.prepend value
 			if (element.prepend) {
-				let elementPrepend = Viewer.window.document.querySelector(element.prepend)
-				elementPrepend.insertBefore(el, elementPrepend.firstChild)
+				let prependElement = Viewer.window.document.querySelector(element.prepend)
+				targetEl = prependElement,
+				where = 'afterbegin'
+
+				if (typeof insertAt === 'number') {
+					let childs = prependElement.$childElements()
+					if (childs.length > 0) {
+						targetEl = childs[insertAt]
+						where = 'beforebegin'
+					}
+				}
+
+				targetEl.insertAdjacentElement(where, el)
 			}
 
 			// Append element to element.append value
 			if (element.append) {
-				let appendElement = Viewer.window.document.querySelector(element.append)
-				appendElement.appendChild(el)
+				let appendElement = Viewer.window.document.querySelector(element.append),
+				targetEl = appendElement,
+				where = 'beforeend'
+
+				if (typeof insertAt === 'number') {
+					let childs = appendElement.$childElements()
+					if (childs.length > 0) {
+						targetEl = childs[insertAt]
+						where = 'afterend'
+					}
+				}
+
+				targetEl.insertAdjacentElement(where, el)
 			}
 
 			// Remove raw html with temporary elements
@@ -1474,15 +1473,17 @@ Viewer.mixins = {
 
 		/**
 		 * On adding block
+		 * @param {ElementNode} element
+		 * @param {Number} index
 		 */
-		addBlock (element) {
+		addBlock (element, index) {
 			// Exeptions for body
 			if (element.append === 'body') {
 				element.append = '[data-type="body"]'
 			}
 
 			// Override attribute
-			this.createElement(element, el => {
+			this.createElement(element, index, el => {
 				el.$select()
 			})
 		},

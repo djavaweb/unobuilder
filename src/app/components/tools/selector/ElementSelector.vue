@@ -200,8 +200,7 @@ export default {
 				let hoverEl = this.getElementById(object.id)
 				if (hoverEl) {
 					// Move block's position
-					let block = this.$root.canvasBuilder('block'),
-					position = 0
+					let block = this.$root.canvasBuilder('block'), insertAt, position = 0
 
 					// If element type is body a.k.a layout
 					// and body has no elements, set position of block to top
@@ -219,14 +218,16 @@ export default {
 					// If element has parent and it's not a root's child (first node of root)
 					// find it until it's root's child
 					else {
-						let parent = hoverEl.$parentOfLayout(),
+						let parent = hoverEl.$firstParentFromLayout(),
 						outline = parent.$outline()
+						insertAt = parent.$index()
 						position = (outline.$top + outline.$height) - 20
 					}
 
 					// Only set position if block hasn't shown yet
 					if (! block.showBlock) {
 						block.position = position
+						block.insertAt = insertAt
 					}
 				}
 			}

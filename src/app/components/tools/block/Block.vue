@@ -36,6 +36,7 @@ export default {
 			position: 0,
 			showBlock: false,
 			animation: true,
+			insertAt: null,
 			selectedTab: 'structure',
 			tabs: [
 				{id: 'structure', label: 'Structure'},
@@ -130,7 +131,7 @@ export default {
 		 */
 		addBlock (block) {
 			this.hide(true)
-			this.$root.canvasBuilder().layout().addBlock(block)
+			this.$root.canvasBuilder().layout().addBlock(block, this.insertAt)
 		},
 
 		/**

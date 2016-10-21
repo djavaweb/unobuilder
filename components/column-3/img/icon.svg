@@ -1,35 +1,32 @@
-<svg width="50.00000000000001" height="50.00000000000001" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
- <!-- Generator: sketchtool 3.7 (28169) - http://www.bohemiancoding.com/sketch -->
- <title>6988C953-17B0-4C5A-8FA5-1B4E01374387</title>
- <desc>Created with sketchtool.</desc>
- <defs>
-  <rect rx="2" height="50" width="50" y="0" x="0" id="path-1"/>
-  <mask height="50" width="50" y="0" x="0" maskUnits="objectBoundingBox" maskContentUnits="userSpaceOnUse" id="mask-2">
-   <use id="svg_1" xlink:href="#path-1"/>
-  </mask>
- </defs>
- <g>
-  <title>background</title>
-  <rect fill="none" id="canvas_background" height="402" width="582" y="-1" x="-1"/>
- </g>
- <g>
-  <title>Layer 1</title>
-  <g fill-rule="evenodd" fill="none" id="Page-1">
-   <g id="Full-View">
-    <g id="Left-panel">
-     <g id="Grid">
-      <g id="grids">
-       <g id="3-col">
-        <g id="Group-4">
-         <rect height="20" width="40" y="15" x="5" fill="#FFFFFF" id="Rectangle-55-Copy"/>
-         <path stroke-linecap="square" stroke="#475054" id="Line-Copy-2" d="m18.5,15.5l0,19"/>
-         <path stroke-linecap="square" stroke="#475054" id="Line-Copy-3" d="m31.5,15.5l0,19"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="50px" height="50px" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 40.3 (33839) - http://www.bohemiancoding.com/sketch -->
+    <title>ED5857F5-C325-45AD-8ACD-6A03A7AB4F8E</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="50" height="50" rx="2"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="50" height="50" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="All-panels-open" transform="translate(-168.000000, -212.000000)">
+            <g id="Left-panel" transform="translate(0.000000, 111.000000)">
+                <g id="Add-element" transform="translate(30.000000, 0.000000)">
+                    <g id="Grid" transform="translate(11.000000, 68.000000)">
+                        <g id="grids" transform="translate(0.000000, 33.000000)">
+                            <g id="3-col" transform="translate(127.000000, 0.000000)">
+                                <g id="Group-4">
+                                    <use id="Rectangle-20" stroke-opacity="0.286486639" stroke="#FFFFFF" mask="url(#mask-2)" stroke-width="2" fill-opacity="0.1" fill="#FFFFFF" xlink:href="#path-1"></use>
+                                    <rect id="Rectangle-55-Copy" fill="#FFFFFF" x="5" y="15" width="40" height="20"></rect>
+                                    <path d="M18.5,15.5 L18.5,34.5" id="Line-Copy-2" stroke="#475054" stroke-linecap="square"></path>
+                                    <path d="M31.5,15.5 L31.5,34.5" id="Line-Copy-3" stroke="#475054" stroke-linecap="square"></path>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
         </g>
-       </g>
-      </g>
-     </g>
     </g>
-   </g>
-  </g>
- </g>
 </svg>
