@@ -1096,7 +1096,7 @@ Viewer.mixins = {
 			this.canvasBuilder('contextMenu').hide()
 
 			// Hide block
-			this.canvasBuilder('block').hide()
+			this.canvasBuilder('block').hide(true)
 
 			// Hide left panel
 			let leftPanel = this.leftPanel()

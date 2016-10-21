@@ -10,7 +10,7 @@
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-	z-index: 10;
+	z-index: 999;
 
     &:hover {
         color: $normal-sky-blue;
@@ -37,8 +37,11 @@
 	left: 0;
 	width: 100%;
 	pointer-events: none;
-	transition: height 0.4s cubic-bezier(.81,.77,0,1);
     z-index: 998;
+
+    &--animation {
+        transition: height 0.15s linear;
+    }
 
 	&-wrapper {
 		position: absolute;

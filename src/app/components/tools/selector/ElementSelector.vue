@@ -187,6 +187,7 @@ export default {
 		 * @param {Object} object
 		 */
 		setState (object) {
+			// Set state
 			this[object.state] = object
 
 			// Hide all tools
@@ -199,7 +200,8 @@ export default {
 				let hoverEl = this.getElementById(object.id)
 				if (hoverEl) {
 					// Move block's position
-					let position = 0
+					let block = this.$root.canvasBuilder('block'),
+					position = 0
 
 					// If element type is body a.k.a layout
 					// and body has no elements, set position of block to top
@@ -222,8 +224,10 @@ export default {
 						position = (outline.$top + outline.$height) - 20
 					}
 
-					// Set the position
-					this.$root.canvasBuilder('block').position = position
+					// Only set position if block hasn't shown yet
+					if (! block.showBlock) {
+						block.position = position
+					}
 				}
 			}
 		},

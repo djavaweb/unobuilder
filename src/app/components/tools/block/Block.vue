@@ -7,7 +7,7 @@ a.add-block(
 
 .canvas-block(
 :style="blockPosition",
-:class="{active: showBlock}"
+:class="{active: showBlock, 'canvas-block--animation': animation}"
 )
 	.canvas-block-wrapper
 		ul
@@ -35,6 +35,7 @@ export default {
 		return {
 			position: 0,
 			showBlock: false,
+			animation: true,
 			selectedTab: 'structure',
 			tabs: [
 				{id: 'structure', label: 'Structure'},
@@ -105,29 +106,63 @@ export default {
 	},
 
 	methods: {
+		/**
+		 * Check current selected tab
+		 * @param  {String} tab
+		 * @return {Boolean}
+		 */
 		isTab (tab) {
 			return  this.selectedTab === tab
 		},
 
+		/**
+		 * Change selected tab
+		 * @param  {String} tab
+		 * @return {void}
+		 */
 		showTab (tab) {
 			this.selectedTab = tab
 		},
 
+		/**
+		 * Add block to canvas
+		 * @param {void}
+		 */
 		addBlock (block) {
+			this.hide(true)
 			this.$root.canvasBuilder().layout().addBlock(block)
-			this.hide()
 		},
 
+		/**
+		 * Toggle block container
+		 * @return {void}
+		 */
 		toggle () {
 			this.$root.canvasBuilder('contextMenu').hide()
+			if (!this.showBlock) {
+				this.animation = true
+			}
 			this.showBlock = !this.showBlock
 		},
 
+		/**
+		 * Show block
+		 * @return {void}
+		 */
 		show () {
+			this.animation = true
 			this.showBlock = true
 		},
 
-		hide () {
+		/**
+		 * Hide block
+		 * @param {Boolean} forceHide
+		 * @return {void}
+		 */
+		hide (forceHide = false) {
+			if (forceHide) {
+				this.animation = false
+			}
 			this.showBlock = false
 		}
 	}
