@@ -2329,6 +2329,8 @@ export default {
 
             // Fix auto number
             [
+                'positionTopValue', 'positionRightValue',
+                'positionBottomValue', 'positionLeftValue',
                 'marginTopValue', 'marginRightValue',
                 'marginBottomValue', 'marginLeftValue',
                 'paddingTopValue', 'paddingRightValue',
