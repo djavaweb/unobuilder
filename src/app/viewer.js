@@ -792,6 +792,20 @@ Viewer.mixins = {
 				}
 			}
 
+			// Get element's parent, until met first child's node of body
+			// for example: If we're in section>container>element>element
+			// find section, section is first child's node of body/layout
+			el.$parentOfLayout = () => {
+				let parent = el.$selectableParent()
+				if (parent) {
+					if (parent.$type !== 'body') {
+						return parent.$parentOfLayout()
+					}
+
+					return el
+				}
+			}
+
 			// Select child until we found selectable element
 			el.$selectableChild = () => {
 				let child = el.firstChild

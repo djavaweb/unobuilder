@@ -59,6 +59,7 @@
 </template>
 
 <script>
+import _last from 'lodash/last'
 import breadcrumb from './Breadcrumb.vue'
 export default {
 	name: 'elementSelector',
@@ -76,10 +77,7 @@ export default {
 	computed: {
 		activeElement () {
 			if (this.select.id) {
-				return this.$root
-				.canvasBuilder()
-				.layout()
-				.getElement(this.select.id)
+				return this.getElementById(this.select.id)
 			}
 		},
 
@@ -149,6 +147,18 @@ export default {
 
 	methods: {
 		/**
+		 * Get element by Id
+		 * @param  {String} id [Uno ID]
+		 * @return {ElementNode}
+		 */
+		getElementById (id) {
+			return this.$root
+			.canvasBuilder()
+			.layout()
+			.getElement(id)
+		},
+
+		/**
 		 * Get properties of active element
 		 * @param  {String} key
 		 * @param  {String} mouseState
@@ -181,11 +191,40 @@ export default {
 
 			// Hide all tools
 			if (object.state === 'select') {
-
 				// Set expanded breadcrumb to collapse
 				this.$nextTick(() => {
 					this.$refs.selectBreadcrumb.expand = false
 				})
+			} else {
+				let hoverEl = this.getElementById(object.id)
+				if (hoverEl) {
+					// Move block's position
+					let position = 0
+
+					// If element type is body a.k.a layout
+					// and body has no elements, set position of block to top
+					// but if body has at least 1 elements
+					// set position to last element's height
+					if (object.type === 'body') {
+						if (hoverEl.$childElements().length > 0) {
+							let firstChild = _last(hoverEl.$childElements()).$outline()
+							position = firstChild.$top + firstChild.$height
+						} else {
+							position = object.css.$top
+						}
+					}
+					// Other than body set position of block's with this case
+					// If element has parent and it's not a root's child (first node of root)
+					// find it until it's root's child
+					else {
+						let parent = hoverEl.$parentOfLayout(),
+						outline = parent.$outline()
+						position = (outline.$top + outline.$height) - 20
+					}
+
+					// Set the position
+					this.$root.canvasBuilder('block').position = position
+				}
 			}
 		},
 
