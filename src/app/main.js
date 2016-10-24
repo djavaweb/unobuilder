@@ -25,11 +25,20 @@ Vue.transition('slidey', {
 	leaveClass: 'slideOutUp'
 })
 
+// Prepare uno builder
+uno.on('prepare', element => {
+	let builder = document.createElement('builder'),
+	builderElement = document.querySelector(element)
+
+	builderElement.insertBefore(builder, builderElement.firstChild)
+	builder.outerHTML = '<builder v-ref:builder></builder>'
+})
+
 // When uno builder init element
-uno.on('init', (element) => {
+uno.on('init', elements => {
 	// Main app
 	const App = new Vue({
-		el: 'body',
+		el: elements.builder,
 		components: {builder},
 		methods: {
 			/**

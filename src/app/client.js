@@ -31,17 +31,30 @@ const unoBuilder = function () {
 	global.__uno__.components = {}
 	global.__uno__.url = null
 	global.__uno__.element = null
+	global.__uno__.builder = null
+
 	const $root = this
+
+	/**
+	 * Init builder
+	 * @param  {String} element
+	 * @return {Object}
+	 */
+	$root.builder = function (element) {
+		global.__uno__.builder = element
+		$root.emit('prepare', element)
+		return $root
+	}
 
 	/**
 	* Uno load URL to uno canvas
 	* @param {Object} options
 	*/
-	$root.loadCanvas = (options) => {
+	$root.loadCanvas = function (options) {
 		if (options.url && options.element) {
 			global.__uno__.url = options.url
 			global.__uno__.element = options.element
-			$root.emit('init', options.element)
+			$root.emit('init', {builder: global.__uno__.builder, canvas: options.element})
 		} else {
 			throw Error(errorMessages.optionsUndefined)
 		}

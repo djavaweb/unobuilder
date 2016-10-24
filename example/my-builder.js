@@ -1,4 +1,4 @@
-uno.loadCanvas({
+uno.builder('body').loadCanvas({
     url: './example/page.html',
     element: '.entry-content'
 }).on('ready', function () {
