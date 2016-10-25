@@ -275,7 +275,7 @@ export default {
 			this.$root
 			.canvasBuilder()
 			.layout()
-			.$emit('removeElement', this.select.id)
+			.removeElement(this.select.id)
 		},
 
 		/**
@@ -301,12 +301,12 @@ export default {
 				this.$root
 				.canvasBuilder()
 				.layout()
-				.$emit('keyCapture', 'copy', this.select.id)
+				.keyCapture('copy', this.select.id)
 			} else {
 				this.$root
 				.canvasBuilder()
 				.layout()
-				.$emit('copyElement', this.select.id)
+				.copyElement(this.select.id)
 			}
 		},
 
@@ -317,7 +317,7 @@ export default {
 			this.$root
 			.canvasBuilder()
 			.layout()
-			.$emit('keyCapture', 'paste')
+			.keyCapture('paste')
 		},
 
 		isElementResizable () {},

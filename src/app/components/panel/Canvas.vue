@@ -24,13 +24,14 @@ import unoViewer from '../../viewer.js'
 export default {
     name: 'canvasBuilder',
     components: {
+        block,
         contextMenu,
         elementSelector,
-        block
     },
 
     data () {
         return {
+            canvasInstance: null,
             bodyBoundRect: null
         }
     },
@@ -117,7 +118,7 @@ export default {
          * @return {Object}
          */
         layout (ref, el) {
-            return this.layoutDOM('body').__vue__.ref(ref, el)
+            return this.canvasInstance.ref(ref, el)
         },
 
         /**
@@ -188,7 +189,7 @@ export default {
             uikitCss.innerHTML = require('raw!uikit/dist/css/uikit.min.css?hack') +
             require('raw!sass!../../../assets/scss/canvas.scss')
 
-            new Vue({
+            this.canvasInstance = new Vue({
                 el: this.layoutDOM('body'),
                 mixins: [unoViewer.mixins]
             })
