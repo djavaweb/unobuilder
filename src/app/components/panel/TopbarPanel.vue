@@ -55,7 +55,7 @@ export default {
     methods: {
         setScreen (size) {
             this.screenSize = size
-            this.$root.ref('centerPanel.canvasBuilder').viewer().setScreenSize(size)
+            this.$root.canvasBuilder().layout().setScreenSize(size)
         },
 
         isScreen (size) {

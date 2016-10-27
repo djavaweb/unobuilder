@@ -1,0 +1,65 @@
+.element-item {
+    padding-right: 7px;
+    padding-bottom: 10px;
+    background-color: $charcoal-grey;
+    min-width: 55px;
+    text-align: center;
+    @include grab;
+
+    &--dragging {
+        @include grabbing;
+        padding: 10px 8px 2px !important;
+        min-width: auto !important;
+        width: 55px;
+        border-radius: 3px;
+        box-shadow: 0 1px 10px 3px rgba(0,0,0,0.3);
+        .icon.no-border {
+            border: 1px solid $white;
+        }
+    }
+
+    &.oncanvas {
+        position: absolute;
+        min-width: auto;
+        max-height: auto;
+        width: 2px;
+        height: 2px;
+        padding: 0;
+        z-index: 999;
+    }
+
+    &.no-space-right, &:last-child {
+        padding-right: 0;
+    }
+
+    .label {
+        font-size: 11px;
+        color: $white;
+    }
+
+    &.component-grid {
+        .icon {
+            border: 1px solid $transparent-white;
+        }
+    }
+
+    .icon {
+        height: 50px;
+        border-radius: 2px;
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
+        background-image: url('#{$assets_path}/img/component-default.svg');
+        opacity: 0.8;
+
+        &.no-border {
+            border: 1px solid rgba(0,0,0,0);
+            &:hover {
+                border-color:$white;
+            }
+        }
+
+        &:hover {
+            opacity: 1
+        }
+    }
+}

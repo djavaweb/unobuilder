@@ -1,0 +1,21 @@
+/**
+ * Load mixins
+ */
+@import "utils/mixins.scss";
+
+/**
+ * Base
+ */
+@import "base/vars.scss";
+@import "base/colors.scss";
+@import "base/fonts.scss";
+
+/**
+ * Mixins
+ */
+@import "utils/mixins.scss";
+
+/**
+ * Import layouts
+ */
+@import "layouts/viewer.scss";

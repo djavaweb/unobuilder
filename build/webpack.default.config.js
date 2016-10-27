@@ -5,15 +5,24 @@ let appDir = path.resolve(__dirname, '..', 'src', 'app'),
 distDir = path.resolve(__dirname, '..', 'dist')
 
 module.exports = {
+    resolve: {
+        root: [appDir],
+        modulesDirectories: ['node_modules'],
+        alias: {
+            uno: 'client.js',
+            jquery: 'jquery/src/jquery',
+            UIKitCSS: 'uikit/dist/css/uikit.min.css'
+        }
+    },
+
     entry: {
-        unobuilder: path.join(appDir, 'main.js'),
-        'unobuilder.viewer': path.join(appDir, 'viewer.js')
+        unobuilder: path.join(appDir, 'main.js')
     },
 
     output: {
         path: distDir,
         publicPath: 'dist/',
-        filename: "[name].js"
+        filename: "[name].js",
     },
 
     module: {
@@ -36,6 +45,11 @@ module.exports = {
                 test: /\.pug$/,
                 loader: 'pug-loader'
             },
+
+            {
+				test: /\.css$/,
+				loader: 'style-loader!css-loader'
+			},
 
             {
 				test: /\.scss$/,

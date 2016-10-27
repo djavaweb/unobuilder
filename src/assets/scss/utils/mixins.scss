@@ -1,0 +1,59 @@
+/**
+ * Display flex
+ */
+@mixin flex {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex
+}
+
+/**
+ * Stick to left
+ * @param  {color} $bgcolor
+ * @param  {int} $z-index
+  */
+@mixin stickleft ($bgcolor, $z-index) {
+    background-color: $bgcolor;
+    z-index: $z-index;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    height: 100vh;
+}
+
+/**
+ * Disable user-select
+ */
+@mixin no-user-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none
+}
+
+/**
+ * Disable pointer events
+ */
+@mixin no-pointer-events {
+    pointer-events: none;
+}
+
+/**
+ * Grab cursor on mouse over
+ */
+@mixin grab {
+    cursor: -webkit-grab !important;
+    cursor: -moz-grab !important;
+    cursor: grab !important;
+}
+
+/**
+ * Grabbing cursor
+ */
+@mixin grabbing {
+    cursor: -webkit-grabbing !important;
+    cursor: -moz-grabbing !important;
+    cursor: grabbing !important;
+}

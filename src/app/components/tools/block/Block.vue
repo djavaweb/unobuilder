@@ -7,7 +7,7 @@ a.add-block(
 
 .canvas-block(
 :style="blockPosition",
-:class="{active: showBlock}"
+:class="{active: showBlock, 'canvas-block--animation': animation}"
 )
 	.canvas-block-wrapper
 		ul
@@ -28,17 +28,15 @@ a.add-block(
 // End of blocks
 </template>
 
-<style lang="sass">
-@import "../../../scss/block.scss"
-</style>
-
 <script>
 export default {
 	name: 'block',
 	data () {
 		return {
-			position: 0,
+			position: -1000,
+			insertAt: null,
 			showBlock: false,
+			animation: true,
 			selectedTab: 'structure',
 			tabs: [
 				{id: 'structure', label: 'Structure'},
@@ -109,30 +107,63 @@ export default {
 	},
 
 	methods: {
+		/**
+		 * Check current selected tab
+		 * @param  {String} tab
+		 * @return {Boolean}
+		 */
 		isTab (tab) {
 			return  this.selectedTab === tab
 		},
 
+		/**
+		 * Change selected tab
+		 * @param  {String} tab
+		 * @return {void}
+		 */
 		showTab (tab) {
 			this.selectedTab = tab
 		},
 
+		/**
+		 * Add block to canvas
+		 * @param {void}
+		 */
 		addBlock (block) {
-			let canvasBuilder = this.$root.ref('centerPanel.canvasBuilder')
-			canvasBuilder.viewer().addBlock(block)
-			this.hide()
+			this.hide(true)
+			this.$root.canvasBuilder().layout().addBlock(block, this.insertAt)
 		},
 
+		/**
+		 * Toggle block container
+		 * @return {void}
+		 */
 		toggle () {
-			this.$root.ref('centerPanel.canvasBuilder.contextMenu').hide()
+			this.$root.canvasBuilder('contextMenu').hide()
+			if (!this.showBlock) {
+				this.animation = true
+			}
 			this.showBlock = !this.showBlock
 		},
 
+		/**
+		 * Show block
+		 * @return {void}
+		 */
 		show () {
+			this.animation = true
 			this.showBlock = true
 		},
 
-		hide () {
+		/**
+		 * Hide block
+		 * @param {Boolean} forceHide
+		 * @return {void}
+		 */
+		hide (forceHide = false) {
+			if (forceHide) {
+				this.animation = false
+			}
 			this.showBlock = false
 		}
 	}

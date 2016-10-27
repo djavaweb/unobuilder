@@ -171,6 +171,26 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
                                     dt.left(
                                     v-html="paddingLeft",
                                     @mousedown="dragStart($event, 'padding', 'left')")
+
+// Popup position
+popup(
+:title="popupPositionTitle",
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-position)
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Position Value
+        .uk-width-4-10
+            input-number(
+            :value.sync="positionPopup",
+            :unit.sync="positionPopupUnit",
+            :width="30",
+            :units="['px', 'em']",
+            :min="-1000",
+            :max="1000")
+
 // Popup margin
 popup(
 :title="popupMarginTitle",
@@ -183,7 +203,7 @@ v-ref:popup-margin)
             label Margin Value
         .uk-width-4-10
             input-number(
-            :value.sync="marginPopupValue",
+            :value.sync="marginPopup",
             :unit.sync="marginPopupUnit",
             :width="30",
             :min="-1000",
@@ -338,7 +358,26 @@ v-ref:popup-all-border)
             :min="0",
             :max="100")
 
-// Popup: Border Color
+// Popup border radius
+popup(
+:title="popupBorderRadiusTitle",
+:overlay="true",
+:on-close="hidePopup",
+button="OK",
+v-ref:popup-border-radius)
+    .uk-grid.uk-grid-small
+        .uk-width-6-10
+            label Radius Width
+        .uk-width-4-10
+            input-number(
+            :value.sync="borderRadiusPopupValue",
+            :unit.sync="borderRadiusPopupUnit",
+            :width="30",
+            :units="['px', '%']",
+            :min="-1000",
+            :max="1000")
+
+// Popup: All border Color
 popup-color-picker(
 :colors.sync="borderColorAll",
 :overlay="true",
@@ -411,7 +450,8 @@ export default {
                     direction: ''
                 },
                 borderRadius: {
-                    direction: ''
+                    yAxis: '',
+                    xAxis: ''
                 },
                 allBorder: {
                     direction: ''
@@ -420,6 +460,9 @@ export default {
                     direction: ''
                 },
                 allPadding: {
+                    direction: ''
+                },
+                position: {
                     direction: ''
                 }
             }
@@ -439,12 +482,12 @@ export default {
          * Position top value based on settings (absolute|fixed)
          * @return {String}
          */
-        positionTop: {
+        positionTopValue: {
             get () {
                 if (this.positionValue !== 'relative') {
                     let positionTop = this.getPositionProp(`settings.${this.positionValue}.top`)
                     if (positionTop) {
-                        return positionTop.value + positionTop.unit
+                        return positionTop.value
                     }
                 }
             },
@@ -455,15 +498,48 @@ export default {
         },
 
         /**
+         * Position top unit based on settings (absolute|fixed)
+         * @return {String}
+         */
+        positionTopUnit: {
+            get () {
+                if (this.positionValue !== 'relative') {
+                    let positionTop = this.getPositionProp(`settings.${this.positionValue}.top`)
+                    if (positionTop) {
+                        return positionTop.unit
+                    }
+                }
+            },
+
+            set (val) {
+                this.setPositionProp(`settings.${this.positionValue}.top.unit`, val)
+            }
+        },
+
+        /**
+         * Position top value based on settings (absolute|fixed)
+         * @return {String}
+         */
+        positionTop: {
+            get () {
+                return utils.autoValue(this.positionTopValue, this.positionTopUnit)
+            },
+
+            set (value) {
+                this.positionTopValue = value
+            }
+        },
+
+        /**
          * Position right value based on settings (absolute|fixed)
          * @return {String}
          */
-        positionRight: {
+        positionRightValue: {
             get () {
                 if (this.positionValue !== 'relative') {
                     let positionRight = this.getPositionProp(`settings.${this.positionValue}.right`)
                     if (positionRight) {
-                        return positionRight.value + positionRight.unit
+                        return positionRight.value
                     }
                 }
             },
@@ -474,15 +550,48 @@ export default {
         },
 
         /**
+         * Position right unit based on settings (absolute|fixed)
+         * @return {String}
+         */
+        positionRightUnit: {
+            get () {
+                if (this.positionValue !== 'relative') {
+                    let positionRight = this.getPositionProp(`settings.${this.positionValue}.right`)
+                    if (positionRight) {
+                        return positionRight.unit
+                    }
+                }
+            },
+
+            set (val) {
+                this.setPositionProp(`settings.${this.positionValue}.right.unit`, val)
+            }
+        },
+
+        /**
+         * Position right value based on settings (absolute|fixed)
+         * @return {String}
+         */
+        positionRight: {
+            get () {
+                return utils.autoValue(this.positionRightValue, this.positionRightUnit, ' ')
+            },
+
+            set (value) {
+                this.positionRightValue = value
+            }
+        },
+
+        /**
          * Position bottom value based on settings (absolute|fixed)
          * @return {String}
          */
-        positionBottom: {
+        positionBottomValue: {
             get () {
                 if (this.positionValue !== 'relative') {
                     let positionBottom = this.getPositionProp(`settings.${this.positionValue}.bottom`)
                     if (positionBottom) {
-                        return positionBottom.value + positionBottom.unit
+                        return positionBottom.value
                     }
                 }
             },
@@ -493,21 +602,87 @@ export default {
         },
 
         /**
+         * Position bottom unit based on settings (absolute|fixed)
+         * @return {String}
+         */
+        positionBottomUnit: {
+            get () {
+                if (this.positionValue !== 'relative') {
+                    let positionBottom = this.getPositionProp(`settings.${this.positionValue}.bottom`)
+                    if (positionBottom) {
+                        return positionBottom.unit
+                    }
+                }
+            },
+
+            set (val) {
+                this.setPositionProp(`settings.${this.positionValue}.bottom.unit`, val)
+            }
+        },
+
+        /**
+         * Position bottom value based on settings (absolute|fixed)
+         * @return {String}
+         */
+        positionBottom: {
+            get () {
+                return utils.autoValue(this.positionBottomValue, this.positionBottomUnit)
+            },
+
+            set (value) {
+                this.positionBottomValue = value
+            }
+        },
+
+        /**
          * Position left value based on settings (absolute|fixed)
          * @return {String}
          */
-        positionLeft: {
+        positionLeftValue: {
             get () {
                 if (this.positionValue !== 'relative') {
                     let positionLeft = this.getPositionProp(`settings.${this.positionValue}.left`)
                     if (positionLeft) {
-                        return positionLeft.value + positionLeft.unit
+                        return positionLeft.value
                     }
                 }
             },
 
             set (val) {
                 this.setPositionProp(`settings.${this.positionValue}.left.value`, val)
+            }
+        },
+
+        /**
+         * Position left unit based on settings (absolute|fixed)
+         * @return {String}
+         */
+        positionLeftUnit: {
+            get () {
+                if (this.positionValue !== 'relative') {
+                    let positionLeft = this.getPositionProp(`settings.${this.positionValue}.left`)
+                    if (positionLeft) {
+                        return positionLeft.unit
+                    }
+                }
+            },
+
+            set (val) {
+                this.setPositionProp(`settings.${this.positionValue}.left.unit`, val)
+            }
+        },
+
+        /**
+         * Position left value based on settings (absolute|fixed)
+         * @return {String}
+         */
+        positionLeft: {
+            get () {
+                return utils.autoValue(this.positionLeftValue, this.positionLeftUnit, ' ')
+            },
+
+            set (value) {
+                this.positionLeftValue = value
             }
         },
 
@@ -523,6 +698,34 @@ export default {
             }
 
             return klass
+        },
+
+        /**
+         * Position popup value
+         * @return {String}
+         */
+        positionPopup: {
+            get () {
+                return this[`position${utils.capitalize(this.popupState.position.direction)}Value`]
+            },
+
+            set (val) {
+                this[`position${utils.capitalize(this.popupState.position.direction)}Value`] = val
+            }
+        },
+
+        /**
+         * Position popup unit
+         * @return {String}
+         */
+        positionPopupUnit: {
+            get () {
+                return this[`position${utils.capitalize(this.popupState.position.direction)}Unit`]
+            },
+
+            set (val) {
+                this[`position${utils.capitalize(this.popupState.position.direction)}Unit`] = val
+            }
         },
 
         /**
@@ -689,7 +892,7 @@ export default {
          * Margin popup value
          * @return {String}
          */
-        marginPopupValue: {
+        marginPopup: {
             get () {
                 let marginValue = this.getMarginProp(this.popupState.margin.direction)
                 if (marginValue) {
@@ -1573,6 +1776,46 @@ export default {
         },
 
         /**
+         * Border radius popup value
+         * @type {Object}
+         */
+        borderRadiusPopupValue: {
+            get () {
+                let borderRadiusState = this.popupState.borderRadius,
+                yAxis = utils.capitalize(borderRadiusState.yAxis),
+                xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+                return this[`borderRadius${yAxis + xAxis}`]
+            },
+
+            set (val) {
+                let borderRadiusState = this.popupState.borderRadius,
+                yAxis = utils.capitalize(borderRadiusState.yAxis),
+                xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+                this[`borderRadius${yAxis + xAxis}`] = val
+            }
+        },
+
+        borderRadiusPopupUnit: {
+            get () {
+                let borderRadiusState = this.popupState.borderRadius,
+                yAxis = utils.capitalize(borderRadiusState.yAxis),
+                xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+                return this[`borderRadius${yAxis + xAxis}Unit`]
+            },
+
+            set (val) {
+                let borderRadiusState = this.popupState.borderRadius,
+                yAxis = utils.capitalize(borderRadiusState.yAxis),
+                xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+                this[`borderRadius${yAxis + xAxis}Unit`] = val
+            }
+        },
+
+        /**
          * Border radius popup unit
          * @return {String}
          */
@@ -1631,6 +1874,14 @@ export default {
         },
 
         /**
+         * Popup Title for position
+         * @return {String}
+         */
+        popupPositionTitle () {
+            return `Position ${utils.capitalize(this.popupState.position.direction)}`
+        },
+
+        /**
          * Popup Title for Margin
          * @return {String}
          */
@@ -1652,7 +1903,19 @@ export default {
          */
         popupPaddingTitle () {
             return `Padding ${utils.capitalize(this.popupState.padding.direction)}`
-        }
+        },
+
+        /**
+         * Popup Title for Border
+         * @return {String}
+         */
+        popupBorderRadiusTitle () {
+            let borderRadiusState = this.popupState.borderRadius,
+            yAxis = utils.capitalize(borderRadiusState.yAxis),
+            xAxis = utils.capitalize(borderRadiusState.xAxis)
+
+            return `Border ${yAxis} ${xAxis} Radius`
+        },
     },
 
     methods: {
@@ -1818,32 +2081,17 @@ export default {
         },
 
         /**
-         * Reset object by type
-         * @param {Object} object
-         */
-        resetObject (object) {
-            for (let i in object) {
-                switch (typeof object[i]) {
-                    case 'string':
-                        object[i] = ''
-                    break
-
-                    case 'number':
-                        object[i] = 0
-                    break
-
-                    case 'boolean':
-                        object[i] = false
-                    break
-                }
-            }
-        },
-
-        /**
          * Reset drag state
          */
         resetDragState () {
-            this.resetObject(this.dragState)
+            utils.resetObject(this.dragState)
+        },
+
+        /**
+         * Reset drag radius state
+         */
+        resetDragRadiusState () {
+            utils.resetObject(this.dragRadiusState)
         },
 
         /**
@@ -2007,10 +2255,14 @@ export default {
             if (this.dragRadiusState.x === event.pageX &&
                 this.dragRadiusState.y === event.pageY &&
                 ! this.dragRadiusState.move) {
-				//this.showPopup($event, this.dragState.layout, this.dragState.direction)
+
+                this.popupState.borderRadius.xAxis = this.dragRadiusState.xAxis
+                this.popupState.borderRadius.yAxis = this.dragRadiusState.yAxis
+                this.$refs.popupBorderRadius.show(this.popupOption(event))
 			}
 
             // Stop dragging
+            this.resetDragRadiusState()
             utils.removeEvent(document, 'mousemove', this.dragMoveRadius, false)
 			utils.removeEvent(document, 'mouseup', this.dragEndRadius, false)
         },
@@ -2050,11 +2302,13 @@ export default {
         hidePopup () {
             // Reset popup state
             for (let i in this.popupState) {
-                this.resetObject(this.popupState[i])
+                utils.resetObject(this.popupState[i])
             }
 
             // Fix auto number
             [
+                'positionTopValue', 'positionRightValue',
+                'positionBottomValue', 'positionLeftValue',
                 'marginTopValue', 'marginRightValue',
                 'marginBottomValue', 'marginLeftValue',
                 'paddingTopValue', 'paddingRightValue',

@@ -16,7 +16,7 @@ export default {
     methods: {
         setTab (tabId) {
             this.activeTab = tabId
-            this.$root.canvasBuilder().viewer().$set('propertyState', tabId)
+            this.$root.canvasBuilder().layout().$set('propertyState', tabId)
         },
 
         isTab (tabId) {

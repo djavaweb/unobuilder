@@ -1,0 +1,60 @@
+.canvas-contextmenu {
+	pointer-events: all;
+	position: absolute;
+	width: 200px;
+	background: $dark;
+	border-radius: 4px;
+	box-shadow: 0 0 5px 0px rgba(0, 0, 0, 0.7);
+	border: 1px solid $dark;
+	overflow: hidden;
+	z-index: 999;
+}
+
+.cm {
+	z-index: 999;
+	list-style: none;
+	padding: 5px 0;
+	margin: 0;
+	position: relative;
+
+	li {
+		padding: 0;
+		margin: 0;
+	}
+
+	a {
+		padding: 5px 10px;
+		color: $white;
+		display: block;
+		font-size: 12px;
+		text-shadow: 0 0 1px $black;
+		cursor: default;
+		&:after {
+			display: block;
+			content: ' ';
+			clear: both;
+			float: none;
+		}
+		&:hover {
+			background: $charcoal-semi-dark;
+			color: $white;
+		}
+	}
+
+	&-label {
+		float: left;
+		font-weight: bold;
+	}
+
+	&-shortcut {
+		float: right;
+		font-style: italic;
+	}
+
+	&-delimiter {
+		display: block;
+		height: 2px;
+		margin: 2px 0;
+		background: $steel-young-grey2
+	}
+}

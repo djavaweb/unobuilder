@@ -27,18 +27,6 @@ export default {
         propAttr,
         propTypography,
         propBackground
-    },
-
-    data () {
-        return {
-            ready: true
-        }
-    },
-
-    methods: {
-        hasProps () {
-            return true
-        }
     }
 }
 </script>

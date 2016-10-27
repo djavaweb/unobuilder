@@ -3,8 +3,8 @@
 
 	// Hover element selector
 	.element-selector-tools.hover(
-	:class="{orange: dragComponent}",
-	:style="hover.css",
+	:class="{orange: dragElement}",
+	:style="hoverStyle",
 	v-if="isHover()",
 	v-el:hover
 	)
@@ -56,14 +56,19 @@
 			)
 		// End of element resizer
 	// End of select element selector
+
+	// Drop line
+	.dropline(v-if="isHover() && dragElement")
+		.dropline__x(:style="droplineX")
+			.dropline__x-triangle.dropline__x-triangle--left
+			.dropline__x-triangle.dropline__x-triangle--right
 </template>
 
-<style lang="sass">
-@import "../../../scss/element-selector.scss"
-</style>
-
 <script>
+import _last from 'lodash/last'
 import breadcrumb from './Breadcrumb.vue'
+
+const droplineMargin = 5
 export default {
 	name: 'elementSelector',
 	components: {
@@ -73,17 +78,15 @@ export default {
 	data () {
 		return {
 			hover: {},
-			select: {}
+			select: {},
+			dropline: {}
 		}
 	},
 
 	computed: {
 		activeElement () {
 			if (this.select.id) {
-				return this.$root
-				.canvasBuilder()
-				.viewer()
-				.getElement(this.select.id)
+				return this.getElementById(this.select.id)
 			}
 		},
 
@@ -118,6 +121,19 @@ export default {
 			return klass
 		},
 
+		hoverStyle () {
+			let style = this.hover.css
+
+			// If it's dragging element and dropline is in bottom
+			if (this.dragElement && this.dropline.css) {
+				if (this.dropline.position === 'bottom') {
+					style.height = `${style.$height + droplineMargin}px`
+				}
+			}
+
+			return style
+		},
+
 		selectClass () {
 			let klass = ['select']
 
@@ -146,12 +162,50 @@ export default {
 			return klass
 		},
 
-		dragComponent () {
+		dragElement () {
+			let dragComponent = this.$root.ref('leftPanel').dragComponent,
+			dragElement = this.$root.canvasBuilder().layout().dragElementState.move
 
+			return dragComponent || dragElement
+		},
+
+		droplineX () {
+			let style = {}
+
+			if (this.dragElement && this.dropline.css) {
+				let width = this.dropline.css.$width - (droplineMargin * 2),
+				left = this.dropline.css.$left + droplineMargin,
+				top = this.dropline.css.$top + droplineMargin
+
+				// If position is bottom
+				// Set dropline to the last child height
+				if (this.dropline.position === 'bottom') {
+					let lastChild = this.dropline.target.lastChild.$element().$outline()
+					top = lastChild.$top + lastChild.$height + (droplineMargin / 2)
+				}
+
+				// Okay
+				style.width = `${width}px`
+				style.transform = `translate(${left}px, ${top}px)`
+			}
+
+			return style
 		}
 	},
 
 	methods: {
+		/**
+		 * Get element by Id
+		 * @param  {String} id [Uno ID]
+		 * @return {ElementNode}
+		 */
+		getElementById (id) {
+			return this.$root
+			.canvasBuilder()
+			.layout()
+			.getElement(id)
+		},
+
 		/**
 		 * Get properties of active element
 		 * @param  {String} key
@@ -178,32 +232,64 @@ export default {
 
 		/**
 		 * Set state
-		 * @param {Object} object
+		 * @param {Object} element
 		 */
-		setState (object) {
-			this[object.state] = object
+		setState (element) {
+			// Set state
+			this[element.state] = element
 
 			// Hide all tools
-			if (object.state === 'select') {
+			if (element.state === 'select') {
+				// Set expanded breadcrumb to collapse
 				this.$nextTick(() => {
-					// Hide left panel
-					let leftPanel = this.$root.ref('leftPanel')
-					if (leftPanel.isActivePanel('component')) {
-						leftPanel.setPanel('component')
-					}
-
-					// Hide block
-					this.$root.canvasBuilder('block').hide()
-
-					// Hide context menu
-					let contextMenu = this.$root.canvasBuilder('contextMenu')
-					if (!object.rightClick && contextMenu.display) {
-						contextMenu.hide()
-					}
-
-					// Set expanded breadcrumb to collapse
 					this.$refs.selectBreadcrumb.expand = false
 				})
+			} else {
+				let hoverEl = this.getElementById(element.id)
+				if (hoverEl) {
+					// Move block's position
+					let block = this.$root.canvasBuilder('block'), insertAt, position = 0
+
+					// If element type is body a.k.a layout
+					// and body has no elements, set position of block to top
+					// but if body has at least 1 elements
+					// set position to last element's height
+					if (element.type === 'body') {
+						if (hoverEl.$childElements().length > 0) {
+							let firstChild = _last(hoverEl.$childElements()).$outline()
+							position = firstChild.$top + firstChild.$height
+						} else {
+							position = element.css.$top
+						}
+					}
+					// Other than body set position of block's with this case
+					// If element has parent and it's not a root's child (first node of root)
+					// find it until it's root's child
+					else {
+						let parent = hoverEl.$firstParentFromLayout(),
+						outline = parent.$outline()
+						insertAt = parent.$index()
+						position = (outline.$top + outline.$height) - 20
+					}
+
+					// Only set position if block hasn't shown yet
+					if (! block.showBlock && !this.dragElement) {
+						block.position = position
+						block.insertAt = insertAt
+					}
+				}
+			}
+		},
+
+		/**
+		 * Drop line when dragging element
+		 * @param {Boolean} display
+		 * @param {Object} dropElement
+		 * @return {void}
+		 */
+		dropAt (display, dropElement) {
+			if (dropElement) {
+				this.dropline = dropElement
 			}
 		},
 
@@ -212,8 +298,9 @@ export default {
 		 * @return {Boolean}
 		 */
 		isHover () {
-			if (this.hover.breadcrumbs && this.hover.breadcrumbs.length>0 &&
-			this.hover.id !== this.select.id) {
+			if (this.hover.breadcrumbs &&
+				this.hover.breadcrumbs.length>0 &&
+				(this.hover.id !== this.select.id || this.dragElement)) {
 				return true
 			}
 		},
@@ -223,7 +310,9 @@ export default {
 		 * @return {Boolean}
 		 */
 		isSelect () {
-			if (this.select.breadcrumbs && this.select.breadcrumbs.length>0) {
+			if (this.select.breadcrumbs &&
+				this.select.breadcrumbs.length>0 &&
+				(this.hover.id !== this.select.id || ! this.dragElement)) {
 				return true
 			}
 		},
@@ -248,8 +337,8 @@ export default {
 		removeElement () {
 			this.$root
 			.canvasBuilder()
-			.viewer()
-			.$emit('removeElement', this.select.id)
+			.layout()
+			.removeElement(this.select.id)
 		},
 
 		/**
@@ -274,13 +363,13 @@ export default {
 			if (inMemory) {
 				this.$root
 				.canvasBuilder()
-				.viewer()
-				.$emit('keyCapture', 'copy', this.select.id)
+				.layout()
+				.keyCapture('copy', this.select.id)
 			} else {
 				this.$root
 				.canvasBuilder()
-				.viewer()
-				.$emit('copyElement', this.select.id)
+				.layout()
+				.copyElement(this.select.id)
 			}
 		},
 
@@ -290,8 +379,8 @@ export default {
 		pasteElement () {
 			this.$root
 			.canvasBuilder()
-			.viewer()
-			.$emit('keyCapture', 'paste')
+			.layout()
+			.keyCapture('paste')
 		},
 
 		isElementResizable () {},

@@ -24,7 +24,7 @@
         // Close component panel
         .title
             | Add Elements
-            a.uk-icon-close(@click="setPanel('component')")
+            a.uk-icon-x(@click="setPanel('component')")
 
         // Search component panel
         .search
@@ -40,8 +40,7 @@
                 component-item(
                 v-for="component in items|filterBy search",
                 :component="component",
-                :class="componentClass(component.settings.id, $index)",
-                v-ref:component.settings.id)
+                :class="componentClass(component.settings.id, $index)")
 // End of left panel
 </template>
 
@@ -65,8 +64,9 @@ export default {
     data () {
         return {
             search: null,
-            componentLoaded: false,
             components: {},
+            dragComponent: false,
+            componentLoaded: false,
             panels: {
                 component: {
                     icon: 'uk-icon-plus',
@@ -136,15 +136,24 @@ export default {
         },
 
         /**
+         * Hide panel
+         */
+        hide () {
+            if (this.isActivePanel('component')) {
+				this.setPanel('component')
+			}
+        },
+
+        /**
          * Generate component class
          * @param  {String} id
          * @param  {Number} index
          * @return {Array}
          */
         componentClass (id, index) {
-            let klass = []
-            klass.push(`component-${utils.slugify(name)}`)
+            let klass = [`component-${utils.slugify(id)}`]
 
+            // Only 3 item in one row
             if ((index + 1) % 3 === 0) {
                 klass.push('no-space-right')
             }

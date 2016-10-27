@@ -1,8 +1,8 @@
-import _mapValues from 'lodash/mapValues'
-import _isObject from 'lodash/isObject'
-import _isArray from 'lodash/isArray'
-import _each from 'lodash/each'
-import _map from 'lodash/map'
+const _mapValues = require('lodash/mapValues')
+const _isObject = require('lodash/isObject')
+const _isArray = require('lodash/isArray')
+const _each = require('lodash/each')
+const _map = require('lodash/map')
 
 const classPrefix = 'uno',
 cssPrefixes = ['-webkit-', '-moz-', '-ms-'],
@@ -239,6 +239,17 @@ const utils = {
 	},
 
     /**
+     * Camelize string from slug or underscore
+     * @param  {String} str
+     * @return {String}
+     */
+    camelize (str) {
+        return str.replace(/(^\s*|\s*$)/g, '').replace(/(\-|_|\s)+(.)?/g, (mathc, sep, c) => {
+            return (c ? c.toUpperCase() : '')
+        })
+    },
+
+    /**
 	* Current Script Data last path and init id
 	*/
 	lastScriptInitId () {
@@ -287,7 +298,29 @@ const utils = {
             }
             return item
         })
-    }
+    },
+
+    /**
+     * Reset object by type
+     * @param {Object} object
+     */
+    resetObject (object) {
+        for (let i in object) {
+            switch (typeof object[i]) {
+                case 'string':
+                    object[i] = ''
+                break
+
+                case 'number':
+                    object[i] = 0
+                break
+
+                case 'boolean':
+                    object[i] = false
+                break
+            }
+        }
+    },
 }
 
-export default utils
+module.exports = utils

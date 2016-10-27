@@ -6,6 +6,11 @@
 </template>
 
 <script>
+import ace from 'brace'
+import aceLanguageTools from 'brace/ext/language_tools'
+import aceMode from 'brace/mode/css'
+import aceTheme from 'brace/theme/monokai'
+
 export default {
     name: 'cssEditor',
     data () {
@@ -41,29 +46,23 @@ export default {
 				editorElement.style.height = editorElement.parentElement.offsetHeight + 'px'
 
 				// Init editor
-				ace.require('ace/ext/language_tools')
+				let layout = this.$root.canvasBuilder().layout()
 				this.editor = ace.edit('css-editor')
 
 				// Get custom css from canvas
-				/*if (this.canvas) {
-					editor.setValue(this.canvas.customCSS)
-				}*/
+				this.editor.setValue(layout.customCSS)
 
 				// Set custom css when any changes
 				this.editor.on('change', () => {
 					let value = this.editor.getValue()
-					/*if (this.canvas) {
-						this.canvas.$emit('saveCSS', value)
-					}*/
+					layout.saveCSS(value)
 				})
 
 				// Editor options
 				this.editor.$blockScrolling = Infinity
-				this.editor.session.setMode('ace/mode/css')
+				this.editor.getSession().setMode('ace/mode/css')
 				this.editor.setTheme('ace/theme/monokai')
 				this.editor.setOptions({
-					enableBasicAutocompletion: true,
-					enableSnippets: true,
 					enableLiveAutocompletion: true,
 					showPrintMargin: false
 				})

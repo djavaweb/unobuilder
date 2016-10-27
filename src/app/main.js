@@ -1,10 +1,10 @@
-/* Our Applications */
+// Expose uno to window
+require('expose?uno!expose?uno!uno')
+
+/* Important Modules */
 import Vue from 'vue'
 import builder from './components/Builder.vue'
 import utils from './utils.js'
-import client from './client.js'
-
-window.uno = client
 
 /* Vue Config */
 Vue.config.debug = true
@@ -25,11 +25,20 @@ Vue.transition('slidey', {
 	leaveClass: 'slideOutUp'
 })
 
+// Prepare uno builder
+uno.on('prepare', element => {
+	let builder = document.createElement('builder'),
+	builderElement = document.querySelector(element)
+
+	builderElement.insertBefore(builder, builderElement.firstChild)
+	builder.outerHTML = '<builder v-ref:builder></builder>'
+})
+
 // When uno builder init element
-client.on('init', (element) => {
+uno.on('init', elements => {
 	// Main app
 	const App = new Vue({
-		el: 'body',
+		el: elements.builder,
 		components: {builder},
 		methods: {
 			/**
@@ -55,7 +64,7 @@ client.on('init', (element) => {
 
 		ready () {
 			this.$nextTick(() => {
-				client.emit('ready')
+				uno.emit('ready')
 			})
 		}
 	})

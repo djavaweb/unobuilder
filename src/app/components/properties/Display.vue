@@ -17,7 +17,8 @@ accordion-item(title="Display", :mouse-state.sync="mouseState", :advanced.sync="
                     @click="setValue('flex')",
                     v-show="advanced")
 
-                    rect-button.display-none(:disabled="isDisabled()",                    :active="isValue('none') && !isDiabled()",
+                    rect-button.display-none(:disabled="isDisabled()",
+                    :active="isValue('none') && !isDiabled()",
                     @click="setValue('none')")
 
     // Flex Properties
@@ -356,7 +357,7 @@ export default {
         },
 
         setGutter (value) {
-            this.$root.elementSelector().setProp('gutter.value', value, this.mouseState)
+            this.$root.canvasBuilder().layout().setGutter(value, this.mouseState)
         }
     }
 }

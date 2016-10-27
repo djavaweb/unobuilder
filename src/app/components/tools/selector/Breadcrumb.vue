@@ -12,11 +12,11 @@
             ) {{item.label}}
 
         // Copy and link editor
-        a.copy.uk-icon-copy(v-if="state==='select'", @click="$parent.copyElement()")
-        a.link.uk-icon-link(v-if="state==='select' && link", @click="editLink()")
+        a.copy.uk-icon-copy(v-if="shouldDisplay", @click="$parent.copyElement()")
+        a.link.uk-icon-link(v-if="shouldDisplay && link", @click="editLink()")
 
     a.remove.uk-icon-remove(
-    v-if="state==='select'",
+    v-if="shouldDisplay",
     @mouseover="$parent.removeOver()"
     @mouseleave="$parent.removeLeave()"
     @click="$parent.removeElement()"
@@ -55,14 +55,20 @@ export default {
         }
     },
 
+    computed: {
+        shouldDisplay () {
+            return this.state === 'select' &&
+            this.$parent.elementKind !== 'body'
+        }
+    },
+
     methods: {
         /**
          * Hover outline in canvas builder
          * @param  {Object} breadcrumb
          */
         showOutline (breadcrumb) {
-            let canvasBuilder = this.$root.ref('centerPanel.canvasBuilder')
-			canvasBuilder.viewer().elementHover(breadcrumb)
+            this.$root.canvasBuilder().layout().elementHover(breadcrumb)
         },
 
         /**
@@ -73,13 +79,11 @@ export default {
          * @param  {Number} index
          */
         breadcrumbAction (breadcrumb, index) {
-            let canvasBuilder = this.$root.ref('centerPanel.canvasBuilder')
-
             if (! this.expand && this.state === 'select') {
-                canvasBuilder.$refs.contextMenu.hide()
+                this.$root.canvasBuilder('contextMenu').hide()
                 this.expand = true
             } else {
-    			canvasBuilder.viewer().elementSelect(breadcrumb)
+    			this.$root.canvasBuilder().layout().elementSelect(breadcrumb)
             }
         },
 

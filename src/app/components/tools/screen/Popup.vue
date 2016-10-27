@@ -2,7 +2,7 @@
 .popup(v-if="display", v-el:popup)
     .popup-window(:class="class", :style="positionStyle")
         .popup-inner
-            a.popup-close.uk-icon-close(@click="hide()")
+            a.popup-close.uk-icon-x(@click="hide()")
             .popup-title(v-if="title", v-html="title")
             .popup-html
                 slot
@@ -10,10 +10,6 @@
 
     .popup-overlay(v-if="overlay", @click="hide()")
 </template>
-
-<style lang="sass">
-@import "../../../scss/popup.scss"
-</style>
 
 <script>
 export default {

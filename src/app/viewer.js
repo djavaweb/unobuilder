@@ -1,6 +1,5 @@
 /* Our Applications */
-import Vue from 'vue'
-import viewer from './components/Viewer.vue'
+import cssRenderer from './components/CSSRenderer.vue'
 import _ from 'lodash'
 import dot from 'dot-object'
 import classList from './lib/classlist.js'
@@ -8,13 +7,12 @@ import Mousetrap from './lib/mousetrap.min.js'
 import utils from './utils.js'
 import config from './config.js'
 
-/* Vue Config */
-Vue.config.debug = true
-
 /* Main app */
-const App = new Vue({
-	el: 'body',
-	components: {viewer},
+const Viewer = {}
+Viewer.window = null
+Viewer.element = null
+Viewer.mixins = {
+	components: {cssRenderer},
 
 	/**
 	 * Main Data
@@ -27,10 +25,16 @@ const App = new Vue({
 			hoverElement: null,
 			editElement: null,
 			copiedElement: null,
-			componentClone: null,
+			componentElement: null,
+			dragComponent: false,
 			dropElement: null,
+			overlapElement: null,
+			dragElementState: {
+				x: 0, y: 0,
+				move: false,
+				element: null
+			},
 			editComponent: false,
-			dragging: false,
 			customCSS: '',
 			global: {},
 			elements: {}
@@ -163,11 +167,18 @@ const App = new Vue({
         /**
          * Create element
          * @param  {Object} element
-         * @param  {Function} ready
+         * @param  {Number|Function} insertAt, fn
          * @return {Node}
          */
-        createElement (element, ready) {
-			let el = document.createElement(element.tag),
+        createElement (element, insertAt, fn) {
+			// Fix arguments
+			let ready = fn
+			if (typeof insertAt === 'function') {
+				ready = insertAt
+			}
+
+
+			let el = Viewer.window.document.createElement(element.tag),
 			id = utils.generateId()
 
 			// Add random ID
@@ -453,20 +464,9 @@ const App = new Vue({
 			}
 
 			// Select element
-			el.$select = (isRightClick) => {
+			el.$select = (isRightClick = false) => {
 				if (el.$selectable) {
-					let parent = el.$parentElement(), index = 0, last = false
-
-					// Get element index,
-					// and child size
-					if (parent) {
-						let parentLength = parent.$childElements().length
-
-						index = $(el).parent().index()
-						if (index === parentLength - 1) {
-							last = true
-						}
-					}
+					let parent = el.$parentElement(),last = false
 
 					// If parent is editable content, and in edit mode
 					// Cancel it dont select outline
@@ -478,15 +478,15 @@ const App = new Vue({
 					this.activeElement = el.$id
 
 					// Notify to element selector
+					let selector = this.canvasBuilder('elementSelector')
 					this.$nextTick(() => {
-						let selector = this.canvasBuilder('elementSelector')
 						selector.setState({
 							state: 'select',
 							id: el.$id,
 							css: el.$outline(),
 							type: el.$type,
 							last: last,
-							index: index,
+							index: el.$index(),
 							expand: false,
 							childSize: 0,
 							removeOver: false,
@@ -502,8 +502,7 @@ const App = new Vue({
 				if (el.$selectable) {
 					this.hoverElement = el.$id
 					this.$nextTick(() => {
-						let selector = this.canvasBuilder('elementSelector')
-						selector.setState({
+						this.canvasBuilder('elementSelector').setState({
 							state: 'hover',
 							id: el.$id,
 							css: el.$outline(),
@@ -512,6 +511,26 @@ const App = new Vue({
 							breadcrumbs: el.$breadcrumbs()
 						})
 					})
+				}
+			}
+
+			// Drop-in element
+			el.$dropIn = (position) => {
+				if (el.$selectable) {
+					this.canvasBuilder('elementSelector').dropAt(true, {
+						id: el.$id,
+						css: el.$outline(),
+						type: el.$type,
+						target: el,
+						position
+					})
+				}
+			}
+
+			// Hide drop-in element
+			el.$dropOut = () => {
+				if (el.$selectable) {
+					this.canvasBuilder('elementSelector').dropAt(false)
 				}
 			}
 
@@ -694,6 +713,17 @@ const App = new Vue({
 				return element
 			}
 
+			// Get selectable element
+			el.$selectableElement = () => {
+				let element = el
+
+				if (el.$type === 'child') {
+					return el.$selectableParent()
+				}
+
+				return el
+			}
+
 			// Get wrapper element
 			el.$wrapper = () => {
 				if (el.parentElement.classList.contains(utils.klass('el-wrapper'))) {
@@ -794,6 +824,37 @@ const App = new Vue({
 				}
 			}
 
+			// Get element's parent, until met first child's node of body
+			// for example: If we're in section>container>element>element
+			// find section, section is first child's node of body/layout
+			el.$firstParentFromLayout = () => {
+				let parent = el.$selectableParent()
+				if (parent) {
+					if (parent.$type !== 'body') {
+						return parent.$firstParentFromLayout()
+					}
+
+					return el
+				}
+			}
+
+			// Get element's index from it's parent
+			el.$index = () => {
+				let index = 0,
+				parent = el.$parentElement()
+
+				if (parent) {
+					let prevSibling = el
+					while ((prevSibling = prevSibling.previousElementSibling) !== null) {
+						if (prevSibling.nodeType === 1) {
+							index++
+						}
+					}
+				}
+
+				return index
+			}
+
 			// Select child until we found selectable element
 			el.$selectableChild = () => {
 				let child = el.firstChild
@@ -875,49 +936,13 @@ const App = new Vue({
 					if (! this.elements[el.$id].props.self[propKey]) {
 						this.elements[el.$id].props.self[propKey] = props
 					}
+
 					dot.set(key, val, this.elements[el.$id].props.self[propKey])
 				}
 
 				this.$nextTick(() => {
 					this.updateStylesheet(true)
 				})
-
-				/*if (!screenSize) {
-					screenSize = 'large'
-				}
-
-				// If we set properties into large screen
-				// All screen size will update too, so on
-				if (screenSize === 'large') {
-					dot.set(key, val, el.$props('large'))
-				}
-
-				// for medium
-				if (['large', 'medium'].includes(screenSize)) {
-					dot.set(key, val, el.$props('medium'))
-				}
-
-				// for small screen
-				if (['large', 'medium', 'small'].includes(screenSize)) {
-					dot.set(key, val, el.$props('small'))
-				}
-
-				// for mini screen
-				if (['large', 'medium', 'small', 'mini'].includes(screenSize)) {
-					dot.set(key, val, el.$props('mini'))
-				}
-
-				// Update custom attributes
-				if (key === 'klass') {
-					el.$setClass(val)
-				} else if (key === 'id') {
-					el.$setAttr(key, val)
-				}
-
-				// Mayday, mayday element has changed
-				this.$nextTick(() => {
-					this.$emit('elementHasChanged', true)
-				})*/
 			}
 
 			// Get properties
@@ -939,14 +964,36 @@ const App = new Vue({
 
 			// Prepend element to element.prepend value
 			if (element.prepend) {
-				let elementPrepend = $(element.prepend).get(0)
-				elementPrepend.insertBefore(el, elementPrepend.firstChild)
+				let prependElement = Viewer.window.document.querySelector(element.prepend)
+				targetEl = prependElement,
+				where = 'afterbegin'
+
+				if (typeof insertAt === 'number') {
+					let childs = prependElement.$childElements()
+					if (childs.length > 0) {
+						targetEl = childs[insertAt]
+						where = 'beforebegin'
+					}
+				}
+
+				targetEl.insertAdjacentElement(where, el)
 			}
 
 			// Append element to element.append value
 			if (element.append) {
-				let appendElement = $(element.append).get(0)
-				appendElement.appendChild(el)
+				let appendElement = Viewer.window.document.querySelector(element.append),
+				targetEl = appendElement,
+				where = 'beforeend'
+
+				if (typeof insertAt === 'number') {
+					let childs = appendElement.$childElements()
+					if (childs.length > 0) {
+						targetEl = childs[insertAt]
+						where = 'afterend'
+					}
+				}
+
+				targetEl.insertAdjacentElement(where, el)
 			}
 
 			// Remove raw html with temporary elements
@@ -1037,6 +1084,15 @@ const App = new Vue({
 		},
 
 		/**
+		 * Get builder leftpanel
+		 * @param {String} ref
+		 * @param {String} el
+		 */
+		leftPanel (ref, el) {
+			return utils.ref(this.builder('leftPanel'), ref, el)
+		},
+
+		/**
 		 * On mouse over
 		 *
 		 * @param  {Event} event
@@ -1047,7 +1103,9 @@ const App = new Vue({
 			if (element.$selectable) {
 				element.$hover()
 			} else {
-				element.parentElement.$hover()
+				if (element.parentElement.$hover) {
+					element.parentElement.$hover()
+				}
 			}
 		},
 
@@ -1062,26 +1120,81 @@ const App = new Vue({
 		},
 
 		/**
-		 * Element clicked
-		 * @param  {Event} event
+		 * Element clicked / Start drag
+		 * @param  {Event} e
 		 * @return {void}
 		 */
-		click (event) {
-			let element = event.target
+		click (e) {
+			// Get possible element
+			let element = null
+			if (e.target.$selectable) {
+				element = e.target
+			} else if (e.target.parentElement.$select) {
+				element = e.target.parentElement.$select
+			}
 
-			if (element.$selectable) {
-				element.$select()
-			} else {
-				element.parentElement.$select()
+			if (element) {
+				// Hide context menu first
+				this.canvasBuilder('contextMenu').hide()
+
+				// Hide block
+				this.canvasBuilder('block').hide(true)
+
+				// Hide left panel
+				this.leftPanel().hide()
+
+				// Set default state before we drag / click element
+				// Body a.k.a layout cannot be dragged
+				if (element.$element().$type === 'body') {
+					element.$select()
+				} else {
+					// Default drag state
+					this.dragElementState.element = element
+					this.dragElementState.x = e.pageX
+					this.dragElementState.y = e.pageY
+
+					// Start dragging
+					utils.addEvent(Viewer.window.document, 'mousemove', this.dragElementMove, false)
+					utils.addEvent(Viewer.window.document, 'mouseup', this.dragElementEnd, false)
+				}
 			}
 		},
 
 		/**
-		 * Element on double clcik
-		 * @param {Event} event
+		 * Moving element to another element
+		 * @param  {Event} e
+		 * @return {void}
 		 */
-		dblclick (event) {
-			let element = event.target
+		dragElementMove (e) {
+			this.dragElementState.move = true
+		},
+
+		/**
+		 * Drag is ended
+		 * @param  {Event} e
+		 * @return {void}
+		 */
+		dragElementEnd (e) {
+			// Stop dragging
+			utils.removeEvent(Viewer.window.document, 'mousemove', this.dragElementMove, false)
+			utils.removeEvent(Viewer.window.document, 'mouseup', this.dragElementEnd, false)
+
+			// If it's only click, not draggin, just select it
+			if (this.dragElementState.x === e.pageX &&
+				this.dragElementState.y === e.pageY) {
+				this.dragElementState.element.$select()
+			}
+
+			// Reset drag state
+			utils.resetObject(this.dragElementState)
+		},
+
+		/**
+		 * Element on double clcik
+		 * @param {Event} e
+		 */
+		dblclick (e) {
+			let element = e.target
 			if (element.$editable) {
 				element.$edit(true)
 			} else {
@@ -1093,20 +1206,19 @@ const App = new Vue({
 
 		/**
 		 * Right click event, will show context menu
-		 * @param  {Event} event
+		 * @param  {Event} e
 		 */
-		rightclick (event) {
-			if (!event.target.$editable || ! this.editComponent) {
-				event.preventDefault()
-				event.target.$select(true)
+		rightclick (e) {
+			if ((! e.target.$editable || ! this.editComponent) && e.target.$select) {
+				e.preventDefault()
+
+				// Select element
+				e.target.$select(true)
 
 				// Notify parent to show context menu
-				let contextMenu = this.canvasBuilder('contextMenu')
-				this.$nextTick(() => {
-					contextMenu.setPosition({
-						x: event.pageX,
-						y: event.pageY
-					})
+				this.canvasBuilder('contextMenu').setPosition({
+					x: e.pageX,
+					y: e.pageY
 				})
 			}
 		},
@@ -1126,12 +1238,13 @@ const App = new Vue({
 
 		/**
 		 * Update hover outline element
+		 * @param {Boolean} isRightclick
 		 */
-		trySelect () {
+		trySelect (isRightclick) {
 			if (this.activeElement) {
 				let element = this.getElement(this.activeElement)
 				if (element) {
-					element.$select()
+					element.$select(isRightclick)
 				}
 			}
 		},
@@ -1147,7 +1260,7 @@ const App = new Vue({
 				selector = `[data-type="body"]`
 			}
 
-			let element = document.querySelector(selector)
+			let element = Viewer.window.document.querySelector(selector)
 			if (element) {
 				if (! selectOriginal) {
 					element = element.$element()
@@ -1158,37 +1271,118 @@ const App = new Vue({
 		},
 
 		/**
-		 * Check is drag source overlap with destination element
-		 * @param  {ElementNode} source [element source]
-		 * @param  {ElementNode} dest   [destination element]
-		 * @param  {Function} fn
-		 * @return {void}
+		 * Check is coords overlap with element
+		 * @param  {ElementNode} elSrc
+		 * @param  {ElementNode} elDst
+		 * @return {Boolean}
 		 */
-		overlap (source, dest, fn) {
-			if (source.getBoundingClientRect && dest.getBoundingClientRect) {
-				let srcRect = source.getBoundingClientRect(),
-				dstRect = dest.getBoundingClientRect()
+		overlapWith (elSrc, elDst, callback) {
+			if (elSrc.getBoundingClientRect && elDst.getBoundingClientRect) {
+				let srcRect = elSrc.getBoundingClientRect(),
+				dstRect = elDst.getBoundingClientRect()
 
-				const inside = () => {
-					return ((dstRect.top <= srcRect.top) && (srcRect.top <= dstRect.bottom)) &&
-					((dstRect.top <= srcRect.bottom) && (srcRect.bottom <= dstRect.bottom)) &&
-					((dstRect.left <= srcRect.left) && (srcRect.left <= dstRect.right)) &&
-					((dstRect.left <= srcRect.right) && (srcRect.right <= dstRect.right))
+				// Get coordinate of source element
+				let x = parseInt(srcRect.left + (srcRect.width / 2)),
+				y = parseInt(srcRect.top + (srcRect.height / 2))
+
+				// If source element is inside of destination element
+				const isInside = () => {
+					return x >= dstRect.left && x <= dstRect.right && y >= dstRect.top && y <= dstRect.bottom
 				}
 
-				const collide = () => {
-					return ! (srcRect.top > dstRect.bottom || srcRect.right < dstRect.left || srcRect.bottom < dstRect.top ||srcRect.left > dstRect.right)
+				// If source element collide with inside top of destination element
+				const collideInTop = () => {
+					return y - dstRect.top <= 3 && y - dstRect.top >= 0
 				}
 
-				// Collision information
-				let info = {
-					collide: collide(),
-					inside: inside()
+				// If source element collide with outside top of destination element
+				const collideOutTop = () => {
+					return dstRect.top - y <= 3 && dstRect.top - y > 0
 				}
 
-				// Callback
-				fn && fn.call(this, info)
+				// If source element collide with inside bottom of destination element
+				const collideInBottom = () => {
+					return dstRect.bottom - y <= 3 && dstRect.bottom - y >= 0
+				}
+
+				// If source element collide with outside bottom of destination element
+				const collideOutBottom = () => {
+					return y - dstRect.bottom <= 3 && y - dstRect.bottom > 0
+				}
+
+				// If source element collide with inside left of destination element
+				const collideInLeft = () => {
+					return x - dstRect.left <= 3 && x - dstRect.left >= 0
+				}
+
+				// If source element collide with outside left of destination element
+				const collideOutLeft = () => {
+					return dstRect.left - x <= 3 && dstRect.left - x > 0
+				}
+
+				// If source element collide with inside right of destination element
+				const collideInRight = () => {
+					return dstRect.right - x <= 3 && dstRect.right - x >= 0
+				}
+
+				// If source element collide with outside right of destination element
+				const collideOutRight = () => {
+					return x - dstRect.right <= 3 && x - dstRect.right > 0
+				}
+
+				return {
+					isInside,
+					collideInTop, collideOutTop,
+					collideInBottom, collideOutBottom,
+					collideInLeft, collideOutLeft,
+					collideInRight, collideOutRight
+				}
 			}
+
+			// if (element.getBoundingClientRect) {
+			// 	let dstRect = element.getBoundingClientRect()
+			//
+			// 	const collideTop = () => {
+			// 		let diff = dstRect.top - (src.y + (src.height)/2)
+			// 		return diff < 4 && diff > -4
+			// 	}
+			//
+			// 	const collideBottom = () => {
+			// 		let diff = (src.y + (src.height)/2) - dstRect.bottom
+			// 		return diff < 4 && diff > -4
+			// 	}
+			//
+			// 	const collideLeft = () => {
+			// 		let diff = dstRect.left - (src.x + (src.width)/2)
+			// 		return diff < 4 && diff > -4
+			// 	}
+			//
+			// 	const collideRight = () => {
+			// 		let diff = (src.x + (src.width)/2) - dstRect.right
+			// 		return diff < 4 && diff > -4
+			// 	}
+			//
+			// 	const isCollide = () => {
+			// 		return ! (src.y > dstRect.bottom ||
+			// 			src.width < dstRect.left ||
+			// 			src.height < dstRect.top ||
+			// 			src.x > dstRect.right)
+			// 	}
+			//
+			// 	const isInside = () => {
+			// 		return ((dstRect.top <= src.y) && (src.y <= dstRect.bottom)) &&
+			// 		((dstRect.top <= src.height) && (src.height <= dstRect.bottom)) &&
+			// 		((dstRect.left <= src.x) && (src.x <= dstRect.right)) &&
+			// 		((dstRect.left <= src.width) && (src.width <= dstRect.right))
+			// 	}
+			//
+			// 	// Callback
+			// 	callback && callback.call(this, {
+			// 		collideTop, collideBottom,
+			// 		collideLeft, collideRight,
+			// 		isCollide, isInside
+			// 	})
+			// }
 		},
 
 		/**
@@ -1197,15 +1391,6 @@ const App = new Vue({
 		 * @link https://github.com/djavaweb/unobuilder/wiki/Create-New-Uno-Component
 		 */
 		templateToElement (dropElement, template, nestedDeep) {
-			const isJSON = (json) => {
-				try {
-					JSON.parse(json)
-					return true
-				} catch (e) {
-					return false
-				}
-			}
-
 			// Parsing tag to node element
 			template = $($.parseXML(template)).children()
 			nestedDeep = nestedDeep || 0
@@ -1253,7 +1438,6 @@ const App = new Vue({
 						}
 					break
 
-
 					case 'content':
 						element.kind = 'content'
 						element.wrapper = false
@@ -1266,7 +1450,7 @@ const App = new Vue({
 
 						let inline = template.attr('inline')
 						template.removeAttr('inline')
-						if (isJSON(inline) && JSON.parse(inline)) {
+						if (utils.isJSON(inline)) {
 							element.attrs.class = utils.klass('inline')
 						}
 
@@ -1284,10 +1468,10 @@ const App = new Vue({
 					case 'child':
 						element.type = 'child'
 
-						let kind = template.attr('kind')
+						let childKind = template.attr('kind')
 						template.removeAttr('kind')
-						if (kind && kind !== '') {
-							element.kind = kind
+						if (childKind) {
+							element.kind = childKind
 						}
 
 						let resizable = template.attr('resizable') || false
@@ -1296,16 +1480,15 @@ const App = new Vue({
 
 						var props = template.attr('props')
 						template.removeAttr('props')
-						if (isJSON(props)) {
+						if (utils.isJSON(props)) {
 							element.props = JSON.parse(props)
 						}
-
 					break
 
 					case 'row':
 						// Get gutter value
 						let gutter = template.attr('gutter') || dropElement.$get('gutter.value'),
-						klass = ['uk-grid', `uk-grid-${gutter}`]
+						klass = ['uk-grid', `uk-grid-${gutter}`, utils.klass('el-row')]
 						template.removeAttr('gutter')
 
 						// Default properties
@@ -1322,7 +1505,7 @@ const App = new Vue({
 						// Set width to column
 						let columns = template.children('column')
 						columns.each((index, column) => {
-							$(column).attr('totalColumn', columns.size())
+							$(column).attr('totalColumn', columns.length)
 						})
 					break
 
@@ -1370,14 +1553,14 @@ const App = new Vue({
 
 					default:
 						return null
-						break
+					break
 				}
 
 				// Get attributes
 				_.each(template.get(0).attributes, (attr, index) => {
 					let attrValue = attr.value
-					if (isJSON(attrValue)) {
-						attrValue = JSON.parse(attr.value)
+					if (utils.isJSON(attrValue)) {
+						attrValue = JSON.parse(attrValue)
 					}
 
 					element.attrs[attr.name] = attrValue
@@ -1437,64 +1620,19 @@ const App = new Vue({
 
 		/**
 		 * On adding block
+		 * @param {ElementNode} element
+		 * @param {Number} index
 		 */
-		addBlock (element) {
+		addBlock (element, index) {
 			// Exeptions for body
 			if (element.append === 'body') {
 				element.append = '[data-type="body"]'
 			}
 
 			// Override attribute
-			this.createElement(element, el => {
+			this.createElement(element, index, el => {
 				el.$select()
 			})
-		},
-
-		/**
-		 *  On screen size change
-		 */
-		setScreenSize (size) {
-			this.screenSize = size
-			this.updateStylesheet(true)
-		},
-
-		/**
-		 * Notify element has change, update stylesheet
-		 * @param {Boolean} reselect
-		 */
-		updateStylesheet (reselectEl) {
-			this.$refs.viewer.updateStylesheet()
-
-			// Reselect element
-			if (reselectEl) {
-				this.$nextTick(() => {
-					this.tryHover()
-					this.trySelect()
-				})
-			}
-		}
-    },
-
-	/**
-	 * Event list
-	 * @type {Object}
-	 */
-    events: {
-        addCSS () {},
-
-		/**
-		 * Disable editor
-		 */
-		disableEditor () {
-			let editableElement = document.querySelectorAll('[contenteditable]')
-			for (let el in editableElement) {
-				if (editableElement[el].$editable) {
-					editableElement[el].$edit(false)
-				}
-			}
-
-			// Empty the editor object
-			this.builder().$broadcast('elementEdit', {})
 		},
 
 		/**
@@ -1535,7 +1673,7 @@ const App = new Vue({
 					if (parent && parent.$row) {
 						let childs = parent.$childElements()
 						if (childs.length===0) {
-							this.$emit('removeElement', parent.$id)
+							this.removeElement(parent.$id)
 						} else {
 							this.tryHover()
 							sibling.$select()
@@ -1570,9 +1708,194 @@ const App = new Vue({
 
 			copyEl.$copy(pasteEl, () => {
 				if (sameCopy) {
-					this.$emit('keyCapture', 'copy')
+					this.copyElement()
 				}
 			})
+		},
+
+		/**
+		 *  On screen size change
+		 */
+		setScreenSize (size) {
+			this.screenSize = size
+			this.updateStylesheet(true)
+		},
+
+		/**
+		 * Notify element has change, update stylesheet
+		 * @param {Boolean} reselect
+		 */
+		updateStylesheet (reselectEl) {
+			this.$refs.cssRenderer.updateStylesheet()
+
+			// Reselect element
+			if (reselectEl) {
+				this.$nextTick(() => {
+					this.tryHover()
+					this.trySelect()
+				})
+			}
+		},
+
+		/**
+		 * Save custom CSS
+		 * @param  {String} css
+		 */
+		saveCSS (css) {
+			this.customCSS = css
+			this.updateStylesheet(true)
+		},
+
+		/**
+		 * Drag a component
+		 * @param {ElementNode} element
+		 * @param {Object} component
+		 */
+		dragComponentStart (element, component) {
+			// Dragigng
+			this.dragComponent = true
+
+			// Set style of cloned element
+			this.componentElement = element
+			this.componentElement.className = [utils.klass('component'), utils.klass('component--dragging')].join(' ')
+			Viewer.window.document.body.appendChild(this.componentElement)
+		},
+
+		/**
+		 * Dragging component is over
+		 * @param {Object} component
+		 */
+		dragComponentEnd (component) {
+			if (this.dropElement) {
+				// Parse element to
+				let element = this.templateToElement(this.dropElement, component.template)
+				if (this.dropElement.$accepting(element.dropable)) {
+					// Create element
+					this.dropElement.$element().$add(element, (el) => {
+						_.each(component.settings.props, (val, key) => {
+							el.$set(key, val)
+						})
+
+						el.$select()
+						this.builder().$broadcast(
+							'callComponentEvent', component, 'ready'
+						)
+						this.dropElement = null
+					})
+				}
+			}
+
+			this.overlapElement.$dropOut()
+			this.componentElement.remove()
+			this.overlapElement = null
+			this.dragComponent = false
+			this.componentClone = null
+			this.dropElement = null
+		},
+
+		/**
+		 * Moving component
+		 * @param {Object} coords
+		 */
+		dragComponentMove (coords) {
+			let layout = this.getElement('body')
+			if (layout) {
+				let componentRect = this.componentElement.getBoundingClientRect(),
+				width = componentRect.width,
+				height = componentRect.height,
+				bodyRect = Viewer.window.document.body.getBoundingClientRect()
+
+				// Get x and y coords inside canvas
+				let x = parseInt((coords.x - (width / 2)) - this.canvasBuilder().leftSpace()),
+				y = parseInt((coords.y - (height / 2)) - this.canvasBuilder().positionFromTop())
+
+				// Follow the original component position
+				this.componentElement.style.left = `${x}px`
+				this.componentElement.style.top = `${y}px`
+
+				// Check overlap element
+				for (let i in this.elements) {
+					let element = this.getElement(this.elements[i].id)
+					if (element) {
+						// Set overlap element with current collide element
+						// No matters if it's collide or not we set it first
+						// The purpose is we'll remove dropline later
+						this.overlapElement = element
+
+						// Detect overlap elements
+						let overlap = this.overlapWith(this.componentElement, element)
+
+						// If it's inside element
+						if (overlap.isInside()) {
+							// Set drop target with current element
+							this.dropElement = element
+
+							// Hover it
+							this.overlapElement.$hover()
+
+							// If element has no childs, dropin line is top
+							// Otherwise check if its collide top or not
+							let position = 'top'
+							if (this.overlapElement.$childElements().length>0) {
+								position = 'bottom'
+							}
+
+							// Set drop in line
+							this.overlapElement.$dropIn(position)
+						}
+					}
+				}
+			}
+		},
+
+		/**
+		 * Set row gutter
+		 * @param {String} size
+		 */
+		setGutter (size, mouseState = '') {
+			let element = this.getElement(this.activeElement)
+			if (element) {
+				element.$set('gutter.value', size, mouseState)
+
+				let childs = element.$childElements()
+				for (let i in childs) {
+					if (childs[i].$kind && childs[i].$kind === 'row') {
+						let gridKlass = _.chain(childs[i].classList)
+						.map(item => item.indexOf('uk-grid-')>-1)
+						.value().indexOf(true)
+
+						//.map(item => item.indexOf('uk-grid-'))
+						if (gridKlass>-1) {
+							childs[i].$removeKlass(childs[i].classList[gridKlass], true)
+							childs[i].$addKlass(`uk-grid-${size}`, true)
+							childs[i].$renderKlass()
+						}
+					}
+				}
+			}
+		}
+    },
+
+	/**
+	 * Event list
+	 * @type {Object}
+	 */
+    events: {
+        addCSS () {},
+
+		/**
+		 * Disable editor
+		 */
+		disableEditor () {
+			let editableElement = Viewer.window.document.querySelectorAll('[contenteditable]')
+			for (let el in editableElement) {
+				if (editableElement[el].$editable) {
+					editableElement[el].$edit(false)
+				}
+			}
+
+			// Empty the editor object
+			this.builder().$broadcast('elementEdit', {})
 		},
 
 		/**
@@ -1599,6 +1922,7 @@ const App = new Vue({
 					// Prevent to copy body element, skip it
 					if (this.copiedElement && this.copiedElement !== 'body') {
 						let copyElement = this.getElement(this.copiedElement)
+
 						if (copyElement) {
 							let copyParentId = copyElement.$parentElement().$id,
 							pasteElement = activeElement.$id, sameCopy
@@ -1637,14 +1961,14 @@ const App = new Vue({
 							}
 
 							// Roger that!
-							this.$emit('copyElement', copyElement.$id, pasteElement, sameCopy)
+							this.copyElement(copyElement.$id, pasteElement, sameCopy)
 						}
 					}
 				break;
 
 				case 'delete':
 					if (activeElement) {
-						this.$emit('removeElement', activeElement.$id)
+						this.removeElement(activeElement.$id)
 					}
 				break;
 
@@ -1706,158 +2030,6 @@ const App = new Vue({
 				case 'clearStyle':
 				break;
 			}
-		},
-
-		/**
-		 * Save custom CSS
-		 * @param  {String} css
-		 */
-		saveCSS (css) {
-			this.customCSS = css
-			this.$nextTick(() => {
-				this.tryHover()
-				this.trySelect()
-			})
-		},
-
-		/**
-		 * When component start to drag
-		 * @param {ElementNode} element
-		 * @param {Object} component
-		 */
-		dragStartComponent (element, component) {
-			// Dragging clone elements
-			this.dragging = true
-			this.componentClone = element.cloneNode(true)
-
-			// Set style of cloned element
-			this.componentClone.classList.add('oncanvas')
-			document.body.appendChild(this.componentClone)
-		},
-
-		/**
-		 * Drag end on component
-		 * @param {Object} component
-		 */
-		dragEndComponent (component) {
-			if (this.dragging && this.componentClone) {
-				this.componentClone.remove()
-
-				if (this.dropElement) {
-					let element = this.templateToElement(this.dropElement, component.template)
-
-					if (this.dropElement.$accepting(element.dropable)) {
-						// Create element
-						this.dropElement.$element().$add(element, (el) => {
-							_.each(component.info.props, (val, key) => {
-								el.$set(key, val)
-							})
-
-							el.$select()
-							this.builder().$broadcast(
-								'callComponentEvent', component, 'ready'
-							)
-							this.dropElement = null
-						})
-					}
-				}
-
-				this.componentClone = null
-				this.dropElement = null
-			}
-		},
-
-		/**
-		 * Event when dragging component from left panel to canvas
-		 * @param {Object} coords
-		 * @param {Number} canvasSize
-		 */
-		dragMoveComponent (coords, canvasSize) {
-			let body = this.getElement('body')
-
-			if (body) {
-				let componentRect = this.componentClone.getBoundingClientRect(),
-				bodyRect = body.getBoundingClientRect(),
-				bodyRectTop = bodyRect.top
-
-				let x = (coords.x - (componentRect.width / 2)) - (canvasSize / 2),
-				y = (coords.y - (componentRect.height / 2)) - bodyRectTop
-
-				// Follow the original component
-				this.componentClone.style.top = `${y}px`
-				this.componentClone.style.left = `${x}px`
-
-
-				// Check overlap for element
-				for (let i in this.elements) {
-					let element = this.getElement(this.elements[i].id)
-					if (element) {
-						// Detect overlap elements
-						this.overlap(this.componentClone, element, (is) => {
-							// If its collide
-							if (is.collide) {
-								let elementRect = element.getBoundingClientRect(),
-								yPos = 8, innerPadding = 3, dragTarget = null,
-								css = {top: 0, left: 0, width: 0},
-								top, left, width
-
-								// We are dragging component in the top of drop element
-								if (y < elementRect.top + yPos) {
-									dragTarget = 'top'
-									top = elementRect.top + innerPadding
-								}
-								// Otherwise
-								else if (y > (elementRect.top + elementRect.height) - yPos) {
-									dragTarget = 'bottom'
-									top = (elementRect.top + elementRect.height) - innerPadding
-								}
-
-								left = elementRect.left + innerPadding
-								width = elementRect.width - innerPadding
-
-								if (left && top) {
-									css.transform = `translate(${left}px, ${top}px)`
-									css.width = `${width}px`
-								}
-
-
-								// Hover it
-								element.$hover()
-								this.dropElement = element
-								this.builder().$broadcast('dragTarget', dragTarget, css)
-							}
-						})
-					}
-				}
-			}
-		},
-
-		/**
-		 * Set row gutter
-		 * @param {String} size
-		 */
-		setGutter (size) {
-			let element = this.getElement(this.activeElement)
-			if (element) {
-				element.$set('gutter.value', size)
-
-				let childs = element.$childElements()
-				for (let i in childs) {
-					if (childs[i].$kind && childs[i].$kind === 'row') {
-						let gridKlass = _.chain(childs[i].classList)
-						.map(item => item.indexOf('uk-grid-')>-1)
-						.value()
-						.indexOf(true)
-
-						//.map(item => item.indexOf('uk-grid-'))
-						if (gridKlass>-1) {
-							childs[i].$removeKlass(childs[i].classList[gridKlass], true)
-							childs[i].$addKlass(`uk-grid-${size}`, true)
-							childs[i].$renderKlass()
-						}
-					}
-				}
-			}
 		}
     },
 
@@ -1866,15 +2038,15 @@ const App = new Vue({
 		 * Window scroll observer, when change notify the parent to set canvas top position as viewer top scroll
 		 * @return {void}
 		 */
-		window.addEventListener('scroll', () => {
-			this.builder().$broadcast('scrolling', document.body.getBoundingClientRect())
+		Viewer.window.addEventListener('scroll', () => {
+			this.builder().$broadcast('scrolling', Viewer.window.document.body.getBoundingClientRect())
 		})
 
 		/**
 		 * When window resize reselect element
 		 * @return {void}
 		 */
-		window.addEventListener('resize', () => {
+		Viewer.window.addEventListener('resize', () => {
 			this.tryHover()
 			this.trySelect()
 		})
@@ -1883,10 +2055,11 @@ const App = new Vue({
          * Create body
          */
         this.createElement({
-            prepend: document.body,
+            append: Viewer.element,
             tag: 'div',
             type: 'body',
-            kind: 'body'
+            kind: 'body',
+			label: (Viewer.element === 'body')? undefined: 'layout'
         }, (el) => {
 			el.$set('display.disabled', true)
 	        el.$select()
@@ -1952,4 +2125,6 @@ const App = new Vue({
 			this.builder().$broadcast('keyCapture', 'releaseShift')
 		}, 'keyup')
     }
-})
+}
+
+module.exports = Viewer
