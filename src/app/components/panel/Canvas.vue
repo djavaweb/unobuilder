@@ -42,15 +42,12 @@ export default {
          * @return {Array}
          */
         viewerClass () {
-            let klass = [],
+            let klass = []
 
             /**
              * Change screensize
              */
-            screenSize = this.$root
-            .ref('centerPanel.topbarPanel')
-            .screenSize
-
+            let screenSize = this.$root.ref('centerPanel.topbarPanel').screenSize
             klass.push(screenSize)
 
             return klass
@@ -95,6 +92,38 @@ export default {
     },
 
     methods: {
+        /**
+         * Get canvas builder size
+         * @return {Number}
+         */
+        size () {
+			return this.$els.iframe.getBoundingClientRect().width
+        },
+
+        /**
+         * Canvas top position
+         * @return {Number} [description]
+         */
+        positionFromTop () {
+            return this.$els.iframe.getBoundingClientRect().top
+        },
+
+        /**
+         * Space position between canvas and left panel
+         * @return {Number} [description]
+         */
+        leftSpace () {
+            return this.$els.iframe.getBoundingClientRect().left
+        },
+
+        /**
+        * Space position between canvas and right panel
+        * @return {Number} [description]
+        */
+       rightSpace () {
+           return this.$els.iframe.getBoundingClientRect().right
+       },
+
         /**
          * Get DOM of viewer
          */
@@ -165,7 +194,7 @@ export default {
             })
 
             // Attach Vue Events
-            this.layoutDOM('body').outerHTML = '<body @mouseleave="leave($event)" @mouseover="over($event)" @click="click($event)" @dblclick="dblclick($event)" @contextmenu="rightclick($event)">'+ this.layoutDOM('body').innerHTML +'</body>'
+            this.layoutDOM('body').outerHTML = `<body @mouseleave="leave($event)" @mouseover="over($event)" @mousedown="click($event)" @dblclick="dblclick($event)" @contextmenu="rightclick($event)" :class="{'uno--dragging': dragElementState.move}">${this.layoutDOM('body').innerHTML}</body>`
 
             // Viewer stylesheet
             let viewerElement = document.createElement('css-renderer')

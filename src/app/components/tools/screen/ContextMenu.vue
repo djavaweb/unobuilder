@@ -4,7 +4,7 @@
 		li(v-for="menu in menus")
 			span.cm-delimiter(v-if="menu.delimiter")
 			a(
-			v-else
+			v-if="shouldDisplay(menu)",
 			@click="click(menu.click)",
 			@mouseover="over(menu.over)"
 			@mouseleave="leave(menu.leave)"
@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import _find from 'lodash/find'
 export default {
 	name: 'contextMenu',
 	data () {
@@ -22,23 +23,45 @@ export default {
 			position: {left: '0px', top: '0px'},
 			menus: [
 				{
+					id: 'cut',
+					label: 'Cut',
+					shortcut: '&#8984;+x',
+					click: 'cut',
+					display: true
+				},
+
+				{
+					id: 'cancel-cut',
+					label: 'Cut: Cancel',
+					shortcut: '&#8984;+esc',
+					click: 'cancelCut',
+					display: false
+				},
+
+				{
+					id: 'copy',
 					label: 'Copy',
 					shortcut: '&#8984;+c',
-					click: 'copy'
+					click: 'copy',
+					display: true
 				},
 
 				{
+					id: 'paste',
 					label: 'Paste',
 					shortcut: '&#8984;+v',
-					click: 'paste'
+					click: 'paste',
+					display: true
 				},
 
 				{
+					id: 'delete',
 					label: 'Delete',
 					shortcut: 'del',
 					click: 'remove',
 					over: 'remove',
-					leave: 'remove'
+					leave: 'remove',
+					display: true
 				},
 
 				{
@@ -46,27 +69,37 @@ export default {
 				},
 
 				{
+					id: 'copy-style',
 					label: 'Copy Style',
 					shortcut: '&#8984;+&#8679;+c',
-					click: 'copyStyle'
+					click: 'copyStyle',
+					display: true
 				},
 
 				{
+					id: 'paste-style',
 					label: 'Paste Style',
 					shortcut: '&#8984;+&#8679;+c',
-					click: 'pasteStyle'
+					click: 'pasteStyle',
+					display: true
 				},
 
 				{
+					id: 'clear-style',
 					label: 'Clear Style',
 					shortcut: '&#8679;+del',
-					click: 'clearStyle'
+					click: 'clearStyle',
+					display: true
 				}
 			]
 		}
 	},
 
 	methods: {
+		shouldDisplay (menu) {
+			return ! menu.delimiter && menu.display
+		},
+
 		setPosition (position) {
 			// Get gutter between canvas and iframe
 			let canvasBuilder = this.$root.canvasBuilder(),
@@ -108,16 +141,38 @@ export default {
 			event && event.preventDefault()
 		},
 
+		cancelCut () {
+			let cut = _find(this.menus, {id: 'cut'}),
+			cancelCut = _find(this.menus, {id: 'cancel-cut'})
+
+			cut.display = true
+			cancelCut.display = false
+		},
+
 		click (command) {
 			let selector = this.$root.elementSelector()
 
 			switch (command) {
+				case 'cut':
+					let cut = _find(this.menus, {id: 'cut'}),
+					cancelCut = _find(this.menus, {id: 'cancel-cut'})
+
+					cut.display = false
+					cancelCut.display = true
+				break
+
+				case 'cancelCut':
+					this.cancelCut()
+				break
+
 				case 'copy':
 					selector.copyElement(true)
+					this.cancelCut()
 				break
 
 				case 'paste':
 					selector.pasteElement()
+					this.cancelCut()
 				break
 
 				case 'remove':

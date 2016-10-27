@@ -6,9 +6,11 @@
     text-align: center;
     @include grab;
 
-    &.ondrag {
+    &--dragging {
         @include grabbing;
-        padding: 10px 10px 5px !important;
+        padding: 10px 8px 2px !important;
+        min-width: auto !important;
+        width: 55px;
         border-radius: 3px;
         box-shadow: 0 1px 10px 3px rgba(0,0,0,0.3);
         .icon.no-border {

@@ -29,6 +29,7 @@ import jquery from 'jquery'
 import uikit from 'uikit'
 import UIKitCSS from 'UIKitCSS'
 import config from '../config.js'
+import utils from '../utils.js'
 import screenDetector from './tools/screen/ScreenDetector.vue'
 import cssEditor from './editor/CssEditor.vue'
 import leftPanel from './panel/LeftPanel.vue'
@@ -51,28 +52,44 @@ export default {
 	},
 
 	computed: {
+		/**
+		 * Set screen cursor by reading some conditional
+		 * @return {void}
+		 */
         resizeCursor () {
-            let klass = [], boxProps = this.$root.ref('rightPanel.properties.box')
+            let klass = [], dragClass = utils.klass('builder--dragging')
+
+			// If we're dragging a component from left panel
+			if (this.$root.ref('leftPanel').dragComponent) {
+				klass.push(dragClass)
+			}
+
+			// When box properties resizing margin/border/padding properties
+			let boxProps = this.$root.ref('rightPanel.properties.box')
             if (boxProps) {
 
+				// Border radius
 				if (boxProps.dragState.move || boxProps.dragRadiusState.move) {
-					klass.push('uno-builder--dragging')
+					klass.push(dragClass)
 				}
 
-	            if (['top', 'bottom'].includes(boxProps.dragState.direction)) {
-	                klass.push('resize-updown')
-	            }
-
-	            if (['left', 'right'].includes(boxProps.dragState.direction)) {
-	                klass.push('resize-leftright')
-	            }
-
-	            if (['topleft', 'bottomright'].includes(boxProps.dragRadiusState.direction)) {
+				if (['topleft', 'bottomright'].includes(boxProps.dragRadiusState.direction)) {
 	                klass.push('resize-nwse')
 	            }
 
 	            if (['topright', 'bottomleft'].includes(boxProps.dragRadiusState.direction)) {
 	                klass.push('resize-nesw')
+	            }
+
+				// Resize value top and bottom
+				// Top-Bottom
+	            if (['top', 'bottom'].includes(boxProps.dragState.direction)) {
+	                klass.push('resize-updown')
+	            }
+
+				// Left-Right
+	            if (['left', 'right'].includes(boxProps.dragState.direction)) {
+	                klass.push('resize-leftright')
 	            }
 			}
 

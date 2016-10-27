@@ -2081,39 +2081,17 @@ export default {
         },
 
         /**
-         * Reset object by type
-         * @param {Object} object
-         */
-        resetObject (object) {
-            for (let i in object) {
-                switch (typeof object[i]) {
-                    case 'string':
-                        object[i] = ''
-                    break
-
-                    case 'number':
-                        object[i] = 0
-                    break
-
-                    case 'boolean':
-                        object[i] = false
-                    break
-                }
-            }
-        },
-
-        /**
          * Reset drag state
          */
         resetDragState () {
-            this.resetObject(this.dragState)
+            utils.resetObject(this.dragState)
         },
 
         /**
          * Reset drag radius state
          */
         resetDragRadiusState () {
-            this.resetObject(this.dragRadiusState)
+            utils.resetObject(this.dragRadiusState)
         },
 
         /**
@@ -2324,7 +2302,7 @@ export default {
         hidePopup () {
             // Reset popup state
             for (let i in this.popupState) {
-                this.resetObject(this.popupState[i])
+                utils.resetObject(this.popupState[i])
             }
 
             // Fix auto number

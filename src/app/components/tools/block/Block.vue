@@ -33,10 +33,10 @@ export default {
 	name: 'block',
 	data () {
 		return {
-			position: 0,
+			position: -1000,
+			insertAt: null,
 			showBlock: false,
 			animation: true,
-			insertAt: null,
 			selectedTab: 'structure',
 			tabs: [
 				{id: 'structure', label: 'Structure'},

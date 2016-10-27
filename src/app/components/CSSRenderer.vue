@@ -364,11 +364,14 @@ export default {
 				style.alignContent = properties.display.settings.flex.container.alignContent
 			}
 
-			/*// Flex align-self
-			let parentProperties = properties.getParent()
-			if (parentProperties && parentProperties.display.value === 'flex' && elementKind === 'column') {
-				style.alignSelf = properties.display.settings.flex.item.alignSelf
-			}*/
+			// Flex align-self
+			let parentProperties
+			if (properties.getParent) {
+				parentProperties = properties.getParent()
+				if (parentProperties && parentProperties.display.value === 'flex' && elementKind === 'column') {
+					style.alignSelf = properties.display.settings.flex.item.alignSelf
+				}
+			}
 
 			// Style applied only for row
 			if (elementKind === 'row') {

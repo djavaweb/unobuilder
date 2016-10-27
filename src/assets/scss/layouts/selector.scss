@@ -31,6 +31,7 @@
     &.orange {
         border-color: $orange;
         border-width: 2px;
+        z-index: 998;
         .breadcrumbs {
             a {
                 background-color: $orange;
@@ -218,6 +219,32 @@
             bottom: 0;
             left: 0;
             right: 0;
+        }
+    }
+}
+
+.dropline {
+    &__x {
+        height: 2px;
+        background: $normal-sky-blue;
+        top: 0px;
+        left: 0px;
+        z-index: 998;
+        position: absolute;
+        &-triangle {
+            margin-top: -3px;
+            border-style: solid;
+
+            &--left {
+                float: left;
+                border-width: 4px 0 4px 5px;
+                border-color: transparent transparent transparent $normal-sky-blue;
+            }
+            &--right {
+                float: right;
+                border-width: 4px 5px 4px 0;
+                border-color: transparent $normal-sky-blue transparent transparent;
+            }
         }
     }
 }

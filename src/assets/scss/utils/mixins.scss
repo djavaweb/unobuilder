@@ -44,16 +44,16 @@
  * Grab cursor on mouse over
  */
 @mixin grab {
-    cursor: -webkit-grab;
-    cursor: -moz-grab;
-    cursor: grab;
+    cursor: -webkit-grab !important;
+    cursor: -moz-grab !important;
+    cursor: grab !important;
 }
 
 /**
  * Grabbing cursor
  */
 @mixin grabbing {
-    cursor: -webkit-grabbing;
-    cursor: -moz-grabbing;
-    cursor: grabbing;
+    cursor: -webkit-grabbing !important;
+    cursor: -moz-grabbing !important;
+    cursor: grabbing !important;
 }

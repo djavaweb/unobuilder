@@ -9,15 +9,17 @@ const rStripComments = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg
 const rArgumentNames = /([^\s,]+)/g
 const rImgPath = /(\/img\/|$img\/)/g
 const errorMessages = {
-	eventRequired: 'An event type must be specified',
-	cannotBeObject: 'An event type cannot be an Object',
-	typeAndCallbackRequired: 'Event type and callback must be specified',
-	allRequired: 'Event type, route and callback function must be specified',
-	JSONNotfound: 'component.json not found',
-	invalidJSON: 'Your JSON is invalid',
-	optionsUndefined: 'Options Undefined'
+	eventRequired: 'UNO: An event type must be specified',
+	cannotBeObject: 'UNO: An event type cannot be an Object',
+	typeAndCallbackRequired: 'UNO: Event type and callback must be specified',
+	allRequired: 'UNO: Event type, route and callback function must be specified',
+	JSONNotfound: 'UNO: component.json not found',
+	TemplateNotfound: 'UNO: template.html not found',
+	invalidJSON: 'UNO: Your JSON is invalid',
+	invalidTemplate: 'UNO: Your Template is invalid',
+	optionsUndefined: 'UNO: Options Undefined'
 }
-const actionObjectException = ['path', 'settings', 'beforeInit', 'afterInit', 'dragStart', 'dragMove', 'dragEnd', 'ready']
+const actionObjectException = ['template', 'path', 'settings', 'beforeInit', 'afterInit', 'dragStart', 'dragMove', 'dragEnd', 'ready']
 
 /**
  * Unobuilder global framework to register components
@@ -40,7 +42,7 @@ const unoBuilder = function () {
 	 * @param  {String} element
 	 * @return {Object}
 	 */
-	$root.builder = function (element) {
+	$root.builder = element => {
 		global.__uno__.builder = element
 		$root.emit('prepare', element)
 		return $root
@@ -50,7 +52,7 @@ const unoBuilder = function () {
 	* Uno load URL to uno canvas
 	* @param {Object} options
 	*/
-	$root.loadCanvas = function (options) {
+	$root.loadCanvas = options => {
 		if (options.url && options.element) {
 			global.__uno__.url = options.url
 			global.__uno__.element = options.element
@@ -103,7 +105,7 @@ const unoBuilder = function () {
 	* Turn off event
 	* @param  {String} eventType [description]
 	*/
-	$root.off = function (eventType) {
+	$root.off = eventType => {
         var argsLength = arguments.length
 
         switch(argsLength) {
@@ -131,9 +133,9 @@ const unoBuilder = function () {
 	* @param  {Object|String|Number|Array} variables
 	*/
 	$root.emit = function (eventType, variables) {
-        var argsLength = arguments.length, vars;
-        var emitCallbacks = function (arr) {
-            for (var i = 0; i < arr.length; i++) {
+        let argsLength = arguments.length, vars;
+        const emitCallbacks = arr => {
+            for (let i = 0; i < arr.length; i++) {
                 arr[i].callback && arr[i].callback.call($root, vars)
             }
         }
@@ -148,7 +150,7 @@ const unoBuilder = function () {
         }
 
         if (global.__uno__.eventList[eventType]) {
-			var arr = global.__uno__.eventList[eventType];
+			let arr = global.__uno__.eventList[eventType];
             emitCallbacks(arr);
         }
     }
@@ -173,7 +175,7 @@ const unoBuilder = function () {
 	 * Uno add component
 	 * @param {String} url
 	 */
-	$root.addComponent = (url) => {
+	$root.addComponent = url => {
 		//$root.emit('addComponent', url);
 		let scriptPath = url.split('/')
 		scriptPath.splice(-1)
@@ -181,7 +183,7 @@ const unoBuilder = function () {
 
 		// Get component object from component.js
 		// For closure purpose
-		let componentObj = {
+		let component = {
 			path: {
 				root: scriptPath,
 				img: `${scriptPath}/img/`,
@@ -191,35 +193,70 @@ const unoBuilder = function () {
 		}
 
 		// load json
-		$.ajax({
-			url: `${scriptPath}/component.json`,
-			type: 'GET',
-			dataType: 'json',
-			complete (xhr) {
-				// Call after init
-				if (xhr.status === 200) {
-					let json = utils.isJSON(xhr.responseText)
-					if (json && json.id) {
-						// Append component settings
-						componentObj.settings = utils.replaceDeep(json, [
-							{regex: /^(img\/)/g, value: componentObj.path.img},
-							{regex: /^(js\/)/g, value: componentObj.path.js},
-							{regex: /^(css\/)/g, value: componentObj.path.css}
-						])
+		const loadJson = callback => {
+			$.ajax({
+				url: `${scriptPath}/component.json`,
+				type: 'GET',
+				dataType: 'json',
+				complete (xhr) {
+					// Call after init
+					if (xhr.status === 200) {
+						let json = utils.isJSON(xhr.responseText)
+						if (json && json.id) {
+							// Append component settings
+							component.settings = utils.replaceDeep(json, [
+								{regex: /^(img\/)/g, value: component.path.img},
+								{regex: /^(js\/)/g, value: component.path.js},
+								{regex: /^(css\/)/g, value: component.path.css}
+							])
 
-						// Add component to list
-						global.__uno__.components[json.id] = componentObj
-
-						// Register script
-						$root.registerScript(url)
+							callback && callback.apply(this, [json.id, component])
+						} else {
+							throw Error(`${errorMessages.invalidJSON}, url: ${scriptPath}/component.json`)
+						}
 					} else {
-						throw Error(errorMessages.invalidJSON)
+						throw Error(`${errorMessages.JSONNotfound}, url: ${scriptPath}/component.json`)
 					}
-				} else {
-					throw Error(errorMessages.JSONNotfound)
 				}
-			}
+			})
+		}
+
+		// Load Markup template
+		const loadTemplate = callback => {
+			$.ajax({
+				url: `${scriptPath}/component.html`,
+				type: 'GET',
+				complete (xhr) {
+					// Call after init
+					if (xhr.status === 200) {
+						let template = $.trim(xhr.responseText.replace(/[\t\n]+/g,' '))
+						if (template !== '') {
+							callback && callback.apply(this, [template])
+						} else {
+							throw Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/component.html`)
+						}
+					} else {
+						throw Error(`${errorMessages.TemplateNotFound}, url: ${scriptPath}/component.html`)
+					}
+				}
+			})
+		}
+
+		// load JSON and HTML
+		loadJson((componentId, component) => {
+			loadTemplate(template => {
+				// Add template to component
+				component.template = template
+
+				// Add component to list
+				global.__uno__.components[componentId] = component
+
+				// Register script
+				$root.registerScript(url)
+			})
 		})
+
+
 
 		return $root
 	}
@@ -228,7 +265,7 @@ const unoBuilder = function () {
 		return global.__uno__.components
 	}
 
-	$root.registerScript = (url) => {
+	$root.registerScript = url => {
 		let script = document.createElement('script'),
 		tagId = utils.generateId('component')
 		script.src = url

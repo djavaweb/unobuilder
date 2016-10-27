@@ -57,7 +57,8 @@ export default {
 
     computed: {
         shouldDisplay () {
-            return this.state === 'select' && this.$parent.elementKind !== 'body'
+            return this.state === 'select' &&
+            this.$parent.elementKind !== 'body'
         }
     },
 

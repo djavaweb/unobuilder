@@ -239,6 +239,17 @@ const utils = {
 	},
 
     /**
+     * Camelize string from slug or underscore
+     * @param  {String} str
+     * @return {String}
+     */
+    camelize (str) {
+        return str.replace(/(^\s*|\s*$)/g, '').replace(/(\-|_|\s)+(.)?/g, (mathc, sep, c) => {
+            return (c ? c.toUpperCase() : '')
+        })
+    },
+
+    /**
 	* Current Script Data last path and init id
 	*/
 	lastScriptInitId () {
@@ -287,7 +298,29 @@ const utils = {
             }
             return item
         })
-    }
+    },
+
+    /**
+     * Reset object by type
+     * @param {Object} object
+     */
+    resetObject (object) {
+        for (let i in object) {
+            switch (typeof object[i]) {
+                case 'string':
+                    object[i] = ''
+                break
+
+                case 'number':
+                    object[i] = 0
+                break
+
+                case 'boolean':
+                    object[i] = false
+                break
+            }
+        }
+    },
 }
 
 module.exports = utils
