@@ -30,7 +30,7 @@
 
     &.orange {
         border-color: $orange;
-        border-width: 2px;
+        border-width: 1px;
         z-index: 998;
         .breadcrumbs {
             a {
@@ -228,7 +228,7 @@
     left: 0px;
     z-index: 990;
     position: absolute;
-    background: $transparent-white;
+    background: rgba(255, 255, 255, 0.8);
 }
 
 .dropline {

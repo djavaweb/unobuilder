@@ -58,7 +58,7 @@
 	// End of select element selector
 
 	// Drop line
-	.dropline(v-if="isHover() && dragElementOrComponent")
+	.dropline(v-if="shouldDisplayDropline")
 		.dropline__x(:style="droplineX")
 			.dropline__x-triangle.dropline__x-triangle--left
 			.dropline__x-triangle.dropline__x-triangle--right
@@ -82,7 +82,8 @@ export default {
 		return {
 			hover: {},
 			select: {},
-			dropline: {}
+			dropline: {},
+			overlay: {}
 		}
 	},
 
@@ -177,10 +178,15 @@ export default {
 			return this.dragElement || this.dragComponent
 		},
 
+		shouldDisplayDropline () {
+			return this.isHover() && this.isOverlayNotDropline()
+		},
+
 		droplineX () {
 			let style = {}
 
 			if (this.dragElementOrComponent && this.dropline.css) {
+				// Set dropline outline
 				let width = this.dropline.css.$width - (droplineMargin * 2),
 				left = this.dropline.css.$left + droplineMargin,
 				top = this.dropline.css.$top + droplineMargin
@@ -203,10 +209,10 @@ export default {
 		dragOverlay () {
 			let style = {}
 
-			if (this.dragElement && this.dropline.css) {
-				style.height = this.dropline.css.height
-				style.width = this.dropline.css.width
-				style.transform = this.dropline.css.transform
+			if (this.dragElement && this.overlay.css) {
+				style.height = this.overlay.css.height
+				style.width = this.overlay.css.width
+				style.transform = this.overlay.css.transform
 			}
 
 			return style
@@ -252,20 +258,20 @@ export default {
 
 		/**
 		 * Set state
-		 * @param {Object} element
+		 * @param {Object} elementObject
 		 */
-		setState (element) {
+		setState (elementObject) {
 			// Set state
-			this[element.state] = element
+			this[elementObject.state] = elementObject
 
 			// Hide all tools
-			if (element.state === 'select') {
+			if (elementObject.state === 'select') {
 				// Set expanded breadcrumb to collapse
 				this.$nextTick(() => {
 					this.$refs.selectBreadcrumb.expand = false
 				})
 			} else {
-				let hoverEl = this.getElementById(element.id)
+				let hoverEl = this.getElementById(elementObject.id)
 				if (hoverEl) {
 					// Move block's position
 					let block = this.$root.canvasBuilder('block'), insertAt, position = 0
@@ -274,12 +280,12 @@ export default {
 					// and body has no elements, set position of block to top
 					// but if body has at least 1 elements
 					// set position to last element's height
-					if (element.type === 'body') {
+					if (elementObject.type === 'body') {
 						if (hoverEl.$childElements().length > 0) {
 							let firstChild = _last(hoverEl.$childElements()).$outline()
 							position = firstChild.$top + firstChild.$height
 						} else {
-							position = element.css.$top
+							position = elementObject.css.$top
 						}
 					}
 					// Other than body set position of block's with this case
@@ -314,6 +320,17 @@ export default {
 		},
 
 		/**
+		 * Overlays at element
+		 * @param  {Object} elementObject
+		 * @return {void}
+		 */
+		overlaying (elementObject) {
+			if (elementObject) {
+				this.overlay = elementObject
+			}
+		},
+
+		/**
 		 * Is valid hover
 		 * @return {Boolean}
 		 */
@@ -334,6 +351,20 @@ export default {
 				this.select.breadcrumbs.length>0 &&
 				(this.hover.id !== this.select.id || ! this.dragElementOrComponent)) {
 				return true
+			}
+		},
+
+		/**
+		 * If overlay elment is not the same with dropline
+		 * @return {Boolean}
+		 */
+		isOverlayNotDropline () {
+			if (this.dragElementOrComponent) {
+				if (this.overlay.css && this.dropline.css) {
+					return this.overlay.id !== this.dropline.id
+				} else if (this.dropline.css) {
+					return true
+				}
 			}
 		},
 

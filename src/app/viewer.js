@@ -24,6 +24,7 @@ Viewer.mixins = {
 			activeElement: null,
 			hoverElement: null,
 			editElement: null,
+			cutElement: false,
 			copiedElement: null,
 			componentElement: null,
 			dragComponent: false,
@@ -32,7 +33,8 @@ Viewer.mixins = {
 			dragElementState: {
 				x: 0, y: 0,
 				move: false,
-				element: null
+				element: null,
+				cloneElement: null
 			},
 			editComponent: false,
 			customCSS: '',
@@ -531,6 +533,18 @@ Viewer.mixins = {
 			el.$dropOut = () => {
 				if (el.$selectable) {
 					this.canvasBuilder('elementSelector').dropAt(false)
+				}
+			}
+
+			// Overlay an element with transparent white overlay
+			el.$overlay = () => {
+				if (el.$selectable) {
+					this.canvasBuilder('elementSelector').overlaying({
+						id: el.$id,
+						css: el.$outline(),
+						type: el.$type,
+						target: el
+					})
 				}
 			}
 
@@ -1145,13 +1159,25 @@ Viewer.mixins = {
 
 				// Set default state before we drag / click element
 				// Body a.k.a layout cannot be dragged
-				if (element.$element().$type === 'body') {
+				if (element.$element().$type === 'body' || e.which !== 1) {
 					element.$select()
 				} else {
+					// Clone element with tiny dot element
+					let cloneElement = Viewer.window.document.createElement('div')
+					cloneElement.style.width = '1px'
+					cloneElement.style.height = '1px'
+					cloneElement.style.position = 'fixed'
+					cloneElement.style.visibility = 'hidden'
+					Viewer.window.document.body.appendChild(cloneElement)
+
 					// Default drag state
+					this.dragElementState.cloneElement = cloneElement
 					this.dragElementState.element = element
 					this.dragElementState.x = e.pageX
 					this.dragElementState.y = e.pageY
+
+					// Cut Element
+					// this.keyCapture('cut')
 
 					// Start dragging
 					utils.addEvent(Viewer.window.document, 'mousemove', this.dragElementMove, false)
@@ -1166,7 +1192,16 @@ Viewer.mixins = {
 		 * @return {void}
 		 */
 		dragElementMove (e) {
+			// Move clone element
+			this.dragElementState.cloneElement.style.left = `${e.pageX}px`
+			this.dragElementState.cloneElement.style.top = `${e.pageY}px`
 			this.dragElementState.move = true
+
+			// Check overlap element
+			this.checkOverlap(this.dragElementState.cloneElement)
+
+			// Overlays overlap element
+			this.dragElementState.element.$element().$overlay()
 		},
 
 		/**
@@ -1182,11 +1217,37 @@ Viewer.mixins = {
 			// If it's only click, not draggin, just select it
 			if (this.dragElementState.x === e.pageX &&
 				this.dragElementState.y === e.pageY) {
+				this.cutElement = false
 				this.dragElementState.element.$select()
 			}
+			// If it's dragging and move over other element
+			// Not from source element, then paste it!
+			else if ((this.dragElementState && this.dropElement) &&
+				(this.dragElementState.element.$id !== this.dropElement.$id)) {
+				this.dropElement.$element().$select()
+				//this.keyCapture('paste')
+			}
+
+			// Remove clone element
+			this.notDraggingElement(this.dragElementState.cloneElement)
 
 			// Reset drag state
 			utils.resetObject(this.dragElementState)
+		},
+
+		/**
+		 * Remove drag element and related data
+		 * @param  {ElementNode} element
+		 * @return {void}
+		 */
+		notDraggingElement (element) {
+			if (element) {
+				element.remove()
+				this.overlapElement = null
+				this.dragComponent = false
+				this.componentClone = null
+				this.dropElement = null
+			}
 		},
 
 		/**
@@ -1336,6 +1397,44 @@ Viewer.mixins = {
 					collideInBottom, collideOutBottom,
 					collideInLeft, collideOutLeft,
 					collideInRight, collideOutRight
+				}
+			}
+		},
+
+		/**
+		 * Check if source element is overlaping with elements
+		 * @param {ElementNode} srcElement
+		 */
+		checkOverlap (srcElement) {
+			for (let i in this.elements) {
+				let element = this.getElement(this.elements[i].id)
+
+				// Set overlap element with current collide element
+				// No matters if it's collide or not we setup it first
+				if (element) {
+					this.overlapElement = element
+
+					// Detect overlap elements
+					let overlap = this.overlapWith(srcElement, element)
+
+					// If it's overlap inside element
+					if (overlap.isInside()) {
+						// Set drop target with current element
+						this.dropElement = element
+
+						// Hover it
+						this.overlapElement.$hover()
+
+						// If element has no childs, dropin line is top
+						// Otherwise check if its collide top or not
+						let position = 'top'
+						if (this.overlapElement.$childElements().length>0) {
+							position = 'bottom'
+						}
+
+						// Set drop in line
+						this.overlapElement.$dropIn(position)
+					}
 				}
 			}
 		},
@@ -1662,10 +1761,9 @@ Viewer.mixins = {
 			}
 
 			copyEl.$copy(pasteEl, () => {
-				console.log('copy same element');
-				// if (sameCopy) {
-				// 	this.copyElement()
-				// }
+				if (sameCopy) {
+					this.copyElement()
+				}
 			})
 		},
 
@@ -1716,10 +1814,16 @@ Viewer.mixins = {
 			}
 
 			switch (action) {
+				case 'cut':
 				case 'copy':
 					// When user copy element, we set copy element to
 					// copiedElement variable, will be used in paste
 					this.copiedElement = this.activeElement
+
+					// Set cut state
+					if (action === 'cut') {
+						this.cutElement = true
+					}
 				break;
 
 				case 'paste':
@@ -1764,17 +1868,24 @@ Viewer.mixins = {
 								}
 							}
 
-							// Roger that!
+							// Okay, copy that!
 							this.copyElement(copyElement.$id, pasteElement, sameCopy)
+
+							// If it's cut, just remove original element
+							if (this.cutElement) {
+								this.cutElement = false
+								this.removeElement(this.copiedElement.$id)
+							}
 						}
 					}
-				break;
+				break
 
 				case 'delete':
 					if (activeElement) {
+						console.log('babaa');
 						this.removeElement(activeElement.$id)
 					}
-				break;
+				break
 
 				case 'selectUp':
 					if (activeElement) {
@@ -1792,7 +1903,7 @@ Viewer.mixins = {
 							prevEl.$select()
 						}
 					}
-				break;
+				break
 
 				case 'selectDown':
 					if (activeElement) {
@@ -1810,7 +1921,7 @@ Viewer.mixins = {
 							nextEl.$select()
 						}
 					}
-				break;
+				break
 
 				case 'enter':
 					if (this.activeElement) {
@@ -1823,16 +1934,16 @@ Viewer.mixins = {
 							firstChild.$element().$select()
 						}
 					}
-				break;
+				break
 
 				case 'copyStyle':
-				break;
+				break
 
 				case 'pasteStyle':
-				break;
+				break
 
 				case 'clearStyle':
-				break;
+				break
 			}
 		},
 
@@ -1852,44 +1963,13 @@ Viewer.mixins = {
 		},
 
 		/**
-		 * Dragging component is over
-		 * @param {Object} component
-		 */
-		dragComponentEnd (component) {
-			if (this.dropElement) {
-				// Parse element to
-				let element = this.templateToElement(this.dropElement, component.template)
-				if (this.dropElement.$accepting(element.dropable)) {
-					// Create element
-					this.dropElement.$element().$add(element, (el) => {
-						_.each(component.settings.props, (val, key) => {
-							el.$set(key, val)
-						})
-
-						el.$select()
-						this.builder().$broadcast(
-							'callComponentEvent', component, 'ready'
-						)
-						this.dropElement = null
-					})
-				}
-			}
-
-			this.overlapElement.$dropOut()
-			this.componentElement.remove()
-			this.overlapElement = null
-			this.dragComponent = false
-			this.componentClone = null
-			this.dropElement = null
-		},
-
-		/**
 		 * Moving component
 		 * @param {Object} coords
 		 */
 		dragComponentMove (coords) {
 			let layout = this.getElement('body')
 			if (layout) {
+				// Get component offset
 				let componentRect = this.componentElement.getBoundingClientRect(),
 				width = componentRect.width,
 				height = componentRect.height,
@@ -1897,45 +1977,40 @@ Viewer.mixins = {
 
 				// Get x and y coords inside canvas
 				let x = parseInt((coords.x - (width / 2)) - this.canvasBuilder().leftSpace()),
-				y = parseInt((coords.y - (height / 2)) - this.canvasBuilder().positionFromTop())
+					y = parseInt((coords.y - (height / 2)) - this.canvasBuilder().positionFromTop())
 
 				// Follow the original component position
 				this.componentElement.style.left = `${x}px`
 				this.componentElement.style.top = `${y}px`
 
 				// Check overlap element
-				for (let i in this.elements) {
-					let element = this.getElement(this.elements[i].id)
-					if (element) {
-						// Set overlap element with current collide element
-						// No matters if it's collide or not we set it first
-						// The purpose is we'll remove dropline later
-						this.overlapElement = element
+				this.checkOverlap(this.componentElement)
+			}
+		},
 
-						// Detect overlap elements
-						let overlap = this.overlapWith(this.componentElement, element)
+		/**
+		 * Dragging component is over
+		 * @param {Object} component
+		 */
+		dragComponentEnd (component) {
+			if (this.dropElement) {
+				// Parse markup into object
+				let element = this.templateToElement(this.dropElement, component.template)
+				if (this.dropElement.$accepting(element.dropable)) {
 
-						// If it's inside element
-						if (overlap.isInside()) {
-							// Set drop target with current element
-							this.dropElement = element
+					// Create element
+					this.dropElement.$element().$add(element, (el) => {
+						_.each(component.settings.props, (val, key) => {
+							el.$set(key, val)
+						})
 
-							// Hover it
-							this.overlapElement.$hover()
-
-							// If element has no childs, dropin line is top
-							// Otherwise check if its collide top or not
-							let position = 'top'
-							if (this.overlapElement.$childElements().length>0) {
-								position = 'bottom'
-							}
-
-							// Set drop in line
-							this.overlapElement.$dropIn(position)
-						}
-					}
+						el.$select()
+					})
 				}
 			}
+
+			this.overlapElement.$dropOut()
+			this.notDraggingElement(this.componentElement)
 		},
 
 		/**
@@ -2025,61 +2100,66 @@ Viewer.mixins = {
 		})
 
 		// Copy element
-		Mousetrap.bind(['ctrl+c', 'command+c'], () => {
+		Mousetrap(Viewer.window.document.body).bind(['ctrl+c', 'command+c'], (e) => {
+			e.preventDefault()
 			this.keyCapture('copy')
 		})
 
 		// Paste element
-		Mousetrap.bind(['ctrl+v', 'command+v'], () => {
+		Mousetrap(Viewer.window.document.body).bind(['ctrl+v', 'command+v'], (e) => {
+			e.preventDefault()
 			this.keyCapture('paste')
 		})
 
 		// Delete element
-		Mousetrap.bind('del', () => {
-			this.builder().$broadcast('clearCanvas')
+		Mousetrap(Viewer.window.document.body).bind('del', (e) => {
+			e.preventDefault()
 			this.keyCapture('delete')
 		})
 
 		// Copy element style
-		Mousetrap.bind(['ctrl+shift+c', 'command+shift+c'], () => {
+		Mousetrap(Viewer.window.document.body).bind(['ctrl+shift+c', 'command+shift+c'], (e) => {
+			e.preventDefault()
 			this.keyCapture('copyStyle')
 		})
 
 		// Paste element style
-		Mousetrap.bind(['ctrl+shift+v', 'command+shift+v'], () => {
+		Mousetrap(Viewer.window.document.body).bind(['ctrl+shift+v', 'command+shift+v'], (e) => {
+			e.preventDefault()
 			this.keyCapture('pasteStyle')
 		})
 
 		// Clear element style
-		Mousetrap.bind(['ctrl+shift+del', 'command+shift+del'], () => {
+		Mousetrap(Viewer.window.document.body).bind(['ctrl+shift+del', 'command+shift+del'], (e) => {
+			e.preventDefault()
 			this.keyCapture('clearStyle')
 		})
 
 		// Select using left and up
-		Mousetrap.bind(['left', 'up'], () => {
-			this.builder().$broadcast('clearCanvas')
+		Mousetrap(Viewer.window.document.body).bind(['left', 'up'], (e) => {
+			e.preventDefault()
 			this.keyCapture('selectUp')
 		})
 
 		// Select using right and down
-		Mousetrap.bind(['right', 'down'], () => {
-			this.builder().$broadcast('clearCanvas')
+		Mousetrap(Viewer.window.document.body).bind(['right', 'down'], (e) => {
+			e.preventDefault()
 			this.keyCapture('selectDown')
 		})
 
 		// Select childs using space
-		Mousetrap.bind(['space', 'enter'], () => {
-			this.builder().$broadcast('clearCanvas')
+		Mousetrap(Viewer.window.document.body).bind(['space', 'enter'], (e) => {
+			e.preventDefault()
 			this.keyCapture('enter')
 		})
 
 		// Detect shift keydown/keyup
-		Mousetrap.bind('shift', () => {
-			this.builder().$broadcast('keyCapture', 'pressShift')
-		})
-        Mousetrap.bind('shift', () => {
-			this.builder().$broadcast('keyCapture', 'releaseShift')
-		}, 'keyup')
+		// Mousetrap(Viewer.window.document.body).bind('shift', () => {
+		// 	this.builder().$broadcast('keyCapture', 'pressShift')
+		// })
+        // Mousetrap(Viewer.window.document.body).bind('shift', () => {
+		// 	this.builder().$broadcast('keyCapture', 'releaseShift')
+		// }, 'keyup')
     }
 }
 
