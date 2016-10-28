@@ -184,12 +184,13 @@ const unoBuilder = function () {
 		// Get component object from component.js
 		// For closure purpose
 		let component = {
+			$id: Date.now(),
 			path: {
 				root: scriptPath,
 				img: `${scriptPath}/img/`,
 				js: `${scriptPath}/js/`,
 				css: `${scriptPath}/css/`
-			}
+			},
 		}
 
 		// load json
@@ -252,7 +253,7 @@ const unoBuilder = function () {
 				global.__uno__.components[componentId] = component
 
 				// Register script
-				$root.registerScript(url)
+				$root.registerScript(url, `component-${component.$id}`)
 			})
 		})
 
@@ -265,11 +266,10 @@ const unoBuilder = function () {
 		return global.__uno__.components
 	}
 
-	$root.registerScript = url => {
-		let script = document.createElement('script'),
-		tagId = utils.generateId('component')
+	$root.registerScript = (url, registerId) => {
+		let script = document.createElement('script')
 		script.src = url
-		script.setAttribute('data-uno-register-id', tagId)
+		script.setAttribute('data-uno-register-id', registerId)
 		document.body.appendChild(script)
 	}
 

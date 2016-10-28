@@ -1882,7 +1882,6 @@ Viewer.mixins = {
 
 				case 'delete':
 					if (activeElement) {
-						console.log('babaa');
 						this.removeElement(activeElement.$id)
 					}
 				break
