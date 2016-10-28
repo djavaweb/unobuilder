@@ -1707,9 +1707,10 @@ Viewer.mixins = {
 			}
 
 			copyEl.$copy(pasteEl, () => {
-				if (sameCopy) {
-					this.copyElement()
-				}
+				console.log('copy same element');
+				// if (sameCopy) {
+				// 	this.copyElement()
+				// }
 			})
 		},
 
