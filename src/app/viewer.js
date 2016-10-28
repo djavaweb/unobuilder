@@ -1338,51 +1338,6 @@ Viewer.mixins = {
 					collideInRight, collideOutRight
 				}
 			}
-
-			// if (element.getBoundingClientRect) {
-			// 	let dstRect = element.getBoundingClientRect()
-			//
-			// 	const collideTop = () => {
-			// 		let diff = dstRect.top - (src.y + (src.height)/2)
-			// 		return diff < 4 && diff > -4
-			// 	}
-			//
-			// 	const collideBottom = () => {
-			// 		let diff = (src.y + (src.height)/2) - dstRect.bottom
-			// 		return diff < 4 && diff > -4
-			// 	}
-			//
-			// 	const collideLeft = () => {
-			// 		let diff = dstRect.left - (src.x + (src.width)/2)
-			// 		return diff < 4 && diff > -4
-			// 	}
-			//
-			// 	const collideRight = () => {
-			// 		let diff = (src.x + (src.width)/2) - dstRect.right
-			// 		return diff < 4 && diff > -4
-			// 	}
-			//
-			// 	const isCollide = () => {
-			// 		return ! (src.y > dstRect.bottom ||
-			// 			src.width < dstRect.left ||
-			// 			src.height < dstRect.top ||
-			// 			src.x > dstRect.right)
-			// 	}
-			//
-			// 	const isInside = () => {
-			// 		return ((dstRect.top <= src.y) && (src.y <= dstRect.bottom)) &&
-			// 		((dstRect.top <= src.height) && (src.height <= dstRect.bottom)) &&
-			// 		((dstRect.left <= src.x) && (src.x <= dstRect.right)) &&
-			// 		((dstRect.left <= src.width) && (src.width <= dstRect.right))
-			// 	}
-			//
-			// 	// Callback
-			// 	callback && callback.call(this, {
-			// 		collideTop, collideBottom,
-			// 		collideLeft, collideRight,
-			// 		isCollide, isInside
-			// 	})
-			// }
 		},
 
 		/**
