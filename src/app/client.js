@@ -269,7 +269,6 @@ const unoBuilder = function () {
 	$root.registerScript = (url, registerId) => {
 		let script = document.createElement('script')
 		script.src = url
-		script.setAttribute('data-uno-register-id', registerId)
 		document.body.appendChild(script)
 	}
 
