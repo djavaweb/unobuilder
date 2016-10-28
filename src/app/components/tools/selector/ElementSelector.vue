@@ -3,7 +3,7 @@
 
 	// Hover element selector
 	.element-selector-tools.hover(
-	:class="{orange: dragElement}",
+	:class="{orange: dragElementOrComponent}",
 	:style="hoverStyle",
 	v-if="isHover()",
 	v-el:hover
@@ -58,10 +58,13 @@
 	// End of select element selector
 
 	// Drop line
-	.dropline(v-if="isHover() && dragElement")
+	.dropline(v-if="isHover() && dragElementOrComponent")
 		.dropline__x(:style="droplineX")
 			.dropline__x-triangle.dropline__x-triangle--left
 			.dropline__x-triangle.dropline__x-triangle--right
+
+	// Element Overlay
+	.element-overlay(v-if="isHover() && dragElement", :style="dragOverlay")
 </template>
 
 <script>
@@ -125,7 +128,7 @@ export default {
 			let style = this.hover.css
 
 			// If it's dragging element and dropline is in bottom
-			if (this.dragElement && this.dropline.css) {
+			if (this.dragElementOrComponent && this.dropline.css) {
 				if (this.dropline.position === 'bottom') {
 					style.height = `${style.$height + droplineMargin}px`
 				}
@@ -162,17 +165,22 @@ export default {
 			return klass
 		},
 
-		dragElement () {
-			let dragComponent = this.$root.ref('leftPanel').dragComponent,
-			dragElement = this.$root.canvasBuilder().layout().dragElementState.move
+		dragComponent () {
+			return this.$root.ref('leftPanel').dragComponent
+		},
 
-			return dragComponent || dragElement
+		dragElement () {
+			return this.$root.canvasBuilder().layout().dragElementState.move
+		},
+
+		dragElementOrComponent () {
+			return this.dragElement || this.dragComponent
 		},
 
 		droplineX () {
 			let style = {}
 
-			if (this.dragElement && this.dropline.css) {
+			if (this.dragElementOrComponent && this.dropline.css) {
 				let width = this.dropline.css.$width - (droplineMargin * 2),
 				left = this.dropline.css.$left + droplineMargin,
 				top = this.dropline.css.$top + droplineMargin
@@ -187,6 +195,18 @@ export default {
 				// Okay
 				style.width = `${width}px`
 				style.transform = `translate(${left}px, ${top}px)`
+			}
+
+			return style
+		},
+
+		dragOverlay () {
+			let style = {}
+
+			if (this.dragElement && this.dropline.css) {
+				style.height = this.dropline.css.height
+				style.width = this.dropline.css.width
+				style.transform = this.dropline.css.transform
 			}
 
 			return style
@@ -300,7 +320,7 @@ export default {
 		isHover () {
 			if (this.hover.breadcrumbs &&
 				this.hover.breadcrumbs.length>0 &&
-				(this.hover.id !== this.select.id || this.dragElement)) {
+				(this.hover.id !== this.select.id || this.dragElementOrComponent)) {
 				return true
 			}
 		},
@@ -312,7 +332,7 @@ export default {
 		isSelect () {
 			if (this.select.breadcrumbs &&
 				this.select.breadcrumbs.length>0 &&
-				(this.hover.id !== this.select.id || ! this.dragElement)) {
+				(this.hover.id !== this.select.id || ! this.dragElementOrComponent)) {
 				return true
 			}
 		},

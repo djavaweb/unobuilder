@@ -223,6 +223,14 @@
     }
 }
 
+.element-overlay {
+    top: 0px;
+    left: 0px;
+    z-index: 990;
+    position: absolute;
+    background: $transparent-white;
+}
+
 .dropline {
     &__x {
         height: 2px;

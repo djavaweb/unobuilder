@@ -1747,6 +1747,140 @@ Viewer.mixins = {
 		},
 
 		/**
+		 * On keyboard event binding
+		 * @param {String} action
+		 * @param {Boolean} isHoveredElement
+		 */
+		keyCapture (action, isHoveredElement) {
+			let activeElement
+
+			// Prevent to copy and remove of body element
+			if (this.activeElement && this.activeElement !== 'body') {
+				activeElement = this.getElement(this.activeElement)
+			}
+
+			switch (action) {
+				case 'copy':
+					// When user copy element, we set copy element to
+					// copiedElement variable, will be used in paste
+					this.copiedElement = this.activeElement
+				break;
+
+				case 'paste':
+					// Prevent to copy body element, skip it
+					if (this.copiedElement && this.copiedElement !== 'body') {
+						let copyElement = this.getElement(this.copiedElement)
+
+						if (copyElement) {
+							let copyParentId = copyElement.$parentElement().$id,
+							pasteElement = activeElement.$id, sameCopy
+
+							// If active element has parent element such as container
+							let parentElement = activeElement.$parentElement()
+							if (parentElement) {
+								// If it's a row element
+								// After paste, copy again current element
+								if (parentElement.$row) {
+									sameCopy = true
+								} else {
+									// set destination element as parent of parent
+									let activeParentId = parentElement.$id
+
+									if (copyParentId === activeParentId) {
+										pasteElement = copyParentId
+									}
+								}
+							}
+
+							// If copy element is the same with active element
+							// set destination element as parent
+							if (copyElement.$id === activeElement.$id) {
+								pasteElement = copyParentId
+							}
+
+							// If copy element is column
+							// And paste element is container or anything that has row
+							// Set paste element as row
+							if (copyElement.$kind === 'column') {
+								let firstChild = this.getElement(pasteElement).firstChild
+								if (firstChild && firstChild.$kind === 'row') {
+									pasteElement = firstChild.$id
+								}
+							}
+
+							// Roger that!
+							this.copyElement(copyElement.$id, pasteElement, sameCopy)
+						}
+					}
+				break;
+
+				case 'delete':
+					if (activeElement) {
+						this.removeElement(activeElement.$id)
+					}
+				break;
+
+				case 'selectUp':
+					if (activeElement) {
+						// Get previous element
+						let prevEl = activeElement.$prev()
+
+						// if active element position is at 1st, we can't move
+						// to up anymore, so we move to parent element
+						if (! prevEl) {
+							prevEl = activeElement.$parentElement()
+						}
+
+						if (prevEl) {
+							prevEl.$hover()
+							prevEl.$select()
+						}
+					}
+				break;
+
+				case 'selectDown':
+					if (activeElement) {
+						// Get next element
+						let nextEl = activeElement.$next()
+
+						// if active element position is at the end, we can't move
+						// to down anymore, so we move to parent element
+						if (! nextEl) {
+							nextEl = activeElement.$parentElement()
+						}
+
+						if (nextEl) {
+							nextEl.$hover()
+							nextEl.$select()
+						}
+					}
+				break;
+
+				case 'enter':
+					if (this.activeElement) {
+						// Get active element and it's child
+						let activeElement = this.getElement(this.activeElement),
+						firstChild = activeElement.firstChild
+
+						// If first element is valid element, here we go!!
+						if (firstChild && firstChild.$element) {
+							firstChild.$element().$select()
+						}
+					}
+				break;
+
+				case 'copyStyle':
+				break;
+
+				case 'pasteStyle':
+				break;
+
+				case 'clearStyle':
+				break;
+			}
+		},
+
+		/**
 		 * Drag a component
 		 * @param {ElementNode} element
 		 * @param {Object} component
@@ -1896,140 +2030,6 @@ Viewer.mixins = {
 
 			// Empty the editor object
 			this.builder().$broadcast('elementEdit', {})
-		},
-
-		/**
-		 * On keyboard event binding
-		 * @param {String} action
-		 * @param {Boolean} isHoveredElement
-		 */
-		keyCapture (action, isHoveredElement) {
-			let activeElement
-
-			// Prevent to copy and remove of body element
-			if (this.activeElement && this.activeElement !== 'body') {
-				activeElement = this.getElement(this.activeElement)
-			}
-
-			switch (action) {
-				case 'copy':
-					// When user copy element, we set copy element to
-					// copiedElement variable, will be used in paste
-					this.copiedElement = this.activeElement
-				break;
-
-				case 'paste':
-					// Prevent to copy body element, skip it
-					if (this.copiedElement && this.copiedElement !== 'body') {
-						let copyElement = this.getElement(this.copiedElement)
-
-						if (copyElement) {
-							let copyParentId = copyElement.$parentElement().$id,
-							pasteElement = activeElement.$id, sameCopy
-
-							// If active element has parent element such as container
-							let parentElement = activeElement.$parentElement()
-							if (parentElement) {
-								// If it's a row element
-								// After paste, copy again current element
-								if (parentElement.$row) {
-									sameCopy = true
-								} else {
-									// set destination element as parent of parent
-									let activeParentId = parentElement.$id
-
-									if (copyParentId === activeParentId) {
-										pasteElement = copyParentId
-									}
-								}
-							}
-
-							// If copy element is the same with active element
-							// set destination element as parent
-							if (copyElement.$id === activeElement.$id) {
-								pasteElement = copyParentId
-							}
-
-							// If copy element is column
-							// And paste element is container or anything that has row
-							// Set paste element as row
-							if (copyElement.$kind === 'column') {
-								let firstChild = this.getElement(pasteElement).firstChild
-								if (firstChild && firstChild.$kind === 'row') {
-									pasteElement = firstChild.$id
-								}
-							}
-
-							// Roger that!
-							this.copyElement(copyElement.$id, pasteElement, sameCopy)
-						}
-					}
-				break;
-
-				case 'delete':
-					if (activeElement) {
-						this.removeElement(activeElement.$id)
-					}
-				break;
-
-				case 'selectUp':
-					if (activeElement) {
-						// Get previous element
-						let prevEl = activeElement.$prev()
-
-						// if active element position is at 1st, we can't move
-						// to up anymore, so we move to parent element
-						if (! prevEl) {
-							prevEl = activeElement.$parentElement()
-						}
-
-						if (prevEl) {
-							prevEl.$hover()
-							prevEl.$select()
-						}
-					}
-				break;
-
-				case 'selectDown':
-					if (activeElement) {
-						// Get next element
-						let nextEl = activeElement.$next()
-
-						// if active element position is at the end, we can't move
-						// to down anymore, so we move to parent element
-						if (! nextEl) {
-							nextEl = activeElement.$parentElement()
-						}
-
-						if (nextEl) {
-							nextEl.$hover()
-							nextEl.$select()
-						}
-					}
-				break;
-
-				case 'enter':
-					if (this.activeElement) {
-						// Get active element and it's child
-						let activeElement = this.getElement(this.activeElement),
-						firstChild = activeElement.firstChild
-
-						// If first element is valid element, here we go!!
-						if (firstChild && firstChild.$element) {
-							firstChild.$element().$select()
-						}
-					}
-				break;
-
-				case 'copyStyle':
-				break;
-
-				case 'pasteStyle':
-				break;
-
-				case 'clearStyle':
-				break;
-			}
 		}
     },
 
@@ -2070,51 +2070,51 @@ Viewer.mixins = {
 
 		// Copy element
 		Mousetrap.bind(['ctrl+c', 'command+c'], () => {
-			this.$emit('keyCapture', 'copy')
+			this.keyCapture('copy')
 		})
 
 		// Paste element
 		Mousetrap.bind(['ctrl+v', 'command+v'], () => {
-			this.$emit('keyCapture', 'paste')
+			this.keyCapture('paste')
 		})
 
 		// Delete element
 		Mousetrap.bind('del', () => {
 			this.builder().$broadcast('clearCanvas')
-			this.$emit('keyCapture', 'delete')
+			this.keyCapture('delete')
 		})
 
 		// Copy element style
 		Mousetrap.bind(['ctrl+shift+c', 'command+shift+c'], () => {
-			this.$emit('keyCapture', 'copyStyle')
+			this.keyCapture('copyStyle')
 		})
 
 		// Paste element style
 		Mousetrap.bind(['ctrl+shift+v', 'command+shift+v'], () => {
-			this.$emit('keyCapture', 'pasteStyle')
+			this.keyCapture('pasteStyle')
 		})
 
 		// Clear element style
 		Mousetrap.bind(['ctrl+shift+del', 'command+shift+del'], () => {
-			this.$emit('keyCapture', 'clearStyle')
+			this.keyCapture('clearStyle')
 		})
 
 		// Select using left and up
 		Mousetrap.bind(['left', 'up'], () => {
 			this.builder().$broadcast('clearCanvas')
-			this.$emit('keyCapture', 'selectUp')
+			this.keyCapture('selectUp')
 		})
 
 		// Select using right and down
 		Mousetrap.bind(['right', 'down'], () => {
 			this.builder().$broadcast('clearCanvas')
-			this.$emit('keyCapture', 'selectDown')
+			this.keyCapture('selectDown')
 		})
 
 		// Select childs using space
 		Mousetrap.bind(['space', 'enter'], () => {
 			this.builder().$broadcast('clearCanvas')
-			this.$emit('keyCapture', 'enter')
+			this.keyCapture('enter')
 		})
 
 		// Detect shift keydown/keyup
