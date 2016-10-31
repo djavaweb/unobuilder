@@ -2,6 +2,7 @@
 const _extend = require('lodash/extend')
 const _omit = require('lodash/omit')
 const _each = require('lodash/each')
+const async = require('async')
 const utils = require('./utils.js')
 
 // Define static vars
@@ -172,15 +173,30 @@ const unoBuilder = function () {
     }
 
 	/**
-	 * Uno add component
+	 * Async queues to add component
+	 */
+	$root.q = async.queue((task, callback) => {
+		$root.initComponent(task.url, task.scriptPath, () => {
+			callback()
+		})
+	}, 1)
+
+	/**
+	 * Uno add component to list
 	 * @param {String} url
 	 */
-	$root.addComponent = url => {
-		//$root.emit('addComponent', url);
+	$root.addComponent = (url) => {
 		let scriptPath = url.split('/')
 		scriptPath.splice(-1)
 		scriptPath = scriptPath.join('/')
+		$root.q.push({url, scriptPath})
+	}
 
+	/**
+	 * Uno init component
+	 * @param {String} url
+	 */
+	$root.initComponent = (url, scriptPath, callback) => {
 		// Get component object from component.js
 		// For closure purpose
 		let component = {
@@ -254,12 +270,10 @@ const unoBuilder = function () {
 
 				// Register script
 				$root.registerScript(url, `component-${component.$id}`)
+
+				callback && callback()
 			})
 		})
-
-
-
-		return $root
 	}
 
 	$root.getComponentList = () => {
