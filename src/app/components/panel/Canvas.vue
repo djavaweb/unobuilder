@@ -226,6 +226,61 @@ export default {
 
         // Set source based on uno url
         this.layoutDOM(null).src = window.__uno__.url
+
+
+        // Copy element
+		Mousetrap(document.body).bind(['ctrl+c', 'command+c'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('copy')
+		})
+
+		// Paste element
+		Mousetrap(document.body).bind(['ctrl+v', 'command+v'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('paste')
+		})
+
+		// Delete element
+		Mousetrap(document.body).bind('del', (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('delete')
+		})
+
+		// Copy element style
+		Mousetrap(document.body).bind(['ctrl+shift+c', 'command+shift+c'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('copyStyle')
+		})
+
+		// Paste element style
+		Mousetrap(document.body).bind(['ctrl+shift+v', 'command+shift+v'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('pasteStyle')
+		})
+
+		// Clear element style
+		Mousetrap(document.body).bind(['ctrl+shift+del', 'command+shift+del'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('clearStyle')
+		})
+
+		// Select using left and up
+		Mousetrap(document.body).bind(['left', 'up'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('selectUp')
+		})
+
+		// Select using right and down
+		Mousetrap(document.body).bind(['right', 'down'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('selectDown')
+		})
+
+		// Select childs using space
+		Mousetrap(document.body).bind(['space', 'enter'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('enter')
+		})
     }
 }
 </script>
