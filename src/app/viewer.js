@@ -24,8 +24,8 @@ Viewer.mixins = {
 			activeElement: null,
 			hoverElement: null,
 			editElement: null,
-			cutElement: false,
 			copiedElement: null,
+			cuttingElement: false,
 			componentElement: null,
 			dragComponent: false,
 			dropElement: null,
@@ -1176,9 +1176,6 @@ Viewer.mixins = {
 					this.dragElementState.x = e.pageX
 					this.dragElementState.y = e.pageY
 
-					// Cut Element
-					// this.keyCapture('cut')
-
 					// Start dragging
 					utils.addEvent(Viewer.window.document, 'mousemove', this.dragElementMove, false)
 					utils.addEvent(Viewer.window.document, 'mouseup', this.dragElementEnd, false)
@@ -1200,8 +1197,8 @@ Viewer.mixins = {
 			// Check overlap element
 			this.checkOverlap(this.dragElementState.cloneElement)
 
-			// Overlays overlap element
-			this.dragElementState.element.$element().$overlay()
+			// Cut and Overlays overlap element
+			this.keyCapture('cut')
 		},
 
 		/**
@@ -1217,15 +1214,13 @@ Viewer.mixins = {
 			// If it's only click, not draggin, just select it
 			if (this.dragElementState.x === e.pageX &&
 				this.dragElementState.y === e.pageY) {
-				this.cutElement = false
 				this.dragElementState.element.$select()
 			}
 			// If it's dragging and move over other element
 			// Not from source element, then paste it!
 			else if ((this.dragElementState && this.dropElement) &&
 				(this.dragElementState.element.$id !== this.dropElement.$id)) {
-				this.dropElement.$element().$select()
-				//this.keyCapture('paste')
+				this.keyCapture('paste')
 			}
 
 			// Remove clone element
@@ -1690,6 +1685,31 @@ Viewer.mixins = {
 		},
 
 		/**
+		 * Copy element by id
+		 * @param {String} id
+		 * @param {String} dstId
+		 * @param {Boolean} sameCopy
+		 * @return {}
+		 */
+		copyElement (id, dstId, sameCopy) {
+			id = id || this.activeElement
+
+			let el = this.getElement(id),
+			copyEl = el.$elementWrapper(),
+			pasteEl = el.$parentElement().$id
+
+			if (dstId) {
+				pasteEl = dstId
+			}
+
+			copyEl.$copy(pasteEl, () => {
+				if (sameCopy) {
+					this.copyElement()
+				}
+			})
+		},
+
+		/**
 		 * Remove element by id
 		 * @param  {String} id
 		 */
@@ -1743,31 +1763,6 @@ Viewer.mixins = {
 		},
 
 		/**
-		 * Copy element by id
-		 * @param {String} id
-		 * @param {String} dstId
-		 * @param {Boolean} sameCopy
-		 * @return {}
-		 */
-		copyElement (id, dstId, sameCopy) {
-			id = id || this.activeElement
-
-			let el = this.getElement(id),
-			copyEl = el.$elementWrapper(),
-			pasteEl = el.$parentElement().$id
-
-			if (dstId) {
-				pasteEl = dstId
-			}
-
-			copyEl.$copy(pasteEl, () => {
-				if (sameCopy) {
-					this.copyElement()
-				}
-			})
-		},
-
-		/**
 		 *  On screen size change
 		 */
 		setScreenSize (size) {
@@ -1814,17 +1809,18 @@ Viewer.mixins = {
 			}
 
 			switch (action) {
-				case 'cut':
 				case 'copy':
 					// When user copy element, we set copy element to
 					// copiedElement variable, will be used in paste
 					this.copiedElement = this.activeElement
+				break
 
-					// Set cut state
-					if (action === 'cut') {
-						this.cutElement = true
-					}
-				break;
+				case 'cut':
+					// Same with copy
+					this.copiedElement = this.activeElement
+					this.cuttingElement = true
+					this.getElement(this.activeElement).$element().$overlay()
+				break
 
 				case 'paste':
 					// Prevent to copy body element, skip it
@@ -1872,9 +1868,9 @@ Viewer.mixins = {
 							this.copyElement(copyElement.$id, pasteElement, sameCopy)
 
 							// If it's cut, just remove original element
-							if (this.cutElement) {
-								this.cutElement = false
-								this.removeElement(this.copiedElement.$id)
+							if (this.cuttingElement) {
+								this.removeElement(copyElement.$id)
+								this.cuttingElement = false
 							}
 						}
 					}
@@ -2096,6 +2092,12 @@ Viewer.mixins = {
 	        this.$nextTick(() => {
 				this.builder().$broadcast('viewerReady')
 			})
+		})
+
+		// Copy element
+		Mousetrap(Viewer.window.document.body).bind(['ctrl+x', 'command+x'], (e) => {
+			e.preventDefault()
+			this.keyCapture('cut')
 		})
 
 		// Copy element

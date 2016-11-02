@@ -64,7 +64,7 @@
 			.dropline__x-triangle.dropline__x-triangle--right
 
 	// Element Overlay
-	.element-overlay(v-if="isHover() && dragElement", :style="dragOverlay")
+	.element-overlay(v-if="(isHover() && dragElement) || (isSelect() && cutElementState)", :style="dragOverlay")
 </template>
 
 <script>
@@ -90,7 +90,10 @@ export default {
 	computed: {
 		activeElement () {
 			if (this.select.id) {
-				return this.getElementById(this.select.id)
+				return this.$root
+				.canvasBuilder()
+				.layout()
+				.getElement(this.select.id)
 			}
 		},
 
@@ -174,6 +177,10 @@ export default {
 			return this.$root.canvasBuilder().layout().dragElementState.move
 		},
 
+		cutElementState () {
+			return this.$root.canvasBuilder().layout().cutElement
+		},
+
 		dragElementOrComponent () {
 			return this.dragElement || this.dragComponent
 		},
@@ -209,7 +216,7 @@ export default {
 		dragOverlay () {
 			let style = {}
 
-			if (this.dragElement && this.overlay.css) {
+			if ((this.dragElement || this.cutElementState) && this.overlay.css) {
 				style.height = this.overlay.css.height
 				style.width = this.overlay.css.width
 				style.transform = this.overlay.css.transform
@@ -383,16 +390,6 @@ export default {
 		},
 
 		/**
-		 * Remove element
-		 */
-		removeElement () {
-			this.$root
-			.canvasBuilder()
-			.layout()
-			.removeElement(this.select.id)
-		},
-
-		/**
 		 * Check whether element has equals kind with given value
 		 */
 		isKind (kind) {
@@ -425,6 +422,17 @@ export default {
 		},
 
 		/**
+		 * Cut element from memory
+		 */
+		cutElement () {
+			let activeElement = this.activeElement
+			if (activeElement) {
+				this.$root.canvasBuilder().layout().keyCapture('cut')
+				activeElement.$overlay()
+			}
+		},
+
+		/**
 		 * Paste element from memory, see copyElement
 		 */
 		pasteElement () {
@@ -432,6 +440,16 @@ export default {
 			.canvasBuilder()
 			.layout()
 			.keyCapture('paste')
+		},
+
+		/**
+		 * Remove element
+		 */
+		removeElement () {
+			this.$root
+			.canvasBuilder()
+			.layout()
+			.removeElement(this.select.id)
 		},
 
 		isElementResizable () {},

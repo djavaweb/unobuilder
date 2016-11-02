@@ -234,6 +234,12 @@ export default {
 			this.layout().keyCapture('copy')
 		})
 
+        // Cut element
+		Mousetrap(document.body).bind(['ctrl+x', 'command+x'], (e) => {
+			e.preventDefault()
+			this.layout().keyCapture('cut')
+		})
+
 		// Paste element
 		Mousetrap(document.body).bind(['ctrl+v', 'command+v'], (e) => {
 			e.preventDefault()
