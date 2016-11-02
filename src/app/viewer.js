@@ -1164,9 +1164,11 @@ Viewer.mixins = {
 				} else {
 					// Clone element with tiny dot element
 					let cloneElement = Viewer.window.document.createElement('div')
-					cloneElement.style.width = '1px'
-					cloneElement.style.height = '1px'
+					cloneElement.style.width = '15px'
+					cloneElement.style.height = '15px'
 					cloneElement.style.position = 'fixed'
+					cloneElement.style.x = `${e.pageX}px`
+					cloneElement.style.y = `${e.pageY}px`
 					cloneElement.style.visibility = 'hidden'
 					Viewer.window.document.body.appendChild(cloneElement)
 
@@ -1175,6 +1177,7 @@ Viewer.mixins = {
 					this.dragElementState.element = element
 					this.dragElementState.x = e.pageX
 					this.dragElementState.y = e.pageY
+
 
 					// Start dragging
 					utils.addEvent(Viewer.window.document, 'mousemove', this.dragElementMove, false)
@@ -1189,9 +1192,13 @@ Viewer.mixins = {
 		 * @return {void}
 		 */
 		dragElementMove (e) {
+			let cloneRect = this.dragElementState.cloneElement.getBoundingClientRect()
+			let x = (e.pageX - (cloneRect.width/2))
+			let y = (e.pageY - (cloneRect.height/2)) - Viewer.window.document.body.scrollTop
+
 			// Move clone element
-			this.dragElementState.cloneElement.style.left = `${e.pageX}px`
-			this.dragElementState.cloneElement.style.top = `${e.pageY}px`
+			this.dragElementState.cloneElement.style.left = `${x}px`
+			this.dragElementState.cloneElement.style.top = `${y}px`
 			this.dragElementState.move = true
 
 			// Check overlap element
