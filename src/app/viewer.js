@@ -23,7 +23,6 @@ Viewer.mixins = {
 			screenSize: 'large',
 			activeElement: null,
 			hoverElement: null,
-			editElement: null,
 			copiedElement: null,
 			cuttingElement: false,
 			componentElement: null,
@@ -36,7 +35,8 @@ Viewer.mixins = {
 				element: null,
 				cloneElement: null
 			},
-			editComponent: false,
+			contentElement: null,
+			editContent: false,
 			customCSS: '',
 			global: {},
 			elements: {}
@@ -135,8 +135,8 @@ Viewer.mixins = {
 					}
 					props.minWidth = {value: 60, unit: 'px'}
 					props.maxWidth = {value: '', unit: '%'}
-					props.height = {value: 100, unit: '%'}
-					props.minHeight = {value: '', unit: 'px'}
+					props.height = {value: '', unit: 'px'}
+					props.minHeight = {value: 60, unit: 'px'}
 					//delete data.totalColumn
 				break
 
@@ -146,19 +146,25 @@ Viewer.mixins = {
 					props.minHeight = {value: 60, unit: 'px'}
 				break
 
+				case 'image':
+					props.minWidth = {value: 250, unit: 'px'}
+					props.minHeight = {value: 250, unit: 'px'}
+				break
+
 				case 'section':
-					props.width.disabled = true
-					props.minWidth.disabled = true
-					props.maxWidth.disabled = true
-					props.height = {value: 60, unit: 'px'}
+					// props.width.disabled = true
+					// props.minWidth.disabled = true
+					// props.maxWidth.disabled = true
+					props.height = {value: 'auto', unit: 'px'}
+					props.minHeight = {value: 60, unit: 'px'}
 				break
 
 				case 'container':
-					props.width.disabled = true
-					props.minWidth.disabled = true
-					props.maxWidth.disabled = true
-					props.height = {value: 100, unit: '%'}
-					props.minHeight = {value: '', unit: 'px'}
+					// props.width.disabled = true
+					// props.minWidth.disabled = true
+					// props.maxWidth.disabled = true
+					props.height = {value: 'auto', unit: '%'}
+					props.minHeight = {value: 60, unit: 'px'}
 				break
 			}
 
@@ -166,13 +172,13 @@ Viewer.mixins = {
 		},
 
 
-        /**
-         * Create element
-         * @param  {Object} element
-         * @param  {Number|Function} insertAt, fn
-         * @return {Node}
-         */
-        createElement (element, insertAt, fn) {
+    /**
+     * Create element
+     * @param  {Object} element
+     * @param  {Number|Function} insertAt, fn
+     * @return {Node}
+     */
+    createElement (element, insertAt, fn) {
 			// Fix arguments
 			let ready = fn
 			if (typeof insertAt === 'function') {
@@ -255,17 +261,6 @@ Viewer.mixins = {
 				}
 
 				props = this.setDefaultSize(props, element)
-				props.getParent = (parentElement) => {
-					if (parentElement) {
-						return el.parentElement
-					} else {
-						let parent = el.$parentElement()
-						if (parent) {
-							return parent.$props()
-						}
-					}
-				}
-
 				if (! this.global[element.kind]) {
 					this.global[element.kind] = {
 						large: props
@@ -407,39 +402,32 @@ Viewer.mixins = {
 				}
 			}
 
+			// Get breadcrumb
+			el.$breadcrumb = () => {
+				return {
+					id: el.$id,
+					label: el.$label
+				}
+			}
+
 			// Get breadcrumbs
 			el.$breadcrumbs = () => {
 				let breadcrumbs = []
 
-				// Self element
+				// Current element
 				let element = el.$element()
-				if (element) {
-					if (element.$label) {
-						breadcrumbs.push({
-							id: element.$id,
-							label: element.$label
-						})
-					}
-					// 2nd parent element
-					if (element.$selectableParent) {
-						let parent = element.$selectableParent()
-						if (parent.$label) {
-							breadcrumbs.push({
-								id: parent.$id,
-								label: parent.$label
-							})
-						}
+				if (element && element.$label) {
+					breadcrumbs.push(element.$breadcrumb())
 
+					// 2nd parent element
+					let parent = element.$selectableParent()
+					if (parent) {
+						breadcrumbs.push(parent.$breadcrumb())
 
 						// 3rd parent element
-						if (parent.$selectableParent) {
-							let grandParent = parent.$selectableParent()
-							if (grandParent.$label) {
-								breadcrumbs.push({
-									id: grandParent.$id,
-									label: grandParent.$label
-								})
-							}
+						let grandParent = parent.$selectableParent()
+						if (grandParent) {
+							breadcrumbs.push(grandParent.$breadcrumb())
 						}
 					}
 				}
@@ -460,6 +448,10 @@ Viewer.mixins = {
 
 			// Accepted drag and drop parent
 			el.$dropable = this.elements[el.$id].dropable
+
+			if (this.elements[el.$id].options) {
+				el.$options = this.elements[el.$id].options
+			}
 
 			el.$outline = () => {
 				return this.outline(el)
@@ -482,8 +474,8 @@ Viewer.mixins = {
 					// Notify to element selector
 					let selector = this.canvasBuilder('elementSelector')
 					this.$nextTick(() => {
-						selector.setState({
-							state: 'select',
+						selector.applyState({
+							mode: 'select',
 							id: el.$id,
 							css: el.$outline(),
 							type: el.$type,
@@ -504,8 +496,8 @@ Viewer.mixins = {
 				if (el.$selectable) {
 					this.hoverElement = el.$id
 					this.$nextTick(() => {
-						this.canvasBuilder('elementSelector').setState({
-							state: 'hover',
+						this.canvasBuilder('elementSelector').applyState({
+							mode: 'hover',
 							id: el.$id,
 							css: el.$outline(),
 							type: el.$type,
@@ -549,24 +541,22 @@ Viewer.mixins = {
 			}
 
 			// Edit editable element
-			el.$edit = (activate) => {
-				if (activate === undefined) {
-					activate = false
-				}
+			el.$edit = (editable = false) => {
+				this.editContent = editable
+				this.contentElement = el.$id
 
-				if (activate) {
-					this.editElement = el.$id
+				if (editable) {
 					this.$nextTick(() => {
-						this.builder().$broadcast('elementEdit', {
-							element: el,
-							css: el.$editorCSS(),
-							window: window
+						this.canvasBuilder('elementSelector').applyState({
+							mode: 'edit',
+							id: el.$id,
+							css: el.$outline(),
+							type: el.$type,
+							target: el,
+							editable: editable
 						})
 					})
 				}
-
-				this.editComponent = activate
-				el.setAttribute('contenteditable', activate)
 			}
 
 			el.$editorCSS = () => {
@@ -828,14 +818,23 @@ Viewer.mixins = {
 
 			// Select parent until we found selectable element
 			el.$selectableParent = () => {
-				let parent = el.parentElement
-				if (parent) {
-					if (!parent.$selectable && parent.$selectableParent) {
-						return parent.$selectableParent()
-					}
-
-					return parent
-				}
+				// let parent = el.parentElement
+				// if (parent) {
+				// 	if (!parent.$selectable && parent.$selectableParent) {
+				// 		return parent.$selectableParent()
+				// 	}
+				//
+				// 	return parent
+				// }
+				//
+				// if (element.parentElement) {
+				// 	if (element.parentElement.$selectable) {
+				// 		return element.parentElement
+				// 	}
+				//
+				// 	return this.searchSelectableParent(element.parentElement)
+				// }
+				return this.searchSelectableParent(el)
 			}
 
 			// Get element's parent, until met first child's node of body
@@ -1140,14 +1139,14 @@ Viewer.mixins = {
 		 */
 		click (e) {
 			// Get possible element
-			let element = null
-			if (e.target.$selectable) {
-				element = e.target
-			} else if (e.target.parentElement.$select) {
-				element = e.target.parentElement.$select
+			let element = e.target
+
+			if (! element.$selectable) {
+				element = this.searchSelectableParent(element)
 			}
 
-			if (element) {
+			if (element && element.$selectable) {
+
 				// Hide context menu first
 				this.canvasBuilder('contextMenu').hide()
 
@@ -1178,7 +1177,6 @@ Viewer.mixins = {
 					this.dragElementState.x = e.pageX
 					this.dragElementState.y = e.pageY
 
-
 					// Start dragging
 					utils.addEvent(Viewer.window.document, 'mousemove', this.dragElementMove, false)
 					utils.addEvent(Viewer.window.document, 'mouseup', this.dragElementEnd, false)
@@ -1205,7 +1203,7 @@ Viewer.mixins = {
 			this.checkOverlap(this.dragElementState.cloneElement)
 
 			// Cut and Overlays overlap element
-			this.keyCapture('cut')
+			// this.keyCapture('cut')
 		},
 
 		/**
@@ -1227,6 +1225,7 @@ Viewer.mixins = {
 			// Not from source element, then paste it!
 			else if ((this.dragElementState && this.dropElement) &&
 				(this.dragElementState.element.$id !== this.dropElement.$id)) {
+				// console.log(this.dropElement)
 				this.keyCapture('paste')
 			}
 
@@ -1258,6 +1257,11 @@ Viewer.mixins = {
 		 */
 		dblclick (e) {
 			let element = e.target
+
+			if (! element.$selectable) {
+				element = this.searchSelectableParent(element)
+			}
+
 			if (element.$editable) {
 				element.$edit(true)
 			} else {
@@ -1330,6 +1334,21 @@ Viewer.mixins = {
 				}
 
 				return element
+			}
+		},
+
+		/**
+		 * Search selectable parent of element
+		 * @param  {[type]} element [description]
+		 * @return {[type]}         [description]
+		 */
+		searchSelectableParent (element) {
+			if (element.parentElement) {
+				if (element.parentElement.$selectable) {
+					return element.parentElement
+				}
+
+				return this.searchSelectableParent(element.parentElement)
 			}
 		},
 
@@ -1469,7 +1488,7 @@ Viewer.mixins = {
 				// Tag name for <element> and <wrapper>
 				// @default 'div'
 				let tagLabel = template.attr('label')
-				template.removeAttr('tag')
+				template.removeAttr('label')
 				if (tagLabel && tagLabel !== '') {
 					element.label = tagLabel
 				}
@@ -1482,10 +1501,10 @@ Viewer.mixins = {
 					break
 
 					case 'element':
-						element.kind = 'element'
 						element.wrapper = false
 						element.selectable = true
 						element.dropable = 'section,container,row,column'
+						element.attrs.class = utils.klass(`el-${tagName}`)
 						element.props = {
 							height: {
 								value: 100,
@@ -1494,19 +1513,31 @@ Viewer.mixins = {
 						}
 					break
 
+					case 'image':
+						element.wrapper = false
+						element.selectable = true
+						element.dropable = 'section,container,row,column'
+						element.attrs.class = utils.klass(`el-img`)
+						element.tag = 'img'
+						element.props = {
+							background: {
+								disabled: true
+							}
+						}
+					break
+
 					case 'content':
-						element.kind = 'content'
 						element.wrapper = false
 						element.selectable = true
 						element.editable = true
 						element.dropable = 'section,container,row,column'
-						if (template.html().trim().length>0) {
+						if (template.html().trim().length > 0) {
 							element.html = _.escape(template.html().trim())
 						}
 
 						let inline = template.attr('inline')
 						template.removeAttr('inline')
-						if (utils.isJSON(inline)) {
+						if (inline) {
 							element.attrs.class = utils.klass('inline')
 						}
 
@@ -1583,7 +1614,7 @@ Viewer.mixins = {
 						}
 
 						// Default properties
-						element.attrs.class = `uk-width-1-${totalColumn}`
+						element.attrs.class = `uk-width-1-${totalColumn} ${utils.klass('el-column-wrapper')}`
 						element.dropable = 'section,container,row,column'
 
 						// Set column as wrapper and unselectable element
@@ -1876,8 +1907,10 @@ Viewer.mixins = {
 
 							// If it's cut, just remove original element
 							if (this.cuttingElement) {
-								this.removeElement(copyElement.$id)
-								this.cuttingElement = false
+								this.$nextTick(() => {
+									this.removeElement(copyElement.$id)
+									this.cuttingElement = false
+								})
 							}
 						}
 					}
@@ -1998,14 +2031,23 @@ Viewer.mixins = {
 			if (this.dropElement) {
 				// Parse markup into object
 				let element = this.templateToElement(this.dropElement, component.template)
-				if (this.dropElement.$accepting(element.dropable)) {
 
-					// Create element
+				// Change kind
+				if (component.settings.kind) {
+					element.kind = component.settings.kind
+				}
+
+				// Options
+				if (component.settings.options) {
+					element.options = component.settings.options
+				}
+
+				// Create element
+				if (this.dropElement.$accepting(element.dropable)) {
 					this.dropElement.$element().$add(element, (el) => {
 						_.each(component.settings.props, (val, key) => {
 							el.$set(key, val)
 						})
-
 						el.$select()
 					})
 				}
@@ -2040,8 +2082,55 @@ Viewer.mixins = {
 					}
 				}
 			}
+		},
+
+		/**
+		 * Disable editor
+		 */
+		applyEditor (state) {
+			let doc = Viewer.window.document
+			if (! state) {
+				let editableElement = doc.querySelectorAll('[contenteditable]')
+				utils.removeEvent(doc, 'input', this.editingContent)
+				utils.removeEvent(doc, 'paste', this.pasteContent)
+				for (let el in editableElement) {
+					if (editableElement[el].$editable) {
+						editableElement[el].setAttribute('contenteditable', false)
+						editableElement[el].$edit(false)
+					}
+				}
+			} else {
+				let element = this.getElement(state.id)
+				if (element) {
+					utils.addEvent(doc, 'input', this.editingContent)
+					utils.addEvent(doc, 'paste', this.pasteContent)
+					element.setAttribute('contenteditable', state.editable)
+				}
+			}
+		},
+
+		editingContent () {
+			this.trySelect()
+			this.canvasBuilder('elementSelector').textEditorReposition()
+		},
+
+		pasteContent (e) {
+			e.preventDefault();
+			let doc = Viewer.window.document
+			let text = ''
+			if (e.clipboardData || e.originalEvent.clipboardData) {
+			  text = (e.originalEvent || e).clipboardData.getData('text/plain')
+			} else if (Viewer.window.clipboardData) {
+			  text = Viewer.window.clipboardData.getData('Text');
+			}
+			if (doc.queryCommandSupported('insertText')) {
+			  doc.execCommand('insertText', false, text);
+			} else {
+			  doc.execCommand('paste', false, text);
+			}
+			this.editingContent(e)
 		}
-    },
+  },
 
 	/**
 	 * Event list
@@ -2049,32 +2138,9 @@ Viewer.mixins = {
 	 */
     events: {
         addCSS () {},
-
-		/**
-		 * Disable editor
-		 */
-		disableEditor () {
-			let editableElement = Viewer.window.document.querySelectorAll('[contenteditable]')
-			for (let el in editableElement) {
-				if (editableElement[el].$editable) {
-					editableElement[el].$edit(false)
-				}
-			}
-
-			// Empty the editor object
-			this.builder().$broadcast('elementEdit', {})
-		}
     },
 
     ready () {
-		/**
-		 * Window scroll observer, when change notify the parent to set canvas top position as viewer top scroll
-		 * @return {void}
-		 */
-		Viewer.window.addEventListener('scroll', () => {
-			this.builder().$broadcast('scrolling', Viewer.window.document.body.getBoundingClientRect())
-		})
-
 		/**
 		 * When window resize reselect element
 		 * @return {void}
@@ -2096,45 +2162,54 @@ Viewer.mixins = {
         }, (el) => {
 			el.$set('display.disabled', true)
 	        el.$select()
-	        this.$nextTick(() => {
-				this.builder().$broadcast('viewerReady')
-			})
 		})
 
 		// Copy element
 		Mousetrap(Viewer.window.document.body).bind(['ctrl+x', 'command+x'], (e) => {
-			e.preventDefault()
-			this.keyCapture('cut')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('cut')
+			}
 		})
 
 		// Copy element
 		Mousetrap(Viewer.window.document.body).bind(['ctrl+c', 'command+c'], (e) => {
-			e.preventDefault()
-			this.keyCapture('copy')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('copy')
+			}
 		})
 
 		// Paste element
 		Mousetrap(Viewer.window.document.body).bind(['ctrl+v', 'command+v'], (e) => {
-			e.preventDefault()
-			this.keyCapture('paste')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('paste')
+			}
 		})
 
 		// Delete element
 		Mousetrap(Viewer.window.document.body).bind('del', (e) => {
-			e.preventDefault()
-			this.keyCapture('delete')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('delete')
+			}
 		})
 
 		// Copy element style
 		Mousetrap(Viewer.window.document.body).bind(['ctrl+shift+c', 'command+shift+c'], (e) => {
-			e.preventDefault()
-			this.keyCapture('copyStyle')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('copyStyle')
+			}
 		})
 
 		// Paste element style
 		Mousetrap(Viewer.window.document.body).bind(['ctrl+shift+v', 'command+shift+v'], (e) => {
-			e.preventDefault()
-			this.keyCapture('pasteStyle')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('pasteStyle')
+			}
 		})
 
 		// Clear element style
@@ -2145,20 +2220,26 @@ Viewer.mixins = {
 
 		// Select using left and up
 		Mousetrap(Viewer.window.document.body).bind(['left', 'up'], (e) => {
-			e.preventDefault()
-			this.keyCapture('selectUp')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('selectUp')
+			}
 		})
 
 		// Select using right and down
 		Mousetrap(Viewer.window.document.body).bind(['right', 'down'], (e) => {
-			e.preventDefault()
-			this.keyCapture('selectDown')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('selectDown')
+			}
 		})
 
 		// Select childs using space
 		Mousetrap(Viewer.window.document.body).bind(['space', 'enter'], (e) => {
-			e.preventDefault()
-			this.keyCapture('enter')
+			if (! this.editContent) {
+				e.preventDefault()
+				this.keyCapture('enter')
+			}
 		})
 
 		// Detect shift keydown/keyup

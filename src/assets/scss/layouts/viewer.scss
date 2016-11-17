@@ -29,6 +29,14 @@ body {
 
 	&-el {
 		cursor: default;
+		@include no-user-select;
+	}
+
+	&-el-img {
+		background-image: url("#{$assets_path}img/uno-light.svg");
+		background-position: 50% 50%;
+		background-repeat: no-repeat;
+		background-color: $charcoal-grey
 	}
 
 	&-el-link {

@@ -1,0 +1,49 @@
+.link-editor {
+    pointer-events: all;
+    background: $charcoal-grey-four;
+    width: 240px;
+    position: absolute;
+    z-index: 999;
+
+    .uk-align-right {
+        margin: 0
+    }
+    &-close {
+        padding: 10px;
+        text-align: right;
+        cursor: default;
+    }
+    &-tab {
+        clear: both;
+        .input-label {
+            padding-left: 10px;
+            margin-top: 10px;
+        }
+        .rect-button {
+            width: 30px;
+            height: 30px;
+            &.link {
+                // &-url {
+                //     background-image: url('#{$assets_path}/img/link.svg');
+                // }
+                // &-post {
+                //     background-image: url('#{$assets_path}/img/link-post.svg')
+                // }
+                // &-page {
+                //     background-image: url('#{$assets_path}/img/link-page.svg')
+                // }
+                // &-email {
+                //     background-image: url('#{$assets_path}/img/link-email.svg')
+                // }
+                // &-phone {
+                //     background-image: url('#{$assets_path}/img/link-phone.svg')
+                // }
+            }
+        }
+    }
+    &-content {
+        clear: both;
+        background-color: $charcoal-semi-dark;
+        padding: 20px 15px;
+    }
+}

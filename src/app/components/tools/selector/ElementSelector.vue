@@ -65,17 +65,26 @@
 
 	// Element Overlay
 	.element-overlay(v-if="(isHover() && dragElement) || (isSelect() && cutElementState)", :style="dragOverlay")
+
+	// Text Editor
+	text-editor(v-if="editContent", :element="edit.target", :style="editContentStyle")
 </template>
 
 <script>
 import _last from 'lodash/last'
 import breadcrumb from './Breadcrumb.vue'
+import textEditor from '../../editor/TextEditor.vue'
+import linkEditor from '../../editor/LinkEditor.vue'
+import optionsEditor from '../../editor/optionsEditor.vue'
 
 const droplineMargin = 5
 export default {
 	name: 'elementSelector',
 	components: {
-		breadcrumb
+		breadcrumb,
+		textEditor,
+		linkEditor,
+		optionsEditor
 	},
 
 	data () {
@@ -83,7 +92,8 @@ export default {
 			hover: {},
 			select: {},
 			dropline: {},
-			overlay: {}
+			overlay: {},
+			edit: {}
 		}
 	},
 
@@ -106,6 +116,12 @@ export default {
 		elementType () {
 			if (this.activeElement) {
 				return this.activeElement.$type
+			}
+		},
+
+		elementOptions () {
+			if (this.activeElement) {
+				return this.activeElement.$options
 			}
 		},
 
@@ -136,6 +152,16 @@ export default {
 				if (this.dropline.position === 'bottom') {
 					style.height = `${style.$height + droplineMargin}px`
 				}
+			}
+
+			return style
+		},
+
+		editContentStyle () {
+			let style = {}
+
+			if (this.editContent) {
+				style.transform = `translate(${this.edit.css.$left}px, ${this.edit.css.$top + this.edit.css.$height}px)`
 			}
 
 			return style
@@ -177,12 +203,16 @@ export default {
 			return this.$root.canvasBuilder().layout().dragElementState.move
 		},
 
+		editContent () {
+			return this.edit && this.edit.editable
+		},
+
 		cutElementState () {
 			return this.$root.canvasBuilder().layout().cutElement
 		},
 
 		dragElementOrComponent () {
-			return this.dragElement || this.dragComponent
+			return (this.dragElement || this.dragComponent) && !this.editContent
 		},
 
 		shouldDisplayDropline () {
@@ -201,8 +231,10 @@ export default {
 				// If position is bottom
 				// Set dropline to the last child height
 				if (this.dropline.position === 'bottom') {
-					let lastChild = this.dropline.target.lastChild.$element().$outline()
-					top = lastChild.$top + lastChild.$height + (droplineMargin / 2)
+					if (this.dropline.target.lastChild && this.dropline.target.lastChild.$element) {
+						let lastChild = this.dropline.target.lastChild.$element().$outline()
+						top = lastChild.$top + lastChild.$height + (droplineMargin / 2)
+					}
 				}
 
 				// Okay
@@ -232,7 +264,7 @@ export default {
 		 * @param  {String} id [Uno ID]
 		 * @return {ElementNode}
 		 */
-		getElementById (id) {
+		getElement (id) {
 			return this.$root
 			.canvasBuilder()
 			.layout()
@@ -264,52 +296,54 @@ export default {
 		},
 
 		/**
-		 * Set state
-		 * @param {Object} elementObject
+		 * Apply current element in state mode
+		 * @param {Object} state
 		 */
-		setState (elementObject) {
-			// Set state
-			this[elementObject.state] = elementObject
+		applyState (stateObject) {
+			let element = this.getElement(stateObject.id)
 
-			// Hide all tools
-			if (elementObject.state === 'select') {
-				// Set expanded breadcrumb to collapse
-				this.$nextTick(() => {
-					this.$refs.selectBreadcrumb.expand = false
-				})
-			} else {
-				let hoverEl = this.getElementById(elementObject.id)
-				if (hoverEl) {
-					// Move block's position
-					let block = this.$root.canvasBuilder('block'), insertAt, position = 0
+			if (element) {
+				this[stateObject.mode] = stateObject
 
-					// If element type is body a.k.a layout
-					// and body has no elements, set position of block to top
-					// but if body has at least 1 elements
-					// set position to last element's height
-					if (elementObject.type === 'body') {
-						if (hoverEl.$childElements().length > 0) {
-							let firstChild = _last(hoverEl.$childElements()).$outline()
-							position = firstChild.$top + firstChild.$height
-						} else {
-							position = elementObject.css.$top
+				switch (stateObject.mode) {
+					case 'edit':
+						this.$root.canvasBuilder().layout().applyEditor(stateObject)
+					break
+
+					case 'select':
+						if (this.editContent && this.edit.id !== stateObject.id) {
+							this.edit.editable = false
+							this.$root.canvasBuilder().layout().applyEditor(false)
 						}
-					}
-					// Other than body set position of block's with this case
-					// If element has parent and it's not a root's child (first node of root)
-					// find it until it's root's child
-					else {
-						let parent = hoverEl.$firstParentFromLayout(),
-						outline = parent.$outline()
-						insertAt = parent.$index()
-						position = (outline.$top + outline.$height) - 20
-					}
 
-					// Only set position if block hasn't shown yet
-					if (! block.showBlock && !this.dragElement) {
-						block.position = position
-						block.insertAt = insertAt
-					}
+						this.$nextTick(() => {
+							this.$refs.selectBreadcrumb.expand = false
+						})
+					break
+
+					case 'hover':
+						// Move block's position
+						let block = this.$root.canvasBuilder('block')
+						let position = stateObject.css.$top
+						let insertAt
+
+						if (stateObject.type !== 'body') {
+							let parent = element.$firstParentFromLayout()
+							let outline = parent.$outline()
+							insertAt = parent.$index()
+							position = (outline.$top + outline.$height) - 20
+						} else {
+							if (element.$childElements().length > 0) {
+								let firstChild = _last(element.$childElements()).$outline()
+								position = firstChild.$top + firstChild.$height
+							}
+						}
+
+						if (! block.showBlock && !this.dragElement) {
+							block.position = position
+							block.insertAt = insertAt
+						}
+					break
 				}
 			}
 		},
@@ -334,6 +368,16 @@ export default {
 		overlaying (elementObject) {
 			if (elementObject) {
 				this.overlay = elementObject
+			}
+		},
+
+		/**
+		 * Resosition text editor
+		 * @return {void}
+		 */
+		textEditorReposition () {
+			if (this.edit.target) {
+				this.edit.css = this.edit.target.$outline()
 			}
 		},
 
@@ -450,6 +494,14 @@ export default {
 			.canvasBuilder()
 			.layout()
 			.removeElement(this.select.id)
+		},
+
+		editLink () {
+			console.log('edit link')
+		},
+
+		editOptions () {
+			console.log('edit link')
 		},
 
 		isElementResizable () {},

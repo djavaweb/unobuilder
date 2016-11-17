@@ -60,119 +60,65 @@ export default {
 			elements = parent.elements,
 			css = []
 
-			// Iterate, iterate, iterate your boat
 			// Generate global css
+			// Render css based on breakpoints
 			for (let elementKind in globalCSS) {
 				if (globalCSS[elementKind]) {
-					//Render css based on breakpoints
-					let breakpoints = globalCSS[elementKind],
-					defaultProps = this.getAvailableProps(screenSize, breakpoints),
-					hoverProps = this.getAvailableProps(screenSize, breakpoints, 'hover'),
-					activeProps = this.getAvailableProps(screenSize, breakpoints, 'active'),
-					focusProps = this.getAvailableProps(screenSize, breakpoints, 'focus')
+					let breakpoints = globalCSS[elementKind]
+					let availableProps = [
+						{props: this.getAvailableProps(screenSize, breakpoints)},
+						{props: this.getAvailableProps(screenSize, breakpoints, 'hover'), pseudo: ':hover'},
+						{props: this.getAvailableProps(screenSize, breakpoints, 'active'), pseudo: ':active'},
+						{props: this.getAvailableProps(screenSize, breakpoints, 'focus'), pseudo: ':focus'}
+					]
 
-					// Render css
-					// Default state
-					let defaultCSSObj = this.generateCssSelector({
-						props: defaultProps,
-						global: true,
-						selector: '.' + utils.klass(`el-${elementKind}`),
-						elementKind: elementKind
-					})
-					if (defaultCSSObj) {
-						css.push(this.renderCSS(defaultCSSObj))
-					}
+					for (let i in availableProps) {
+						let options = {
+							global: true,
+							props: availableProps[i].props,
+							selector: '.' + utils.klass(`el-${elementKind}`),
+							elementKind: elementKind,
+						}
 
-					// Hover state
-					let hoverCSSObj = this.generateCssSelector({
-						props: hoverProps,
-						global: true,
-						pseudo: ':hover',
-						selector: '.' + utils.klass(`el-${elementKind}`),
-						elementKind: elementKind
-					})
-					if (hoverCSSObj) {
-						css.push(this.renderCSS(hoverCSSObj))
-					}
+						if (availableProps[i].pseudo) {
+							options.pseudo = availableProps[i].pseudo
+						}
 
-					// Active state
-					let activeCSSObj = this.generateCssSelector({
-						props: activeProps,
-						global: true,
-						pseudo: ':active',
-						selector: '.' + utils.klass(`el-${elementKind}`),
-						elementKind: elementKind
-					})
-					if (activeCSSObj) {
-						css.push(this.renderCSS(activeCSSObj))
-					}
-
-					// Focus state
-					let focusCSSObj = this.generateCssSelector({
-						props: focusProps,
-						global: true,
-						pseudo: ':focus',
-						selector: '.' + utils.klass(`el-${elementKind}`),
-						elementKind: elementKind
-					})
-					if (focusCSSObj) {
-						css.push(this.renderCSS(focusCSSObj))
+						let output = this.generateCssSelector(options)
+						if (output) {
+							css.push(this.renderCSS(output))
+						}
 					}
 				}
 			}
 
-			// Generate css for self-properties
+			// Generate css for each elements
+			// Render css based on self-properties breakpoints
 			for (let id in elements) {
 				if (elements[id].props) {
-					//Render css based on breakpoints
-					let breakpoints = elements[id].props.self,
-					defaultProps = this.getAvailableProps(screenSize, breakpoints),
-					hoverProps = this.getAvailableProps(screenSize, breakpoints, 'hover'),
-					activeProps = this.getAvailableProps(screenSize, breakpoints, 'active'),
-					focusProps = this.getAvailableProps(screenSize, breakpoints, 'focus')
+					let breakpoints = elements[id].props.self
+					let availableProps = [
+						{props: this.getAvailableProps(screenSize, breakpoints)},
+						{props: this.getAvailableProps(screenSize, breakpoints, 'hover'), pseudo: ':hover'},
+						{props: this.getAvailableProps(screenSize, breakpoints, 'active'), pseudo: ':active'},
+						{props: this.getAvailableProps(screenSize, breakpoints, 'focus'), pseudo: ':focus'}
+					]
 
-					// Render css
-					// Default state
-					let defaultCSSObj = this.generateCssSelector({
-						props: defaultProps,
-						selector: `[data-id="${id}"]`,
-						elementKind: elements[id].kind,
-					})
-					if (defaultCSSObj) {
-						css.push(this.renderCSS(defaultCSSObj))
-					}
+					for (let i in availableProps) {
+						let options = {
+							props: availableProps[i].props,
+							selector: `[data-id="${id}"]`,
+							elementKind: elements[id].kind
+						}
 
-					// Hover state
-					let hoverCSSObj = this.generateCssSelector({
-						props: hoverProps,
-						pseudo: ':hover',
-						selector: `[data-id="${id}"]`,
-						elementKind: elements[id].kind
-					})
-					if (hoverCSSObj) {
-						css.push(this.renderCSS(hoverCSSObj))
-					}
+						if (availableProps[i].pseudo) {
+							options.pseudo = availableProps[i].pseudo
+						}
 
-					// Active state
-					let activeCSSObj = this.generateCssSelector({
-						props: activeProps,
-						psudo: ':active',
-						selector: `[data-id="${id}"]`,
-						elementKind: elements[id].kind,
-					})
-					if (activeCSSObj) {
-						css.push(this.renderCSS(activeCSSObj))
-					}
-
-					// Focus state
-					let focusCSSObj = this.generateCssSelector({
-						props: focusProps,
-						pseudo: ':focus',
-						selector: `[data-id="${id}"]`,
-						elementKind: elements[id].kind
-					})
-					if (focusCSSObj) {
-						css.push(this.renderCSS(focusCSSObj))
+						let output = this.generateCssSelector(options)
+						if (output) {
+							css.push(this.renderCSS(output))
+						}
 					}
 				}
 			}
@@ -223,23 +169,29 @@ export default {
 
 		generateCssSelector (options) {
 			if (options.elementKind && options.props) {
-				let pseudoSelector = (options.pseudo)? options.pseudo: '',
-				cssObj = this.cssObject(options.elementKind, options.props),
-				cssPropObj = {
-					css: cssObj,
+				let pseudoSelector = options.pseudo || ''
+				let cssObject = this.cssObject(options.elementKind, options.props)
+				let cssSelector = {
+					css: cssObject,
 					selector: options.selector + pseudoSelector,
 					elementKind: options.elementKind,
 				}
 
 				if (options.elementKind === 'container') {
-					let selector = options.selector
 					if (options.global) {
-						selector = '.' + utils.klass(`el-wrapper`)
+						options.selector = `.${utils.klass(`el-wrapper`)}`
 					}
-					cssPropObj.parentSelector = `${selector}${pseudoSelector}`
+					cssSelector.parentSelector = `${options.selector}${pseudoSelector}`
 				}
 
-				return cssPropObj
+				if (options.elementKind === 'column') {
+					if (options.global) {
+						options.selector = `.${utils.klass(`el-column-wrapper`)}`
+					}
+					cssSelector.parentSelector = `${options.selector}${pseudoSelector}`
+				}
+
+				return cssSelector
 			}
 		},
 
@@ -335,30 +287,10 @@ export default {
 				style.left = utils.autoUnit(properties.position.settings[properties.position.value].left)
 			}
 
-			// Display Properties
+			// Flex Properties
 			if (properties.display.value === 'flex') {
-				// flex-direction
-				let reverse = (properties.display.settings.flex.container.reverse)? '-reverse': ''
-				style.flexDirection = properties.display.settings.flex.container.direction + reverse
-
-				// flex-wrap
-				let wrap = properties.display.settings.flex.container.wrap,
-				reverseWrap = properties.display.settings.flex.container.reverseWrap,
-				flexWrap = ''
-
-				if (wrap) {
-					flexWrap = 'wrap'
-				} else {
-					flexWrap = 'nowrap'
-				}
-
-				if (reverseWrap) {
-					flexWrap += '-reverse'
-				}
-
-				style.flexWrap = flexWrap
-
-				// align-items
+				style.flexDirection = this.flexDirection(properties)
+				style.flexWrap = this.flexWrap(properties)
 				style.alignItems = properties.display.settings.flex.container.alignItems
 				style.justifyContent = properties.display.settings.flex.container.justifyContent
 				style.alignContent = properties.display.settings.flex.container.alignContent
@@ -373,21 +305,33 @@ export default {
 				}
 			}
 
+			// Row is invisible or unselectable
+			// So it's duplicate parent properties
 			// Style applied only for row
 			if (elementKind === 'row') {
-				if (parentProperties) {
-					// Set Rows display properties like it's parent
-					properties.display = parentProperties.display
-				}
-
 				// Always set width, height and flex-grow to fill with parent
 				style.flexGrow = 1
 				style.width = 'auto'
 				style.height = '100%'
 
+				if (parentProperties) {
+					if (parentProperties.display.value === 'flex') {
+						style.width = '100%'
+						style.flexDirection = this.flexDirection(parentProperties)
+						style.flexWrap = this.flexWrap(parentProperties)
+						style.alignItems = parentProperties.display.settings.flex.container.alignItems
+						style.justifyContent = parentProperties.display.settings.flex.container.justifyContent
+						style.alignContent = parentProperties.display.settings.flex.container.alignContent
+					}
+
+					if (! parentProperties.minWidth.disabled) style.minWidth = utils.autoUnit(parentProperties.minWidth, true)
+					style.height = utils.autoUnit(parentProperties.height)
+					if (parentProperties.minHeight.value > 0) style.minHeight = utils.autoUnit(parentProperties.minHeight, true)
+				}
+
 				// Delete position and other unnecesery style
 				_each(['position',
-					'minWidth', 'maxWidth', 'minHeight', 'maxHeight',
+					'maxWidth', 'maxHeight',
 					'marginTop', 'marginLeft', 'marginRight', 'marginBottom',
 					'paddingTop', 'paddingLeft', 'paddingRight', 'paddingBottom',
 					'borderTop', 'borderLeft', 'borderRight', 'borderBottom'], function (item) {
@@ -402,19 +346,38 @@ export default {
 			return style
 		},
 
+		flexDirection (properties) {
+			let reverse = (properties.display.settings.flex.container.reverse)? '-reverse': ''
+			return properties.display.settings.flex.container.direction + reverse
+		},
+
+		flexWrap (properties) {
+			let wrap = properties.display.settings.flex.container.wrap,
+			reverseWrap = properties.display.settings.flex.container.reverseWrap,
+			flexWrap = 'nowrap'
+
+			if (wrap) {
+				flexWrap = 'wrap'
+			}
+
+			if (reverseWrap) {
+				flexWrap += '-reverse'
+			}
+
+			return flexWrap
+		},
+
 		/**
 		 * Render css js-based object into real css properties
 		 * @param {Object} object [kind, selector, parentSelector, css]
 		 * @return {String}
 		 */
 		renderCSS (object) {
-			let $root = this.$root,
-			cssArr = [],
-			cssArrParent = [],
-			childSelector,
-			cssArrChild = [],
-			css = '',
-			exclusion = {
+			let output = ''
+			let cssArr = []
+			let cssArrParent = []
+			let cssArrChild = []
+			let exclusion = {
 				column: {
 					parent: [
 						'width',
@@ -480,18 +443,18 @@ export default {
 			}
 
 			if (cssArr.length>0) {
-				css += object.selector + `{${cssArr.join(';')}}`
+				output += object.selector + `{${cssArr.join(';')}}`
 			}
 
 			if (cssArrParent.length>0 && object.parentSelector) {
-				css += object.parentSelector + `{${cssArrParent.join(';')}}`
+				output += object.parentSelector + `{${cssArrParent.join(';')}}`
 			}
 
 			if (cssArrChild.length>0 && childSelector) {
-				css += childSelector + `{${cssArrChild.join(';')}}`
+				output += childSelector + `{${cssArrChild.join(';')}}`
 			}
 
-			return css
+			return output
 		},
 	}
 }

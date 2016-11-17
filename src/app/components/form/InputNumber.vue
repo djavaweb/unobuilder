@@ -144,11 +144,18 @@ export default {
 		 * @param  {Event} event
 		 */
 		dragStart (event) {
-			this.dragState.move = false
-			this.dragState.coord = event.pageY
-            this.dragState.initialValue = this.value
-			utils.addEvent(document, 'mousemove', this.dragMove, false)
-			utils.addEvent(document, 'mouseup', this.dragEnd, false)
+			let value = parseInt(this.value)
+			if (this.value.toString().indexOf('.')>=0) {
+				value = parseFloat(this.value)
+			}
+
+			if (! isNaN(value)) {
+				this.dragState.move = false
+				this.dragState.coord = event.pageY
+				this.dragState.initialValue = value
+				utils.addEvent(document, 'mousemove', this.dragMove, false)
+				utils.addEvent(document, 'mouseup', this.dragEnd, false)
+			}
 		},
 
 		/**
@@ -156,8 +163,8 @@ export default {
 		 * @param  {Event} event
 		 */
 		dragMove (event) {
-			let value = parseInt((this.dragState.coord - event.pageY)/2)
-			value += this.dragState.initialValue
+			let delta = parseInt((this.dragState.coord - event.pageY)/2)
+			let value = this.dragState.initialValue + (delta * this.step)
 
 			// Check minimum
 			if (value<this.min) {

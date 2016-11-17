@@ -3,6 +3,7 @@
   "label": "Heading",
   "icon": "img/icon.svg",
   "group": "Component",
+  "kind": "heading",
   "props": {
       "fontSize": {
           "value": 24,

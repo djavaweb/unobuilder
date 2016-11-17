@@ -1,6 +1,7 @@
 <template lang="pug">
 // Blocks
 a.add-block(
+v-if="shouldDisplayButton",
 :style="buttonPosition",
 @click="toggle()"
 )
@@ -103,6 +104,14 @@ export default {
 			let style = {}
 			style.top = `${this.position+30}px`
 			return style
+		},
+
+		/**
+		 * Should button display or not
+		 * @return {Boolean}
+		 */
+		shouldDisplayButton () {
+			return ! this.$root.elementSelector().editContent
 		}
 	},
 
