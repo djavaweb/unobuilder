@@ -23,21 +23,21 @@
             width: 30px;
             height: 30px;
             &.link {
-                // &-url {
-                //     background-image: url('#{$assets_path}/img/link.svg');
-                // }
-                // &-post {
-                //     background-image: url('#{$assets_path}/img/link-post.svg')
-                // }
-                // &-page {
-                //     background-image: url('#{$assets_path}/img/link-page.svg')
-                // }
-                // &-email {
-                //     background-image: url('#{$assets_path}/img/link-email.svg')
-                // }
-                // &-phone {
-                //     background-image: url('#{$assets_path}/img/link-phone.svg')
-                // }
+                &-url {
+                    background-image: url('#{$assets_path}/img/edit-link.svg');
+                }
+                &-post {
+                    background-image: url('#{$assets_path}/img/link-post.svg')
+                }
+                &-page {
+                    background-image: url('#{$assets_path}/img/link-page.svg')
+                }
+                &-email {
+                    background-image: url('#{$assets_path}/img/link-email.svg')
+                }
+                &-phone {
+                    background-image: url('#{$assets_path}/img/link-phone.svg')
+                }
             }
         }
     }

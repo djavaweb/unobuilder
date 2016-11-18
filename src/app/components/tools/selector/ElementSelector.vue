@@ -68,6 +68,9 @@
 
 	// Text Editor
 	text-editor(v-if="editContent", :element="edit.target", :style="editContentStyle")
+
+	// Link Editor
+	link-editor(v-if="linkEditor.display", :element="linkEditor.element", :position="linkEditor.position")
 </template>
 
 <script>
@@ -93,7 +96,15 @@ export default {
 			select: {},
 			dropline: {},
 			overlay: {},
-			edit: {}
+			edit: {},
+			linkEditor: {
+				display: false,
+				element: null,
+				position: {
+					x: 0,
+					y: 0
+				}
+			}
 		}
 	},
 
@@ -497,7 +508,12 @@ export default {
 		},
 
 		editLink () {
-			console.log('edit link')
+			// if (this.elementKind === 'link') {
+			// 	let offset = this.activeElement.$outline()
+			// 	this.linkEditor.display = true
+			// 	this.linkEditor.position = {x: offset.$left, y: offset.$top}
+			// 	this.linkEditor.element = this.activeElement
+			// }
 		},
 
 		editOptions () {
