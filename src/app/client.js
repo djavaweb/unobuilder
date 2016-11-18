@@ -2,6 +2,7 @@
 const _extend = require('lodash/extend')
 const _omit = require('lodash/omit')
 const _each = require('lodash/each')
+const async = require('async')
 const utils = require('./utils.js')
 
 // Define static vars
@@ -172,24 +173,40 @@ const unoBuilder = function () {
     }
 
 	/**
-	 * Uno add component
+	 * Async queues to add component
+	 */
+	$root.q = async.queue((task, callback) => {
+		$root.initComponent(task.url, task.scriptPath, () => {
+			callback()
+		})
+	}, 1)
+
+	/**
+	 * Uno add component to list
 	 * @param {String} url
 	 */
-	$root.addComponent = url => {
-		//$root.emit('addComponent', url);
+	$root.addComponent = (url) => {
 		let scriptPath = url.split('/')
 		scriptPath.splice(-1)
 		scriptPath = scriptPath.join('/')
+		$root.q.push({url, scriptPath})
+	}
 
+	/**
+	 * Uno init component
+	 * @param {String} url
+	 */
+	$root.initComponent = (url, scriptPath, callback) => {
 		// Get component object from component.js
 		// For closure purpose
 		let component = {
+			$id: Date.now(),
 			path: {
 				root: scriptPath,
 				img: `${scriptPath}/img/`,
 				js: `${scriptPath}/js/`,
 				css: `${scriptPath}/css/`
-			}
+			},
 		}
 
 		// load json
@@ -252,24 +269,20 @@ const unoBuilder = function () {
 				global.__uno__.components[componentId] = component
 
 				// Register script
-				$root.registerScript(url)
+				$root.registerScript(url, `component-${component.$id}`)
+
+				callback && callback()
 			})
 		})
-
-
-
-		return $root
 	}
 
 	$root.getComponentList = () => {
 		return global.__uno__.components
 	}
 
-	$root.registerScript = url => {
-		let script = document.createElement('script'),
-		tagId = utils.generateId('component')
+	$root.registerScript = (url, registerId) => {
+		let script = document.createElement('script')
 		script.src = url
-		script.setAttribute('data-uno-register-id', tagId)
 		document.body.appendChild(script)
 	}
 

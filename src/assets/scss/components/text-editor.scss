@@ -1,0 +1,65 @@
+.text-editor {
+  position: absolute;
+  z-index: 999;
+  pointer-events: all;
+  &__wrapper {
+    background: $dark-grey;
+    box-shadow: 0 0 5px 1px $transparent-black;
+    border-radius: 2px;
+    display: inline-block;
+    button {
+        color: #dadada;
+        display: inline-block;
+        font-weight: bold;
+        text-align: center;
+        vertical-align: middle;
+        background-color: $dark-grey;
+        border: 0;
+        font-size: 16px;
+        width: 35px;
+        height: 30px;
+        border-right: 1px solid rgba(255, 255, 255, 0.14);
+        border-top: 1px solid #2d3233;
+        outline: none;
+        border-radius: 2px;
+        &:last {
+            border-right: 0;
+        }
+        &:hover {
+            border-top-color: lighten(#2d3233, 5%);
+            background-color: lighten($dark-grey, 5%);
+        }
+
+        &.active {
+            background-color: darken($dark-grey, 10%);
+        }
+
+        i {
+            height: 16px;
+            display: block;
+            background-repeat: no-repeat;
+            background-position: 50% 50%;
+
+            &.text-editor-bold {
+                background-image: url('#{$assets_path}/img/text-editor-bold.svg');
+            }
+
+            &.text-editor-italic {
+                background-image: url('#{$assets_path}/img/text-editor-italic.svg');
+            }
+
+            &.text-editor-link {
+                background-image: url('#{$assets_path}/img/text-editor-link.svg');
+            }
+
+            &.text-editor-clear {
+                background-image: url('#{$assets_path}/img/text-editor-clear.svg');
+            }
+
+            &.text-editor-color {
+                background-image: url('#{$assets_path}/img/text-editor-color.svg');
+            }
+        }
+    }
+  }
+}

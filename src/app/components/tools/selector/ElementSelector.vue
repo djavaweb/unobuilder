@@ -3,7 +3,7 @@
 
 	// Hover element selector
 	.element-selector-tools.hover(
-	:class="{orange: dragElement}",
+	:class="{orange: dragElementOrComponent}",
 	:style="hoverStyle",
 	v-if="isHover()",
 	v-el:hover
@@ -58,35 +58,63 @@
 	// End of select element selector
 
 	// Drop line
-	.dropline(v-if="isHover() && dragElement")
+	.dropline(v-if="shouldDisplayDropline")
 		.dropline__x(:style="droplineX")
 			.dropline__x-triangle.dropline__x-triangle--left
 			.dropline__x-triangle.dropline__x-triangle--right
+
+	// Element Overlay
+	.element-overlay(v-if="(isHover() && dragElement) || (isSelect() && cutElementState)", :style="dragOverlay")
+
+	// Text Editor
+	text-editor(v-if="editContent", :element="edit.target", :style="editContentStyle")
+
+	// Link Editor
+	link-editor(v-if="linkEditor.display", :element="linkEditor.element", :position="linkEditor.position")
 </template>
 
 <script>
 import _last from 'lodash/last'
 import breadcrumb from './Breadcrumb.vue'
+import textEditor from '../../editor/TextEditor.vue'
+import linkEditor from '../../editor/LinkEditor.vue'
+import optionsEditor from '../../editor/optionsEditor.vue'
 
 const droplineMargin = 5
 export default {
 	name: 'elementSelector',
 	components: {
-		breadcrumb
+		breadcrumb,
+		textEditor,
+		linkEditor,
+		optionsEditor
 	},
 
 	data () {
 		return {
 			hover: {},
 			select: {},
-			dropline: {}
+			dropline: {},
+			overlay: {},
+			edit: {},
+			linkEditor: {
+				display: false,
+				element: null,
+				position: {
+					x: 0,
+					y: 0
+				}
+			}
 		}
 	},
 
 	computed: {
 		activeElement () {
 			if (this.select.id) {
-				return this.getElementById(this.select.id)
+				return this.$root
+				.canvasBuilder()
+				.layout()
+				.getElement(this.select.id)
 			}
 		},
 
@@ -99,6 +127,12 @@ export default {
 		elementType () {
 			if (this.activeElement) {
 				return this.activeElement.$type
+			}
+		},
+
+		elementOptions () {
+			if (this.activeElement) {
+				return this.activeElement.$options
 			}
 		},
 
@@ -125,10 +159,20 @@ export default {
 			let style = this.hover.css
 
 			// If it's dragging element and dropline is in bottom
-			if (this.dragElement && this.dropline.css) {
+			if (this.dragElementOrComponent && this.dropline.css) {
 				if (this.dropline.position === 'bottom') {
 					style.height = `${style.$height + droplineMargin}px`
 				}
+			}
+
+			return style
+		},
+
+		editContentStyle () {
+			let style = {}
+
+			if (this.editContent) {
+				style.transform = `translate(${this.edit.css.$left}px, ${this.edit.css.$top + this.edit.css.$height}px)`
 			}
 
 			return style
@@ -162,17 +206,35 @@ export default {
 			return klass
 		},
 
-		dragElement () {
-			let dragComponent = this.$root.ref('leftPanel').dragComponent,
-			dragElement = this.$root.canvasBuilder().layout().dragElementState.move
+		dragComponent () {
+			return this.$root.ref('leftPanel').dragComponent
+		},
 
-			return dragComponent || dragElement
+		dragElement () {
+			return this.$root.canvasBuilder().layout().dragElementState.move
+		},
+
+		editContent () {
+			return this.edit && this.edit.editable
+		},
+
+		cutElementState () {
+			return this.$root.canvasBuilder().layout().cutElement
+		},
+
+		dragElementOrComponent () {
+			return (this.dragElement || this.dragComponent) && !this.editContent
+		},
+
+		shouldDisplayDropline () {
+			return this.isHover() && this.isOverlayNotDropline()
 		},
 
 		droplineX () {
 			let style = {}
 
-			if (this.dragElement && this.dropline.css) {
+			if (this.dragElementOrComponent && this.dropline.css) {
+				// Set dropline outline
 				let width = this.dropline.css.$width - (droplineMargin * 2),
 				left = this.dropline.css.$left + droplineMargin,
 				top = this.dropline.css.$top + droplineMargin
@@ -180,13 +242,27 @@ export default {
 				// If position is bottom
 				// Set dropline to the last child height
 				if (this.dropline.position === 'bottom') {
-					let lastChild = this.dropline.target.lastChild.$element().$outline()
-					top = lastChild.$top + lastChild.$height + (droplineMargin / 2)
+					if (this.dropline.target.lastChild && this.dropline.target.lastChild.$element) {
+						let lastChild = this.dropline.target.lastChild.$element().$outline()
+						top = lastChild.$top + lastChild.$height + (droplineMargin / 2)
+					}
 				}
 
 				// Okay
 				style.width = `${width}px`
 				style.transform = `translate(${left}px, ${top}px)`
+			}
+
+			return style
+		},
+
+		dragOverlay () {
+			let style = {}
+
+			if ((this.dragElement || this.cutElementState) && this.overlay.css) {
+				style.height = this.overlay.css.height
+				style.width = this.overlay.css.width
+				style.transform = this.overlay.css.transform
 			}
 
 			return style
@@ -199,7 +275,7 @@ export default {
 		 * @param  {String} id [Uno ID]
 		 * @return {ElementNode}
 		 */
-		getElementById (id) {
+		getElement (id) {
 			return this.$root
 			.canvasBuilder()
 			.layout()
@@ -231,52 +307,54 @@ export default {
 		},
 
 		/**
-		 * Set state
-		 * @param {Object} element
+		 * Apply current element in state mode
+		 * @param {Object} state
 		 */
-		setState (element) {
-			// Set state
-			this[element.state] = element
+		applyState (stateObject) {
+			let element = this.getElement(stateObject.id)
 
-			// Hide all tools
-			if (element.state === 'select') {
-				// Set expanded breadcrumb to collapse
-				this.$nextTick(() => {
-					this.$refs.selectBreadcrumb.expand = false
-				})
-			} else {
-				let hoverEl = this.getElementById(element.id)
-				if (hoverEl) {
-					// Move block's position
-					let block = this.$root.canvasBuilder('block'), insertAt, position = 0
+			if (element) {
+				this[stateObject.mode] = stateObject
 
-					// If element type is body a.k.a layout
-					// and body has no elements, set position of block to top
-					// but if body has at least 1 elements
-					// set position to last element's height
-					if (element.type === 'body') {
-						if (hoverEl.$childElements().length > 0) {
-							let firstChild = _last(hoverEl.$childElements()).$outline()
-							position = firstChild.$top + firstChild.$height
-						} else {
-							position = element.css.$top
+				switch (stateObject.mode) {
+					case 'edit':
+						this.$root.canvasBuilder().layout().applyEditor(stateObject)
+					break
+
+					case 'select':
+						if (this.editContent && this.edit.id !== stateObject.id) {
+							this.edit.editable = false
+							this.$root.canvasBuilder().layout().applyEditor(false)
 						}
-					}
-					// Other than body set position of block's with this case
-					// If element has parent and it's not a root's child (first node of root)
-					// find it until it's root's child
-					else {
-						let parent = hoverEl.$firstParentFromLayout(),
-						outline = parent.$outline()
-						insertAt = parent.$index()
-						position = (outline.$top + outline.$height) - 20
-					}
 
-					// Only set position if block hasn't shown yet
-					if (! block.showBlock && !this.dragElement) {
-						block.position = position
-						block.insertAt = insertAt
-					}
+						this.$nextTick(() => {
+							this.$refs.selectBreadcrumb.expand = false
+						})
+					break
+
+					case 'hover':
+						// Move block's position
+						let block = this.$root.canvasBuilder('block')
+						let position = stateObject.css.$top
+						let insertAt
+
+						if (stateObject.type !== 'body') {
+							let parent = element.$firstParentFromLayout()
+							let outline = parent.$outline()
+							insertAt = parent.$index()
+							position = (outline.$top + outline.$height) - 20
+						} else {
+							if (element.$childElements().length > 0) {
+								let firstChild = _last(element.$childElements()).$outline()
+								position = firstChild.$top + firstChild.$height
+							}
+						}
+
+						if (! block.showBlock && !this.dragElement) {
+							block.position = position
+							block.insertAt = insertAt
+						}
+					break
 				}
 			}
 		},
@@ -294,13 +372,34 @@ export default {
 		},
 
 		/**
+		 * Overlays at element
+		 * @param  {Object} elementObject
+		 * @return {void}
+		 */
+		overlaying (elementObject) {
+			if (elementObject) {
+				this.overlay = elementObject
+			}
+		},
+
+		/**
+		 * Resosition text editor
+		 * @return {void}
+		 */
+		textEditorReposition () {
+			if (this.edit.target) {
+				this.edit.css = this.edit.target.$outline()
+			}
+		},
+
+		/**
 		 * Is valid hover
 		 * @return {Boolean}
 		 */
 		isHover () {
 			if (this.hover.breadcrumbs &&
 				this.hover.breadcrumbs.length>0 &&
-				(this.hover.id !== this.select.id || this.dragElement)) {
+				(this.hover.id !== this.select.id || this.dragElementOrComponent)) {
 				return true
 			}
 		},
@@ -312,8 +411,22 @@ export default {
 		isSelect () {
 			if (this.select.breadcrumbs &&
 				this.select.breadcrumbs.length>0 &&
-				(this.hover.id !== this.select.id || ! this.dragElement)) {
+				(this.hover.id !== this.select.id || ! this.dragElementOrComponent)) {
 				return true
+			}
+		},
+
+		/**
+		 * If overlay elment is not the same with dropline
+		 * @return {Boolean}
+		 */
+		isOverlayNotDropline () {
+			if (this.dragElementOrComponent) {
+				if (this.overlay.css && this.dropline.css) {
+					return this.overlay.id !== this.dropline.id
+				} else if (this.dropline.css) {
+					return true
+				}
 			}
 		},
 
@@ -329,16 +442,6 @@ export default {
 		 */
 		removeLeave () {
 			this.select.removeOver = false
-		},
-
-		/**
-		 * Remove element
-		 */
-		removeElement () {
-			this.$root
-			.canvasBuilder()
-			.layout()
-			.removeElement(this.select.id)
 		},
 
 		/**
@@ -374,6 +477,17 @@ export default {
 		},
 
 		/**
+		 * Cut element from memory
+		 */
+		cutElement () {
+			let activeElement = this.activeElement
+			if (activeElement) {
+				this.$root.canvasBuilder().layout().keyCapture('cut')
+				activeElement.$overlay()
+			}
+		},
+
+		/**
 		 * Paste element from memory, see copyElement
 		 */
 		pasteElement () {
@@ -381,6 +495,29 @@ export default {
 			.canvasBuilder()
 			.layout()
 			.keyCapture('paste')
+		},
+
+		/**
+		 * Remove element
+		 */
+		removeElement () {
+			this.$root
+			.canvasBuilder()
+			.layout()
+			.removeElement(this.select.id)
+		},
+
+		editLink () {
+			// if (this.elementKind === 'link') {
+			// 	let offset = this.activeElement.$outline()
+			// 	this.linkEditor.display = true
+			// 	this.linkEditor.position = {x: offset.$left, y: offset.$top}
+			// 	this.linkEditor.element = this.activeElement
+			// }
+		},
+
+		editOptions () {
+			console.log('edit link')
 		},
 
 		isElementResizable () {},

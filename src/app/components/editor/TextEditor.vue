@@ -1,16 +1,25 @@
-<template>
-<div class="ed-btn--wrapper" :style="style">
-    <button v-for="btn in defaultButtons" @click="command(btn)" title="{{{btn.title}}}" id="{{btn.id}}" :class="{'active': btn.toggle}">{{{btn.label}}}</button>
-</div>
+<template lang="pug">
+.text-editor(:style="style")
+  .text-editor__wrapper
+    button(
+    id="{{btn.id}}",
+    :class="{active: btn.toggle}",
+    v-for="btn in defaultButtons",
+    @click="command(btn)",
+    title="{{{btn.title}}}") {{{btn.label}}}
+
+  color-picker(v-if="displayColorPicker", :colors.sync="colors", scheme="dark")
 </template>
 
 <script>
-import _ from 'underscore'
-import rectButton from '../misc/rect-button.vue'
+import _extend from 'lodash/extend'
+import rectButton from '../form/RectButton.vue'
+import utils from '../../utils.js'
+import colorPicker from 'vue-sketch-color-picker'
 
 export default {
     name: 'editor',
-    components: {rectButton},
+    components: {rectButton, colorPicker},
     props: {
         buttons: {
             default: null,
@@ -19,11 +28,6 @@ export default {
         },
 
         element: {
-            default: null,
-            required: true
-        },
-
-        window: {
             default: null,
             required: true
         },
@@ -52,43 +56,65 @@ export default {
             editor: null,
             toggle: '',
             button: {},
-            defaultButtons: _.extend([
+            displayColorPicker: false,
+            colors: {
+              hex: '#000000',
+              hsl: {
+                h: 150,
+                s: 0.5,
+                l: 0.2,
+                a: 1
+              },
+              hsv: {
+                h: 150,
+                s: 0.66,
+                v: 0.30,
+                a: 1
+              },
+              rgba: {
+                r: 25,
+                g: 77,
+                b: 51,
+                a: 1
+              },
+              a: 1
+            },
+            defaultButtons: _extend([
                 {
                     id: 'bold',
-                    label: '<i class="uk-icon-bold"></i>',
+                    label: '<i class="text-editor-bold"></i>',
                     title: 'Bold',
                     command: 'bold'
                 },
                 {
                     id: 'italic',
-                    label: '<i class="uk-icon-italic"></i>',
+                    label: '<i class="text-editor-italic"></i>',
                     title: 'Italic',
                     command: 'italic'
                 },
                 {
                     id: 'link',
-                    label: '<i class="link"></i>',
+                    label: '<i class="text-editor-link"></i>',
                     title: 'Insert Link',
-                    toggle: false,
                     command: 'fn',
                     fn () {
-                        this.getSelection((selection, selector, editor, vue) => {
+                        let layout = this.$root.canvasBuilder().layout()
+                        this.getSelection((selection, selector, editor) => {
                             selector().removeAllRanges()
                             selector().addRange(selection.range)
-                            vue.createElement({
+
+                            layout.createElement({
                                 tag: 'a',
                                 kind: 'link',
                                 type: 'component',
-                                selectable: true,
+                                html: selection.word,
+                                options: 'link',
                                 wrapper: false,
-                                dropable: 'section,container,row,column,content',
-                                html: selection.word
+                                selectable: true,
+                                dropable: 'section,container,row,column,content'
                             }, (link) => {
-                                // Little tricky here -_-
-                                // Create new temporary element
-                                // Insert as text replacement
                                 let tmp = editor.createElement('div')
-                                tmp.id = this.$root.generateId('tmp')
+                                tmp.id = utils.generateId('tmp')
                                 this.exec('insertHTML', tmp.outerHTML)
 
                                 // Then replace temporary element
@@ -96,7 +122,7 @@ export default {
                                 let tmpEl = editor.querySelector(`#${tmp.id}`)
                                 tmpEl.parentNode.replaceChild(link, tmpEl)
 
-                                this.$dispatch('disableEditor')
+                                layout.applyEditor(false)
                                 selector().removeAllRanges()
                                 link.$select()
                             })
@@ -105,17 +131,26 @@ export default {
                 },
                 {
                     id: 'remove',
-                    label: '<i class="remove-style"></i>',
+                    label: '<i class="text-editor-clear"></i>',
                     title: 'Clear Style',
-                    command: 'removeFormat'
+                    command: 'fn',
+                    fn () {
+                        let layout = this.$root.canvasBuilder().layout()
+                        this.getSelection((selection, selector, editor) => {
+                            selector().removeAllRanges()
+                            selector().addRange(selection.range)
+                            this.exec('insertHTML', selection.word)
+                            // Todo. Remove Link from layout.elements
+                        })
+                    }
                 },
                 {
                     id: 'color-picker',
-                    label: '<i class="color-picker"></i>',
+                    label: '<i class="text-editor-color"></i>',
                     title: 'Color',
                     command: 'fn',
                     fn () {
-
+                      this.displayColorPicker = !this.displayColorPicker
                     }
                 }
             ], this.buttons)
@@ -128,9 +163,9 @@ export default {
          * @param  {Function} callback
          */
         getEditor (callback) {
-            if (this.element && this.window) {
+            if (this.element && this.$root.canvasBuilder().layoutDOM()) {
                 let editor = this.element.ownerDocument
-                callback && callback.call(this, editor, this.window)
+                callback && callback.call(this, editor, this.$root.canvasBuilder().layoutDOM())
             }
         },
 
@@ -143,15 +178,7 @@ export default {
                 this.exec(button.command)
             } else {
                 this.getEditor((editor) => {
-                    button.toggle = !button.toggle
-                    if (button.toggle) {
-                        this.toggle = button.id
-                        this.button = button
-                        button.fn && button.fn.apply(this, [button, editor])
-                    } else {
-                        this.toggle = ''
-                        this.button = {}
-                    }
+                    button.fn && button.fn.apply(this, [button, editor])
                 })
             }
         },
@@ -224,7 +251,7 @@ export default {
                     content = range.cloneContents()
 
                     // HTML selection
-                    let div = document.createElement('div')
+                    let div = doc.createElement('div')
                     div.appendChild(content)
 
                     selected = {
@@ -238,7 +265,7 @@ export default {
                     getSelection = doc.selection
 
                     let range = getSelection.createRange(),
-                    textNode = document.createTextNode(range.text)
+                    textNode = doc.createTextNode(range.text)
 
                     selected = {
                         range: range,
@@ -248,8 +275,7 @@ export default {
                     selected.word = range.expand('word').text
                 }
 
-                let vue = doc.body.__vue__
-                callback && callback.call(this, selected, getSelection, editor, vue)
+                callback && callback.call(this, selected, getSelection, editor)
             })
         },
 
@@ -279,61 +305,3 @@ export default {
     }
 }
 </script>
-
-<style lang="less">
-@import "../../css/colors.less";
-.ed-btn--wrapper {
-    pointer-events: all;
-    background: @dark-grey;
-    position: absolute;
-    z-index: 999;
-    box-shadow: 0 0 5px 1px @transparent-black;
-    border-radius: 2px;
-    button {
-        color: #dadada;
-        display: inline-block;
-        font-weight: bold;
-        text-align: center;
-        vertical-align: middle;
-        background-color: @dark-grey;
-        border: 0;
-        font-size: 16px;
-        width: 35px;
-        height: 30px;
-        border-right: 1px solid rgba(255, 255, 255, 0.14);
-        border-top: 1px solid #2d3233;
-        outline: none;
-        border-radius: 2px;
-        &:last {
-            border-right: 0;
-        }
-        &:hover {
-            border-top-color: lighten(#2d3233, 5%);
-            background-color: lighten(@dark-grey, 5%);
-        }
-
-        &.active {
-            background-color: darken(@dark-grey, 10%);
-        }
-
-        i {
-            height: 16px;
-            display: block;
-            background-repeat: no-repeat;
-            background-position: 50% 50%;
-
-            &.link {
-                background-image: url('../../img/link.svg');
-            }
-
-            &.remove-style {
-                background-image: url('../../img/remove-style.svg');
-            }
-
-            &.color-picker {
-                background-image: url('../../img/palette.svg');
-            }
-        }
-    }
-}
-</style>

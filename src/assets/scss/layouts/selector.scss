@@ -30,7 +30,7 @@
 
     &.orange {
         border-color: $orange;
-        border-width: 2px;
+        border-width: 1px;
         z-index: 998;
         .breadcrumbs {
             a {
@@ -121,7 +121,26 @@
                 margin-left: 0;
                 margin-right: -1px;
                 display: inline-block;
-                padding-top: 3px;
+                padding: 3px;
+            }
+
+            &.copy {
+              background-image: url("#{$assets_path}/img/selector-copy.svg");
+              background-position: 50% 50%;
+              background-repeat: no-repeat;
+            }
+
+            &.options--link {
+                background-image: url("#{$assets_path}/img/edit-link.svg");
+                background-position: 50% 50%;
+                background-repeat: no-repeat;
+            }
+
+            &.options--default {
+                background-image: url("#{$assets_path}/img/settings-small.svg");
+                background-position: 50% 50%;
+                background-repeat: no-repeat;
+                background-size: 70%;
             }
         }
 
@@ -141,6 +160,7 @@
             padding: 2px 0 2px 3px;
             -webkit-font-smoothing: auto;
             font-size: 10px;
+            margin-bottom: 1px !important;
             &:after {
                 content: '>';
                 margin-left: 5px;
@@ -157,11 +177,12 @@
     .edit-tools {
         @include flex;
         align-items: flex-start;
-        .copy, .link {
+        .copy, .options {
             display: inline-block;
-            background: $stone !important;
+            background-color: $stone !important;
             border-color: $stone !important;
-            padding-top: 3px;
+            height: 11px;
+            padding: 3px 10px;
             &:hover {
                 background-color: $dark !important;
             }
@@ -221,6 +242,14 @@
             right: 0;
         }
     }
+}
+
+.element-overlay {
+    top: 0px;
+    left: 0px;
+    z-index: 990;
+    position: absolute;
+    background: rgba(255, 255, 255, 0.8);
 }
 
 .dropline {

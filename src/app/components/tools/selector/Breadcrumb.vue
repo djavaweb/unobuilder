@@ -12,8 +12,9 @@
             ) {{item.label}}
 
         // Copy and link editor
-        a.copy.uk-icon-copy(v-if="shouldDisplay", @click="$parent.copyElement()")
-        a.link.uk-icon-link(v-if="shouldDisplay && link", @click="editLink()")
+        a.copy(v-if="shouldDisplay", @click="$parent.copyElement()")
+        a.options.options--link(v-if="shouldDisplay && elementLink", @click="$parent.editLink()")
+        a.options.options--default(v-if="shouldDisplay && elementOptions && !elementLink", @click="$parent.editOptions()")
 
     a.remove.uk-icon-remove(
     v-if="shouldDisplay",
@@ -38,11 +39,6 @@ export default {
             default: ''
         },
 
-        link: {
-            type: Boolean,
-            default: false
-        },
-
         class: {
             type: Array,
             default: () => []
@@ -59,6 +55,14 @@ export default {
         shouldDisplay () {
             return this.state === 'select' &&
             this.$parent.elementKind !== 'body'
+        },
+
+        elementLink () {
+          return this.$parent.elementKind === 'link'
+        },
+
+        elementOptions () {
+          return this.$parent.elementOptions
         }
     },
 
@@ -83,11 +87,9 @@ export default {
                 this.$root.canvasBuilder('contextMenu').hide()
                 this.expand = true
             } else {
-    			this.$root.canvasBuilder().layout().elementSelect(breadcrumb)
+    			      this.$root.canvasBuilder().layout().elementSelect(breadcrumb)
             }
-        },
-
-        isLink () {}
+        }
     }
 }
 </script>

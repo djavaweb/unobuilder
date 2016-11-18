@@ -3,6 +3,7 @@
     accordion(v-ref:accordion-wrapper)
         prop-display(v-ref:display)
         prop-box-properties(v-ref:box)
+        prop-size(v-ref:size)
         prop-attr(v-ref:attribute)
         prop-typography(v-ref:typography)
         prop-background(v-ref:background)

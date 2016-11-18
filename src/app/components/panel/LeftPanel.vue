@@ -38,7 +38,7 @@
         accordion(v-if="componentLoaded", v-ref:accordion)
             accordion-item(v-for="(groupName, items) in components|filterBy search", :title="groupName")
                 component-item(
-                v-for="component in items|filterBy search",
+                v-for="component in items|orderBy component.$id -1|filterBy search",
                 :component="component",
                 :class="componentClass(component.settings.id, $index)")
 // End of left panel

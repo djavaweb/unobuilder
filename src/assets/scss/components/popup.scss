@@ -40,9 +40,10 @@
             font-size: 11px;
             color: $white;
             margin-right: 10px;
-            width: 90px;
+            // width: 90px;
             display: inline-block;
             text-transform: capitalize;
+            padding: 5px 0;
         }
         button {
             @extend .button;
@@ -71,8 +72,12 @@
         transform: translate(-50%, -50%);
         height: auto;
         &.color-picker {
-            background: none;
-            box-shadow: none;
+          background: none;
+          box-shadow: none;
+        }
+        &.link-editor {
+          background: $charcoal-semi-dark;
+          box-shadow: none;
         }
     }
 }

@@ -264,6 +264,8 @@ html, body, #app {
     left: 35px;
     width: 200px;
     z-index: 9;
+    height: 100%;
+    overflow: auto;
 
     .search {
         margin: 0 10px 5px;

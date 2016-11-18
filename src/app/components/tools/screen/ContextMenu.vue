@@ -157,6 +157,7 @@ export default {
 					let cut = _find(this.menus, {id: 'cut'}),
 					cancelCut = _find(this.menus, {id: 'cancel-cut'})
 
+					selector.cutElement()
 					cut.display = false
 					cancelCut.display = true
 				break

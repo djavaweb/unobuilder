@@ -184,48 +184,128 @@ export default {
     },
 
     ready () {
-        // Onload
-        utils.addEvent(this.layoutDOM(null), 'load', () => {
+      // Onload
+      utils.addEvent(this.layoutDOM(null), 'load', () => {
 
-            // Window on scroll
-            utils.addEvent(this.layoutDOM(), 'scroll', (e) => {
-                let bodyBoundRect = this.layoutDOM('body').getBoundingClientRect()
-                this.bodyBoundRect = bodyBoundRect
-            })
+          // Window on scroll
+          utils.addEvent(this.layoutDOM(), 'scroll', (e) => {
+              let bodyBoundRect = this.layoutDOM('body').getBoundingClientRect()
+              this.bodyBoundRect = bodyBoundRect
+          })
 
-            // Attach Vue Events
-            this.layoutDOM('body').outerHTML = `<body @mouseleave="leave($event)" @mouseover="over($event)" @mousedown="click($event)" @dblclick="dblclick($event)" @contextmenu="rightclick($event)" :class="{'uno--dragging': dragElementState.move}">${this.layoutDOM('body').innerHTML}</body>`
+          // Attach Vue Events
+          this.layoutDOM('body').outerHTML = `<body @mouseleave="leave($event)" @mouseover="over($event)" @mousedown="click($event)" @dblclick="dblclick($event)" @contextmenu="rightclick($event)" :class="{'uno--dragging': dragElementState.move}">${this.layoutDOM('body').innerHTML}</body>`
 
-            // Viewer stylesheet
-            let viewerElement = document.createElement('css-renderer')
-            this.layoutDOM('body').appendChild(viewerElement)
-            viewerElement.outerHTML = '<css-renderer v-ref:css-renderer></css-renderer>'
+          // Viewer stylesheet
+          let viewerElement = document.createElement('css-renderer')
+          this.layoutDOM('body').appendChild(viewerElement)
+          viewerElement.outerHTML = '<css-renderer v-ref:css-renderer></css-renderer>'
 
-            // Google webfont
-            let webfont = document.createElement('script')
-            webfont.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js'
-            this.layoutDOM('body').appendChild(webfont)
+          // Google webfont
+          let webfont = document.createElement('script')
+          webfont.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js'
+          this.layoutDOM('body').appendChild(webfont)
 
-            // Attach important js modules to iframe
-            unoViewer.window = this.layoutDOM()
-            unoViewer.window.jQuery = require('jquery')
-            unoViewer.window.UIKit = require('uikit')
-            unoViewer.element = window.__uno__.element
+          // Attach important js modules to iframe
+          unoViewer.window = this.layoutDOM()
+          unoViewer.window.jQuery = require('jquery')
+          unoViewer.window.UIKit = require('uikit')
+          unoViewer.element = window.__uno__.element
 
-            // UIKit CSS
-            let uikitCss = document.createElement('style')
-            this.layoutDOM('head').appendChild(uikitCss)
-            uikitCss.innerHTML = require('raw!uikit/dist/css/uikit.min.css?hack') +
-            require('raw!sass!../../../assets/scss/canvas.scss')
+          // UIKit CSS
+          let uikitCss = document.createElement('style')
+          this.layoutDOM('head').appendChild(uikitCss)
+          uikitCss.innerHTML = require('raw!uikit/dist/css/uikit.min.css?hack') +
+          require('raw!sass!../../../assets/scss/canvas.scss')
 
-            this.canvasInstance = new Vue({
-                el: this.layoutDOM('body'),
-                mixins: [unoViewer.mixins]
-            })
-        })
+          this.canvasInstance = new Vue({
+              el: this.layoutDOM('body'),
+              mixins: [unoViewer.mixins]
+          })
+      })
 
-        // Set source based on uno url
-        this.layoutDOM(null).src = window.__uno__.url
+      // Set source based on uno url
+      this.layoutDOM(null).src = window.__uno__.url
+
+      // Copy element
+  		Mousetrap(document.body).bind(['ctrl+c', 'command+c'], (e) => {
+  			e.preventDefault()
+        if (this.$root.ref().hoverStatus === 'centerPanel') {
+          this.layout().keyCapture('copy')
+        }
+  		})
+
+      // Cut element
+  		Mousetrap(document.body).bind(['ctrl+x', 'command+x'], (e) => {
+  			e.preventDefault()
+        if (this.$root.ref().hoverStatus === 'centerPanel') {
+  			  this.layout().keyCapture('cut')
+        }
+  		})
+
+  		// Paste element
+  		Mousetrap(document.body).bind(['ctrl+v', 'command+v'], (e) => {
+  			if (this.$root.ref().hoverStatus === 'centerPanel') {
+          e.preventDefault()
+          this.layout().keyCapture('paste')
+        }
+  		})
+
+  		// Delete element
+  		Mousetrap(document.body).bind('del', (e) => {
+  			if (this.$root.ref().hoverStatus === 'centerPanel') {
+          e.preventDefault()
+          this.layout().keyCapture('delete')
+        }
+  		})
+
+  		// Copy element style
+  		Mousetrap(document.body).bind(['ctrl+shift+c', 'command+shift+c'], (e) => {
+  			if (this.$root.ref().hoverStatus === 'centerPanel') {
+          e.preventDefault()
+          this.layout().keyCapture('copyStyle')
+        }
+  		})
+
+  		// Paste element style
+  		Mousetrap(document.body).bind(['ctrl+shift+v', 'command+shift+v'], (e) => {
+  			if (this.$root.ref().hoverStatus === 'centerPanel') {
+          e.preventDefault()
+          this.layout().keyCapture('pasteStyle')
+        }
+  		})
+
+  		// Clear element style
+  		Mousetrap(document.body).bind(['ctrl+shift+del', 'command+shift+del'], (e) => {
+  			if (this.$root.ref().hoverStatus === 'centerPanel') {
+          e.preventDefault()
+          this.layout().keyCapture('clearStyle')
+        }
+  		})
+
+  		// Select using left and up
+  		Mousetrap(document.body).bind(['left', 'up'], (e) => {
+  			e.preventDefault()
+  			if (this.$root.ref().hoverStatus === 'centerPanel') {
+          this.layout().keyCapture('selectUp')
+        }
+  		})
+
+  		// Select using right and down
+  		Mousetrap(document.body).bind(['right', 'down'], (e) => {
+  			if (this.$root.ref().hoverStatus === 'centerPanel') {
+          e.preventDefault()
+          this.layout().keyCapture('selectDown')
+        }
+  		})
+
+  		// Select childs using space
+  		Mousetrap(document.body).bind(['space', 'enter'], (e) => {
+  			if (! this.$root.elementSelector().editContent && this.$root.ref().hoverStatus === 'centerPanel') {
+          e.preventDefault()
+          this.layout().keyCapture('enter')
+        }
+  		})
     }
 }
 </script>

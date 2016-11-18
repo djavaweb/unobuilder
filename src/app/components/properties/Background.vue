@@ -10,18 +10,14 @@ accordion-item(title="Background", :advanced.sync="advanced", :mouse-state.sync=
             .uk-width-7-10.uk-flex
                 .button-group.right
                     rect-button.background-none(:disabled="isDisabled()", :active="isValue('none')", @click="setValue('none')")
-
                     rect-button.background-color(:disabled="isDisabled()", :active="isValue('color')", @click="setValue('color')")
-
                     rect-button.background-image(:disabled="isDisabled()", :active="isValue('image')", @click="setValue('image')")
-
                     rect-button.background-video(:disabled="isDisabled()", :active="isValue('video')", @click="setValue('video')")
-
                     rect-button.background-gradient(:disabled="isDisabled()", :active="isValue('gradient')", @click="setValue('gradient')")
     // End of background buttons
 
     // Background Properties Panel
-    accordion-expand-view(v-if="!isValue('none')")
+    accordion-expand-view(v-if="!isValue('none') && !isDisabled()")
         accordion-item-view(v-if="isValue('color')")
             color-picker(:colors.sync="bgColor", scheme="dark", v-ref:color-picker)
     // End of background properties panel

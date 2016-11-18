@@ -261,15 +261,15 @@ const utils = {
 
     /**
      * Check if json is valid
-     * @param  {String}  json
-     * @param  {String}  message
+     * @param  {String} json
+     * @param  {String} message
      * @return {Boolean}
      */
     isJSON (json, message = 'Invalid JSON') {
         try {
             return JSON.parse(json)
         } catch (e) {
-            throw Error(message)
+            return false
         }
     },
 
