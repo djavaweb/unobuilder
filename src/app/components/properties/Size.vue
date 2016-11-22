@@ -1,5 +1,5 @@
 <template lang="pug">
-accordion-item(title="size", :mouse-state.sync="mouseState", :advanced.sync="advanced")
+accordion-item(title="size", :mouse-state.sync="mouseState", :advanced.sync="advanced", v-if="shouldDisplay")
   accordion-item-view
     .uk-grid.uk-grid-small
       .uk-width-5-10
@@ -258,6 +258,15 @@ export default {
       maxHeightDisabled () {
         return this.$root.elementSelector().getProp('maxHeight.disabled', this.mouseState)
       },
+
+      shouldDisplay () {
+        return !this.widthDisabled &&
+        !this.minWidthDisabled &&
+        !this.maxWidthDisabled &&
+        !this.heightDisabled &&
+        !this.minHeightDisabled &&
+        !this.maxHeightDisabled
+      }
     }
 }
 </script>

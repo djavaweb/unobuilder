@@ -1,5 +1,5 @@
 <template lang="pug">
-.right-panel
+.right-panel(@click="closeAllPanels($event)")
     right-panel-tab(v-ref:tab)
     right-panel-properties(v-ref:properties)
 </template>
@@ -10,8 +10,18 @@ import rightPanelProperties from './RightPanelProperties.vue'
 export default {
     name: 'rightPanel',
     components: {
-        rightPanelTab,
-        rightPanelProperties
+      rightPanelTab,
+      rightPanelProperties
+    },
+    methods: {
+      closeAllPanels (e) {
+        let element = e.target
+        if (element.tagName.toLowerCase() === 'dt') {
+          this.$root.closeAllPanels(['context', 'leftpanel', 'block'])
+        } else {
+          this.$root.closeAllPanels()
+        }
+      }
     }
 }
 </script>

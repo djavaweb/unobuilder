@@ -8,7 +8,7 @@
 		step="{{step}}",
 		:disabled="disabled",
 		v-model="value",
-		placeholder="None",
+		placeholder="{{placeholder}}",
 		@focus="onFocus()",
 		@blur="onBlur()",
 		:style="inputStyle")
@@ -63,6 +63,10 @@ export default {
 		units: {
 			type: Array,
 			default: () => ['px', 'em', '%']
+		},
+		placeholder: {
+			type: String,
+			default: '-'
 		}
 	},
 

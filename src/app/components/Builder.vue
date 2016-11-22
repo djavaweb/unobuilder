@@ -67,34 +67,46 @@ export default {
 			// When box properties resizing margin/border/padding properties
 			let boxProps = this.$root.ref('rightPanel.properties.box')
 			if (boxProps) {
+				// Border radius
+				if (boxProps.dragState.move || boxProps.dragRadiusState.move) {
+					klass.push(dragClass)
+				}
 
-			// Border radius
-			if (boxProps.dragState.move || boxProps.dragRadiusState.move) {
-				klass.push(dragClass)
-			}
+				if (['topleft', 'bottomright'].includes(boxProps.dragRadiusState.direction)) {
+				  klass.push('resize-nwse')
+				}
 
-			if (['topleft', 'bottomright'].includes(boxProps.dragRadiusState.direction)) {
-			      klass.push('resize-nwse')
-			  }
+				if (['topright', 'bottomleft'].includes(boxProps.dragRadiusState.direction)) {
+				  klass.push('resize-nesw')
+				}
 
-			  if (['topright', 'bottomleft'].includes(boxProps.dragRadiusState.direction)) {
-			      klass.push('resize-nesw')
-			  }
+				// Resize value top and bottom
+				// Top-Bottom
+				if (['top', 'bottom'].includes(boxProps.dragState.direction)) {
+				  klass.push('resize-updown')
+				}
 
-			// Resize value top and bottom
-			// Top-Bottom
-			  if (['top', 'bottom'].includes(boxProps.dragState.direction)) {
-			      klass.push('resize-updown')
-			  }
-
-			// Left-Right
-			  if (['left', 'right'].includes(boxProps.dragState.direction)) {
-			      klass.push('resize-leftright')
-			  }
+				// Left-Right
+				if (['left', 'right'].includes(boxProps.dragState.direction)) {
+				    klass.push('resize-leftright')
+				}
 			}
 
 			return klass
-			}
-    },
+		}
+  },
+
+	methods: {
+		closeAllPanels () {
+			// Hide context menu first
+			this.$root.canvasBuilder('contextMenu').hide()
+
+			// Hide block
+			this.$root.canvasBuilder('block').hide(true)
+
+			// Hide left panel
+			this.$root.ref('leftPanel').hide()
+		}
+	}
 }
 </script>

@@ -81,6 +81,11 @@
             color: $white;
         }
 
+        span {
+          cursor: pointer;
+          margin-left: 5px;
+        }
+
         .uk-icon-caret-down {
             display: none
         }

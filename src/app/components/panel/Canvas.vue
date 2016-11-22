@@ -42,15 +42,15 @@ export default {
          * @return {Array}
          */
         viewerClass () {
-            let klass = []
+          let klass = []
 
-            /**
-             * Change screensize
-             */
-            let screenSize = this.$root.ref('centerPanel.topbarPanel').screenSize
-            klass.push(screenSize)
+          /**
+           * Change screensize
+           */
+          let screenSize = this.$root.ref('centerPanel.topbarPanel').screenSize
+          klass.push(screenSize)
 
-            return klass
+          return klass
         },
 
         /**
@@ -58,36 +58,36 @@ export default {
          * @return {Array}
          */
         viewerWidth () {
-            let style = {},
-            screenSize = this.$root
-            .ref('centerPanel.topbarPanel')
-            .screenSize
+          let style = {},
+          screenSize = this.$root
+          .ref('centerPanel.topbarPanel')
+          .screenSize
 
-            switch (screenSize) {
-                case 'medium':
-                    style.width = `${728}px`
-                break
+          switch (screenSize) {
+              case 'medium':
+                  style.width = `${728}px`
+              break
 
-                case 'small':
-                    style.width = `${600}px`
-                break
+              case 'small':
+                  style.width = `${600}px`
+              break
 
-                case 'mini':
-                    style.width = `${480}px`
-                break
-            }
+              case 'mini':
+                  style.width = `${480}px`
+              break
+          }
 
-            return style
+          return style
         },
 
         scrollValue () {
-            let style = {}
+          let style = {}
 
-            if (this.bodyBoundRect) {
-                style.top = `${this.bodyBoundRect.top}px`
-            }
+          if (this.bodyBoundRect) {
+              style.top = `${this.bodyBoundRect.top}px`
+          }
 
-            return style
+          return style
         }
     },
 
@@ -97,7 +97,7 @@ export default {
          * @return {Number}
          */
         size () {
-			return this.$els.iframe.getBoundingClientRect().width
+          return this.$els.iframe.getBoundingClientRect().width
         },
 
         /**
@@ -105,7 +105,7 @@ export default {
          * @return {Number} [description]
          */
         positionFromTop () {
-            return this.$els.iframe.getBoundingClientRect().top
+          return this.$els.iframe.getBoundingClientRect().top
         },
 
         /**
@@ -113,7 +113,7 @@ export default {
          * @return {Number} [description]
          */
         leftSpace () {
-            return this.$els.iframe.getBoundingClientRect().left
+          return this.$els.iframe.getBoundingClientRect().left
         },
 
         /**
@@ -121,23 +121,23 @@ export default {
         * @return {Number} [description]
         */
        rightSpace () {
-           return this.$els.iframe.getBoundingClientRect().right
+          return this.$els.iframe.getBoundingClientRect().right
        },
 
         /**
          * Get DOM of viewer
          */
         layoutDOM (query) {
-            let win = this.$els.iframe.contentWindow
-            if (typeof query !== 'undefined') {
-                if (query === null) {
-                    win = this.$els.iframe
-                } else {
-                    win = win.document.querySelector(query)
-                }
-            }
+          let win = this.$els.iframe.contentWindow
+          if (typeof query !== 'undefined') {
+              if (query === null) {
+                  win = this.$els.iframe
+              } else {
+                  win = win.document.querySelector(query)
+              }
+          }
 
-            return win
+          return win
         },
 
         /**
@@ -147,7 +147,7 @@ export default {
          * @return {Object}
          */
         layout (ref, el) {
-            return this.canvasInstance.ref(ref, el)
+          return this.canvasInstance.ref(ref, el)
         },
 
         /**
@@ -155,23 +155,23 @@ export default {
          * @return {Number}
          */
         viewerSize (dimension) {
-            let size = 0,
-            html = this.layoutDOM(null),
-            body = this.layoutDOM('body')
+          let size = 0,
+          html = this.layoutDOM(null),
+          body = this.layoutDOM('body')
 
-            if (dimension === 'height') {
-                size = Math.max(
-                    body.scrollHeight,
-                    body.offsetHeight,
-                    html.clientHeight,
-                    html.scrollHeight,
-                    html.offsetHeight
-                )
-            } else {
-                size = body.getBoundingClientRect().width
-            }
+          if (dimension === 'height') {
+              size = Math.max(
+                  body.scrollHeight,
+                  body.offsetHeight,
+                  html.clientHeight,
+                  html.scrollHeight,
+                  html.offsetHeight
+              )
+          } else {
+              size = body.getBoundingClientRect().width
+          }
 
-            return size
+          return size
         },
 
         /**
@@ -179,7 +179,11 @@ export default {
          * @param {Number} offset
          */
         offset (offset) {
-            return this.$els.canvasBuilder.getBoundingClientRect()[offset]
+          return this.$els.canvasBuilder.getBoundingClientRect()[offset]
+        },
+
+        baba () {
+          console.log('baba')
         }
     },
 
@@ -305,6 +309,12 @@ export default {
           e.preventDefault()
           this.layout().keyCapture('enter')
         }
+  		})
+
+      // Close all panels
+  		Mousetrap(document.body).bind(['esc'], (e) => {
+        e.preventDefault()
+        this.layout().keyCapture('esc')
   		})
     }
 }
