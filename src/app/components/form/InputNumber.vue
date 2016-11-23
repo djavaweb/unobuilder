@@ -153,7 +153,7 @@ export default {
 				value = parseFloat(this.value)
 			}
 
-			if (! isNaN(value)) {
+			if (! isNaN(value) && ! this.disabled) {
 				this.dragState.move = false
 				this.dragState.coord = event.pageY
 				this.dragState.initialValue = value
