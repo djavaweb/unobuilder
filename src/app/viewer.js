@@ -345,14 +345,14 @@ Viewer.mixins = {
 
 			// Get data properties
 			el.$props = (mouseState = '', screenSize) => {
-				let state = this.propertyState,
-				element = this.elements[el.$id],
-				propsCollection = element.props.global,
-				screenAvailable = ['large', 'medium', 'small', 'mini'],
-				currentScreenSize = screenSize || this.screenSize,
-				currentScreenIndex = screenAvailable.indexOf(currentScreenSize),
-				propsKey = '',
-				props = {}
+				let state = this.propertyState
+				let element = this.elements[el.$id]
+				let propsCollection = element.props.global
+				let screenAvailable = ['large', 'medium', 'small', 'mini']
+				let currentScreenSize = screenSize || this.screenSize
+				let currentScreenIndex = screenAvailable.indexOf(currentScreenSize)
+				let propsKey = ''
+				let props = {}
 
 				// If self properties is not defined
 				// Get properties from global
@@ -377,7 +377,6 @@ Viewer.mixins = {
 				}
 
 				props = propsCollection[propsKey]
-
 				return props
 			}
 
@@ -1220,7 +1219,7 @@ Viewer.mixins = {
 			this.checkOverlap(this.dragElementState.cloneElement)
 
 			// Cut and Overlays overlap element
-			// this.keyCapture('cut')
+			this.keyCapture('cut')
 		},
 
 		/**
@@ -1238,12 +1237,16 @@ Viewer.mixins = {
 				this.dragElementState.y === e.pageY) {
 				this.dragElementState.element.$select()
 			}
+
 			// If it's dragging and move over other element
 			// Not from source element, then paste it!
-			else if ((this.dragElementState && this.dropElement) &&
-				(this.dragElementState.element.$id !== this.dropElement.$id)) {
-				// console.log(this.dropElement)
-				this.keyCapture('paste')
+			let isDropping = this.dragElementState && this.dropElement
+			if (isDropping) {
+				let validDrop = this.dragElementState.element.$id !== this.dropElement.$id
+				if (validDrop) {
+					this.copyElement(this.dragElementState.element.$id, this.dropElement.$id)
+					this.removeElement(this.dragElementState.element.$id)
+				}
 			}
 
 			// Remove clone element
@@ -1279,9 +1282,11 @@ Viewer.mixins = {
 				element = this.searchSelectableParent(element)
 			}
 
-			if (element.$editable) {
-				element.$edit(true)
-			} else {
+			if (element) {
+				if (element.$editable) {
+					element.$edit(true)
+				}
+
 				if (element.parentElement.$editable) {
 					element.parentElement.$edit(true)
 				}
@@ -1748,18 +1753,18 @@ Viewer.mixins = {
 		copyElement (id, dstId, sameCopy) {
 			id = id || this.activeElement
 
-			let el = this.getElement(id),
-			copyEl = el.$elementWrapper(),
-			pasteEl = el.$parentElement().$id
+			let el = this.getElement(id)
+			let copyEl = el.$elementWrapper()
+			let pasteEl = el.$parentElement().$id
 
 			if (dstId) {
 				pasteEl = dstId
 			}
 
 			copyEl.$copy(pasteEl, () => {
-				if (sameCopy) {
-					this.copyElement()
-				}
+				// if (sameCopy) {
+				// 	this.copyElement()
+				// }
 			})
 		},
 
@@ -1873,7 +1878,10 @@ Viewer.mixins = {
 					// Same with copy
 					this.copiedElement = this.activeElement
 					this.cuttingElement = true
-					this.getElement(this.activeElement).$element().$overlay()
+					let overlayElement = this.getElement(this.activeElement)
+					if (overlayElement) {
+						overlayElement.$element().$overlay()
+					}
 				break
 
 				case 'paste':
