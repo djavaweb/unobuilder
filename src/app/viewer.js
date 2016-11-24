@@ -5,6 +5,7 @@ import dot from 'dot-object'
 import classList from './lib/classlist.js'
 import Mousetrap from './lib/mousetrap.min.js'
 import utils from './utils.js'
+import client from './client.js'
 import config from './config.js'
 
 /* Main app */
@@ -262,6 +263,26 @@ Viewer.mixins = {
 
 				props = this.setDefaultSize(props, element)
 				if (! this.global[element.kind]) {
+					let propsModifier = {
+						column: {
+							width: {disabled: true},
+							minWidth: {disabled: true},
+							maxWidth: {disabled: true},
+							height: {disabled: true},
+							minHeight: {disabled: true},
+							maxHeight: {disabled: true}
+						}
+					}
+
+					for (let elKind in propsModifier) {
+						if (element.kind === elKind) {
+							let propsValue = propsModifier[elKind]
+							for (let key in propsValue) {
+								props[key] = _.extend(props[key], propsValue[key])
+							}
+						}
+					}
+
 					this.global[element.kind] = {
 						large: props
 					}
@@ -324,14 +345,14 @@ Viewer.mixins = {
 
 			// Get data properties
 			el.$props = (mouseState = '', screenSize) => {
-				let state = this.propertyState,
-				element = this.elements[el.$id],
-				propsCollection = element.props.global,
-				screenAvailable = ['large', 'medium', 'small', 'mini'],
-				currentScreenSize = screenSize || this.screenSize,
-				currentScreenIndex = screenAvailable.indexOf(currentScreenSize),
-				propsKey = '',
-				props = {}
+				let state = this.propertyState
+				let element = this.elements[el.$id]
+				let propsCollection = element.props.global
+				let screenAvailable = ['large', 'medium', 'small', 'mini']
+				let currentScreenSize = screenSize || this.screenSize
+				let currentScreenIndex = screenAvailable.indexOf(currentScreenSize)
+				let propsKey = ''
+				let props = {}
 
 				// If self properties is not defined
 				// Get properties from global
@@ -356,7 +377,6 @@ Viewer.mixins = {
 				}
 
 				props = propsCollection[propsKey]
-
 				return props
 			}
 
@@ -1078,13 +1098,16 @@ Viewer.mixins = {
 		 * @param {String} ref
 		 * @param {String} el
 		 */
-		builder (ref, el) {
-			return window
-			.parent
-			.document
-			.querySelector('body')
+		builder (ref = '', el) {
+			let builder = window.parent.document
+			.querySelector(client.getBuilderSelector())
 			.__vue__
-			.ref(ref)
+
+			if (ref !== '') {
+				return builder.ref(ref)
+			}
+
+			return builder
 		},
 
 		/**
@@ -1138,6 +1161,9 @@ Viewer.mixins = {
 		 * @return {void}
 		 */
 		click (e) {
+			// Hide context menu first
+			this.builder().closeAllPanels()
+
 			// Get possible element
 			let element = e.target
 
@@ -1146,16 +1172,6 @@ Viewer.mixins = {
 			}
 
 			if (element && element.$selectable) {
-
-				// Hide context menu first
-				this.canvasBuilder('contextMenu').hide()
-
-				// Hide block
-				this.canvasBuilder('block').hide(true)
-
-				// Hide left panel
-				this.leftPanel().hide()
-
 				// Set default state before we drag / click element
 				// Body a.k.a layout cannot be dragged
 				if (element.$element().$type === 'body' || e.which !== 1) {
@@ -1203,7 +1219,7 @@ Viewer.mixins = {
 			this.checkOverlap(this.dragElementState.cloneElement)
 
 			// Cut and Overlays overlap element
-			// this.keyCapture('cut')
+			this.keyCapture('cut')
 		},
 
 		/**
@@ -1221,12 +1237,16 @@ Viewer.mixins = {
 				this.dragElementState.y === e.pageY) {
 				this.dragElementState.element.$select()
 			}
+
 			// If it's dragging and move over other element
 			// Not from source element, then paste it!
-			else if ((this.dragElementState && this.dropElement) &&
-				(this.dragElementState.element.$id !== this.dropElement.$id)) {
-				// console.log(this.dropElement)
-				this.keyCapture('paste')
+			let isDropping = this.dragElementState && this.dropElement
+			if (isDropping) {
+				let validDrop = this.dragElementState.element.$id !== this.dropElement.$id
+				if (validDrop) {
+					this.copyElement(this.dragElementState.element.$id, this.dropElement.$id)
+					this.removeElement(this.dragElementState.element.$id)
+				}
 			}
 
 			// Remove clone element
@@ -1262,9 +1282,11 @@ Viewer.mixins = {
 				element = this.searchSelectableParent(element)
 			}
 
-			if (element.$editable) {
-				element.$edit(true)
-			} else {
+			if (element) {
+				if (element.$editable) {
+					element.$edit(true)
+				}
+
 				if (element.parentElement.$editable) {
 					element.parentElement.$edit(true)
 				}
@@ -1605,7 +1627,6 @@ Viewer.mixins = {
 						// Get column width value
 						// @default is 1 it's mean 100%
 						let width = parseInt(template.attr('width'))
-						template.removeAttr('width')
 
 						if (! isNaN(width)) {
 							width = width * 10
@@ -1732,18 +1753,18 @@ Viewer.mixins = {
 		copyElement (id, dstId, sameCopy) {
 			id = id || this.activeElement
 
-			let el = this.getElement(id),
-			copyEl = el.$elementWrapper(),
-			pasteEl = el.$parentElement().$id
+			let el = this.getElement(id)
+			let copyEl = el.$elementWrapper()
+			let pasteEl = el.$parentElement().$id
 
 			if (dstId) {
 				pasteEl = dstId
 			}
 
 			copyEl.$copy(pasteEl, () => {
-				if (sameCopy) {
-					this.copyElement()
-				}
+				// if (sameCopy) {
+				// 	this.copyElement()
+				// }
 			})
 		},
 
@@ -1857,7 +1878,10 @@ Viewer.mixins = {
 					// Same with copy
 					this.copiedElement = this.activeElement
 					this.cuttingElement = true
-					this.getElement(this.activeElement).$element().$overlay()
+					let overlayElement = this.getElement(this.activeElement)
+					if (overlayElement) {
+						overlayElement.$element().$overlay()
+					}
 				break
 
 				case 'paste':
@@ -1969,6 +1993,10 @@ Viewer.mixins = {
 							firstChild.$element().$select()
 						}
 					}
+				break
+
+				case 'esc':
+					this.builder().closeAllPanels()
 				break
 
 				case 'copyStyle':
@@ -2158,7 +2186,7 @@ Viewer.mixins = {
             tag: 'div',
             type: 'body',
             kind: 'body',
-			label: (Viewer.element === 'body')? undefined: 'layout'
+						label: (Viewer.element === 'body')? undefined: 'layout'
         }, (el) => {
 			el.$set('display.disabled', true)
 	        el.$select()

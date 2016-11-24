@@ -4,7 +4,7 @@
 :class="resizeCursor"
 )
     // Black overlay
-    .blackout
+    .blackout(@click="$root.closeAllPanels()")
 
     // Panel buttons
     .left-panel-buttons
@@ -102,28 +102,28 @@ export default {
          * @param {String} panelName
          */
         setPanel (panelName) {
-            // If panel
-            if (this.panels[panelName].selected !== undefined &&
-                ! this.panels[panelName].selected) {
-                return
+          // If panel
+          if (this.panels[panelName].selected !== undefined &&
+            ! this.panels[panelName].selected) {
+            return
+          }
+
+          // Toggle panel state
+          this.panels[panelName].active = !this.panels[panelName].active
+
+          // If panel is css editor, set component unselected
+          if (panelName === 'cssEditor') {
+            this.panels.component.selected = !this.panels[panelName].active
+            if (this.panels[panelName].active) {
+                this.panels.component.active = !this.panels[panelName].active
             }
+          }
 
-            // Toggle panel state
-            this.panels[panelName].active = !this.panels[panelName].active
-
-            // If panel is css editor, set component unselected
-            if (panelName === 'cssEditor') {
-                this.panels.component.selected = !this.panels[panelName].active
-                if (this.panels[panelName].active) {
-                    this.panels.component.active = !this.panels[panelName].active
-                }
-            }
-
-            /**
-             * Broadcast an event
-             * Tell taht leftPanel has been changed
-             */
-            this.$root.$broadcast('leftPanel', this.activePanel)
+          /**
+           * Broadcast an event
+           * Tell taht leftPanel has been changed
+           */
+          this.$root.$broadcast('leftPanel', this.activePanel)
         },
 
         /**
@@ -139,9 +139,9 @@ export default {
          * Hide panel
          */
         hide () {
-            if (this.isActivePanel('component')) {
-				this.setPanel('component')
-			}
+          if (this.isActivePanel('component')) {
+            this.setPanel('component')
+          }
         },
 
         /**
@@ -151,14 +151,14 @@ export default {
          * @return {Array}
          */
         componentClass (id, index) {
-            let klass = [`component-${utils.slugify(id)}`]
+          let klass = [`component-${utils.slugify(id)}`]
 
-            // Only 3 item in one row
-            if ((index + 1) % 3 === 0) {
-                klass.push('no-space-right')
-            }
+          // Only 3 item in one row
+          if ((index + 1) % 3 === 0) {
+              klass.push('no-space-right')
+          }
 
-            return klass
+          return klass
         }
     },
 

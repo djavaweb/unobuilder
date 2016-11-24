@@ -60,6 +60,33 @@ uno.on('init', elements => {
 			elementSelector (str, el) {
 				return utils.ref(this.canvasBuilder('elementSelector'), str, el)
 			},
+
+			// Close all panels
+			closeAllPanels (panel = []) {
+				if (panel.length === 0) {
+					panel = ['context', 'block', 'leftpanel', 'popup']
+				}
+
+				// Hide context menu first
+				if (panel.includes('context')) {
+					this.canvasBuilder('contextMenu').hide()
+				}
+
+				// Hide block
+				if (panel.includes('block')) {
+					this.canvasBuilder('block').hide(true)
+				}
+
+				// Hide left panel
+				if (panel.includes('leftpanel')) {
+					this.ref('leftPanel').hide()
+				}
+
+				// Hide all popups
+				if (panel.includes('popup')) {
+					this.ref('rightPanel.properties.box').hidePopup()
+				}
+			}
 		},
 
 		ready () {

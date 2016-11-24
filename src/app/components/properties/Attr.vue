@@ -1,18 +1,18 @@
 <template lang="pug">
 // Custom Attributes
 accordion-item(title="Attributes")
-    accordion-item-view
-        .uk-grid.uk-grid-small
-            .uk-width-2-10
-                label.input-label Class
-            .uk-width-8-10
-                input.input-text.uk-width-1-1(v-model="klass")
+  accordion-item-view
+    .uk-grid.uk-grid-small
+      .uk-width-2-10
+        label.input-label Class
+      .uk-width-8-10
+        input.input-text.uk-width-1-1(v-model="klass")
 
-        .uk-grid.uk-grid-small(v-if="propertyState('page')")
-            .uk-width-2-10
-                label.input-label ID
-            .uk-width-8-10
-                input.input-text.uk-width-1-1(v-model="id")
+    .uk-grid.uk-grid-small(v-if="propertyState('page')")
+        .uk-width-2-10
+          label.input-label ID
+        .uk-width-8-10
+          input.input-text.uk-width-1-1(v-model="id")
 // End of custom attributes
 </template>
 

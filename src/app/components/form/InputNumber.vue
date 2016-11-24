@@ -8,7 +8,7 @@
 		step="{{step}}",
 		:disabled="disabled",
 		v-model="value",
-		placeholder="None",
+		placeholder="{{placeholder}}",
 		@focus="onFocus()",
 		@blur="onBlur()",
 		:style="inputStyle")
@@ -63,6 +63,10 @@ export default {
 		units: {
 			type: Array,
 			default: () => ['px', 'em', '%']
+		},
+		placeholder: {
+			type: String,
+			default: '-'
 		}
 	},
 
@@ -149,7 +153,7 @@ export default {
 				value = parseFloat(this.value)
 			}
 
-			if (! isNaN(value)) {
+			if (! isNaN(value) && ! this.disabled) {
 				this.dragState.move = false
 				this.dragState.coord = event.pageY
 				this.dragState.initialValue = value

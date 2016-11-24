@@ -13,6 +13,11 @@
 
     .accordion-wrapper {
         position: relative;
+        &--disabled {
+          .accordion-title, .uk-icon-caret-right:before {
+            color: $gunmetal-two;
+          }
+        }
     }
 
     .switcher-handler {
@@ -65,7 +70,7 @@
         }
     }
 
-    .uk-accordion-title {
+    .accordion-title {
         margin: 0;
         color: $white;
         font-size: 12px;
@@ -79,6 +84,11 @@
         i {
             margin-right: 3px;
             color: $white;
+        }
+
+        span {
+          cursor: pointer;
+          margin-left: 5px;
         }
 
         .uk-icon-caret-down {
