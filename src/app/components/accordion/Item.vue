@@ -1,21 +1,21 @@
 <template lang="pug">
-.accordion-wrapper
-    .switcher-handler(v-if="advanced!==undefined||mouseState!==undefined")
-        switcher(v-if="advanced!==undefined",:value.sync="advanced", label="Advanced")
-        a.mouse-state-toggler(v-if="mouseState!==undefined", @click="toggleMouseState()")
+.accordion-wrapper(:class="{'accordion-wrapper--disabled': disabled}")
+  .switcher-handler(v-if="shouldDisplaySwitch || shouldDisplayMouseState")
+    switcher(v-if="shouldDisplaySwitch", :value.sync="advanced", label="Advanced")
+    a.mouse-state-toggler(v-if="shouldDisplayMouseState", @click="toggleMouseState()")
 
-    h3.uk-accordion-title
-        .uk-icon-caret-right
-        .uk-icon-caret-down
-        |  {{title}}
+  h3.accordion-title(:class="{'uk-accordion-title': !disabled}")
+    .uk-icon-caret-right
+    .uk-icon-caret-down
+    span.accordion-title__content {{title}}
 
-    .uk-accordion-content
-        .mouse-state-properties(v-if="mouseState!==undefined && displayMouseState")
-            a(@click="setMouseState('')", :class="{active: isMouseState('')}") none
-            a(@click="setMouseState('hover')", :class="{active: isMouseState('hover')}") hover
-            a(@click="setMouseState('active')", :class="{active: isMouseState('active')}") active
-            a(@click="setMouseState('focus')", :class="{active: isMouseState('focus')}") focus
-        slot
+  .uk-accordion-content
+    .mouse-state-properties(v-if="shouldDisplayMouseState && chooseMouseState")
+      a(@click="setMouseState('')", :class="{active: isMouseState('')}") none
+      a(@click="setMouseState('hover')", :class="{active: isMouseState('hover')}") hover
+      a(@click="setMouseState('active')", :class="{active: isMouseState('active')}") active
+      a(@click="setMouseState('focus')", :class="{active: isMouseState('focus')}") focus
+    slot
 </template>
 
 <script>
@@ -24,40 +24,55 @@ export default {
     name: 'accordionItem',
 
     components: {
-        switcher
+      switcher
     },
 
     props: {
-        title: {
-            required: true,
-            type: String,
-            default: 'Untitled'
-        },
+      title: {
+        required: true,
+        type: String,
+        default: 'Untitled'
+      },
 
-        advanced: {},
-        mouseState: {
-            type: String
-        }
+      disabled: {
+        type: Boolean,
+        default: false
+      },
+
+      advanced: {},
+      mouseState: {
+        type: String
+      }
     },
 
     data () {
-        return {
-            displayMouseState: false
-        }
+      return {
+        chooseMouseState: false
+      }
+    },
+
+    computed: {
+      shouldDisplaySwitch () {
+        return ! this.disabled && this.advanced !== undefined
+      },
+
+      shouldDisplayMouseState () {
+        return ! this.disabled && this.mouseState !== undefined
+      }
     },
 
     methods: {
-        isMouseState (state) {
-            return this.mouseState === state
-        },
+      isMouseState (state) {
+          return this.mouseState === state
+      },
 
-        setMouseState (state) {
-            this.mouseState = state
-        },
+      setMouseState (state) {
+          this.mouseState = state
+      },
 
-        toggleMouseState () {
-            this.displayMouseState = !this.displayMouseState
-        }
+      toggleMouseState () {
+          this.chooseMouseState = !this.chooseMouseState
+      }
     }
 }
 </script>

@@ -160,11 +160,13 @@ export default {
 			// If it's actually not moving
 			// Just add component to active element
 			if ((event.pageX === this.dragState.x && event.pageY === this.dragState.y) || notMoving) {
-				console.log('not moving');
-			} else {
-				// Tell to canvas
-				this.$root.canvasBuilder().layout().dragComponentEnd(this.component)
+				let activeElement = this.$root.elementSelector().activeElement
+				this.$root.canvasBuilder().layout().overlapElement = activeElement
+				this.$root.canvasBuilder().layout().dropElement = activeElement
 			}
+
+			// Tell to canvas
+			this.$root.canvasBuilder().layout().dragComponentEnd(this.component)
 
 			// Remove element and reset dragtate to default
 			this.dragState.element.remove()

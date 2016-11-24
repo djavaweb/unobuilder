@@ -176,7 +176,7 @@ accordion-item(title="Box Properties", :mouse-state.sync="mouseState")
 popup(
 :title="popupPositionTitle",
 :overlay="true",
-:on-close="hidePopup",
+:on-close="closePopupCallback",
 button="OK",
 v-ref:popup-position)
     .uk-grid.uk-grid-small
@@ -195,7 +195,7 @@ v-ref:popup-position)
 popup(
 :title="popupMarginTitle",
 :overlay="true",
-:on-close="hidePopup",
+:on-close="closePopupCallback",
 button="OK",
 v-ref:popup-margin)
     .uk-grid.uk-grid-small
@@ -213,7 +213,7 @@ v-ref:popup-margin)
 popup(
 title="All Margin",
 :overlay="true",
-:on-close="hidePopup",
+:on-close="closePopupCallback",
 button="OK",
 v-ref:popup-all-margin)
     .uk-grid.uk-grid-small
@@ -231,7 +231,7 @@ v-ref:popup-all-margin)
 popup(
 :title="popupPaddingTitle",
 :overlay="true",
-:on-close="hidePopup",
+:on-close="closePopupCallback",
 button="OK",
 v-ref:popup-padding)
     .uk-grid.uk-grid-small
@@ -249,7 +249,7 @@ v-ref:popup-padding)
 popup(
 title="All Padding",
 :overlay="true",
-:on-close="hidePopup",
+:on-close="closePopupCallback",
 button="OK",
 v-ref:popup-all-padding)
     .uk-grid.uk-grid-small
@@ -267,7 +267,7 @@ v-ref:popup-all-padding)
 popup(
 :title="popupBorderTitle",
 :overlay="true",
-:on-close="hidePopup",
+:on-close="closePopupCallback",
 button="OK",
 v-ref:popup-border)
     .uk-grid.uk-grid-small
@@ -312,7 +312,7 @@ v-ref:border-color-popup)
 popup(
 title="All Border",
 :overlay="true",
-:on-close="hidePopup",
+:on-close="closePopupCallback",
 button="OK",
 v-ref:popup-all-border)
     .uk-grid.uk-grid-small
@@ -362,7 +362,7 @@ v-ref:popup-all-border)
 popup(
 :title="popupBorderRadiusTitle",
 :overlay="true",
-:on-close="hidePopup",
+:on-close="closePopupCallback",
 button="OK",
 v-ref:popup-border-radius)
     .uk-grid.uk-grid-small
@@ -2299,33 +2299,43 @@ export default {
          * Hide popup
          * @return {void}
          */
-        hidePopup () {
-            // Reset popup state
-            for (let i in this.popupState) {
-                utils.resetObject(this.popupState[i])
+        hidePopup (popupName) {
+          if (popupName) {
+            return this.$refs[`popup${utils.capitalize(popupName)}`]
+          }
+
+          for (let id in this.$refs) {
+            let popup = this.$refs[id]
+            if (popup.display) {
+              this.$refs[id].hide()
             }
+          }
+        },
+
+        /**
+         * Callback on popup closed
+         * @return {void}
+         */
+        closePopupCallback () {
+            // Reset popup state
+            utils.resetObject(this.popupState)
 
             // Fix auto number
-            [
-                'positionTopValue', 'positionRightValue',
-                'positionBottomValue', 'positionLeftValue',
-                'marginTopValue', 'marginRightValue',
-                'marginBottomValue', 'marginLeftValue',
-                'paddingTopValue', 'paddingRightValue',
-                'paddingBottomValue', 'paddingLeftValue',
-                'borderTopValue', 'borderRightValue',
-                'borderBottomValue', 'borderLeftValue'
-            ].forEach((propKey) => {
-                if (isNaN(parseInt(this[propKey])) || isNaN(parseFloat(this[propKey]))) {
-                    // If key is margin, it's okay if value is auto
-                    // But it's a shame, if key is border or padding
-                    if (propKey.indexOf('margin')) {
-                        if (this[propKey] !== 'auto') {
-                            this[propKey] = 0
-                        }
-                    } else {
-                        this[propKey] = 0
-                    }
+            let popupList = [
+              'positionTopValue', 'positionRightValue',
+              'positionBottomValue', 'positionLeftValue',
+              'marginTopValue', 'marginRightValue',
+              'marginBottomValue', 'marginLeftValue',
+              'paddingTopValue', 'paddingRightValue',
+              'paddingBottomValue', 'paddingLeftValue',
+              'borderTopValue', 'borderRightValue',
+              'borderBottomValue', 'borderLeftValue'
+            ]
+
+            // If key it's margin, 'auto' value is allowed
+            popupList.forEach(prop => {
+                if (isNaN(this[prop]) && prop.indexOf('margin') < 0) {
+                  this[prop] = 0
                 }
             })
         }

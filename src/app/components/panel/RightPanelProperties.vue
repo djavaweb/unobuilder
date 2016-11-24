@@ -21,13 +21,13 @@ import propBackground from '../properties/Background.vue'
 export default {
     name: 'rightPanelPropertiesItem',
     components: {
-        accordion,
-        propDisplay,
-        propBoxProperties,
-        propSize,
-        propAttr,
-        propTypography,
-        propBackground
+      accordion,
+      propDisplay,
+      propBoxProperties,
+      propSize,
+      propAttr,
+      propTypography,
+      propBackground
     }
 }
 </script>

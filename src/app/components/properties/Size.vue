@@ -1,5 +1,5 @@
 <template lang="pug">
-accordion-item(title="size", :mouse-state.sync="mouseState", :advanced.sync="advanced")
+accordion-item(title="size", :mouse-state.sync="mouseState", :advanced.sync="advanced", :disabled="disabled")
   accordion-item-view
     .uk-grid.uk-grid-small
       .uk-width-5-10
@@ -91,6 +91,7 @@ export default {
             .setProp('width.value', val, this.mouseState)
         }
       },
+
       widthUnit: {
         get () {
             return this.$root
@@ -104,6 +105,7 @@ export default {
             .setProp('width.unit', val, this.mouseState)
         }
       },
+
       widthDisabled () {
         return this.$root.elementSelector().getProp('width.disabled', this.mouseState)
       },
@@ -255,9 +257,21 @@ export default {
             .setProp('maxHeight.unit', val, this.mouseState)
         }
       },
+
       maxHeightDisabled () {
         return this.$root.elementSelector().getProp('maxHeight.disabled', this.mouseState)
       },
+
+      disabled () {
+        let activeTab = this.$root.ref('rightPanel.tab').activeTab
+        return activeTab === 'global' &&
+        this.widthDisabled &&
+        this.minWidthDisabled &&
+        this.maxWidthDisabled &&
+        this.heightDisabled &&
+        this.minHeightDisabled &&
+        this.maxHeightDisabled
+      }
     }
 }
 </script>

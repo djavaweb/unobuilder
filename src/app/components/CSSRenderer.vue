@@ -171,23 +171,28 @@ export default {
 			if (options.elementKind && options.props) {
 				let pseudoSelector = options.pseudo || ''
 				let cssObject = this.cssObject(options.elementKind, options.props)
+				let withParentSelector = false
 				let cssSelector = {
 					css: cssObject,
 					selector: options.selector + pseudoSelector,
 					elementKind: options.elementKind,
 				}
 
-				if (options.elementKind === 'container') {
-					if (options.global) {
-						options.selector = `.${utils.klass(`el-wrapper`)}`
+				if (options.global) {
+					let globalWrapperSelectors = {
+						column: `.${utils.klass(`el-column-wrapper`)}`,
+						container:  `.${utils.klass(`el-wrapper`)}`
 					}
-					cssSelector.parentSelector = `${options.selector}${pseudoSelector}`
+
+					for (let el in globalWrapperSelectors) {
+						if (options.elementKind === el) {
+							options.selector = globalWrapperSelectors[el]
+							withParentSelector = true
+						}
+					}
 				}
 
-				if (options.elementKind === 'column') {
-					if (options.global) {
-						options.selector = `.${utils.klass(`el-column-wrapper`)}`
-					}
+				if (withParentSelector) {
 					cssSelector.parentSelector = `${options.selector}${pseudoSelector}`
 				}
 

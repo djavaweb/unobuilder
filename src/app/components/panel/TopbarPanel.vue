@@ -1,6 +1,6 @@
 <template lang="pug">
 // Topbar panel
-.topbar-panel
+.topbar-panel(@click="$root.closeAllPanels()")
     div &nbsp;
 
     // Screen size button
@@ -54,12 +54,12 @@ export default {
 
     methods: {
         setScreen (size) {
-            this.screenSize = size
-            this.$root.canvasBuilder().layout().setScreenSize(size)
+          this.screenSize = size
+          this.$root.canvasBuilder().layout().setScreenSize(size)
         },
 
         isScreen (size) {
-            return this.screenSize === size
+          return this.screenSize === size
         }
     },
 

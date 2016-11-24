@@ -50,6 +50,14 @@ const unoBuilder = function () {
 	}
 
 	/**
+	 * get builder selector
+	 * @return {String}
+	 */
+	$root.getBuilderSelector = () => {
+		return global.__uno__.builder
+	}
+
+	/**
 	* Uno load URL to uno canvas
 	* @param {Object} options
 	*/

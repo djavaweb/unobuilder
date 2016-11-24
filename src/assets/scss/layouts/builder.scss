@@ -140,8 +140,8 @@ html, body, #app {
             right: 0;
             bottom: 0;
             pointer-events: none;
-            overflow: visible;
-            overflow-x: hidden;
+            overflow: hidden;
+            //overflow-x: hidden;
             line-height: 12px;
             margin: 0 auto;
             transition: width 0.3s;
@@ -204,7 +204,6 @@ html, body, #app {
     overflow: hidden;
 
     .screen-view {
-        margin-left: 10%;
         a {
             color: $white;
             font-size: 23px;
