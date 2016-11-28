@@ -12,6 +12,15 @@ accordion-item(title="Display", :mouse-state.sync="mouseState", :advanced.sync="
                     :active="isValue('block') && !isDisabled()",
                     @click="setValue('block')")
 
+                    rect-button.display-inline-block(:disabled="isDisabled()",
+                    :active="isValue('inline-block') && !isDisabled()",
+                    @click="setValue('inline-block')"
+                    v-show="advanced")
+
+                    rect-button.display-inline(:disabled="isDisabled()",
+                    :active="isValue('inline') && !isDisabled()",
+                    @click="setValue('inline')")
+
                     rect-button.display-flex(:disabled="isDisabled()",
                     :active="isValue('flex') && !isDisabled()",
                     @click="setValue('flex')",
