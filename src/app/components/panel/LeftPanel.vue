@@ -139,7 +139,6 @@ export default {
          * Hide panel
          */
         hide () {
-          console.log(this.activePanel);
           if (this.activePanel) {
             this.setPanel(this.activePanel)
           }
