@@ -4,10 +4,10 @@
 :class="resizeCursor"
 )
     // Black overlay
-    .blackout(@click="$root.closeAllPanels()")
+    .left-panel__blackout(@click="$root.closeAllPanels()")
 
     // Panel buttons
-    .left-panel-buttons
+    .left-panel__buttons
         a.toggle-button(
         :class="{active: isActivePanel(panelName)||panel.selected}",
         v-for="(panelName, panel) in panels",
