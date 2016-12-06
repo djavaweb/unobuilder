@@ -11,7 +11,7 @@
         a.toggle-button(
         :class="{active: isActivePanel(panelName)||panel.selected}",
         v-for="(panelName, panel) in panels",
-        @click="setPanel(panelName, panel)"
+        @click="setPanel(panelName)"
         )
             i(class="{{panel.icon}}")
     // End of panel buttons
@@ -139,8 +139,8 @@ export default {
          * Hide panel
          */
         hide () {
-          if (this.isActivePanel('component')) {
-            this.setPanel('component')
+          if (this.activePanel) {
+            this.setPanel(this.activePanel)
           }
         },
 

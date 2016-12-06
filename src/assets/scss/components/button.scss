@@ -86,6 +86,14 @@
         background-image: url('#{$assets_path}/img/display-none.svg');
     }
 
+    &.display-inline {
+        background-image: url('#{$assets_path}/img/display-inline.svg');
+    }
+
+    &.display-inline-block {
+        background-image: url('#{$assets_path}/img/display-inline-block.svg');
+    }
+
     &.flex-row {
         background-image: url('#{$assets_path}/img/flex-row.svg');
         &--reverse {
