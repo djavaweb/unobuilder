@@ -7,26 +7,26 @@ accordion-item(title="Display", :mouse-state.sync="mouseState", :advanced.sync="
                 label.bold Select Type
 
             .uk-width-3-5
-                .button-group.right
-                    rect-button.display-block(:disabled="isDisabled()",
+                .button-group.button-group__right
+                    rect-button.rect-button--display-block(:disabled="isDisabled()",
                     :active="isValue('block') && !isDisabled()",
                     @click="setValue('block')")
 
-                    rect-button.display-inline-block(:disabled="isDisabled()",
+                    rect-button.rect-button--display-inline-block(:disabled="isDisabled()",
                     :active="isValue('inline-block') && !isDisabled()",
                     @click="setValue('inline-block')"
                     v-show="advanced")
 
-                    rect-button.display-inline(:disabled="isDisabled()",
+                    rect-button.rect-button--display-inline(:disabled="isDisabled()",
                     :active="isValue('inline') && !isDisabled()",
                     @click="setValue('inline')")
 
-                    rect-button.display-flex(:disabled="isDisabled()",
+                    rect-button.rect-button--display-flex(:disabled="isDisabled()",
                     :active="isValue('flex') && !isDisabled()",
                     @click="setValue('flex')",
                     v-show="advanced")
 
-                    rect-button.display-none(:disabled="isDisabled()",
+                    rect-button.rect-button--display-none(:disabled="isDisabled()",
                     :active="isValue('none') && !isDiabled()",
                     @click="setValue('none')")
 
