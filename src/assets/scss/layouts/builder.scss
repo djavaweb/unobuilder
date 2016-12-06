@@ -71,7 +71,7 @@ html, body, #app {
     width: 35px;
     z-index: 999;
 
-    .left-panel-buttons {
+    .left-panel__buttons {
         margin-top: 40px;
         a {
             color: $white;
@@ -102,7 +102,7 @@ html, body, #app {
         }
     }
 
-    .blackout {
+    .left-panel__blackout {
         background: $dark-grey;
         height: 100%;
         position: absolute;
