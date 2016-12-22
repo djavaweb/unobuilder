@@ -1,5 +1,5 @@
 <template>
-<a class="rect-button" :class="{active: active, disabled: disabled}"><slot></slot></a>
+<a class="rect-button" :class="{'rect-button--active': active, 'rect-button--disabled': disabled}"><slot></slot></a>
 </template>
 
 <script>
