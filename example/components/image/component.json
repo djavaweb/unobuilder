@@ -1,0 +1,12 @@
+{
+  "id": "image",
+  "label": "Image",
+  "icon": "img/icon.svg",
+  "group": "Component",
+  "options": {
+    "src": {
+      "type": "upload",
+      "value": ""
+    }
+  }
+}

@@ -1,0 +1,39 @@
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+html {
+  background-color: lighten($warm-grey, 20);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Lato', arial, sans-serif;
+}
+
+.#{$prefix} {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+
+  &--avoid-right-bar {
+    margin-right: 240px;
+  }
+
+  &--avoid-left-bar {
+    margin-left: 30px;
+  }
+
+  &--avoid-top-bar {
+    body {
+      height: calc(100% - 40px);
+      margin-top: 40px;
+    }
+  }
+
+  &__workspace {
+    height: 100%;
+  }
+}

@@ -20,11 +20,13 @@ module.exports = {
     filename: '[name].js'
   },
   resolve: {
-    extensions: ['', '.js', '.vue', '.json'],
+    extensions: ['', '.js', '.vue', '.json', '.css'],
     fallback: [path.join(__dirname, '../node_modules')],
     alias: {
       'vue$': 'vue/dist/vue.common.js',
+      'uikit': 'uikit/dist',
       'src': path.resolve(__dirname, '../src'),
+      'uno': path.resolve(__dirname, '../src/client.js'),
       'assets': path.resolve(__dirname, '../src/assets'),
       'components': path.resolve(__dirname, '../src/components')
     }
@@ -69,12 +71,20 @@ module.exports = {
         loader: 'json'
       },
       {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        test: /\.(png|jpe?g|gif|svg|cur)(\?.*)?$/,
         loader: 'url',
         query: {
           limit: 10000,
           name: utils.assetsPath('img/[name].[hash:7].[ext]')
         }
+      },
+      {
+        test: /\.css$/,
+        loader: '!style-loader!css-loader'
+      },
+      {
+        test: /\.scss$/,
+        loader: 'sass-loader'
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="17px" viewBox="0 0 20 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>29DDE0AE-F9D3-4CB3-9067-639896D77F4D</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <rect id="path-1" x="7" y="0" width="6" height="17"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="6" height="17" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Full-View" transform="translate(-1376.000000, -442.000000)" fill="#FFFFFF">
+            <g id="Right-Panel" transform="translate(1197.000000, 72.000000)">
+                <g id="Display-option" transform="translate(0.000000, 80.000000)">
+                    <g id="Flex-settings" transform="translate(0.000000, 64.000000)">
+                        <g id="sizing-,-align,-order" transform="translate(13.000000, 183.000000)">
+                            <g id="Sizing-buttons" transform="translate(101.000000, 37.000000)">
+                                <g id="dont-shrink" transform="translate(60.000000, 0.000000)">
+                                    <g id="Group-24" transform="translate(5.000000, 6.000000)">
+                                        <g id="Group-23">
+                                            <use id="dont-shrink" stroke-opacity="0.7" stroke="#FFFFFF" mask="url(#mask-2)" stroke-width="2" fill-opacity="0.45" xlink:href="#path-1"></use>
+                                            <polyline id="Close" points="5 6.50357143 4.49642857 6 2.5 7.99642857 0.503571429 6 0 6.50357143 1.99642857 8.5 0 10.4964286 0.503571429 11 2.5 9.00357143 4.49642857 11 5 10.4964286 3.00357143 8.5 5 6.50357143"></polyline>
+                                            <polyline id="Close-Copy" points="20 6.50357143 19.4964286 6 17.5 7.99642857 15.5035714 6 15 6.50357143 16.9964286 8.5 15 10.4964286 15.5035714 11 17.5 9.00357143 19.4964286 11 20 10.4964286 18.0035714 8.5 20 6.50357143"></polyline>
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

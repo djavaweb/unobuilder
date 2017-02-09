@@ -1,0 +1,15 @@
+@mixin OpenSans {
+  font-family: 'Open Sans', arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@mixin PreventSelect {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@mixin ResizeVertical {
+  cursor: url("#{$assets_path}/cursor/resize-vertical.cur") 12 12, ns-resize !important;
+}

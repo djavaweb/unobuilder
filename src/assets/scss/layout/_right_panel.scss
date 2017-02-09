@@ -1,0 +1,46 @@
+.#{$prefix} {
+  &__right-panel {
+    @include PreventSelect;
+  	width: 240px;
+  	background-color: $charcoal-grey;
+    position: fixed;
+    height: 100%;
+    padding-top: 40px;
+    right: 0;
+    top: 0;
+    z-index: 33;
+  }
+
+  &__properties {
+    padding: 10px;
+  }
+
+  &__property-switcher {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 240px;
+    display: flex;
+    z-index: 33;
+    a {
+      @include OpenSans;
+      width: 50%;
+      height: 40px;
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      text-decoration: none;
+      color: $white;
+      background-color: $dark-two;
+
+      &.property {
+        &--active {
+          background: none;
+        }
+      }
+    }
+  }
+}

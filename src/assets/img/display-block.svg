@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>E7450031-C7BC-4E34-BE6D-E501ED510D5E</title>
+    <desc>Created with sketchtool.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Full-View" transform="translate(-1287.000000, -194.000000)" fill="#FFFFFF">
+            <g id="Right-Panel" transform="translate(1197.000000, 72.000000)">
+                <g id="Display-option" transform="translate(0.000000, 80.000000)">
+                    <g id="Display-settings" transform="translate(12.000000, 35.000000)">
+                        <g id="button-block" transform="translate(71.000000, 0.000000)">
+                            <g id="Block-icon" transform="translate(7.000000, 7.000000)">
+                                <path d="M14.2222222,0 L1.77777778,0 C0.8,0 0,0.8 0,1.77777778 L0,14.2222222 C0,15.2 0.8,16 1.77777778,16 L14.2222222,16 C15.2,16 16,15.2 16,14.2222222 L16,1.77777778 C16,0.8 15.2,0 14.2222222,0 L14.2222222,0 Z M1.77777778,1.77777778 L14.2222222,1.77777778 L14.2222222,14.2222222 L1.77777778,14.2222222 L1.77777778,1.77777778 Z" id="block"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

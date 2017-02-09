@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="17px" viewBox="0 0 24 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>8FAC7E77-000C-4946-9FF8-6455A56554AA</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <rect id="path-1" x="9" y="0" width="8" height="17"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="8" height="17" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Full-View" transform="translate(-1344.000000, -442.000000)" fill="#FFFFFF">
+            <g id="Right-Panel" transform="translate(1197.000000, 72.000000)">
+                <g id="Display-option" transform="translate(0.000000, 80.000000)">
+                    <g id="Flex-settings" transform="translate(0.000000, 64.000000)">
+                        <g id="sizing-,-align,-order" transform="translate(13.000000, 183.000000)">
+                            <g id="Sizing-buttons" transform="translate(101.000000, 37.000000)">
+                                <g id="fill-empty-space" transform="translate(30.000000, 0.000000)">
+                                    <g id="Group-22" transform="translate(2.000000, 6.000000)">
+                                        <g id="icon">
+                                            <use id="Rectangle-212" stroke-opacity="0.7" stroke="#FFFFFF" mask="url(#mask-2)" stroke-width="2" fill-opacity="0.45" xlink:href="#path-1"></use>
+                                            <polyline id="right-arrow" transform="translate(21.497041, 8.731125) rotate(-180.000000) translate(-21.497041, -8.731125) " points="20.3787422 8.10927089 22.6049802 5.87681439 21.7281658 5 17.9970407 8.73112507 21.7281658 12.4622501 22.6049802 11.5854357 20.3787422 9.35297924 24.9970407 9.35297932 24.9970407 8.10927104"></polyline>
+                                            <polyline id="right-arrow" points="3.37874225 8.10927089 5.60498021 5.87681439 4.72816581 5 0.997040749 8.73112507 4.72816581 12.4622501 5.60498021 11.5854357 3.37874225 9.35297924 7.99704075 9.35297932 7.99704075 8.10927104"></polyline>
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

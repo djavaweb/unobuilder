@@ -1,0 +1,134 @@
+.#{$prefix} {
+  &__accordion {
+    &-item {
+      position: relative;
+
+      h3 {
+        @include OpenSans;
+        display: flex;
+        align-items: center;
+        color: $white;
+        font-size: 12px;
+        line-height: normal;
+        padding: 5px 0;
+        border-bottom: solid 2px $steel-young-grey;
+        text-transform: uppercase;
+        &:after {
+          display: none;
+        }
+      }
+
+      &__content {
+        margin: 0;
+        padding: 10px 0 0
+      }
+
+      &:nth-child(n+1) {
+        margin: 0 0 10px;
+      }
+
+      &.uk-open {
+        .icon--arrow-expanded {
+          display: flex
+        }
+        .icon--arrow-collapsed {
+          display: none;
+        }
+      }
+    }
+
+    &-icon {
+      margin-right: 3px;
+      display: block;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      &.icon {
+        &--arrow-expanded {
+          display: none;
+        }
+      }
+    }
+
+    &-label {
+      display: block;
+      font-weight: bold;
+    }
+
+    &-mouse-state {
+      position: absolute;
+      top: 1px;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      align-items: center;
+      height: 25px;
+      #mouse {
+        fill: $transparent-white
+      }
+      &.mouse--active {
+        #mouse {
+          fill: $white;
+        }
+      }
+    }
+
+    &-advanced-switcher {
+      position: absolute;
+      top: 0;
+      right: 18px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-content: center;
+    }
+
+    &-state-switcher {
+      display: flex;
+      padding: 0 0 2px;
+      align-items: center;
+      align-content: center;
+      justify-content: center;
+      background-color: $gunmetal-two;
+      margin-top: -10px;
+      margin-bottom: 10px;
+      a {
+        color: $warm-grey-nine;
+        font-weight: bold;
+        font-size: 12px;
+        margin: 0 3px;
+        text-decoration: none;
+        &:hover {
+          color: $white;
+        }
+        &.state--active {
+          color: $white;
+          text-decoration: underline;
+        }
+      }
+    }
+
+    &-content {
+      box-sizing: border-box;
+      background-color: $charcoal-semi-dark;
+      margin-left: -10px;
+      margin-right: -10px;
+      padding: 10px;
+    }
+
+    &-content-item {
+      border-bottom: 1px solid darken($transparent-white, 60);
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      &:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+      & > label {
+        color: $transparent-white
+      }
+    }
+  }
+}

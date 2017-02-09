@@ -56,6 +56,10 @@ app.use(hotMiddleware)
 var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
 app.use(staticPath, express.static('./static'))
 
+// Example directory
+var examplePath = path.posix.join(config.dev.assetsPublicPath, config.dev.exampleDirectory)
+app.use(examplePath, express.static('./example'))
+
 var uri = 'http://localhost:' + port
 
 devMiddleware.waitUntilValid(function () {

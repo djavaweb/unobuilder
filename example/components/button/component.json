@@ -1,0 +1,6 @@
+{
+  "id": "button",
+  "label": "Button",
+  "icon": "img/icon.svg",
+  "group": "Component"
+}
