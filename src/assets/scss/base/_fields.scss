@@ -430,6 +430,26 @@
       }
     }
 
+    &--column {
+      display: flex;
+      align-items: center;
+      margin-top: 0!important;
+      margin-left: 10px;
+      width: 50%;
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      label {
+        margin-right: 5px;
+        min-width: 35px;
+        text-align: right;
+        align-items: flex-end;
+        justify-content: flex-end;
+      }
+    }
+
     &--row {
       * {
         @include OpenSans;
@@ -452,24 +472,8 @@
       }
     }
 
-    &--column {
-      display: flex;
-      align-items: center;
-      margin-top: 0!important;
-      margin-left: 10px;
-      width: 50%;
-
-      &:first-child {
-        margin-left: 0;
-      }
-
-      label {
-        margin-right: 5px;
-        min-width: 35px;
-        text-align: right;
-        align-items: flex-end;
-        justify-content: flex-end;
-      }
+    &--x {
+      display: inline !important;
     }
   }
 }

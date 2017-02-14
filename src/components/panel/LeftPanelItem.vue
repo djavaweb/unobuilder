@@ -14,44 +14,37 @@ export default {
     tooltip: {
       type: String
     },
-    open: {
+    defaultActive: {
       type: Boolean,
       default: false
     },
     active: {
       type: Boolean,
       default: false
-    },
-    initiated: {
-      type: Boolean,
-      default: false
-    },
-    defaultNav: {
-      type: Boolean,
-      default: false
     }
   },
   computed: {
     ...mapGetters([
-      'leftPanelNav',
-      'openLeftPanel',
-      'defaultPanel'
+      'openLeftPanel'
     ])
   },
   methods: {
     ...mapActions([
-      'registerLeftPanel',
-      'showLeftPanel'
+      'showLeftPanel',
+      'hideLeftPanels'
     ])
   },
   created () {
-    const {active, open, initiated, defaultNav} = this
-    const settings = {active, open, initiated, defaultNav}
-    this.registerLeftPanel({id: this.id, settings})
+    if (this.defaultActive) {
+      this.showLeftPanel(this.id)
+      this.hideLeftPanels()
+    }
   },
   render (h) {
+    const isOpenCurrentPanel = this.openLeftPanel === this.id
+
     const classes = {
-      'panel--selected': this.openLeftPanel === this.id
+      'panel--selected': isOpenCurrentPanel
     }
 
     const attrs = {
@@ -59,8 +52,13 @@ export default {
       'uk-tooltip': 'pos: right'
     }
 
+    const onClick = event => {
+      this.showLeftPanel(this.id)
+    }
+
     return (
       <a class={classes}
+      onClick={onClick}
       domPropsInnerHTML={SVGIcon(this.icon)}
       {...{attrs}} />
     )

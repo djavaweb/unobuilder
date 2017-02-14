@@ -207,22 +207,21 @@ const UnoBuilder = function () {
   }
 
   /**
-   * Async queues to add component
+   * Async queues to add component or block
    */
-  _root.componentQueue = async.queue((task, callback) => {
-    _root.initComponent(task.url, task.scriptPath, () => {
+  _root.elementQueue = async.queue((task, callback) => {
+    const fnName = task.type === 'component'
+      ? 'initComponent'
+      : 'initBlock'
+
+    _root[fnName](task.url, task.scriptPath, () => {
       callback()
     })
   }, 1)
 
-  /**
-   * Async queues to add block
-   */
-  _root.blockQueue = async.queue((task, callback) => {
-    _root.initBlock(task.url, task.scriptPath, () => {
-      callback()
-    })
-  }, 1)
+  _root.elementQueue.drain = done => {
+    _root.emit('finish')
+  }
 
   /**
    * Uno add component to list
@@ -230,7 +229,8 @@ const UnoBuilder = function () {
    */
   _root.addComponent = (url) => {
     let scriptPath = getScriptPath(url)
-    _root.componentQueue.push({ url, scriptPath })
+    let type = 'component'
+    _root.elementQueue.push({ url, type, scriptPath })
   }
 
   /**
@@ -239,7 +239,8 @@ const UnoBuilder = function () {
    */
   _root.addBlock = (url) => {
     let scriptPath = getScriptPath(url)
-    _root.blockQueue.push({ url, scriptPath })
+    let type = 'block'
+    _root.elementQueue.push({ url, type, scriptPath })
   }
 
   /**
@@ -341,6 +342,12 @@ const UnoBuilder = function () {
 
   _root.getComponentList = () => {
     return global.__uno__.components
+  }
+
+  _root.getComponentItem = item => {
+    if (item in global.__uno__.components) {
+      return global.__uno__.components[item]
+    }
   }
 
   _root.getBlockList = () => {

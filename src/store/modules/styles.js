@@ -5,6 +5,7 @@ import * as mutation from '../mutation-types'
 import {isEqual, isString} from 'lodash'
 
 const state = {
+  customStyles: '',
   globalProperty: {
     active: false,
     current: {
@@ -20,6 +21,15 @@ const state = {
 }
 
 const mutations = {
+  /**
+   * Change css editor value
+   * @param Object state
+   * @return void
+   */
+  [mutation.SET_CUSTOM_STYLES] (state, value) {
+    state.customStyles = value
+  },
+
   [mutation.SET_PROPERTY] (state, {element, kind, properties}) {
     let cssObject = element.cssProperties[state.screenSize]
 
@@ -106,6 +116,26 @@ const mutations = {
 }
 
 const actions = {
+  /**
+   * Change custom styles
+   *
+   * @param Function commit
+   * @param String value
+   * @return void
+   */
+  setCustomStyles ({commit}, value) {
+    commit(mutation.SET_CUSTOM_STYLES, value)
+  },
+
+  /**
+   * Change property value
+   *
+   * @param Function {commit}
+   * @param Object {rootState}
+   * @param Object {state}
+   * @param Object properties
+   * @return void
+   **/
   setPropertyValue ({commit, rootState, state}, properties) {
     const { elements } = rootState
     const { selected } = elements
@@ -147,6 +177,13 @@ const actions = {
 }
 
 const getters = {
+  /**
+   * Custom CSS
+   * @param  {Object} state
+   * @return {String}
+   */
+  customStyles: state => state.customStyles,
+
   /**
    * Global Properties
    * @param  {Object} state

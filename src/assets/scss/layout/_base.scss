@@ -5,6 +5,7 @@ html, body {
 
 html {
   background-color: lighten($warm-grey, 20);
+  transition: linear margin 0.075s;
 }
 
 body {

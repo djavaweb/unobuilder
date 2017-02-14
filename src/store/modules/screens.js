@@ -1,4 +1,4 @@
-import {ScreenType, ClassPrefix} from '../../const'
+import {ScreenType, Labels, ClassPrefix} from '../../const'
 import * as mutation from '../mutation-types'
 
 const previewClass = [
@@ -8,7 +8,9 @@ const previewClass = [
 
 const state = {
   screenSize: ScreenType.LARGE,
-  previewMode: true
+  previewMode: true,
+  screenLoader: true,
+  loaderMessage: Labels.LOADING
 }
 
 const mutations = {
@@ -17,16 +19,16 @@ const mutations = {
    */
   [mutation.TOGGLE_PREVIEW] (state) {
     state.previewMode = !state.previewMode
-    const {documentElement} = document
 
-    documentElement.className = `${ClassPrefix.MAIN}--avoid-top-bar`
+    const {documentElement: htmlTag} = document
+    htmlTag.className = `${ClassPrefix.MAIN}--avoid-top-bar`
 
     previewClass.forEach(item => {
       const className = `${ClassPrefix.MAIN}--${item}`
       if (state.previewMode) {
-        documentElement.classList.remove(className)
+        htmlTag.classList.remove(className)
       } else {
-        documentElement.classList.add(className)
+        htmlTag.classList.add(className)
       }
     })
   },
@@ -36,6 +38,20 @@ const mutations = {
    */
   [mutation.SET_SCREEN_SIZE] (state, size) {
     state.screenSize = size
+  },
+
+  /**
+   * Set loader message
+   */
+  [mutation.SET_LOADER_MESSAGE] (state, message) {
+    state.loaderMessage = message
+  },
+
+  /**
+   * Toggle loader
+   */
+  [mutation.TOGGLE_LOADER] (state, toggle) {
+    state.screenLoader = !toggle ? !state.screenLoader : toggle
   }
 }
 
@@ -55,10 +71,41 @@ const actions = {
    * @param  {[type]} {commit} [description]
    * @return {[type]}          [description]
    */
-  togglePreview ({commit, rootState}) {
-    // const {leftPanelNav} = rootState.panels
-    // leftPanelNav.component.initiated = false
+  togglePreview ({commit, getters}) {
     commit(mutation.TOGGLE_PREVIEW)
+  },
+
+  /**
+   * Toggle loader screen
+   * @param {Function} commit
+   * @return void
+   */
+  toggleLoader ({commit}, toggle) {
+    commit(mutation.TOGGLE_LOADER, toggle)
+  },
+
+  /**
+   * Set loader message
+   * @param {Function} commit
+   * @return void
+   */
+  setLoaderMessage ({commit}, message) {
+    commit(mutation.SET_LOADER_MESSAGE, message)
+  },
+
+  /**
+   * Show loader screen
+   */
+  showLoaderMessage ({commit}, message) {
+    commit(mutation.SET_LOADER_MESSAGE, message)
+    commit(mutation.TOGGLE_LOADER, true)
+  },
+
+  /**
+   * Hide loader screen
+   */
+  hideLoaderMessage ({commit}, message) {
+    commit(mutation.TOGGLE_LOADER, false)
   }
 }
 
@@ -74,7 +121,18 @@ const getters = {
    * Preview Mode
    * @type {Boolean}
    */
-  previewMode: state => state.previewMode
+  previewMode: state => state.previewMode,
+
+  /**
+   * Loader state
+   */
+  screenLoader: state => state.screenLoader,
+
+  /**
+   * Loader Message
+   * @type {Boolean}
+   */
+  loaderMessage: state => state.loaderMessage
 }
 
 export default {

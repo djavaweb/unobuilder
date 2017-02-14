@@ -3,9 +3,10 @@ import * as mutation from '../mutation-types'
 
 const state = {
   hoverStatus: '',
-  searchComponent: '',
+  searchComponents: '',
   leftPanelNav: {},
   advancedPanels: {},
+  toggleLeftPanel: false,
   openLeftPanel: '',
   openInputPanel: '',
   blocks: {}
@@ -23,59 +24,27 @@ const mutations = {
    * Hide left panels
    */
   [mutation.HIDE_LEFT_PANELS] (state) {
-    for (let panelName in state.leftPanelNav) {
-      state.leftPanelNav[panelName].open = false
-    }
+    state.toggleLeftPanel = false
   },
 
   /**
    * When users click left panel nav
    */
   [mutation.SHOW_LEFT_PANEL] (state, id) {
-    const panel = state.leftPanelNav[id]
-    const toggleOpen = !panel.defaultNav && panel.active
-
-    if (toggleOpen) {
-      for (let _id in state.leftPanelNav) {
-        if (state.leftPanelNav[_id].defaultNav) {
-          id = _id
-        }
-      }
+    if (state.openLeftPanel !== id) {
+      state.toggleLeftPanel = true
+    } else {
+      state.toggleLeftPanel = !state.toggleLeftPanel
     }
 
     state.openLeftPanel = id
-
-    for (let _id in state.leftPanelNav) {
-      if (_id === id) {
-        state.leftPanelNav[_id].active = true
-        if (!toggleOpen) {
-          state.leftPanelNav[_id].open = !state.leftPanelNav[_id].open
-        }
-        if (!state.leftPanelNav[_id].initiated) {
-          state.leftPanelNav[_id].initiated = true
-        }
-      } else {
-        state.leftPanelNav[_id].active = false
-        state.leftPanelNav[_id].open = false
-      }
-    }
   },
 
   /**
    * Search component on left panel
    */
-  [mutation.SEARCH_COMPONENT] (state, value) {
-    state.searchComponent = value
-  },
-
-  /**
-   * Register advanced panels whether open or not
-   */
-  [mutation.REGISTER_LEFT_PANEL_NAV] (state, {id, settings}) {
-    state.leftPanelNav[id] = settings
-    if (settings.active) {
-      state.openLeftPanel = id
-    }
+  [mutation.FIND_COMPONENT] (state, value) {
+    state.searchComponents = value
   },
 
   /**
@@ -152,17 +121,7 @@ const actions = {
    * @return {void}
    */
   findComponent ({commit}, value) {
-    commit(mutation.SEARCH_COMPONENT, value)
-  },
-
-  /**
-   * Register left panel navigation
-   * @param {Function} options.commit
-   * @param {String} id
-   * @return {void}
-   */
-  registerLeftPanel ({commit}, payload) {
-    commit(mutation.REGISTER_LEFT_PANEL_NAV, payload)
+    commit(mutation.FIND_COMPONENT, value)
   },
 
   /**
@@ -190,33 +149,12 @@ const actions = {
 
 const getters = {
   /**
-   * Left panel navigation object
-   * @type {Object}
-   */
-  leftPanelNav: state => state.leftPanelNav,
-
-  /**
-   * Components init status
-   * @type {Boolean}
-   */
-  defaultPanel: state => {
-    let defaultPanel
-
-    for (let i in state.leftPanelNav) {
-      if (state.leftPanelNav[i].defaultNav) {
-        defaultPanel = state.leftPanelNav[i]
-      }
-    }
-
-    return defaultPanel
-  },
-
-  /**
    * Advanced panel list
    * @type {Object}
    */
   advancedPanels: state => state.advancedPanels,
-
+  searchComponents: state => state.searchComponents,
+  toggleLeftPanel: state => state.toggleLeftPanel,
   openLeftPanel: state => state.openLeftPanel,
 
   /**

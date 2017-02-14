@@ -5,55 +5,44 @@ import {ClassPrefix, Tooltips, Icons, PropertyPanelIds} from '../../const'
 /* eslint-disable no-unused-vars */
 import NavItem from './LeftPanelItem'
 import ComponentsPanel from './LeftPanelComponents'
+import CSSEditor from './LeftPanelCssEditor'
 
-const mainClass = `${ClassPrefix.LEFT_PANEL}__nav`
+const mainClass = ClassPrefix.LEFT_PANEL
+const navClass = `${ClassPrefix.LEFT_PANEL}__nav`
+
+const panels = [
+  {
+    id: PropertyPanelIds.COMPONENT,
+    icon: Icons.ADD_ELEMENT,
+    tooltip: Tooltips.ADD_ELEMENT,
+    defaultActive: true
+  },
+  {
+    id: PropertyPanelIds.CSS_EDITOR,
+    icon: Icons.CODE_EDITOR,
+    tooltip: Tooltips.CODE_EDITOR
+  }
+]
 
 export default {
   name: 'leftPanel',
   computed: {
     ...mapGetters([
-      'previewMode',
-      'openLeftPanel'
+      'toggleLeftPanel',
+      'previewMode'
     ])
   },
   methods: {
     ...mapActions([
+      'registerLeftPanel',
       'hideAllPanels',
       'showLeftPanel'
     ])
   },
   render (h) {
-    if (this.previewMode) {
-      return
-    }
-
-    const panels = [
-      {
-        id: PropertyPanelIds.COMPONENT,
-        icon: Icons.ADD_ELEMENT,
-        tooltip: Tooltips.ADD_ELEMENT,
-        defaultNav: true,
-        open: false,
-        active: true,
-        initiated: false
-      },
-      {
-        id: PropertyPanelIds.CSS_EDITOR,
-        icon: Icons.CODE_EDITOR,
-        tooltip: Tooltips.CODE_EDITOR,
-        open: false,
-        active: false,
-        initiated: false
-      }
-    ]
-
     const navPanels = panels.map(props => {
-      const panelItemClick = event => {
-        this.showLeftPanel(props.id)
-        this.$forceUpdate()
-      }
       return <li>
-        <NavItem nativeOnClick={panelItemClick} {...{props}} />
+        <NavItem {...{props}} />
       </li>
     })
 
@@ -62,15 +51,17 @@ export default {
       this.hideAllPanels()
     }
 
-    let componentsPanel
-    if (this.openLeftPanel === PropertyPanelIds.COMPONENT) {
-      componentsPanel = <ComponentsPanel />
-    }
+    const classes = {}
+    classes['animate--slide-out'] = this.previewMode
+    classes['animate--slide-in'] = !this.previewMode
 
     return (
-      <div class={ClassPrefix.LEFT_PANEL}>
-        <ul class={mainClass} onClick={leftPanelClick}>{navPanels}</ul>
-        {componentsPanel}
+      <div class={[mainClass, classes]}>
+        <ul class={navClass} onClick={leftPanelClick}>
+          {navPanels}
+        </ul>
+        <ComponentsPanel />
+        <CSSEditor />
       </div>
     )
   }

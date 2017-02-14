@@ -1,5 +1,5 @@
 <script>
-import {mapGetters} from 'vuex'
+import {mapActions} from 'vuex'
 import {ClassPrefix, Labels, InputType} from '../../const'
 import * as common from '../../utils/common'
 
@@ -12,9 +12,9 @@ const textboxId = `input-${common.RandomUID()}`
 
 export default {
   name: 'LeftPanelSearchBox',
-  computed: {
-    ...mapGetters([
-      'searchComponentResults'
+  methods: {
+    ...mapActions([
+      'findComponent'
     ])
   },
   render (h) {
@@ -27,13 +27,18 @@ export default {
 
     const textAttrs = {
       id: textboxId,
+      value: this.searchComponents,
       placeholder: Labels.SEARCH_ELEMENT
+    }
+
+    const onInput = event => {
+      this.findComponent(event.target.value)
     }
 
     return (
       <div class={mainClass}>
         <Label {...{props: labelProps}} />
-        <Textbox props={{type: InputType.SEARCH}} {...{attrs: textAttrs}} />
+        <Textbox nativeOnInput={onInput} props={{type: InputType.SEARCH}} {...{attrs: textAttrs}} />
       </div>
     )
   }

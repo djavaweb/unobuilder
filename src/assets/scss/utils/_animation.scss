@@ -1,6 +1,6 @@
-@mixin animation ($animationName) {
-  -webkit-animation-duration: 0.3s;
-  animation-duration: 0.3s;
+@mixin animation ($animationName, $duration: 0.2s) {
+  -webkit-animation-duration: $duration;
+  animation-duration: $duration;
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
   animation-name: $animationName;
@@ -9,6 +9,17 @@
 @keyframes slideInLeft {
   from {
     transform: translate3d(-100%, 0, 0);
+    visibility: visible;
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translate3d(100%, 0, 0);
     visibility: visible;
   }
 
@@ -27,5 +38,58 @@
     visibility: hidden;
     -webkit-transform: translate3d(-100%, 0, 0);
     transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    visibility: hidden;
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+
+.animate {
+  &--fade-in {
+    @include animation(fadeIn);
+  }
+  &--fade-out {
+    @include animation(fadeOut, 0.5s);
+  }
+  &--slide-in {
+    @include animation(slideInLeft);
+  }
+  &--slide-out {
+    @include animation(slideOutLeft);
+  }
+  &--slide-in-right {
+    @include animation(slideInRight);
+  }
+  &--slide-out-right {
+    @include animation(slideOutRight);
   }
 }

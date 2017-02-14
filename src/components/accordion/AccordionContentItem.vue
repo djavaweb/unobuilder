@@ -18,12 +18,12 @@ export default {
     let itemLabel
 
     if (this.label) {
-      const labelProps = {
+      const props = {
         text: this.label,
         uppercase: true,
         bold: true
       }
-      itemLabel = <label {...{props: labelProps}} />
+      itemLabel = <label {...{props}} />
     }
 
     return (

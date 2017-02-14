@@ -14,16 +14,16 @@ export default {
     ])
   },
   render (h) {
-    let panel
+    let classes = {}
+    classes['animate--slide-out-right'] = this.previewMode
+    classes['animate--slide-in-right'] = !this.previewMode
 
-    if (!this.previewMode) {
-      panel = <div class={ClassPrefix.RIGHT_PANEL}>
+    return (
+      <div class={[ClassPrefix.RIGHT_PANEL, classes]}>
         <RightPanelSwitcher />
         <PropertiesPanels />
       </div>
-    }
-
-    return panel
+    )
   }
 }
 </script>

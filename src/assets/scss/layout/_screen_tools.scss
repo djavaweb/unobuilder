@@ -32,5 +32,32 @@
         font-size: 13px;
       }
     }
+
+    &-loader {
+      @include PreventSelect;
+      position: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 999;
+      background-color: transparentize($dark, 0.05);
+      transition: display 5s;
+
+      &.preview-mode {
+        width: 100%;
+      }
+
+      .loading-message {
+        font-size: 14px;
+        display: block;
+        color: $white;
+        margin-top: 5px;
+      }
+    }
   }
 }

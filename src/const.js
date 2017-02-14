@@ -105,6 +105,7 @@ export const Panels = {
 
 export const Labels = {
   EMPTY: '',
+  NOOP: 'noop',
   UNTITLED: 'Untitled',
   NO_ITEMS: 'No Items',
   SCREEN_LARGE: 'Desktop Screen',
@@ -140,10 +141,12 @@ export const Labels = {
   MIN: 'Min',
   MAX: 'Max',
   SAVE: 'Save',
-  UNIT_AUTO: '-'
+  UNIT_AUTO: '-',
+  LOADING: 'Please wait loading...'
 }
 
 export const Icons = {
+  LOGO: 'uno-logo',
   ADD_ELEMENT: 'add-element',
   CODE_EDITOR: 'code-editor',
   SCREEN_LARGE: 'screen-large',
@@ -177,7 +180,8 @@ export const Icons = {
   UNDO: 'undo',
   REDO: 'redo',
   ARROW_UP: 'arrow-up-input',
-  ARROW_DOWN: 'arrow-down-input'
+  ARROW_DOWN: 'arrow-down-input',
+  CLOSE: 'close'
 }
 
 export const Tooltips = {

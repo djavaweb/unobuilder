@@ -5,11 +5,14 @@ import {ClassPrefix} from '../../const'
 /* eslint-disable no-unused-vars */
 import CanvasTools from './CanvasTools'
 
+const mainClass = ClassPrefix.WORKSPACE
+
 export default {
   name: 'workspace',
   computed: {
     ...mapGetters([
-      'screenSize'
+      'screenSize',
+      'previewMode'
     ])
   },
   methods: {
@@ -22,8 +25,12 @@ export default {
       this.hideAllPanels()
     }
 
+    const classes = {
+      'preview--mode': this.previewMode
+    }
+
     return (
-      <div onClick={onClick} class={ClassPrefix.WORKSPACE}>
+      <div onClick={onClick} class={[mainClass, classes]}>
         <CanvasTools />
       </div>
     )

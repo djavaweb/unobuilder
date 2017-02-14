@@ -60,7 +60,8 @@ export default {
       {
         id: PropertyPanelIds.BACKGROUND,
         title: Labels.BACKGROUND_PROPERTIES,
-        advanced: true
+        advanced: true,
+        mouseState: true
       },
 
       {

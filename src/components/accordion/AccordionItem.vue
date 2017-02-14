@@ -103,7 +103,7 @@ export default {
       </div>
     }
 
-    if (this.mouseState !== undefined) {
+    if (this.mouseState) {
       const mouseStateClick = event => {
         this.mouseOpen = !this.mouseOpen
       }
@@ -115,7 +115,7 @@ export default {
         domPropsInnerHTML={SVGIcon(Icons.MOUSE)} />
     }
 
-    const icon = iconList.map(item => {
+    const expandCollapseIcon = iconList.map(item => {
       return <span
         class={[`icon--${item}`, iconClass]}
         domPropsInnerHTML={SVGIcon(item)} />
@@ -124,7 +124,7 @@ export default {
     return (
       <li class={[mainClass, {'uk-open': this.open}]}>
         <h3 class="uk-accordion-title">
-          {icon}
+          {expandCollapseIcon}
           <span class={labelClass}>{this.title}</span>
         </h3>
         <div class={['uk-accordion-content', contentClasses]}>

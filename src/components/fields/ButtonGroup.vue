@@ -14,9 +14,11 @@ export default {
     }
   },
   render (h) {
-    const buttons = this.items.filter(item => item).map(props => {
-      return <Button {...{props}} />
-    })
+    const buttons = this.items
+      .filter(item => item)
+      .map(props => {
+        return <Button {...{props}} />
+      })
 
     return (
       <div class={mainClass}>{buttons}</div>
