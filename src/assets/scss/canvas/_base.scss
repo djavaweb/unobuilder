@@ -1,0 +1,36 @@
+html {
+  height: 100%;
+  overflow: auto;
+}
+
+html * {
+  cursor: default;
+  -webkit-user-drag: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+[contenteditable="true"], [contenteditable="true"] * {
+  cursor: text!important;
+}
+
+[contenteditable="true"] {
+  outline: none;
+  box-shadow: 0 0 0px 4px rgba(91, 172, 255, 0.22);
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+a[href] {
+  cursor: pointer;
+}
+
+.uk-grid+.uk-grid {
+  margin-top: inherit;
+}
+

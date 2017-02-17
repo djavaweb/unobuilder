@@ -12,7 +12,7 @@ import '!style-loader!css-loader!assets/uikit/css/uikit.min.css'
 import 'assets/scss/main.scss'
 
 /* eslint-disable no-unused-vars */
-import Builder from './components/Builder'
+import App from './components/App'
 
 // Vue config
 Vue.config.debug = true
@@ -22,6 +22,6 @@ Uno.on('init', app => {
   new Vue({
     el: app.builder,
     store,
-    render: h => <Builder ref="root" />
+    render: h => <App ref="root" />
   })
 })

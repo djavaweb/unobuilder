@@ -1,13 +1,15 @@
 export const MainPrefix = 'uno-builder'
 export const ClassPrefix = {
   MAIN: MainPrefix,
+  SHORT: 'uno',
   FIELDS: `${MainPrefix}-fields`,
   SCREEN: `${MainPrefix}__screen`,
   ACCORDION: `${MainPrefix}__accordion`,
   LEFT_PANEL: `${MainPrefix}__left-panel`,
   RIGHT_PANEL: `${MainPrefix}__right-panel`,
   TOP_PANEL: `${MainPrefix}__top-panel`,
-  WORKSPACE: `${MainPrefix}__workspace`
+  WORKSPACE: `${MainPrefix}__workspace`,
+  CANVAS: `${MainPrefix}__canvas`
 }
 
 export const ScreenType = {
@@ -95,6 +97,11 @@ export const NestedableRules = {
   heading: [],
   section: KindList.filter(item => !['section', 'input'].includes(item)),
   container: KindList.filter(item => !['section', 'container', 'input'].includes(item))
+}
+
+export const DomType = {
+  TAG: 'tag',
+  TEXT: 'text'
 }
 
 export const Panels = {

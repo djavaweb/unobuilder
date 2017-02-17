@@ -1,6 +1,6 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
-import {SVGIcon} from '../../utils/common'
+import {SVGIcon} from '../../utils'
 
 export default {
   name: 'leftPanelNavItem',

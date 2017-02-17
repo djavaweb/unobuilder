@@ -1,6 +1,7 @@
 import tagLexer from 'pug-lexer'
 import tagParser from 'pug-parser'
 import {each, mapValues, map, isArray, isObject} from 'lodash'
+import {ClassPrefix} from './const'
 
 const cssPrefixes = [
   '-webkit-',
@@ -31,16 +32,10 @@ const hyphenateRE = /([a-z\d])([A-Z])/g
 const camelizeRE = /-(\w)/g
 
 /**
- * Default Prefix
- * @type {String}
- */
-export const AttrPrefix = 'uno'
-
-/**
  * Data ID from attribute prefix
  * @type {[type]}
  */
-export const SelectorAttrId = `data-${AttrPrefix}-id`
+export const SelectorAttrId = `data-${ClassPrefix.SHORT}-id`
 
 /**
  * Generate random UID
@@ -67,7 +62,7 @@ export const SelectorId = id => {
 }
 
 export const ClassName = (name = 'unnamed', selector = '') => {
-  return `${selector}${AttrPrefix}-${name}`
+  return `${selector}${ClassPrefix.SHORT}-${name}`
 }
 
 export const GlobalClassName = (name = 'unnamed', selector = '') => {
@@ -257,6 +252,23 @@ export const IsJSON = (json, message = 'Invalid JSON') => {
 }
 
 /**
+ * Change ID deep
+ */
+export const ChangeIdDeep = object => {
+  const newId = RandomUID()
+  if (object.id) {
+    object.id = newId
+    object.dataObject.attrs[SelectorAttrId] = newId
+    object.dataObject.attrs.testid = newId
+    object.dataObject.ref = newId.replace(/-/g, '')
+    for (let index in object.childNodes) {
+      object.childNodes[index] = ChangeIdDeep(object.childNodes[index])
+    }
+  }
+  return object
+}
+
+/**
  * Replace object deep
  * @param {Object} object
  * @param {Array} replace
@@ -288,4 +300,11 @@ export const ReplaceDeep = (obj, replace) => {
  */
 export const SVGIcon = filename => {
   return require(`!raw-loader!assets/img/${filename}.svg`)
+}
+
+/**
+ * Get element's ID
+ */
+export const GetNodeId = element => {
+  return element && element.getAttribute(SelectorAttrId)
 }

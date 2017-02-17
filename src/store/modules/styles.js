@@ -1,4 +1,4 @@
-import {CloneObject, GlobalClassName, SelectorId} from '../../utils/common'
+import {CloneObject, GlobalClassName, SelectorId} from '../../utils'
 import {PropertyList} from '../../const'
 import * as node from '../../utils/node-element'
 import * as mutation from '../mutation-types'

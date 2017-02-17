@@ -1,7 +1,7 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {ClassPrefix, Labels, Icons, Tooltips} from '../../const'
-import {SVGIcon} from '../../utils/common'
+import {SVGIcon} from '../../utils'
 
 /* eslint-disable no-unused-vars */
 import Switcher from '../fields/Switcher'

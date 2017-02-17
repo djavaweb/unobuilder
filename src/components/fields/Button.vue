@@ -1,6 +1,6 @@
 <script>
 import {ButtonType, ClassPrefix} from '../../const'
-import {SVGIcon} from '../../utils/common'
+import {SVGIcon} from '../../utils'
 
 const mainClass = `${ClassPrefix.FIELDS}--button`
 

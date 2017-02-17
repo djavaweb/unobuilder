@@ -1,7 +1,7 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {ClassPrefix, Labels, Tooltips, Units, Icons} from '../../const'
-import {RandomUID, SVGIcon} from '../../utils/common'
+import {RandomUID, SVGIcon} from '../../utils'
 
 /* eslint-disable no-unused-vars */
 import Textbox from './Textbox'

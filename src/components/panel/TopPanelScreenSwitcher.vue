@@ -1,6 +1,6 @@
 <script>
 import {ClassPrefix, ScreenType, Tooltips, Icons} from '../../const'
-import {SVGIcon} from '../../utils/common'
+import {SVGIcon} from '../../utils'
 import {mapGetters, mapActions} from 'vuex'
 
 const mainClass = `${ClassPrefix.TOP_PANEL}-screen-switcher`
@@ -14,6 +14,8 @@ export default {
   },
   methods: {
     ...mapActions([
+      'selectElement',
+      'refreshScroll',
       'changeScreenSize'
     ])
   },
@@ -32,6 +34,7 @@ export default {
 
       const onClick = event => {
         this.changeScreenSize(screenSize)
+        this.refreshScroll()
       }
 
       return <a

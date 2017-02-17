@@ -2,7 +2,7 @@
 import {mapGetters} from 'vuex'
 import {ClassPrefix, Labels, ScreenSize} from '../../const'
 
-const mediaToolsClass = `${ClassPrefix.WORKSPACE}-canvas-media-tools`
+const mediaToolsClass = `${ClassPrefix.CANVAS}-media-tools`
 
 export default {
   name: 'mediaQueryStatus',

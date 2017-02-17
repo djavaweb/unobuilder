@@ -14,9 +14,10 @@ export default {
     ])
   },
   render (h) {
-    let classes = {}
-    classes['animate--slide-out-right'] = this.previewMode
-    classes['animate--slide-in-right'] = !this.previewMode
+    let classes = {
+      'animate--slide-out-right': this.previewMode,
+      'animate--slide-in-right': !this.previewMode
+    }
 
     return (
       <div class={[ClassPrefix.RIGHT_PANEL, classes]}>

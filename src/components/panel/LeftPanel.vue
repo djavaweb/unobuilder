@@ -40,26 +40,25 @@ export default {
     ])
   },
   render (h) {
-    const navPanels = panels.map(props => {
-      return <li>
-        <NavItem {...{props}} />
-      </li>
-    })
+    const classes = {
+      'animate--slide-out': this.previewMode,
+      'animate--slide-in': !this.previewMode
+    }
 
     const leftPanelClick = event => {
       if (event.target !== event.currentTarget) return
       this.hideAllPanels()
     }
 
-    const classes = {}
-    classes['animate--slide-out'] = this.previewMode
-    classes['animate--slide-in'] = !this.previewMode
+    const navPanels = panels.map(props => {
+      return <li>
+        <NavItem {...{props}} />
+      </li>
+    })
 
     return (
       <div class={[mainClass, classes]}>
-        <ul class={navClass} onClick={leftPanelClick}>
-          {navPanels}
-        </ul>
+        <ul class={navClass} onClick={leftPanelClick}>{navPanels}</ul>
         <ComponentsPanel />
         <CSSEditor />
       </div>

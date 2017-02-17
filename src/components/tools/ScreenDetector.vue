@@ -14,10 +14,6 @@ export default {
     }
   },
   methods: {
-    /**
-    * Get windows width
-    * @return Number
-    */
     windowWidth () {
       return window.innerWidth ||
       document.documentElement.clientWidth ||
@@ -26,10 +22,6 @@ export default {
   },
 
   mounted () {
-    /**
-    * Window resize observer, since we can't using this app with screen < 950, warning will appear
-    * @return {void}
-    */
     this.windowSize = this.windowWidth()
     window.addEventListener('resize', () => {
       this.windowSize = this.windowWidth()
@@ -38,7 +30,6 @@ export default {
 
   render (h) {
     const screenTooSmall = this.windowSize < SafeScreenSize
-
     if (!screenTooSmall) {
       return
     }

@@ -1,7 +1,7 @@
 <script>
 import {mapGetters} from 'vuex'
 import {ClassPrefix, Labels, Icons} from '../../const'
-import {SVGIcon} from '../../utils/common'
+import {SVGIcon} from '../../utils'
 
 const mainClass = `${ClassPrefix.SCREEN}-loader`
 
@@ -10,8 +10,7 @@ export default {
   computed: {
     ...mapGetters([
       'screenLoader',
-      'loaderMessage',
-      'previewMode'
+      'loaderMessage'
     ])
   },
   render (h) {

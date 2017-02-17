@@ -2,7 +2,7 @@
 import {ClassPrefix} from '../../const'
 import uno from '../../client'
 
-const mainClass = `${ClassPrefix.WORKSPACE}-canvas-block-component`
+const mainClass = `${ClassPrefix.CANVAS}-block-component`
 
 export default {
   name: 'canvasBlockComponent',

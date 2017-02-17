@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import styles from './modules/styles'
 import panels from './modules/panels'
-import screens from './modules/screens'
+import tools from './modules/tools'
 import elements from './modules/elements'
 import components from './modules/components'
 import * as mutation from './mutation-types'
@@ -49,7 +49,7 @@ export default new Vuex.Store({
   modules: {
     styles,
     panels,
-    screens,
+    tools,
     elements,
     components
   },

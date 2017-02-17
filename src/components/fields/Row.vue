@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import Label from './Label'
 import {ClassPrefix} from '../../const'
-import {SVGIcon} from '../../utils/common'
+import {SVGIcon} from '../../utils'
 
 const mainClass = `${ClassPrefix.FIELDS}--row`
 

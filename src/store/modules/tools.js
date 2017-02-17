@@ -8,17 +8,20 @@ const previewClass = [
 
 const state = {
   screenSize: ScreenType.LARGE,
-  previewMode: true,
+  canvasLoaded: false,
+  canvasScroll: {},
+  previewMode: false,
   screenLoader: true,
   loaderMessage: Labels.LOADING
 }
 
 const mutations = {
   /**
-   * Change Screen Size
+   * Toggle preview mode
    */
-  [mutation.TOGGLE_PREVIEW] (state) {
-    state.previewMode = !state.previewMode
+  [mutation.TOGGLE_PREVIEW] (state, toggle) {
+    toggle = typeof toggle === 'undefined' ? !state.previewMode : toggle
+    state.previewMode = toggle
 
     const {documentElement: htmlTag} = document
     htmlTag.className = `${ClassPrefix.MAIN}--avoid-top-bar`
@@ -52,6 +55,20 @@ const mutations = {
    */
   [mutation.TOGGLE_LOADER] (state, toggle) {
     state.screenLoader = !toggle ? !state.screenLoader : toggle
+  },
+
+  /**
+   * Init canvas iframe
+   */
+  [mutation.SET_INITIATED_CANVAS] (state) {
+    state.canvasLoaded = true
+  },
+
+  /**
+   * Set canvas scroll value
+   */
+  [mutation.SET_CANVAS_SCROLL] (state, scrollValue) {
+    state.canvasScroll = scrollValue
   }
 }
 
@@ -71,8 +88,26 @@ const actions = {
    * @param  {[type]} {commit} [description]
    * @return {[type]}          [description]
    */
-  togglePreview ({commit, getters}) {
+  togglePreview ({commit}) {
     commit(mutation.TOGGLE_PREVIEW)
+  },
+
+  /**
+   * Show Preview
+   * @param  {[type]} {commit} [description]
+   * @return {[type]}          [description]
+   */
+  showPreview ({commit}) {
+    commit(mutation.TOGGLE_PREVIEW, true)
+  },
+
+  /**
+   * Hide Preview
+   * @param  {[type]} {commit} [description]
+   * @return {[type]}          [description]
+   */
+  hidePreview ({commit}) {
+    commit(mutation.TOGGLE_PREVIEW, false)
   },
 
   /**
@@ -106,6 +141,20 @@ const actions = {
    */
   hideLoaderMessage ({commit}, message) {
     commit(mutation.TOGGLE_LOADER, false)
+  },
+
+  /**
+   * Notify that canvas already loaded
+   */
+  canvasReady ({commit}) {
+    commit(mutation.SET_INITIATED_CANVAS)
+  },
+
+  /**
+   * Set canvas scroll bounds top
+   */
+  setCanvasScroll ({commit}, scrollValue) {
+    commit(mutation.SET_CANVAS_SCROLL, scrollValue)
   }
 }
 
@@ -132,7 +181,15 @@ const getters = {
    * Loader Message
    * @type {Boolean}
    */
-  loaderMessage: state => state.loaderMessage
+  loaderMessage: state => state.loaderMessage,
+
+  /**
+   * Canvas status
+   * @type {Boolean}
+   */
+  canvasLoaded: state => state.canvasLoaded,
+
+  canvasScroll: state => state.canvasScroll
 }
 
 export default {

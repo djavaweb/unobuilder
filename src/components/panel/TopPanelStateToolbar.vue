@@ -15,7 +15,9 @@ export default {
   },
   methods: {
     ...mapActions([
-      'togglePreview'
+      'togglePreview',
+      'undo',
+      'redo'
     ])
   },
   render (h) {
@@ -71,8 +73,10 @@ export default {
 
     return (
       <div class={mainClass}>
-        <Button {...{attrs: undo.attrs, props: undo.props}} />
-        <Button {...{attrs: redo.attrs, props: redo.props}} />
+        <Button nativeOnClick={this.undo}
+          {...{attrs: undo.attrs, props: undo.props}} />
+        <Button nativeOnClick={this.redo}
+          {...{attrs: redo.attrs, props: redo.props}} />
         <Button nativeOnClick={previewClick}
           {...{attrs: preview.attrs, props: preview.props}} />
         <Button {...{attrs: save.attrs, props: save.props}} />

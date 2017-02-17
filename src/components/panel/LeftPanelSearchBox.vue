@@ -1,14 +1,14 @@
 <script>
 import {mapActions} from 'vuex'
 import {ClassPrefix, Labels, InputType} from '../../const'
-import * as common from '../../utils/common'
+import {RandomUID} from '../../utils'
 
 /* eslint-disable no-unused-vars */
 import Label from '../fields/Label'
 import Textbox from '../fields/Textbox'
 
 const mainClass = `${ClassPrefix.MAIN}__component-search-box`
-const textboxId = `input-${common.RandomUID()}`
+const textboxId = `input-${RandomUID()}`
 
 export default {
   name: 'LeftPanelSearchBox',

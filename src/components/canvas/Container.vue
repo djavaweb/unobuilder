@@ -4,16 +4,16 @@ import {ClassPrefix, ScreenType, ScreenSize} from '../../const'
 
 /* eslint-disable no-unused-vars */
 import MediaQueryStatus from '../tools/MediaQueryStatus'
-import CanvasIframe from './CanvasIframe'
-import CanvasBlockComponent from './CanvasBlockComponent'
-
-const mainClass = `${ClassPrefix.WORKSPACE}-canvas`
+import CanvasIframe from './Iframe'
+import BlockComponent from './Block'
+import ElementSelector from '../tools/ElementSelector'
 
 export default {
   name: 'canvas',
   computed: {
     ...mapGetters([
-      'screenSize'
+      'screenSize',
+      'previewMode'
     ]),
     canvasStyle () {
       const sizeConst = this.screenSize.toUpperCase()
@@ -50,17 +50,25 @@ export default {
   },
 
   render (h) {
-    let {canvasStyle, mediaQueryStatus} = {}
+    let mediaQueryStatus
+    let elementSelector
+    let blockComponent
 
     if (this.screenSize !== ScreenType.LARGE) {
       mediaQueryStatus = <MediaQueryStatus />
     }
 
+    if (!this.previewMode) {
+      elementSelector = <ElementSelector />
+      blockComponent = <BlockComponent />
+    }
+
     return (
-      <div class={mainClass} style={this.canvasStyle}>
+      <div class={ClassPrefix.CANVAS} style={this.canvasStyle}>
         {mediaQueryStatus}
+        {elementSelector}
         <CanvasIframe />
-        <CanvasBlockComponent />
+        {blockComponent}
       </div>
     )
   }

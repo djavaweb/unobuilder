@@ -1,7 +1,7 @@
 // Import important modules
 import $ from 'jquery'
 import async from 'async'
-import {IsJSON, ReplaceDeep, RandomUID} from './utils/common'
+import {IsJSON, ReplaceDeep, RandomUID} from './utils'
 import {extend, omit} from 'lodash'
 
 // Define static vars
@@ -218,10 +218,6 @@ const UnoBuilder = function () {
       callback()
     })
   }, 1)
-
-  _root.elementQueue.drain = done => {
-    _root.emit('finish')
-  }
 
   /**
    * Uno add component to list

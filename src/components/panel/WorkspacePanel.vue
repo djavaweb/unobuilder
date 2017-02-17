@@ -3,7 +3,7 @@ import {mapGetters, mapActions} from 'vuex'
 import {ClassPrefix} from '../../const'
 
 /* eslint-disable no-unused-vars */
-import CanvasTools from './CanvasTools'
+import Canvas from '../canvas/Container'
 
 const mainClass = ClassPrefix.WORKSPACE
 
@@ -31,7 +31,7 @@ export default {
 
     return (
       <div onClick={onClick} class={[mainClass, classes]}>
-        <CanvasTools />
+        <Canvas />
       </div>
     )
   }

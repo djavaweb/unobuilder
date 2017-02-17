@@ -25,22 +25,24 @@ export default {
       'hoverRightPanel',
       'hoverCenterPanel',
       'hideLoaderMessage',
-      'togglePreview',
+      'canvasReady',
+      'hidePreview',
+      'refreshScroll',
       'setLoaderMessage'
     ])
   },
   created () {
     uno.on('finish', () => {
+      setTimeout(() => this.refreshScroll(), 100)
       this.hideLoaderMessage()
-      setTimeout(() => {
-        this.setLoaderMessage(Labels.NOOP)
-      }, 1000)
+      this.hidePreview()
+      this.canvasReady()
+      setTimeout(() => this.setLoaderMessage(Labels.NOOP), 1250)
     })
   },
-  mounted () {
+  beforeMount () {
     this.$nextTick(() => {
       uno.emit('ready')
-      this.togglePreview()
     })
   },
   render (h) {
