@@ -7,9 +7,9 @@ const state = {
   leftPanelNav: {},
   advancedPanels: {},
   toggleLeftPanel: false,
+  toggleBlockPanel: false,
   openLeftPanel: '',
-  openInputPanel: '',
-  blocks: {}
+  openInputPanel: ''
 }
 
 const mutations = {
@@ -69,6 +69,14 @@ const mutations = {
   [mutation.TOGGLE_INPUT_PANEL] (state, id) {
     id = state.openInputPanel === id ? '' : id
     state.openInputPanel = id
+  },
+
+  /**
+   * Toggle block panel
+   */
+  [mutation.TOGGLE_BLOCK_PANEL] (state, toggle) {
+    toggle = typeof toggle === 'undefined' ? !state.toggleBlockPanel : toggle
+    state.toggleBlockPanel = toggle
   }
 }
 
@@ -142,8 +150,36 @@ const actions = {
     commit(mutation.TOGGLE_ADVANCED_PANEL, propName)
   },
 
+  /**
+   * Toggle input panel
+   * @param Function commit
+   */
   toggleInputPanel ({commit}, id) {
     commit(mutation.TOGGLE_INPUT_PANEL, id)
+  },
+
+  /**
+   * Toggle block panel
+   * @param Function commit
+   */
+  toggleBlock ({commit}) {
+    commit(mutation.TOGGLE_BLOCK_PANEL)
+  },
+
+  /**
+   * Display block panel
+   * @param Function commit
+   */
+  showBlockPanel ({commit}) {
+    commit(mutation.TOGGLE_BLOCK_PANEL, true)
+  },
+
+  /**
+   * Hide block panel
+   * @param Function commit
+   */
+  hideBlockPanel ({commit}) {
+    commit(mutation.TOGGLE_BLOCK_PANEL, false)
   }
 }
 
@@ -155,6 +191,7 @@ const getters = {
   advancedPanels: state => state.advancedPanels,
   searchComponents: state => state.searchComponents,
   toggleLeftPanel: state => state.toggleLeftPanel,
+  toggleBlockPanel: state => state.toggleBlockPanel,
   openLeftPanel: state => state.openLeftPanel,
 
   /**

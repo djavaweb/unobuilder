@@ -33,10 +33,12 @@ export default {
   },
   created () {
     uno.on('finish', () => {
-      setTimeout(() => this.refreshScroll(), 100)
-      this.hideLoaderMessage()
       this.hidePreview()
-      this.canvasReady()
+      setTimeout(() => {
+        this.canvasReady()
+        this.hideLoaderMessage()
+      }, 1000)
+      setTimeout(() => this.refreshScroll(), 100)
       setTimeout(() => this.setLoaderMessage(Labels.NOOP), 1250)
     })
   },

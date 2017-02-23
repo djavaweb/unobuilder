@@ -1,7 +1,7 @@
 // Import important modules
 import $ from 'jquery'
 import async from 'async'
-import {IsJSON, ReplaceDeep, RandomUID} from './utils'
+import {IsJSON, RandomUID} from './utils'
 import {extend, omit} from 'lodash'
 
 // Define static vars
@@ -28,6 +28,82 @@ const actionObjectException = [
   'added',
   'ready'
 ]
+
+class HTMLParser {
+  constructor () {
+    this.output = ''
+  }
+
+  parse (tree) {
+    return new Promise(resolve => {
+      const walk = this.walk(tree, 0)
+      let it = walk.next()
+
+      while (!it.done) {
+        it = walk.next()
+      }
+
+      resolve(this.output)
+    })
+  }
+
+  * walk (tree, level) {
+    if (!tree) return
+
+    for (let i = 0; i < tree.length; i++) {
+      const node = tree[i]
+      this.output += `\n${'  '.repeat(level)}${this.parseNode(node)}`
+
+      if (node.childNodes.length > 0) {
+        yield * this.walk(node.childNodes, level + 1)
+      }
+    }
+  }
+
+  parseNode (node) {
+    const {nodeType} = node
+
+    switch (nodeType) {
+      case 10: return `doctype html`
+      case 8: return `//${node.textContent}`
+      case 3: return `| ${node.textContent}`
+    }
+
+    if (node.nodeName) {
+      return this.setAttributes(node)
+    }
+
+    return node
+  }
+
+  setAttributes (node) {
+    let output = node.nodeName.toLowerCase()
+    let attributes = []
+
+    if (node.id) {
+      output += `#${node.id}`
+    }
+
+    if (node.classList.length > 0) {
+      for (let i = 0; i <= node.classList.length; i++) {
+        output += `.${node.classList[i]}`
+      }
+    }
+
+    for (let i in node.attributes) {
+      let {localName, value} = node.attributes[i]
+      if (localName && (localName !== 'id' && localName !== 'class')) {
+        attributes.push(`${localName}='${value}'`)
+      }
+    }
+
+    if (attributes.length > 0) {
+      output += `(${attributes.join(', ')})`
+    }
+
+    return output
+  }
+}
 
 const getScriptPath = url => {
   let scriptPath = url.split('/')
@@ -214,7 +290,7 @@ const UnoBuilder = function () {
       ? 'initComponent'
       : 'initBlock'
 
-    _root[fnName](task.url, task.scriptPath, () => {
+    _root[fnName](task.url, task.scriptPath).then(() => {
       callback()
     })
   }, 1)
@@ -243,97 +319,94 @@ const UnoBuilder = function () {
    * Uno init element (block / component)
    * @param {String} url
    */
-  _root.initElement = (element, url, scriptPath, callback) => {
+  _root.initElement = (element, url, scriptPath) => {
     // Get component object from js file
     // For closure purpose
     let data = {
       _id: RandomUID(),
-      path: {
-        root: scriptPath,
-        img: `${scriptPath}/img/`,
-        js: `${scriptPath}/js/`,
-        css: `${scriptPath}/css/`
-      }
+      path: scriptPath
     }
 
-    // load json
-    const loadJson = callback => {
-      $.ajax({
-        url: `${scriptPath}/${element}.json`,
-        type: 'GET',
-        dataType: 'json',
-        complete (xhr) {
-          // Call after init
-          if (xhr.status === 200) {
-            let json = IsJSON(xhr.responseText)
-            if (json && json.id) {
-              // Append component settings
-              data.settings = ReplaceDeep(json, [{
-                regex: /^(img\/)/g,
-                value: data.path.img
-              }, {
-                regex: /^(js\/)/g,
-                value: data.path.js
-              }, {
-                regex: /^(css\/)/g,
-                value: data.path.css
-              }])
-
-              callback && callback.apply(this, [json.id, data])
+    // Load json
+    const loadJson = () => {
+      return new Promise((resolve, reject) => {
+        $.ajax({
+          url: `${scriptPath}/${element}.json`,
+          type: 'GET',
+          dataType: 'json',
+          complete (xhr) {
+            if (xhr.status === 200) {
+              let json = IsJSON(xhr.responseText)
+              if (json && json.id) {
+                json.icon = `${scriptPath}/${json.icon}`
+                data.settings = json
+                resolve(data)
+              } else {
+                reject(new Error(`${errorMessages.invalidJSON}, url: ${scriptPath}/${element}.json`))
+              }
             } else {
-              throw Error(`${errorMessages.invalidJSON}, url: ${scriptPath}/${element}.json`)
+              reject(new Error(`${errorMessages.JSONNotfound}, url: ${scriptPath}/${element}.json`))
             }
-          } else {
-            throw Error(`${errorMessages.JSONNotfound}, url: ${scriptPath}/${element}.json`)
           }
-        }
+        })
       })
     }
 
     // Load Markup template
-    const loadTemplate = callback => {
-      $.ajax({
-        url: `${scriptPath}/${element}.html`,
-        type: 'GET',
-        complete (xhr) {
-          // Call after init
-          if (xhr.status === 200) {
-            let template = $.trim(xhr.responseText.replace(/[\t\n]+/g, ' '))
-            if (template !== '') {
-              callback && callback.apply(this, [template])
+    const loadTemplate = () => {
+      return new Promise((resolve, reject) => {
+        $.ajax({
+          url: `${scriptPath}/${element}.html`,
+          type: 'GET',
+          complete (xhr) {
+            if (xhr.status === 200) {
+              let template = $.trim(xhr.responseText.replace(/[\t\n]+/g, ' '))
+              if (template !== '') {
+                resolve(template)
+              } else {
+                reject(new Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/${element}.html`))
+              }
             } else {
-              throw Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/${element}.html`)
+              reject(new Error(`${errorMessages.TemplateNotFound}, url: ${scriptPath}/${element}.html`))
             }
-          } else {
-            throw Error(`${errorMessages.TemplateNotFound}, url: ${scriptPath}/${element}.html`)
           }
-        }
+        })
       })
     }
 
-    // load JSON and HTML
-    loadJson((elementId, _element) => {
-      loadTemplate(template => {
-        // Add template to component
-        _element.template = template
+    const errorLogger = err => {
+      console.error(err)
+    }
 
-        // Add component to list
-        global.__uno__[`${element}s`][elementId] = _element
+    const parser = new HTMLParser()
 
-        // Register script
-        _root.registerScript(url, `${element}-${_element._id}`)
+    return new Promise((resolve) => {
+      loadJson()
+      .catch(errorLogger)
+      .then(loadTemplate)
+      .catch(errorLogger)
+      .then(template => {
+        let html = $.parseHTML(template)
+        parser.parse(html).then(output => {
+          data.template = output
 
-        callback && callback()
+          // Add component to list
+          global.__uno__[`${element}s`][data.settings.id] = data
+
+          // Register script
+          _root.registerScript(url, `${element}-${data.id}`)
+          resolve()
+        })
       })
     })
   }
 
-  _root.initComponent = (url, scriptPath, callback) => {
-    _root.initElement('component', url, scriptPath, callback)
+  _root.initComponent = (url, scriptPath) => {
+    return _root.initElement('component', url, scriptPath)
   }
 
-  _root.initBlock = (url, scriptPath, callback) => {
-    _root.initElement('block', url, scriptPath, callback)
+  _root.initBlock = (url, scriptPath) => {
+    return _root.initElement('block', url, scriptPath)
   }
 
   _root.getComponentList = () => {

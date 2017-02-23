@@ -1,6 +1,6 @@
 {
   "id": "video",
   "label": "Video",
-  "icon": "img/icon.svg",
+  "icon": "icon.svg",
   "group": "Component"
 }

@@ -15,6 +15,7 @@ export default {
   },
   methods: {
     ...mapActions([
+      'refreshScroll',
       'togglePreview',
       'undo',
       'redo'
@@ -57,6 +58,9 @@ export default {
 
     const previewClick = event => {
       this.togglePreview()
+      if (!this.previewMode) {
+        setTimeout(() => this.refreshScroll(), 10)
+      }
     }
 
     const save = {

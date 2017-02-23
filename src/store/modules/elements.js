@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
-import {VoidElements, NestedableRules, MoveAction} from '../../const'
+import {RootElementTag, VoidElements, NestedableRules, MoveAction} from '../../const'
 import {isEqual} from 'lodash'
 
 const state = {
@@ -9,11 +9,12 @@ const state = {
   current: [],
   snapshot: [],
   next: [],
+  move: {},
   window: undefined,
   selected: null,
   hovered: null,
-  openBreadcrumbs: false,
-  move: {}
+  lastInserted: null,
+  openBreadcrumbs: false
 }
 
 const getElementObject = (id, elements) => {
@@ -45,7 +46,46 @@ const getElementObjectByNode = (element, elements) => {
 const getParentElement = id => {
   const element = getElementNodeById(id)
   if (element) {
-    return utils.GetNodeId(element.parentElement) ? element.parentElement : undefined
+    return utils.GetNodeId(element.parentElement)
+      ? element.parentElement
+      : undefined
+  }
+}
+
+const getRootElement = id => {
+  const element = getElementNodeById(id)
+
+  if (!element) {
+    return
+  }
+
+  if (element.getAttribute(RootElementTag)) {
+    return element
+  }
+
+  const parentElement = getParentElement(id)
+  if (parentElement && parentElement.getAttribute(RootElementTag)) {
+    return element
+  } else {
+    return getRootElement(utils.GetNodeId(parentElement))
+  }
+}
+
+const getPrevElement = id => {
+  const element = getElementNodeById(id)
+  if (element) {
+    return utils.GetNodeId(element.previousElementSibling)
+      ? element.previousElementSibling
+      : undefined
+  }
+}
+
+const getNextElement = id => {
+  const element = getElementNodeById(id)
+  if (element) {
+    return utils.GetNodeId(element.nextElementSibling)
+      ? element.nextElementSibling
+      : undefined
   }
 }
 
@@ -54,6 +94,34 @@ const getParentElementObject = (id, elements) => {
   if (parentElement) {
     return getElementObjectByNode(parentElement, elements)
   }
+}
+
+const getPrevElementObject = (id, elements) => {
+  const prevElement = getPrevElement(id)
+  if (prevElement) {
+    return getElementObjectByNode(prevElement, elements)
+  }
+}
+
+const getNextElementObject = (id, elements) => {
+  const nextElement = getNextElement(id)
+  if (nextElement) {
+    return getElementObjectByNode(nextElement, elements)
+  }
+}
+
+const getSiblingElement = (id, elements) => {
+  let element = getParentElementObject(id, elements)
+  const prevElement = getPrevElementObject(id, elements)
+  const nextElement = getNextElementObject(id, elements)
+
+  if (nextElement) {
+    element = nextElement
+  } else if (prevElement) {
+    element = prevElement
+  }
+
+  return element
 }
 
 const getRequiredParentElement = (id, elements) => {
@@ -89,6 +157,18 @@ const getBreadcrumbById = (id, elements) => {
   if (elementObject) {
     const { id, label } = elementObject
     return { id, label }
+  }
+}
+
+const deleteNodeById = (id, elements) => {
+  for (let i = 0; i < elements.length; i++) {
+    if (elements[i].childNodes && elements[i].childNodes.length > 0) {
+      deleteNodeById(id, elements[i].childNodes)
+    }
+
+    if (elements[i].id === id) {
+      elements.splice(i, 1)
+    }
   }
 }
 
@@ -179,13 +259,7 @@ const mutations = {
     if (prev.length > 0) {
       state.prev = prev.slice(0, prev.length - 1)
       state.current = prev[prev.length - 1]
-      state.next = [ current, ...next ]
-
-      if (state.selected && state.selected.id === state.current.id) {
-        state.selected = state.current
-      } else {
-        state.selected = null
-      }
+      state.next = [current, ...next]
     }
   },
 
@@ -202,12 +276,6 @@ const mutations = {
       state.prev = [ ...prev, current ]
       state.current = next[0]
       state.next = next.slice(1)
-
-      if (state.selected && state.selected.id === state.current.id) {
-        state.selected = state.current
-      } else {
-        state.selected = null
-      }
     }
   },
 
@@ -221,9 +289,11 @@ const mutations = {
   /**
    * Add element to current state
    */
-  [mutation.ADD_ELEMENT] (state, { markupText, appendTo, index }) {
+  [mutation.ADD_ELEMENT] (state, { markupText, appendTo, index = 0 }) {
     const element = utils.MarkupToObject(markupText)
     if (element) {
+      state.lastInserted = element.id
+
       if (!appendTo) {
         index = !index ? state.snapshot.length : index
         state.snapshot.splice(index, 0, element)
@@ -239,21 +309,7 @@ const mutations = {
    * Remove current element state by id
    */
   [mutation.REMOVE_ELEMENT] (state, id) {
-    const parentElement = getParentElementObject(id, state.snapshot)
-    id = (parentElement && parentElement.requiredParent) ? parentElement.id : id
-
-    const removeElement = (elements) => {
-      for (let i = 0; i < elements.length; i++) {
-        if (elements[i].childNodes && elements[i].childNodes.length > 0) {
-          removeElement(elements[i].childNodes)
-        }
-
-        if (elements[i].id === id) {
-          elements.splice(i, 1)
-        }
-      }
-    }
-    removeElement(state.snapshot)
+    deleteNodeById(id, state.snapshot)
   },
 
   /**
@@ -262,6 +318,13 @@ const mutations = {
   [mutation.SELECT_ELEMENT] (state, {element, selected}) {
     element.selected = selected
     state.selected = element
+  },
+
+  /**
+   * Set selected element
+   */
+  [mutation.HOVER_ELEMENT] (state, element) {
+    state.hovered = element
   },
 
   /**
@@ -314,6 +377,30 @@ const mutations = {
   [mutation.TOGGLE_BREADCRUMB] (state, toggle) {
     toggle = typeof toggle === 'undefined' ? !state.openBreadcrumbs : toggle
     state.openBreadcrumbs = toggle
+  },
+
+  /**
+   * Set window scroll Y value
+   */
+  [mutation.SET_WINDOW_SCROLL] (state, value) {
+    if (state.window) {
+      if (typeof value === 'string') {
+        let [operator, intvalue] = value.split('')
+        intvalue = parseInt(intvalue)
+
+        switch (operator) {
+          case '+':
+            value = state.window.scrollY + intvalue
+            break
+
+          case '-':
+            value = state.window.scrollY - intvalue
+            break
+        }
+      }
+
+      state.window.scrollTo(state.window.scrollX, value)
+    }
   }
 }
 
@@ -326,6 +413,35 @@ const actions = {
   },
 
   /**
+   * Undo Action
+   * @param  {Function} store.commit
+   * @return {void}
+   */
+  undoElement ({commit, state}) {
+    if (state.prev.length > 1) {
+      commit(mutation.UNDO_ELEMENT)
+
+      // Select root element
+      commit(mutation.SET_WINDOW_SCROLL, '+1')
+      commit(mutation.HOVER_ELEMENT, null)
+      commit(mutation.SELECT_ELEMENT, {
+        element: state.current[0],
+        selected: true
+      })
+      commit(mutation.SET_WINDOW_SCROLL, '-1')
+    }
+  },
+
+  /**
+   * Redo Action
+   * @param  {Function} store.commit
+   * @return {void}
+   */
+  redoElement ({commit}) {
+    commit(mutation.REDO_ELEMENT)
+  },
+
+  /**
    * Add Element to the current state
    * @param {Function} store.commit
    * @param {String} options.markupText
@@ -333,9 +449,11 @@ const actions = {
    * @return {void}
    */
   addElement ({commit}, options) {
+    commit(mutation.SET_WINDOW_SCROLL, '+1')
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.ADD_ELEMENT, options)
     commit(mutation.APPLY_ELEMENT)
+    commit(mutation.SET_WINDOW_SCROLL, '-1')
   },
 
   /**
@@ -344,10 +462,20 @@ const actions = {
    * @param  {String} id
    * @return {void}
    */
-  removeElement ({commit}, id) {
+  removeElement ({commit, state}, id) {
+    const element = getRequiredParentElement(id, state.current) || getElementObject(id, state.current)
+    const nextSelectedElement = getSiblingElement(id, state.current)
+
     commit(mutation.SNAPSHOT_ELEMENT)
-    commit(mutation.REMOVE_ELEMENT, id)
+    commit(mutation.REMOVE_ELEMENT, element.id)
     commit(mutation.APPLY_ELEMENT)
+    commit(mutation.SET_WINDOW_SCROLL, '+1')
+    commit(mutation.HOVER_ELEMENT, null)
+    commit(mutation.SELECT_ELEMENT, {
+      element: nextSelectedElement,
+      selected: true
+    })
+    commit(mutation.SET_WINDOW_SCROLL, '-1')
   },
 
   /**
@@ -396,6 +524,8 @@ const actions = {
    * @return {void}
    */
   selectElement ({commit, state}, id) {
+    commit(mutation.SET_WINDOW_SCROLL, '+1')
+
     if (!id && state.selected) {
       id = state.selected.id
     }
@@ -424,6 +554,7 @@ const actions = {
 
     // Hide all breadcrumbs again
     commit(mutation.TOGGLE_BREADCRUMB, false)
+    commit(mutation.SET_WINDOW_SCROLL, '-1')
 
     // const element
 
@@ -463,6 +594,19 @@ const actions = {
     // }
   },
 
+  hoverElement ({commit}, id) {
+    if (!id) {
+      return
+    }
+
+    if (id.tagName) {
+      id = utils.GetNodeId(id)
+    }
+
+    const element = getElementObject(id)
+    commit(mutation.HOVER_ELEMENT, element)
+  },
+
   editContent ({commit}, element) {
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.EDIT_CONTENT, element)
@@ -496,12 +640,9 @@ const actions = {
     commit(mutation.TOGGLE_BREADCRUMB, false)
   },
 
-  refreshScroll ({state}) {
-    if (state.window) {
-      const {window} = state
-      window.scrollTo(window.scrollX, window.scrollY + 1)
-      window.scrollTo(window.scrollX, 0)
-    }
+  refreshScroll ({commit}) {
+    commit(mutation.SET_WINDOW_SCROLL, '+1')
+    commit(mutation.SET_WINDOW_SCROLL, 0)
   }
 }
 
@@ -521,6 +662,13 @@ const getters = {
   selectedElement: state => state.selected,
 
   /**
+   * Hovered Element
+   * @param  {Object} state
+   * @return {Object}
+   */
+  hoveredElement: state => state.hovered,
+
+  /**
    * Selected element offset
    * @param {Object} state
    * @return {Object}
@@ -529,32 +677,157 @@ const getters = {
     const styles = {}
 
     if (state.selected) {
-      const elementNode = getElementNodeById(state.selected.id)
-      if (elementNode) {
-        const {canvasScroll} = rootState
-        const bounds = elementNode.getBoundingClientRect()
-        const pos = {
-          top: bounds.top,
-          left: bounds.left
-        }
+      const element = getElementNodeById(state.selected.id)
 
-        if (canvasScroll.top) {
-          pos.top += Math.abs(canvasScroll.top)
-          pos.left += Math.abs(canvasScroll.left)
-        }
-
-        styles.top = `${pos.top}px`
-        styles.left = `${pos.left}px`
-        styles.height = `${bounds.height}px`
-        styles.width = `${bounds.width}px`
+      if (!element) {
+        return styles
       }
+
+      const {canvasScroll} = rootState
+      const bounds = element.getBoundingClientRect()
+      const pos = {
+        top: bounds.top,
+        left: bounds.left
+      }
+
+      if (canvasScroll.top) {
+        pos.top += Math.abs(canvasScroll.top)
+        pos.left += Math.abs(canvasScroll.left)
+      }
+
+      styles.top = pos.top
+      styles.left = pos.left
+      styles.height = bounds.height
+      styles.width = bounds.width
     }
 
     return styles
   },
 
   /**
-   * Breadcrumbs
+   * Hovered element offset
+   * @param {Object} state
+   * @return {Object}
+   */
+  hoveredOffset (state, rootState) {
+    const styles = {}
+
+    if (state.hovered) {
+      const element = getElementNodeById(state.hovered.id)
+
+      if (!element) {
+        return styles
+      }
+
+      const {canvasScroll} = rootState
+      const bounds = element.getBoundingClientRect()
+      const pos = {
+        top: bounds.top,
+        left: bounds.left
+      }
+
+      if (canvasScroll.top) {
+        pos.top += Math.abs(canvasScroll.top)
+        pos.left += Math.abs(canvasScroll.left)
+      }
+
+      styles.top = pos.top
+      styles.left = pos.left
+      styles.height = bounds.height
+      styles.width = bounds.width
+    }
+
+    return styles
+  },
+
+  /**
+   * Block add placement offset
+   * @param {Object} state
+   * @return {Object}
+   */
+  blockPosition (state, rootState) {
+    let position = 0
+
+    if (!state.hovered) {
+      return position
+    }
+
+    const element = getRootElement(state.hovered.id)
+
+    if (!element) {
+      return position
+    }
+
+    const {canvasScroll} = rootState
+    let {top, height} = element.getBoundingClientRect()
+
+    if (element.getAttribute(RootElementTag)) {
+      height = 0
+
+      const elementObject = getElementObjectByNode(element, state.current)
+      if (elementObject && elementObject.childNodes.length > 0) {
+        const last = elementObject.childNodes.slice().pop()
+        const lastElement = getElementNodeById(last.id)
+        if (lastElement) {
+          const lastBounds = lastElement.getBoundingClientRect()
+          top = lastBounds.top
+          height = lastBounds.height
+        }
+      }
+    }
+
+    if (canvasScroll.top) {
+      top += Math.abs(canvasScroll.top)
+    }
+
+    position = height + top
+    return position
+  },
+
+  rootElement (state) {
+    const element = state.window.document.querySelector(`[${utils.SelectorAttrId}][${RootElementTag}]`)
+    return getElementObjectByNode(element, state.current)
+  },
+
+  /**
+   * Block index
+   **/
+  blockIndex () {
+    let index = 0
+
+    if (!state.hovered) {
+      return index
+    }
+
+    const element = getRootElement(state.hovered.id)
+    if (element) {
+      if (element.getAttribute(RootElementTag)) {
+        const elementObject = getElementObjectByNode(element, state.current)
+        if (elementObject && elementObject.childNodes.length > 0) {
+          index = elementObject.childNodes.length
+        }
+
+        return index
+      }
+
+      const elementId = utils.GetNodeId(element)
+      const parentElement = getParentElement(elementId)
+      if (parentElement) {
+        const childNodes = parentElement.childNodes
+        for (let i = 0; i < childNodes.length; i++) {
+          if (utils.GetNodeId(childNodes[i]) === elementId) {
+            index = i
+          }
+        }
+      }
+      index++
+    }
+
+    return index
+  },
+
+  /**
+   * Breadcrumbs on selected element
    * @return {Array}
    */
   breadcrumbs (state) {
@@ -579,6 +852,20 @@ const getters = {
     }
 
     return breadcrumbs.reverse()
+  },
+
+  /**
+   * Single breadcrumb on hovered element
+   */
+  breadcrumb (state) {
+    let breadcrumb = {}
+
+    if (state.hovered) {
+      let {id, label} = state.hovered
+      breadcrumb = { id, label }
+    }
+
+    return breadcrumb
   },
 
   /**

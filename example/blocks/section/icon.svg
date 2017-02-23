@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="100px" height="70px" viewBox="0 0 100 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 40.3 (33839) - http://www.bohemiancoding.com/sketch -->
+    <title>6753118E-8587-45A1-8A2A-6DD5A0E4A017</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="100" height="70" rx="2"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="100" height="70" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="All-panels-open" transform="translate(-498.000000, -225.000000)">
+            <g id="Add-predefined-section" transform="translate(30.000000, 132.000000)">
+                <g id="Accordion-content" transform="translate(0.000000, 38.000000)">
+                    <g id="Section" transform="translate(468.000000, 55.000000)">
+                        <g id="Shape">
+                            <g>
+                                <use id="Rectangle-35" stroke="#BFBFBF" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"></use>
+                                <rect id="Rectangle-36" fill="#475054" x="2" y="20" width="96" height="30"></rect>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

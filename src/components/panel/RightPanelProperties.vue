@@ -24,7 +24,8 @@ export default {
   },
   methods: {
     ...mapActions([
-      'hideLeftPanels'
+      'hideLeftPanels',
+      'hideBlockPanel'
     ])
   },
   render (h) {
@@ -104,8 +105,13 @@ export default {
       )
     })
 
+    const onClick = event => {
+      this.hideLeftPanels()
+      this.hideBlockPanel()
+    }
+
     return (
-      <div class={mainClass} onClick={this.hideLeftPanels}>
+      <div class={mainClass} onClick={onClick}>
         <Accordion>{propertiesEls}</Accordion>
       </div>
     )

@@ -5,7 +5,6 @@ import panels from './modules/panels'
 import tools from './modules/tools'
 import elements from './modules/elements'
 import components from './modules/components'
-import * as mutation from './mutation-types'
 
 Vue.use(Vuex)
 
@@ -18,29 +17,24 @@ const snapshotPlugin = store => {
 const actions = {
   /**
    * Undo Action
-   * @param  {Function} store.commit
-   * @return {void}
    */
-  undo ({ commit }) {
-    commit(mutation.UNDO_ELEMENT)
+  undo ({dispatch}) {
+    dispatch('undoElement')
   },
 
   /**
    * Redo Action
-   * @param  {Function} store.commit
-   * @return {void}
    */
-  redo ({ commit }) {
-    commit(mutation.REDO_ELEMENT)
+  redo ({dispatch}) {
+    dispatch('redoElement')
   },
 
   /**
    * Hide all panels including popup, left panels selector, etc
-   * @param  {Function} store.commit
    */
-  hideAllPanels ({commit}) {
-    commit(mutation.HIDE_LEFT_PANELS)
-    commit(mutation.TOGGLE_INPUT_PANEL, '')
+  hideAllPanels ({dispatch}) {
+    dispatch('hideLeftPanels')
+    dispatch('toggleInputPanel', '')
   }
 }
 

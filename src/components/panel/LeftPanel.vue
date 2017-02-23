@@ -36,6 +36,7 @@ export default {
     ...mapActions([
       'registerLeftPanel',
       'hideAllPanels',
+      'hideBlockPanel',
       'showLeftPanel'
     ])
   },
@@ -48,6 +49,7 @@ export default {
     const leftPanelClick = event => {
       if (event.target !== event.currentTarget) return
       this.hideAllPanels()
+      this.hideBlockPanel()
     }
 
     const navPanels = panels.map(props => {

@@ -33,6 +33,8 @@ export const MoveAction = {
   CUT: 'cut'
 }
 
+export const RootElementTag = 'root'
+
 export const VoidElements = [
   'area',
   'base',
@@ -188,7 +190,8 @@ export const Icons = {
   REDO: 'redo',
   ARROW_UP: 'arrow-up-input',
   ARROW_DOWN: 'arrow-down-input',
-  CLOSE: 'close'
+  CLOSE: 'close',
+  ADD_BLOCK: 'add-block'
 }
 
 export const Tooltips = {

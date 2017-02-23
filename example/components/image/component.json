@@ -1,7 +1,7 @@
 {
   "id": "image",
   "label": "Image",
-  "icon": "img/icon.svg",
+  "icon": "icon.svg",
   "group": "Component",
   "options": {
     "src": {

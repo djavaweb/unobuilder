@@ -1,6 +1,6 @@
 {
   "id": "column-2",
   "label": "2 Columns",
-  "icon": "img/icon.svg",
+  "icon": "icon.svg",
   "group": "Grid"
 }

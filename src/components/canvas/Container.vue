@@ -67,8 +67,8 @@ export default {
       <div class={ClassPrefix.CANVAS} style={this.canvasStyle}>
         {mediaQueryStatus}
         {elementSelector}
-        <CanvasIframe />
         {blockComponent}
+        <CanvasIframe />
       </div>
     )
   }

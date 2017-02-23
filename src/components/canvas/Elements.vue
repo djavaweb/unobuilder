@@ -1,5 +1,6 @@
 <script>
-import {mapActions} from 'vuex'
+import $ from 'jquery'
+import {mapGetters, mapActions} from 'vuex'
 import {ClassName} from '../../utils'
 import {DomType, VoidElements} from '../../const'
 
@@ -19,15 +20,37 @@ export default {
     }
   },
 
+  computed: {
+    ...mapGetters([
+      'toggleBlockPanel',
+      'previewMode'
+    ])
+  },
+
   methods: {
     ...mapActions([
-      'selectElement'
+      'selectElement',
+      'hoverElement',
+      'hideBlockPanel'
     ])
   },
 
   render (createElement) {
     const click = event => {
+      if (this.previewMode) {
+        return
+      }
+
       this.selectElement(event.target)
+      if (this.toggleBlockPanel) {
+        this.hideBlockPanel()
+      }
+    }
+
+    const mouseover = event => {
+      if (!this.previewMode && !this.toggleBlockPanel) {
+        this.hoverElement(event.target)
+      }
     }
 
     const renderElement = node => {
@@ -36,11 +59,17 @@ export default {
       }
 
       let { dataObject, childNodes } = node
+
+      childNodes = childNodes.map(
+        item => typeof item === 'string' ? $.trim(item) : item
+      ).filter(item => item)
+
       const { tagName, selected } = node
       const { innerHTML } = dataObject.domProps
 
       const notVoidElements = !VoidElements.includes(tagName)
       const emptyNodes = !innerHTML && childNodes.length < 1 || innerHTML && innerHTML.length < 1
+
       const classEvents = {
         IS_CHILD_NODES_EMPTY: {
           occurs: emptyNodes && notVoidElements,
@@ -82,7 +111,8 @@ export default {
       dataObject = Object.assign({}, dataObject)
       dataObject.class = Object.assign(dataObject.class, classes)
       dataObject.on = {
-        click
+        click,
+        mouseover
       }
 
       childNodes = childNodes.map(

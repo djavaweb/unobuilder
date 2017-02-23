@@ -6,10 +6,11 @@ import {ClassPrefix} from '../../const'
 import RemoveButton from '../fields/CloseButton'
 
 const mainClass = `${ClassPrefix.CANVAS}-selector`
-const selectedClass = `${ClassPrefix.CANVAS}-selector__selected`
-const selectorToolClass = `${selectedClass}-tools`
-const breadcrumbClass = `${selectedClass}-breadcrumbs`
-const removeClass = `${selectedClass}-remove`
+const selectedClass = `${mainClass}__selected`
+const hoveredClass = `${mainClass}__hovered`
+const selectorToolClass = `${mainClass}-tools`
+const breadcrumbClass = `${mainClass}-breadcrumbs`
+const removeClass = `${mainClass}-remove`
 
 export default {
   name: 'canvasElementSelector',
@@ -17,14 +18,18 @@ export default {
     ...mapGetters([
       'openBreadcrumbs',
       'selectedElement',
+      'hoveredElement',
       'selectedOffset',
+      'hoveredOffset',
       'canvasScroll',
-      'breadcrumbs'
+      'breadcrumbs',
+      'breadcrumb'
     ])
   },
   methods: {
     ...mapActions([
       'selectElement',
+      'hoverElement',
       'removeElement',
       'showBreadcrumbs'
     ])
@@ -35,7 +40,8 @@ export default {
     }
   },
   render (h) {
-    let selectedStyles = {}
+    let {selectedStyles, hoveredStyles} = {}
+
     const selectedHoverClass = {
       'hover--remove': this.removeHover
     }
@@ -44,7 +50,13 @@ export default {
     }
 
     if (this.selectedElement) {
-      selectedStyles = this.selectedOffset
+      let {top, left, width, height} = this.selectedOffset
+      selectedStyles = {
+        top: `${top}px`,
+        left: `${left}px`,
+        width: `${width}px`,
+        height: `${height}px`
+      }
     }
 
     let [lastBreadcrumb, restBreadcrumb] = [[], []]
@@ -69,31 +81,55 @@ export default {
         }
       }
 
+      const onMouseOver = event => {
+        this.hoverElement(item.id)
+      }
+
       return <span class={className}>
-        <a onClick={onClick}>{item.label}</a>
+        <a onClick={onClick} onMouseover={onMouseOver}>{item.label}</a>
       </span>
     })
 
-    const removeHover = event => {
-      this.removeHover = true
-    }
-
-    const removeLeave = event => {
-      this.removeHover = false
-    }
-
-    const removeClick = event => {
-      this.removeElement(this.selectedElement.id)
-    }
-
     let removeElement
     if (this.selectedElement && !this.selectedElement.dataObject.attrs.root) {
+      const removeHover = event => {
+        this.removeHover = true
+      }
+
+      const removeLeave = event => {
+        this.removeHover = false
+      }
+
+      const removeClick = event => {
+        this.removeElement(this.selectedElement.id)
+        this.removeHover = false
+      }
+
       removeElement = <RemoveButton
         class={removeClass}
         nativeOnMouseover={removeHover}
         nativeOnMouseleave={removeLeave}
         nativeOnClick={removeClick}
       />
+    }
+
+    let hoverTools
+    if (this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id) {
+      let {top, left, width, height} = this.hoveredOffset
+      hoveredStyles = {
+        top: `${top}px`,
+        left: `${left}px`,
+        width: `${width}px`,
+        height: `${height}px`
+      }
+
+      hoverTools = <div class={[hoveredClass]} style={hoveredClass} style={hoveredStyles}>
+        <div class={selectorToolClass}>
+          <div class={breadcrumbClass}>
+            <span>{this.breadcrumb.label}</span>
+          </div>
+        </div>
+      </div>
     }
 
     return (
@@ -104,6 +140,7 @@ export default {
             {removeElement}
           </div>
         </div>
+        {hoverTools}
       </div>
     )
   }

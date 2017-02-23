@@ -15,7 +15,8 @@ export default {
   },
   methods: {
     ...mapActions([
-      'hideAllPanels'
+      'hideAllPanels',
+      'hideBlockPanel'
     ])
   },
   render (h) {
@@ -23,8 +24,13 @@ export default {
       'preview--enabled': this.previewMode
     }
 
+    const onClick = event => {
+      this.hideAllPanels()
+      this.hideBlockPanel()
+    }
+
     return (
-      <div onClick={this.hideAllPanels} class={[ClassPrefix.TOP_PANEL, previewClasses]}>
+      <div onClick={onClick} class={[ClassPrefix.TOP_PANEL, previewClasses]}>
         <ScreenSwitcher />
         <StateTools />
       </div>

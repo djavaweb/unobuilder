@@ -1,6 +1,6 @@
 {
   "id": "map",
   "label": "Map",
-  "icon": "img/icon.svg",
+  "icon": "icon.svg",
   "group": "Component"
 }

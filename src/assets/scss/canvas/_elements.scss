@@ -1,13 +1,25 @@
+.#{$prefix}:not(.preview--mode) {
+  padding-bottom: 165px;
+  .#{$prefix-short} {
+    &-empty {
+      outline: 1px dashed #555 !important;
+      outline-offset: -1px !important;
+      box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.1), inset 0 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+      padding-bottom: 75px;
+      padding-right: 75px;
+      font-size: 0;
+      line-height: 0;
+      vertical-align: middle;
+    }
+  }
+}
+
 .#{$prefix-short} {
   &-empty {
-    outline: 1px dashed #555 !important;
-    outline-offset: -1px !important;
-    box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.1), inset 0 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
     padding-bottom: 75px;
     padding-right: 75px;
     font-size: 0;
     line-height: 0;
-    vertical-align: middle;
   }
 
   &-g {

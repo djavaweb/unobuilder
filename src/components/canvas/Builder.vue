@@ -1,16 +1,19 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix} from '../../const'
+import {ClassPrefix, RootElementTag} from '../../const'
 
 /* eslint-disable no-unused-vars */
 import Elements from './Elements'
+import Stylesheet from './Stylesheet'
 
 export default {
   name: 'canvasBuilder',
   computed: {
     ...mapGetters([
       'elements',
-      'selectedElement'
+      'selectedElement',
+      'previewMode',
+      'customStyles'
     ])
   },
   methods: {
@@ -44,7 +47,7 @@ export default {
     if (this.elements.length < 1) {
       // Add root element
       this.addElement({
-        markupText: 'div(kind="layout", root="true")'
+        markupText: `div(kind="layout", ${RootElementTag}="true")`
       })
 
       // Select root element
@@ -57,6 +60,10 @@ export default {
     }
   },
   render (h) {
+    const classes = {
+      'preview--mode': this.previewMode
+    }
+
     const onClick = event => {
       this.hideAllPanels()
     }
@@ -73,9 +80,9 @@ export default {
     }
 
     return (
-      <div class={ClassPrefix.MAIN} onClick={onClick}>
+      <div class={[ClassPrefix.MAIN, classes]} onClick={onClick}>
+        <Stylesheet content={this.customStyles} />
         {elements}
-        <button onClick={baba}>Add</button>
       </div>
     )
   }

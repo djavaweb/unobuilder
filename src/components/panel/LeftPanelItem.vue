@@ -31,7 +31,8 @@ export default {
   methods: {
     ...mapActions([
       'showLeftPanel',
-      'hideLeftPanels'
+      'hideLeftPanels',
+      'hideBlockPanel'
     ])
   },
   created () {
@@ -54,6 +55,7 @@ export default {
 
     const onClick = event => {
       this.showLeftPanel(this.id)
+      this.hideBlockPanel()
     }
 
     return (

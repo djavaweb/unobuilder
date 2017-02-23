@@ -1,7 +1,7 @@
 {
   "id": "text",
   "label": "Text",
-  "icon": "img/icon.svg",
+  "icon": "icon.svg",
   "group": "Component",
   "props": {
     "background": {

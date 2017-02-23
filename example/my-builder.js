@@ -10,6 +10,7 @@ uno.builder('#uno-builder').loadCanvas({
 
   // Basic Blocks
   uno.addBlock('./example/blocks/section/block.js')
+  uno.addBlock('./example/blocks/section-container/block.js')
 
   // Grid components
   uno.addComponent('./example/components/column-1/component.js')
