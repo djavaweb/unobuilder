@@ -12,6 +12,7 @@ export default {
     ...mapGetters([
       'elements',
       'selectedElement',
+
       'previewMode',
       'customStyles'
     ])
@@ -21,8 +22,6 @@ export default {
       'hideAllPanels',
       'addElement',
       'removeElement',
-      'moveElement',
-      'dropElement',
       'selectElement',
       'editContent'
     ])
@@ -71,13 +70,6 @@ export default {
     const elements = this.elements.map(element => {
       return <Elements node={element} />
     })
-
-    const baba = event => {
-      this.addElement({
-        markupText: 'div.uk-container(kind="container")',
-        appendTo: this.selectedElement.id
-      })
-    }
 
     return (
       <div class={[ClassPrefix.MAIN, classes]} onClick={onClick}>

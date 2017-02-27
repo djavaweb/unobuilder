@@ -52,6 +52,18 @@ const getParentElement = id => {
   }
 }
 
+const getIndexFromParent = id => {
+  const parentElement = getParentElement(id)
+  for (let i = 0; i < parentElement.childNodes.length; i++) {
+    const _id = utils.GetNodeId(parentElement.childNodes[i])
+    if (_id === id) {
+      return i
+    }
+  }
+
+  return 0
+}
+
 const getRootElement = id => {
   const element = getElementNodeById(id)
 
@@ -149,7 +161,8 @@ const isVoidElementById = id => {
 }
 
 const isNestedablePair = (fromKind, toKind) => {
-  return NestedableRules[toKind].includes(fromKind)
+  const rule = NestedableRules[toKind]
+  return rule !== '*' ? rule.includes(fromKind) : true
 }
 
 const getBreadcrumbById = (id, elements) => {
@@ -337,18 +350,23 @@ const mutations = {
   /**
    * Paste element
    */
-  [mutation.DROP_ELEMENT] (state, payload) {
-    let dropElement = payload && payload.id
-     ? getElementObject(payload.id, state.snapshot)
+  [mutation.DROP_ELEMENT] (state, element) {
+    if (element.parent) {
+      const parent = getParentElementObject(element.parent, state.snapshot)
+      element.id = parent.id
+    }
+
+    let dropElement = element && element.id
+     ? getElementObject(element.id, state.snapshot)
      : state.snapshot
 
     if (!dropElement || !state.move.element) return
 
-    let index = payload && payload.index ? payload.index : 0
+    let index = element && element.index ? element.index : 0
     let srcElement = utils.CloneObject(state.move.element)
     srcElement = utils.ChangeIdDeep(srcElement)
 
-    if (payload && payload.id) {
+    if (element && element.id) {
       const notVoidElement = !isVoidElementById(dropElement.id)
       const canNested = isNestedablePair(srcElement.kind, dropElement.kind)
       if (notVoidElement && canNested) {
@@ -479,7 +497,7 @@ const actions = {
   },
 
   /**
-   * Copy and Cut actions
+   * Copy and Cut actions in memory
    * @param  {Function} options.commit
    * @param  {Function} options.state
    * @param  {String} options.action
@@ -488,6 +506,7 @@ const actions = {
    */
   moveElement ({commit, state}, {action, id}) {
     commit(mutation.SNAPSHOT_ELEMENT)
+
     const srcElement = getRequiredParentElement(id, state.snapshot) || getElementObject(id, state.snapshot)
 
     if (srcElement) {
@@ -500,6 +519,35 @@ const actions = {
         commit(mutation.REMOVE_ELEMENT, id)
       }
 
+      commit(mutation.DROP_ELEMENT, {
+        parent: id
+      })
+      commit(mutation.APPLY_ELEMENT)
+    }
+  },
+
+  /**
+   * Duplicate
+   * @param  {Function} options.commit
+   * @param  {Function} options.state
+   * @param  {String} options.action
+   * @param  {String} options.id
+   * @return {void}
+   */
+  duplicateElement ({commit, state}, id) {
+    commit(mutation.SNAPSHOT_ELEMENT)
+    const srcElement = getElementObject(id, state.snapshot)
+
+    if (srcElement) {
+      const index = getIndexFromParent(id)
+      commit(mutation.MOVE_ELEMENT, {
+        action: MoveAction.COPY,
+        element: utils.CloneObject(srcElement)
+      })
+      commit(mutation.DROP_ELEMENT, {
+        index,
+        parent: id
+      })
       commit(mutation.APPLY_ELEMENT)
     }
   },

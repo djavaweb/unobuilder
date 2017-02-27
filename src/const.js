@@ -87,6 +87,7 @@ export const PropertyList = [
 ]
 
 export const NestedableRules = {
+  layout: '*',
   div: KindList.filter(item => !['div', 'input'].includes(item)),
   row: KindList.filter(item => !['section', 'container', 'row', 'form', 'div', 'input'].includes(item)),
   column: KindList.filter(item => !['section', 'container', 'column', 'input'].includes(item)),
@@ -191,7 +192,8 @@ export const Icons = {
   ARROW_UP: 'arrow-up-input',
   ARROW_DOWN: 'arrow-down-input',
   CLOSE: 'close',
-  ADD_BLOCK: 'add-block'
+  ADD_BLOCK: 'add-block',
+  COPY: 'copy'
 }
 
 export const Tooltips = {
@@ -234,7 +236,8 @@ export const Tooltips = {
   UNIT_EM: 'EM Unit',
   UNIT_VH: 'View Height',
   UNIT_VW: 'View Width',
-  UNIT_PERCENT: '% from parent'
+  UNIT_PERCENT: '% from parent',
+  COPY_ELEMENT: 'Copy Element'
 }
 
 export const PropertyPanelIds = {

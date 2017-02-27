@@ -1,6 +1,7 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix} from '../../const'
+import {ClassPrefix, Tooltips, Icons} from '../../const'
+import {SVGIcon} from '../../utils'
 
 /* eslint-disable no-unused-vars */
 import RemoveButton from '../fields/CloseButton'
@@ -11,6 +12,7 @@ const hoveredClass = `${mainClass}__hovered`
 const selectorToolClass = `${mainClass}-tools`
 const breadcrumbClass = `${mainClass}-breadcrumbs`
 const removeClass = `${mainClass}-remove`
+const buttonClass = `${mainClass}-buttons`
 
 export default {
   name: 'canvasElementSelector',
@@ -31,6 +33,8 @@ export default {
       'selectElement',
       'hoverElement',
       'removeElement',
+      'duplicateElement',
+      'dropElement',
       'showBreadcrumbs'
     ])
   },
@@ -90,7 +94,8 @@ export default {
       </span>
     })
 
-    let removeElement
+    let removeElementBtn
+    let copyElementBtn
     if (this.selectedElement && !this.selectedElement.dataObject.attrs.root) {
       const removeHover = event => {
         this.removeHover = true
@@ -105,12 +110,21 @@ export default {
         this.removeHover = false
       }
 
-      removeElement = <RemoveButton
+      removeElementBtn = <RemoveButton
         class={removeClass}
         nativeOnMouseover={removeHover}
         nativeOnMouseleave={removeLeave}
         nativeOnClick={removeClick}
       />
+
+      const copyClick = event => {
+        this.duplicateElement(this.selectedElement.id)
+      }
+
+      copyElementBtn = <a domPropsInnerHTML={SVGIcon(Icons.COPY)}
+        onClick={copyClick}
+        title={Tooltips.COPY_ELEMENT}
+        uk-tooltip="pos: top" />
     }
 
     let hoverTools
@@ -137,7 +151,10 @@ export default {
         <div class={[selectedClass, selectedHoverClass]} style={selectedStyles}>
           <div class={selectorToolClass}>
             <div class={breadcrumbClass}>{breadcrumbEls}</div>
-            {removeElement}
+            <div class={buttonClass}>
+              {copyElementBtn}
+            </div>
+            {removeElementBtn}
           </div>
         </div>
         {hoverTools}

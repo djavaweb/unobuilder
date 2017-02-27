@@ -2,7 +2,7 @@
 import {ClassPrefix, Labels} from '../../const'
 
 /* eslint-disable no-unused-vars */
-import label from '../fields/Label'
+import Label from '../fields/Label'
 
 const mainClass = `${ClassPrefix.ACCORDION}-content-item`
 
@@ -23,7 +23,7 @@ export default {
         uppercase: true,
         bold: true
       }
-      itemLabel = <label {...{props}} />
+      itemLabel = <Label {...{props}} />
     }
 
     return (
