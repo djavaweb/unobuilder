@@ -1,6 +1,12 @@
 .#{$prefix}:not(.preview--mode) {
-  padding-bottom: 165px;
   .#{$prefix-short} {
+    &-g-layout {
+      &:after {
+        content: ' ';
+        padding-bottom: 165px;
+        display: block;
+      }
+    }
     &-empty {
       outline: 1px dashed #555 !important;
       outline-offset: -1px !important;
