@@ -137,6 +137,22 @@ $selector-border-width: 2px;
           text-decoration: none;
         }
       }
+
+      &-buttons {
+        display: flex;
+        a {
+          pointer-events: all;
+          display: flex;
+          align-content: center;
+          align-items: center;
+          height: 100%;
+          padding: 0 5px;
+          background-color: lighten($dark-grey, 10);
+          &:hover, &:active {
+            background-color: $dark-grey
+          }
+        }
+      }
     }
 
     &-block-component {
