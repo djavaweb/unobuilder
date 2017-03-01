@@ -23,13 +23,13 @@ export default {
       'hoveredElement',
       'selectedOffset',
       'hoveredOffset',
-      'canvasScroll',
       'breadcrumbs',
       'breadcrumb'
     ])
   },
   methods: {
     ...mapActions([
+      'noop',
       'selectElement',
       'hoverElement',
       'removeElement',
@@ -48,9 +48,6 @@ export default {
 
     const selectedHoverClass = {
       'hover--remove': this.removeHover
-    }
-    const toolStyles = {
-      top: `${this.canvasScroll.top}px`
     }
 
     if (this.selectedElement) {
@@ -114,6 +111,7 @@ export default {
         class={removeClass}
         nativeOnMouseover={removeHover}
         nativeOnMouseleave={removeLeave}
+        nativeOnContextmenu={this.noop}
         nativeOnClick={removeClick}
       />
 
@@ -147,7 +145,7 @@ export default {
     }
 
     return (
-      <div class={mainClass} style={toolStyles}>
+      <div class={mainClass}>
         <div class={[selectedClass, selectedHoverClass]} style={selectedStyles}>
           <div class={selectorToolClass}>
             <div class={breadcrumbClass}>{breadcrumbEls}</div>

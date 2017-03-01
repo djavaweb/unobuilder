@@ -7,13 +7,18 @@ import MediaQueryStatus from '../tools/MediaQueryStatus'
 import CanvasIframe from './Iframe'
 import BlockComponent from './Block'
 import ElementSelector from '../tools/ElementSelector'
+import ContextMenu from '../tools/ContextMenu'
+
+const canvasToolClass = `${ClassPrefix.CANVAS}-tools`
 
 export default {
   name: 'canvas',
   computed: {
     ...mapGetters([
       'screenSize',
-      'previewMode'
+      'previewMode',
+      'contextMenu',
+      'canvasScroll'
     ]),
     canvasStyle () {
       const sizeConst = this.screenSize.toUpperCase()
@@ -53,6 +58,7 @@ export default {
     let mediaQueryStatus
     let elementSelector
     let blockComponent
+    let contextMenu
 
     if (this.screenSize !== ScreenType.LARGE) {
       mediaQueryStatus = <MediaQueryStatus />
@@ -63,11 +69,22 @@ export default {
       blockComponent = <BlockComponent />
     }
 
+    if (this.contextMenu) {
+      contextMenu = <ContextMenu />
+    }
+
+    const canvasToolStyles = {
+      top: `${this.canvasScroll.top}px`
+    }
+
     return (
       <div class={ClassPrefix.CANVAS} style={this.canvasStyle}>
-        {mediaQueryStatus}
-        {elementSelector}
-        {blockComponent}
+        <div class={canvasToolClass} style={canvasToolStyles}>
+          {mediaQueryStatus}
+          {elementSelector}
+          {blockComponent}
+          {contextMenu}
+        </div>
         <CanvasIframe />
       </div>
     )

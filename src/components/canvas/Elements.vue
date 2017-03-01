@@ -23,6 +23,7 @@ export default {
   computed: {
     ...mapGetters([
       'toggleBlockPanel',
+      'canvasScroll',
       'previewMode'
     ])
   },
@@ -31,14 +32,29 @@ export default {
     ...mapActions([
       'selectElement',
       'hoverElement',
-      'hideBlockPanel'
+      'hideBlockPanel',
+      'showContextMenu',
+      'hideContextMenu',
+      'setContextCoords'
     ])
   },
 
   render (createElement) {
     const click = event => {
+      event.preventDefault()
+
       if (this.previewMode) {
         return
+      }
+
+      let {x, y, which} = event
+
+      if (which === 3) {
+        y += Math.abs(this.canvasScroll.top)
+        this.setContextCoords({x, y})
+        this.showContextMenu()
+      } else if (which === 1) {
+        this.hideContextMenu()
       }
 
       this.selectElement(event.target)
@@ -112,7 +128,8 @@ export default {
       dataObject.class = Object.assign(dataObject.class, classes)
       dataObject.on = {
         click,
-        mouseover
+        mouseover,
+        contextmenu: click
       }
 
       childNodes = childNodes.map(

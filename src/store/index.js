@@ -35,6 +35,13 @@ const actions = {
   hideAllPanels ({dispatch}) {
     dispatch('hideLeftPanels')
     dispatch('toggleInputPanel', '')
+  },
+
+  /**
+   * Do nothing
+   */
+  noop (store, event) {
+    event.preventDefault()
   }
 }
 

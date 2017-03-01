@@ -121,12 +121,13 @@ const UnoBuilder = function () {
     global.__uno__ = {}
   }
 
-  global.__uno__.eventList = {}
-  global.__uno__.components = {}
-  global.__uno__.blocks = {}
-  global.__uno__.url = null
-  global.__uno__.element = null
-  global.__uno__.builder = null
+  const builder = global.__uno__
+  builder.eventList = {}
+  builder.components = {}
+  builder.blocks = {}
+  builder.url = null
+  builder.element = null
+  builder.builder = null
 
   const _root = this
 
@@ -136,7 +137,7 @@ const UnoBuilder = function () {
    * @return {Object}
    */
   _root.builder = element => {
-    global.__uno__.builder = element
+    builder.builder = element
     _root.emit('prepare', element)
     return _root
   }
@@ -146,7 +147,7 @@ const UnoBuilder = function () {
    * @return {String}
    */
   _root.getBuilderSelector = () => {
-    return global.__uno__.builder
+    return builder.builder
   }
 
   /**
@@ -154,7 +155,7 @@ const UnoBuilder = function () {
    * @return {String}
    */
   _root.getBuilderUrl = () => {
-    return global.__uno__.url
+    return builder.url
   }
 
   /**
@@ -163,10 +164,10 @@ const UnoBuilder = function () {
    */
   _root.loadCanvas = options => {
     if (options.url && options.element) {
-      global.__uno__.url = options.url
-      global.__uno__.element = options.element
+      builder.url = options.url
+      builder.element = options.element
       _root.emit('init', {
-        builder: global.__uno__.builder,
+        builder: builder.builder,
         canvas: options.element
       })
     } else {
@@ -201,11 +202,11 @@ const UnoBuilder = function () {
     }
 
     // eventType doesn't exist, create new one
-    if (!global.__uno__.eventList[eventType]) {
-      global.__uno__.eventList[eventType] = []
+    if (!builder.eventList[eventType]) {
+      builder.eventList[eventType] = []
     }
 
-    global.__uno__.eventList[eventType].push({
+    builder.eventList[eventType].push({
       callback: callback
     })
 
@@ -230,8 +231,8 @@ const UnoBuilder = function () {
         break
     }
 
-    if (global.__uno__.eventList[eventType]) {
-      delete global.__uno__.eventList[eventType]
+    if (builder.eventList[eventType]) {
+      delete builder.eventList[eventType]
     }
 
     return _root
@@ -260,8 +261,8 @@ const UnoBuilder = function () {
         break
     }
 
-    if (global.__uno__.eventList[eventType]) {
-      let arr = global.__uno__.eventList[eventType]
+    if (builder.eventList[eventType]) {
+      let arr = builder.eventList[eventType]
       emitCallbacks(arr)
     }
   }
@@ -271,15 +272,15 @@ const UnoBuilder = function () {
    * @return {Object} eventList
    */
   _root.events = () => {
-    return global.__uno__.eventList
+    return builder.eventList
   }
 
   /**
    * Reset Events
    */
   _root.resetEvents = () => {
-    global.__uno__.eventList = {}
-    return global.__uno__.eventList
+    builder.eventList = {}
+    return builder.eventList
   }
 
   /**
@@ -391,7 +392,7 @@ const UnoBuilder = function () {
           data.template = output
 
           // Add component to list
-          global.__uno__[`${element}s`][data.settings.id] = data
+          builder[`${element}s`][data.settings.id] = data
 
           // Register script
           _root.registerScript(url, `${element}-${data.id}`)
@@ -410,17 +411,23 @@ const UnoBuilder = function () {
   }
 
   _root.getComponentList = () => {
-    return global.__uno__.components
+    return builder.components
   }
 
   _root.getComponentItem = item => {
-    if (item in global.__uno__.components) {
-      return global.__uno__.components[item]
+    if (item in builder.components) {
+      return builder.components[item]
     }
   }
 
   _root.getBlockList = () => {
-    return global.__uno__.blocks
+    return builder.blocks
+  }
+
+  _root.getBlockItem = item => {
+    if (item in builder.blocks) {
+      return builder.blocks[item]
+    }
   }
 
   _root.registerScript = (url, registerId) => {
@@ -435,30 +442,30 @@ const UnoBuilder = function () {
    * @param {Object} options
    */
   _root.registerElement = (element, name, options) => {
-    if (global.__uno__[element][name]) {
+    if (builder[element][name]) {
       // Call before init event
       if (options.events.beforeInit) {
-        options.events.beforeInit.apply(global.__uno__[element][name])
+        options.events.beforeInit.apply(builder[element][name])
       }
 
       // Duplicate data that doesn't have events name
       if (options.data) {
         let data = omit(options.data, actionObjectException)
-        extend(global.__uno__[element][name], data)
+        extend(builder[element][name], data)
       }
 
       // Duplicate all events
       if (options.events) {
         actionObjectException.forEach(eventName => {
           if (options.events[eventName]) {
-            global.__uno__[element][name][eventName] = options.events[eventName]
+            builder[element][name][eventName] = options.events[eventName]
           }
         })
       }
 
       // Call after init event
       if (options.events.afterInit) {
-        options.events.afterInit.apply(global.__uno__[element][name])
+        options.events.afterInit.apply(builder[element][name])
       }
     }
 

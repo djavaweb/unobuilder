@@ -12,7 +12,9 @@ const state = {
   canvasScroll: {},
   previewMode: false,
   screenLoader: true,
-  loaderMessage: Labels.LOADING
+  loaderMessage: Labels.LOADING,
+  contextMenu: false,
+  contextMenuCoords: {}
 }
 
 const mutations = {
@@ -54,7 +56,21 @@ const mutations = {
    * Toggle loader
    */
   [mutation.TOGGLE_LOADER] (state, toggle) {
-    state.screenLoader = !toggle ? !state.screenLoader : toggle
+    state.screenLoader = toggle === undefined ? !state.screenLoader : toggle
+  },
+
+  /**
+   * Toggle context menu
+   */
+  [mutation.TOGGLE_CONTEXT_MENU] (state, toggle) {
+    state.contextMenu = toggle === undefined ? !state.contextMenu : toggle
+  },
+
+  /**
+   * Set menu coords
+   */
+  [mutation.SET_CONTEXT_COORDS] (state, coords) {
+    state.contextMenuCoords = coords
   },
 
   /**
@@ -155,6 +171,40 @@ const actions = {
    */
   setCanvasScroll ({commit}, scrollValue) {
     commit(mutation.SET_CANVAS_SCROLL, scrollValue)
+  },
+
+  /**
+   * Toggle Context Menu
+   * @param  {Function} {commit}
+   * @return {void}
+   */
+  toggleContextMenu ({commit}) {
+    commit(mutation.TOGGLE_CONTEXT_MENU)
+  },
+
+  /**
+   * Show Preview
+   * @param  {Function} {commit}
+   * @return {void}
+   */
+  showContextMenu ({commit}) {
+    commit(mutation.TOGGLE_CONTEXT_MENU, true)
+  },
+
+  /**
+   * Hide Preview
+   * @param  {Function} {commit}
+   * @return {void}
+   */
+  hideContextMenu ({commit}) {
+    commit(mutation.TOGGLE_CONTEXT_MENU, false)
+  },
+
+  /**
+   * Set context menu coords
+   */
+  setContextCoords ({commit}, coords) {
+    commit(mutation.SET_CONTEXT_COORDS, coords)
   }
 }
 
@@ -188,8 +238,10 @@ const getters = {
    * @type {Boolean}
    */
   canvasLoaded: state => state.canvasLoaded,
+  canvasScroll: state => state.canvasScroll,
 
-  canvasScroll: state => state.canvasScroll
+  contextMenu: state => state.contextMenu,
+  contextMenuCoords: state => state.contextMenuCoords
 }
 
 export default {

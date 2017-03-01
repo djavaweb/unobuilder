@@ -8,6 +8,7 @@ const state = {
   advancedPanels: {},
   toggleLeftPanel: false,
   toggleBlockPanel: false,
+  openBlockPanel: '',
   openLeftPanel: '',
   openInputPanel: ''
 }
@@ -77,6 +78,10 @@ const mutations = {
   [mutation.TOGGLE_BLOCK_PANEL] (state, toggle) {
     toggle = typeof toggle === 'undefined' ? !state.toggleBlockPanel : toggle
     state.toggleBlockPanel = toggle
+  },
+
+  [mutation.OPEN_BLOCK_PANEL] (state, id) {
+    state.openBlockPanel = id
   }
 }
 
@@ -180,6 +185,10 @@ const actions = {
    */
   hideBlockPanel ({commit}) {
     commit(mutation.TOGGLE_BLOCK_PANEL, false)
+  },
+
+  switchBlockItem ({commit}, id) {
+    commit(mutation.OPEN_BLOCK_PANEL, id)
   }
 }
 
@@ -193,6 +202,7 @@ const getters = {
   toggleLeftPanel: state => state.toggleLeftPanel,
   toggleBlockPanel: state => state.toggleBlockPanel,
   openLeftPanel: state => state.openLeftPanel,
+  openBlockPanel: state => state.openBlockPanel,
 
   /**
    * Current opened input panel

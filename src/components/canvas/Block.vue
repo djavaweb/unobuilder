@@ -14,46 +14,65 @@ export default {
   name: 'canvasBlockComponent',
   computed: {
     ...mapGetters([
-      'canvasScroll',
       'toggleBlockPanel',
       'rootElement',
       'blockIndex',
-      'blockPosition'
+      'blockPosition',
+      'openBlockPanel'
     ])
   },
   methods: {
     ...mapActions([
+      'noop',
       'toggleBlock',
+      'hideContextMenu',
       'hideBlockPanel',
-      'addElement'
+      'addElement',
+      'switchBlockItem'
     ])
+  },
+  data () {
+    return {
+      init: false
+    }
   },
   render (h) {
     const blockList = uno.getBlockList()
     const blockNavList = []
     const blockItemList = []
 
-    const blockStyles = {
-      top: `${this.canvasScroll.top}px`
+    for (let id in blockList) {
+      const item = uno.getBlockItem(id)
+      const {group} = item.settings
+
+      blockItemList.push(item)
+
+      if (!this.init) {
+        this.switchBlockItem(group)
+      }
+
+      if (!blockNavList.includes(group)) {
+        blockNavList.push(group)
+      }
     }
 
-    Object.values(blockList).forEach(item => {
-      blockItemList.push(item)
-      if (!blockNavList.includes(item.settings.group)) {
-        blockNavList.push(item.settings.group)
-      }
-    })
-
     const blockNav = blockNavList.map(item => {
-      const onClick = event => {}
-
-      const classes = {
-        'active': true
+      const onClick = event => {
+        this.switchBlockItem(item)
       }
-      return <li><a onClick={onClick} class={classes}>{item}</a></li>
+      const classes = {
+        'active': this.openBlockPanel === item
+      }
+      return <li>
+        <a onClick={onClick} class={classes}>{item}</a>
+      </li>
     })
 
     const blockItem = blockItemList.map(item => {
+      if (item.settings.group !== this.openBlockPanel) {
+        return
+      }
+
       const onClick = event => {
         this.addElement({
           markupText: item.template,
@@ -90,9 +109,16 @@ export default {
       top: `${this.blockPosition}px`
     }
 
+    const addOnClick = event => {
+      this.toggleBlock()
+      this.hideContextMenu()
+    }
+
     return (
-      <div class={mainClass} style={blockStyles}>
-        <a class={addClass} onClick={this.toggleBlock}
+      <div class={mainClass}>
+        <a class={addClass}
+          onClick={addOnClick}
+          onContextmenu={this.noop}
           domPropsInnerHTML={SVGIcon(Icons.ADD_BLOCK)}
           style={addBlockStyles} />
         <div class={[boxClass, boxClasses]} style={boxStyles}>
