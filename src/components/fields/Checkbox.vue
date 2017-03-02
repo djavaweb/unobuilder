@@ -23,5 +23,6 @@ export default {
         <span class="label">{this.label}</span>
       </div>
     )
+  }
 }
 </script>
