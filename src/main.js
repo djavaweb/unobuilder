@@ -3,7 +3,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import store from './store'
-import Uno from 'expose-loader?uno!uno'
+import Uno from './client.js'
 import 'expose-loader?jQuery!jquery'
 import 'expose-loader?UIKit!script-loader!uikit/js/uikit.min.js'
 
@@ -13,6 +13,8 @@ import 'assets/scss/main.scss'
 
 /* eslint-disable no-unused-vars */
 import App from './components/App'
+
+if (!window.uno) window.uno = Uno
 
 // Vue config
 Vue.config.debug = true
