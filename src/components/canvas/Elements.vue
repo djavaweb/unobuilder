@@ -84,7 +84,7 @@ export default {
       const { innerHTML } = dataObject.domProps
 
       const notVoidElements = !VoidElements.includes(tagName)
-      const emptyNodes = !innerHTML && childNodes.length < 1 || innerHTML && innerHTML.length < 1
+      const emptyNodes = (!innerHTML && childNodes.length < 1) || (innerHTML && innerHTML.length < 1)
 
       const classEvents = {
         IS_CHILD_NODES_EMPTY: {
