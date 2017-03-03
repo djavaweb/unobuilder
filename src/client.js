@@ -491,4 +491,4 @@ const UnoBuilder = function () {
   return _root
 }
 
-module.exports = new UnoBuilder()
+export default new UnoBuilder()
