@@ -8,8 +8,8 @@ import 'expose-loader?jQuery!jquery'
 import 'expose-loader?UIKit!script-loader!uikit/js/uikit.min.js'
 
 // Import styles
-import '!style-loader!css-loader!assets/uikit/css/uikit.min.css'
-import 'assets/scss/main.scss'
+import './assets/uikit/css/uikit.min.css'
+import './assets/scss/main.scss'
 
 /* eslint-disable no-unused-vars */
 import App from './components/App'
