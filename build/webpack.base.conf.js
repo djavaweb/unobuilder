@@ -23,10 +23,10 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.common.js',
       'uikit': 'uikit/dist',
-      'src': path.resolve(__dirname, '../src'),
-      'uno': path.resolve(__dirname, '../src/client.js'),
-      'assets': path.resolve(__dirname, '../src/assets'),
-      'components': path.resolve(__dirname, '../src/components')
+      '@': resolve('src'),
+      'uno': resolve('src/client.js'),
+      'assets': resolve('src/assets'),
+      'components': resolve('src/components')
     }
   },
   module: {
