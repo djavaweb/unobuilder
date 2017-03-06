@@ -17,10 +17,12 @@ module.exports = {
         // Source will be stored in result.value
         console.log(result.value);
       })
-      .waitForElementPresent('body', 60000, false) 
-      .waitForElementPresent('div', 60000, false)
-      .waitForElementPresent('#uno-builder', 60000, false) 
-      .waitForElementPresent('.uno-builder', 60000, false) 
+      .waitForElementPresent('body', 30000, false) 
+      .waitForElementPresent('div', 30000, false)
+      .waitForElementPresent('.uno-builder', 30000, false) 
+      .getLog('browser', function(result) {
+        console.log(result)
+      })
       .end()
   }
 }
