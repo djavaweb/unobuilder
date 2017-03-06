@@ -21,7 +21,11 @@ module.exports = {
       .waitForElementPresent('div', 30000, false)
       .waitForElementPresent('.uno-builder', 30000, false) 
       .getLog('browser', function(result) {
-        console.log(result)
+        result.forEach(function (value, key) {
+          if(value.level === 'SEVERE') {
+            console.error(value.message)
+          }
+        })
       })
       .end()
   }
