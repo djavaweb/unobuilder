@@ -90,6 +90,13 @@ var webpackConfig = merge(baseWebpackConfig, {
         to: config.build.assetsSubDirectory,
         ignore: ['.*']
       }
+    ]),
+    // copy example folder to dist
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../example'),
+        to: config.build.assetsRoot + '/example'
+      }
     ])
   ]
 })
