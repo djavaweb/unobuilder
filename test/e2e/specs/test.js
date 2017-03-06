@@ -10,7 +10,6 @@ module.exports = {
 
     browser
       .url(devServer)
-      .waitForElementVisible('div', 60000) // yes. 3 minute 😐
       // .assert.elementPresent('.hello')
       // .assert.containsText('h1', 'UnoBuilder App')
       // .assert.elementCount('img', 1)
@@ -18,6 +17,10 @@ module.exports = {
         // Source will be stored in result.value
         console.log(result.value);
       })
+      .waitForElementVisible('body', 60000) 
+      .waitForElementVisible('#uno-builder', 60000) 
+      .waitForElementVisible('.uno-builder', 60000) 
+      .waitForElementVisible('div', 60000) 
       .end()
   }
 }
