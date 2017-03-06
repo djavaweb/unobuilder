@@ -14,6 +14,10 @@ module.exports = {
       // .assert.elementPresent('.hello')
       // .assert.containsText('h1', 'UnoBuilder App')
       // .assert.elementCount('img', 1)
+      .source(function (result){
+        // Source will be stored in result.value
+        console.log(result.value);
+      })
       .end()
   }
 }
