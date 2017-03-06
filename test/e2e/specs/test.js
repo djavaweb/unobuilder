@@ -10,15 +10,6 @@ module.exports = {
 
     browser
       .url(devServer)
-      // .assert.elementPresent('.hello')
-      // .assert.containsText('h1', 'UnoBuilder App')
-      // .assert.elementCount('img', 1)
-      .source(function (result){
-        // Source will be stored in result.value
-        console.log(result.value);
-      })
-      .waitForElementPresent('body', 30000, false) 
-      .waitForElementPresent('div', 30000, false)
       .waitForElementPresent('.uno-builder', 30000, false) 
       .getLog('browser', function(result) {
         result.forEach(function (value, key) {
