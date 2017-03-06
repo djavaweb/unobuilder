@@ -10,7 +10,7 @@ module.exports = {
 
     browser
       .url(devServer)
-      // .waitForElementVisible('div', 180000) // yes. 3 minute 😐
+      .waitForElementVisible('div', 60000) // yes. 3 minute 😐
       // .assert.elementPresent('.hello')
       // .assert.containsText('h1', 'UnoBuilder App')
       // .assert.elementCount('img', 1)
