@@ -3,8 +3,8 @@ import {mapGetters} from 'vuex'
 import {ClassPrefix} from '../../const'
 
 /* eslint-disable no-unused-vars */
-import RightPanelSwitcher from './rightPanelSwitcher'
-import PropertiesPanels from './rightPanelProperties'
+import RightPanelSwitcher from './RightPanelSwitcher'
+import PropertiesPanels from './RightPanelProperties'
 
 export default {
   name: 'rightPanel',
