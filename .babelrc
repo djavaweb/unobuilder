@@ -5,7 +5,13 @@
     }],
     "stage-2"
   ],
-  "plugins": ["transform-runtime", "transform-vue-jsx"],
+  "plugins": [
+    "transform-runtime",
+    "transform-vue-jsx",
+    "syntax-async-functions",
+    "transform-async-to-generator",
+    "transform-async-to-module-method"
+  ],
   "comments": false,
   "env": {
     "test": {

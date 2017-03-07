@@ -217,24 +217,31 @@ const UnoBuilder = function () {
   /**
    * Async queues to add component or block
    */
-  this.elementQueue = async.queue((task, callback) => {
+  this.elementQueue = async.queue((task, next) => {
     const fnName = task.type === 'component'
       ? 'initComponent'
       : 'initBlock'
 
-    this[fnName](task.url, task.scriptPath).then(() => {
-      callback()
-    })
+    this[fnName](task.url)
+      .then(() => {
+        next()
+        task.resolve()
+      })
   }, 1)
+
+  this.addQueue = (url, type) => {
+    return new Promise(resolve => {
+      this.elementQueue.push({ url, type, resolve })
+    })
+  }
 
   /**
    * Uno add component to list
    * @param {String} url
    */
   this.addComponent = url => {
-    let scriptPath = getScriptPath(url)
     let type = 'component'
-    this.elementQueue.push({ url, type, scriptPath })
+    return this.addQueue(url, type)
   }
 
   /**
@@ -242,16 +249,17 @@ const UnoBuilder = function () {
    * @param {String} url
    */
   this.addBlock = url => {
-    let scriptPath = getScriptPath(url)
     let type = 'block'
-    this.elementQueue.push({ url, type, scriptPath })
+    return this.addQueue(url, type)
   }
 
   /**
    * Uno init element (block / component)
    * @param {String} url
    */
-  this.initElement = (element, url, scriptPath) => {
+  this.initElement = (element, url) => {
+    const scriptPath = getScriptPath(url)
+
     // Get component object from js file
     // For closure purpose
     let data = {
@@ -306,9 +314,7 @@ const UnoBuilder = function () {
       })
     }
 
-    const errorLogger = err => {
-      console.error(err)
-    }
+    const errorLogger = err => console.error(err)
 
     const parser = new HTMLParser()
 
@@ -333,12 +339,12 @@ const UnoBuilder = function () {
     })
   }
 
-  this.initComponent = (url, scriptPath) => {
-    return this.initElement('component', url, scriptPath)
+  this.initComponent = url => {
+    return this.initElement('component', url)
   }
 
-  this.initBlock = (url, scriptPath) => {
-    return this.initElement('block', url, scriptPath)
+  this.initBlock = url => {
+    return this.initElement('block', url)
   }
 
   this.getComponentList = () => {
@@ -422,4 +428,6 @@ const UnoBuilder = function () {
   return this
 }
 
-export default new UnoBuilder()
+window.uno = new UnoBuilder()
+
+export default window.uno

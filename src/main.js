@@ -14,8 +14,6 @@ import './assets/scss/main.scss'
 /* eslint-disable no-unused-vars */
 import App from './components/App'
 
-if (!window.uno) window.uno = Uno
-
 // Vue config
 Vue.config.debug = true
 
