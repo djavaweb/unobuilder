@@ -210,7 +210,7 @@ const getStyle = (elementObject, isGlobal) => {
   return properties
 }
 
-const setSursorPosition = atStart => el => {
+const setCursorPosition = atStart => el => {
   const hasFeature = {
     getSelection: typeof state.window.getSelection !== 'undefined',
     createRange: typeof state.window.document.createRange !== 'undefined',
@@ -385,7 +385,7 @@ const mutations = {
     const element = getElementObjectByNode(editableNode, state.snapshot)
     if (element && element.editable) {
       element.dataObject.attrs.contenteditable = true
-      setTimeout(() => setSursorPosition(false)(editableNode), 0)
+      setTimeout(() => setCursorPosition(false)(editableNode), 0)
     }
   },
 
@@ -668,7 +668,7 @@ const actions = {
 
     //   // if (enable) {
     //   //   this.$set(state.selected.dataObject.attrs, CONTENT_EDITABLE_ATTR, true)
-    //   //   setTimeout(() => node.SetSursorPosition(false)(element), 0)
+    //   //   setTimeout(() => node.SetCursorPosition(false)(element), 0)
     //   // } else {
     //   //   this.$delete(state.selectedElement.dataObject.attrs, CONTENT_EDITABLE_ATTR)
     //   //   element.removeAttribute(CONTENT_EDITABLE_ATTR)
