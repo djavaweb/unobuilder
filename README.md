@@ -1,6 +1,6 @@
 # unobuilder
 
- ![Travis CI Unobuilder][travis]
+ [![Build Status](https://travis-ci.org/djavaweb/unobuilder.svg?branch=develop)](https://travis-ci.org/djavaweb/unobuilder)
 
 > Flexible drag n drop page builder
 
@@ -28,5 +28,3 @@ npm run test
 ```
 
 For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-
-[travis]: https://travis-ci.org/djavaweb/unobuilder.svg?branch=master
