@@ -23,7 +23,11 @@ export default {
         'no-image': !item.settings.icon
       }
 
-      return <div class={itemClass}>
+      // Vue 2.2.1 must provide unique key to each list
+      // https://vuejs.org/v2/guide/list.html#key
+      const itemKey = 'left-panel-component-item--' + item._id
+
+      return <div class={itemClass} key={itemKey}>
         <div class={imageClass} style={styles} />
         <div class="label">{item.settings.label}</div>
       </div>

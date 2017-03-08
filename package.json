@@ -19,9 +19,9 @@
     "brace": "^0.10.0",
     "jquery": "^3.1.1",
     "uikit": "^3.0.0-beta.16",
-    "vue": "^2.1.0",
+    "vue": "^2.2.1",
     "vue-multiselect": "^2.0.0-beta.13",
-    "vuex": "^2.1.1"
+    "vuex": "^2.2.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",
