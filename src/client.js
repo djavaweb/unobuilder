@@ -439,4 +439,6 @@ class UnoBuilder {
   }
 }
 
-export default new UnoBuilder()
+global.uno = new UnoBuilder()
+
+export default global.uno
