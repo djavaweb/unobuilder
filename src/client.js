@@ -40,28 +40,27 @@ const getScriptPath = url => {
   return scriptPath
 }
 
-const asdf = new WeakMap()
+// let this.__registry__ = global.this.__registry__
 
 /**
  * Unobuilder global framework to register components
  */
 class UnoBuilder {
   constructor () {
-    const uno = {
+    this.__registry__ = {
       eventList: {},
       components: {},
       blocks: {},
       url: null,
       element: null,
-      builder: null
+      builder: null,
+      queue: null
     }
 
-    this.__uno__ = uno
-
-     /**
-     * Async queues to add component or block
-     */
-    this.elementQueue = async.queue((task, next) => {
+  /**
+   * Async queues to add component or block
+   */
+    this.__registry__.queue = async.queue((task, next) => {
       const fn = task.type === 'component'
         ? 'initComponent'
         : 'initBlock'
@@ -80,7 +79,7 @@ class UnoBuilder {
    * @return {Object}
    */
   builder (element) {
-    this.__uno__.builder = element
+    this.__registry__.builder = element
     this.emit('prepare', element)
     return this
   }
@@ -90,7 +89,7 @@ class UnoBuilder {
    * @return {String}
    */
   getBuilderSelector () {
-    return this.__uno__.builder
+    return this.__registry__.builder
   }
 
   /**
@@ -98,7 +97,7 @@ class UnoBuilder {
    * @return {String}
    */
   getBuilderUrl () {
-    return this.__uno__.url
+    return this.__registry__.url
   }
 
   /**
@@ -107,11 +106,11 @@ class UnoBuilder {
    */
   loadCanvas (options) {
     if (options.url && options.element) {
-      const uno = this.__uno__
-      uno.url = options.url
-      uno.element = options.element
+      const registry = this.__registry__
+      registry.url = options.url
+      registry.element = options.element
       this.emit('init', {
-        builder: uno.builder,
+        builder: registry.builder,
         canvas: options.element
       })
     } else {
@@ -149,7 +148,7 @@ class UnoBuilder {
         break
     }
 
-    const { eventList } = this.__uno__
+    const { eventList } = this.__registry__
 
     // eventType doesn't exist, create new one
     if (!eventList[eventType]) {
@@ -183,7 +182,7 @@ class UnoBuilder {
         break
     }
 
-    const { eventList } = this.__uno__
+    const { eventList } = this.__registry__
 
     if (eventList[eventType]) {
       delete eventList[eventType]
@@ -212,7 +211,7 @@ class UnoBuilder {
         break
     }
 
-    const { eventList } = this.__uno__
+    const { eventList } = this.__registry__
 
     if (eventList[eventType]) {
       let arr = eventList[eventType]
@@ -228,21 +227,21 @@ class UnoBuilder {
    * @return {Object} eventList
    */
   events () {
-    return this.__uno__.eventList
+    return this.__registry__.eventList
   }
 
   /**
    * Reset Events
    */
   resetEvents () {
-    let { eventList } = this.__uno__
+    let { eventList } = this.__registry__
     eventList = {}
     return eventList
   }
 
   addQueue (url, type) {
     return new Promise(resolve => {
-      this.elementQueue.push({ url, type, resolve })
+      this.__registry__.queue.push({ url, type, resolve })
     })
   }
 
@@ -340,7 +339,7 @@ class UnoBuilder {
           data.template = output
 
           // Add component to list
-          this.__uno__[`${element}s`][data.settings.id] = data
+          this.__registry__[`${element}s`][data.settings.id] = data
 
           // Register script
           this.registerScript(url, `${element}-${data.id}`)
@@ -359,22 +358,22 @@ class UnoBuilder {
   }
 
   getComponentList () {
-    return this.__uno__.components
+    return this.__registry__.components
   }
 
   getComponentItem (item) {
-    const { components } = this.__uno__
+    const { components } = this.__registry__
     if (item in components) {
       return components[item]
     }
   }
 
   getBlockList () {
-    return this.__uno__.blocks
+    return this.__registry__.blocks
   }
 
   getBlockItem (item) {
-    const { blocks } = this.__uno__
+    const { blocks } = this.__registry__
     if (item in blocks) {
       return blocks[item]
     }
@@ -392,31 +391,31 @@ class UnoBuilder {
    * @param {Object} options
    */
   registerElement (element, name, options) {
-    const uno = this.__uno__
-    if (uno[element][name]) {
+    const registry = this.__registry__
+    if (registry[element][name]) {
       // Call before init event
       if (options.events.beforeInit) {
-        options.events.beforeInit.apply(uno[element][name])
+        options.events.beforeInit.apply(registry[element][name])
       }
 
       // Duplicate data that doesn't have events name
       if (options.data) {
         let data = omit(options.data, actionObjectException)
-        extend(uno[element][name], data)
+        extend(registry[element][name], data)
       }
 
       // Duplicate all events
       if (options.events) {
         actionObjectException.forEach(eventName => {
           if (options.events[eventName]) {
-            uno[element][name][eventName] = options.events[eventName]
+            registry[element][name][eventName] = options.events[eventName]
           }
         })
       }
 
       // Call after init event
       if (options.events.afterInit) {
-        options.events.afterInit.apply(uno[element][name])
+        options.events.afterInit.apply(registry[element][name])
       }
     }
 
@@ -440,6 +439,4 @@ class UnoBuilder {
   }
 }
 
-window.uno = new UnoBuilder()
-
-export default window.uno
+export default new UnoBuilder()
