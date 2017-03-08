@@ -18,6 +18,7 @@ const errorMessages = {
   invalidTemplate: 'UNO: Your Template is invalid',
   optionsUndefined: 'UNO: Options Undefined'
 }
+
 const actionObjectException = [
   'template',
   'path',
@@ -39,30 +40,46 @@ const getScriptPath = url => {
   return scriptPath
 }
 
+// let this.__registry__ = global.this.__registry__
+
 /**
  * Unobuilder global framework to register components
  */
-const UnoBuilder = function () {
-  if (!global.__uno__) global.__uno__ = {}
+class UnoBuilder {
+  constructor () {
+    this.__registry__ = {
+      eventList: {},
+      components: {},
+      blocks: {},
+      url: null,
+      element: null,
+      builder: null,
+      queue: null
+    }
 
-  global.__uno__ = {
-    eventList: {},
-    components: {},
-    blocks: {},
-    url: null,
-    element: null,
-    builder: null
+  /**
+   * Async queues to add component or block
+   */
+    this.__registry__.queue = async.queue((task, next) => {
+      const fn = task.type === 'component'
+        ? 'initComponent'
+        : 'initBlock'
+
+      this[fn](task.url)
+        .then(() => {
+          next()
+          task.resolve()
+        })
+    }, 1)
   }
-
-  const builder = global.__uno__
 
   /**
    * Init builder
    * @param  {String} element
    * @return {Object}
    */
-  this.builder = element => {
-    builder.builder = element
+  builder (element) {
+    this.__registry__.builder = element
     this.emit('prepare', element)
     return this
   }
@@ -71,28 +88,29 @@ const UnoBuilder = function () {
    * get builder selector
    * @return {String}
    */
-  this.getBuilderSelector = () => {
-    return builder.builder
+  getBuilderSelector () {
+    return this.__registry__.builder
   }
 
   /**
    * Get builder url
    * @return {String}
    */
-  this.getBuilderUrl = () => {
-    return builder.url
+  getBuilderUrl () {
+    return this.__registry__.url
   }
 
   /**
    * Uno load URL to uno canvas
    * @param {Object} options
    */
-  this.loadCanvas = options => {
+  loadCanvas (options) {
     if (options.url && options.element) {
-      builder.url = options.url
-      builder.element = options.element
+      const registry = this.__registry__
+      registry.url = options.url
+      registry.element = options.element
       this.emit('init', {
-        builder: builder.builder,
+        builder: registry.builder,
         canvas: options.element
       })
     } else {
@@ -106,7 +124,7 @@ const UnoBuilder = function () {
    * @param  {String} eventType
    * @param  {Function} fn
    */
-  this.on = (...args) => {
+  on (...args) {
     let argsLength = args.length
     let eventType
     let fn
@@ -130,12 +148,14 @@ const UnoBuilder = function () {
         break
     }
 
+    const { eventList } = this.__registry__
+
     // eventType doesn't exist, create new one
-    if (!builder.eventList[eventType]) {
-      builder.eventList[eventType] = []
+    if (!eventList[eventType]) {
+      eventList[eventType] = []
     }
 
-    builder.eventList[eventType].push({
+    eventList[eventType].push({
       callback
     })
 
@@ -146,7 +166,7 @@ const UnoBuilder = function () {
    * Turn off event
    * @param  {String} eventType [description]
    */
-  this.off = (...args) => {
+  off (...args) {
     let argsLength = args.length
     let eventType
 
@@ -162,8 +182,10 @@ const UnoBuilder = function () {
         break
     }
 
-    if (builder.eventList[eventType]) {
-      delete builder.eventList[eventType]
+    const { eventList } = this.__registry__
+
+    if (eventList[eventType]) {
+      delete eventList[eventType]
     }
 
     return this
@@ -174,7 +196,7 @@ const UnoBuilder = function () {
    * @param  {String} eventType
    * @param  {Object|String|Number|Array} variables
    */
-  this.emit = (...args) => {
+  emit (...args) {
     let argsLength = args.length
     let eventType = args[0]
     let variables
@@ -189,8 +211,10 @@ const UnoBuilder = function () {
         break
     }
 
-    if (builder.eventList[eventType]) {
-      let arr = builder.eventList[eventType]
+    const { eventList } = this.__registry__
+
+    if (eventList[eventType]) {
+      let arr = eventList[eventType]
       // emit callback
       for (let i = 0; i < arr.length; i++) {
         arr[i].callback && arr[i].callback.call(this, vars)
@@ -202,36 +226,22 @@ const UnoBuilder = function () {
    * Get event list
    * @return {Object} eventList
    */
-  this.events = () => {
-    return builder.eventList
+  events () {
+    return this.__registry__.eventList
   }
 
   /**
    * Reset Events
    */
-  this.resetEvents = () => {
-    builder.eventList = {}
-    return builder.eventList
+  resetEvents () {
+    let { eventList } = this.__registry__
+    eventList = {}
+    return eventList
   }
 
-  /**
-   * Async queues to add component or block
-   */
-  this.elementQueue = async.queue((task, next) => {
-    const fnName = task.type === 'component'
-      ? 'initComponent'
-      : 'initBlock'
-
-    this[fnName](task.url)
-      .then(() => {
-        next()
-        task.resolve()
-      })
-  }, 1)
-
-  this.addQueue = (url, type) => {
+  addQueue (url, type) {
     return new Promise(resolve => {
-      this.elementQueue.push({ url, type, resolve })
+      this.__registry__.queue.push({ url, type, resolve })
     })
   }
 
@@ -239,7 +249,7 @@ const UnoBuilder = function () {
    * Uno add component to list
    * @param {String} url
    */
-  this.addComponent = url => {
+  addComponent (url) {
     let type = 'component'
     return this.addQueue(url, type)
   }
@@ -248,7 +258,7 @@ const UnoBuilder = function () {
    * Uno add block to list
    * @param {String} url
    */
-  this.addBlock = url => {
+  addBlock (url) {
     let type = 'block'
     return this.addQueue(url, type)
   }
@@ -257,7 +267,7 @@ const UnoBuilder = function () {
    * Uno init element (block / component)
    * @param {String} url
    */
-  this.initElement = (element, url) => {
+  initElement (element, url) {
     const scriptPath = getScriptPath(url)
 
     // Get component object from js file
@@ -329,7 +339,7 @@ const UnoBuilder = function () {
           data.template = output
 
           // Add component to list
-          builder[`${element}s`][data.settings.id] = data
+          this.__registry__[`${element}s`][data.settings.id] = data
 
           // Register script
           this.registerScript(url, `${element}-${data.id}`)
@@ -339,35 +349,37 @@ const UnoBuilder = function () {
     })
   }
 
-  this.initComponent = url => {
+  initComponent (url) {
     return this.initElement('component', url)
   }
 
-  this.initBlock = url => {
+  initBlock (url) {
     return this.initElement('block', url)
   }
 
-  this.getComponentList = () => {
-    return builder.components
+  getComponentList () {
+    return this.__registry__.components
   }
 
-  this.getComponentItem = item => {
-    if (item in builder.components) {
-      return builder.components[item]
+  getComponentItem (item) {
+    const { components } = this.__registry__
+    if (item in components) {
+      return components[item]
     }
   }
 
-  this.getBlockList = () => {
-    return builder.blocks
+  getBlockList () {
+    return this.__registry__.blocks
   }
 
-  this.getBlockItem = item => {
-    if (item in builder.blocks) {
-      return builder.blocks[item]
+  getBlockItem (item) {
+    const { blocks } = this.__registry__
+    if (item in blocks) {
+      return blocks[item]
     }
   }
 
-  this.registerScript = url => {
+  registerScript (url) {
     let script = document.createElement('script')
     script.src = url
     document.body.appendChild(script)
@@ -378,31 +390,32 @@ const UnoBuilder = function () {
    * @param {String} name
    * @param {Object} options
    */
-  this.registerElement = (element, name, options) => {
-    if (builder[element][name]) {
+  registerElement (element, name, options) {
+    const registry = this.__registry__
+    if (registry[element][name]) {
       // Call before init event
       if (options.events.beforeInit) {
-        options.events.beforeInit.apply(builder[element][name])
+        options.events.beforeInit.apply(registry[element][name])
       }
 
       // Duplicate data that doesn't have events name
       if (options.data) {
         let data = omit(options.data, actionObjectException)
-        extend(builder[element][name], data)
+        extend(registry[element][name], data)
       }
 
       // Duplicate all events
       if (options.events) {
         actionObjectException.forEach(eventName => {
           if (options.events[eventName]) {
-            builder[element][name][eventName] = options.events[eventName]
+            registry[element][name][eventName] = options.events[eventName]
           }
         })
       }
 
       // Call after init event
       if (options.events.afterInit) {
-        options.events.afterInit.apply(builder[element][name])
+        options.events.afterInit.apply(registry[element][name])
       }
     }
 
@@ -412,7 +425,7 @@ const UnoBuilder = function () {
   /**
    * Register components
    */
-  this.registerComponent = (name, options) => {
+  registerComponent (name, options) {
     this.registerElement('components', name, options)
     return this
   }
@@ -420,14 +433,12 @@ const UnoBuilder = function () {
   /**
    * Register blocks
    */
-  this.registerBlock = (name, options) => {
+  registerBlock (name, options) {
     this.registerElement('blocks', name, options)
     return this
   }
-
-  return this
 }
 
-window.uno = new UnoBuilder()
+global.uno = new UnoBuilder()
 
-export default window.uno
+export default global.uno
