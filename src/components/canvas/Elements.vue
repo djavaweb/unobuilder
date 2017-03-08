@@ -42,6 +42,7 @@ export default {
   render (createElement) {
     const click = event => {
       event.preventDefault()
+      event.stopPropagation()
 
       if (this.previewMode) {
         return
