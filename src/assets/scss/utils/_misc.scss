@@ -12,3 +12,21 @@
 @mixin ResizeVertical {
   cursor: url("#{$assets_path}/cursor/resize-vertical.cur") 12 12, ns-resize !important;
 }
+
+/**
+ * Grabbing cursor
+ */
+@mixin grabbing {
+    cursor: -webkit-grabbing !important;
+    cursor: -moz-grabbing !important;
+    cursor: grabbing !important;
+}
+
+@mixin ForceFill {
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
