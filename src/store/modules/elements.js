@@ -696,6 +696,29 @@ const actions = {
 
 const getters = {
   /**
+   * Get iframe window
+   * @param {Object} state
+   * @return {Object}
+   */
+  iframeWindow: state => state.window,
+
+  /**
+   * Get iframe document
+   * @param {Object} state
+   * @return {Object}
+   */
+  iframeDocument: state => state.window.document,
+
+  /**
+   * Get iframe document
+   * @param {Object} state
+   * @return {Object}
+   */
+  iframeBody: state => state.window.document.body,
+
+  iframeOffset: state => state.window.frameElement.getBoundingClientRect(),
+
+  /**
    * Element list
    * @param  {Object} state
    * @return {Object}

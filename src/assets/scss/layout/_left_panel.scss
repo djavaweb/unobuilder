@@ -128,11 +128,27 @@
       margin: 10px 0;
       display: block;
     }
-  }
+  } 
 
   &__grid-item {
+    position: relative;
     width: 50px;
     margin-bottom: 10px;
+    &:after {
+      @include ForceFill();
+    }
+    &--dragging {
+      @include grabbing();
+      pointer-events: none;
+      background-color: $charcoal-grey;
+      position: absolute;
+      padding: 10px 8px 2px !important;
+      min-width: auto !important;
+      width: 55px;
+      border-radius: 3px;
+      box-shadow: 0 1px 10px 3px rgba(0,0,0,0.3);
+      z-index: 999
+    }
     .image {
       height: 50px;
       max-height: 50px;

@@ -24,7 +24,8 @@ export default {
     ...mapGetters([
       'toggleBlockPanel',
       'canvasScroll',
-      'previewMode'
+      'previewMode',
+      'componentDragging'
     ])
   },
 
@@ -35,7 +36,8 @@ export default {
       'hideBlockPanel',
       'showContextMenu',
       'hideContextMenu',
-      'setContextCoords'
+      'setContextCoords',
+      'disableDragComponent'
     ])
   },
 
@@ -67,6 +69,13 @@ export default {
     const mouseover = event => {
       if (!this.previewMode && !this.toggleBlockPanel) {
         this.hoverElement(event.target)
+      }
+    }
+
+    const mouseup = event => {
+      if (!this.componentDragging) return false
+      if (event.target === event.currentTarget) {
+        console.log('Dropped on ', event.target)
       }
     }
 
@@ -130,6 +139,7 @@ export default {
       dataObject.on = {
         click,
         mouseover,
+        mouseup,
         contextmenu: click
       }
 

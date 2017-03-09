@@ -308,3 +308,32 @@ export const SVGIcon = filename => {
 export const GetNodeId = element => {
   return element && element.getAttribute(SelectorAttrId)
 }
+
+/**
+ * Add event listener crossbrowser
+ * @param {ElementNode} element
+ * @param {String} event
+ * @param {Function} fn
+ */
+export const addEvent = (element, event, fn) => {
+  if (element.addEventListener) {
+    fn && element.addEventListener(event, fn, false)
+  } else {
+    element.attachEvent('on' + event, () => {
+      fn && fn.call(element, window.event)
+    })
+  }
+}
+
+/**
+ * Remove event listener crossbrowser
+ * @param {ElementNode} element
+ * @param {Function} fn
+ */
+export const removeEvent = (element, event, fn) => {
+  if (element.addEventListener) {
+    element.removeEventListener(event, fn)
+  } else {
+    element.detachEvent('on' + event, fn)
+  }
+}
