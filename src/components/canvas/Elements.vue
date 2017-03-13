@@ -1,7 +1,8 @@
 <script>
 import $ from 'jquery'
+import Uno from 'uno'
 import {mapGetters, mapActions} from 'vuex'
-import {ClassName} from '../../utils'
+import {ClassName, SelectorAttrId} from '../../utils'
 import {DomType, VoidElements} from '../../const'
 
 const className = {
@@ -25,7 +26,8 @@ export default {
       'toggleBlockPanel',
       'canvasScroll',
       'previewMode',
-      'componentDragging'
+      'componentDragging',
+      'componentActive'
     ])
   },
 
@@ -37,7 +39,8 @@ export default {
       'showContextMenu',
       'hideContextMenu',
       'setContextCoords',
-      'disableDragComponent'
+      'disableDragComponent',
+      'addElement'
     ])
   },
 
@@ -75,7 +78,12 @@ export default {
     const mouseup = event => {
       if (!this.componentDragging) return false
       if (event.target === event.currentTarget) {
-        console.log('Dropped on ', event.target)
+        const item = Uno.getComponentItem(this.componentActive)
+        this.addElement({
+          markupText: item.template,
+          appendTo: event.target.getAttribute(SelectorAttrId),
+          index: 0
+        })
       }
     }
 

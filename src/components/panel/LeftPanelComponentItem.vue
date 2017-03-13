@@ -1,7 +1,7 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {ClassPrefix} from '../../const'
-import {addEvent, removeEvent} from '../../utils'
+import {addEvent, removeEvent, SelectorAttrComponent} from '../../utils'
 
 const mainClass = `${ClassPrefix.LEFT_PANEL}-component-items`
 const itemClass = `${ClassPrefix.MAIN}__grid-item`
@@ -79,7 +79,8 @@ export default {
       addEvent(this.iframeDocument, 'mousemove', this.dragMove, false)
       addEvent(this.iframeDocument, 'mouseup', this.dragEnd, false)
 
-      this.enableDragComponent()
+      const componentId = this.dragState.element.getAttribute(SelectorAttrComponent)
+      this.enableDragComponent(componentId)
       this.hideLeftPanels()
     },
     dragMove (event) {
@@ -118,9 +119,14 @@ export default {
         'no-image': !item.settings.icon
       }
 
+      const key = `${itemClass}--${item._id}`
+
       return <div
         class={itemClass}
-        onMousedown={this.dragStart}>
+        onMousedown={this.dragStart}
+        data-uno-component={item.settings.id}
+        key={key}
+        >
         <div class={imageClass} style={styles} />
         <div class="label">{item.settings.label}</div>
       </div>
