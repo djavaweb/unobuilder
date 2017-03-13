@@ -38,6 +38,12 @@ const camelizeRE = /-(\w)/g
 export const SelectorAttrId = `data-${ClassPrefix.SHORT}-id`
 
 /**
+ * Data component name from attribute prefix
+ * @type {[type]}
+ */
+export const SelectorAttrComponent = `data-${ClassPrefix.SHORT}-component`
+
+/**
  * Generate random UID
  * @return {String}
  */
