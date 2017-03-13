@@ -90,8 +90,8 @@ export default {
       this.dragState.x = pageX
       this.dragState.y = pageY
 
+      let isIframe = event.target.ownerDocument !== document
       // Move element UI
-      let isIframe = !event.target.classList.value.match(/.*uno-builder.*/)
       this.moveElement(this.dragState.element, isIframe)
     },
     dragEnd (event, moving) {
