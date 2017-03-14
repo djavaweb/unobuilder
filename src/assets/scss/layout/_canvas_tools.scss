@@ -62,6 +62,11 @@ $selector-border-width: 2px;
       &__hovered {
         z-index: 28;
         border-width: $selector-border-width - 1;
+        &--dragging {
+          border-width: $selector-border-width;
+          border-color: orange;
+          z-index: 30;
+        }
         .#{$prefix}__canvas-selector-tools {
           margin-left: -($selector-border-width - 1);
           margin-right: -($selector-border-width - 1);
