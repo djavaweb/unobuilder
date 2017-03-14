@@ -12,7 +12,7 @@
 
       {
         "id": "coords",
-        "type": "row",
+        "type": "group",
         "label": "Coordinates",
         "items": [
           {
@@ -32,7 +32,7 @@
       {
         "id": "zoom",
         "type": "number",
-        "default": 13
+        "value": 13
       }
   ]
 }
