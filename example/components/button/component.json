@@ -2,5 +2,22 @@
   "id": "button",
   "label": "Button",
   "icon": "icon.svg",
-  "group": "Component"
+  "group": "Component",
+  "settings": [
+    {
+      "id": "my-button__dsjkf",
+      "type": "buttons",
+      "bind": "class",
+      "items": [
+        {
+          "label": "Primary",
+          "value": "uk-button-primary"
+        },
+        {
+          "label": "Secondary",
+          "value": "uk-button-secondary"
+        }
+      ]
+    }
+  ]
 }
