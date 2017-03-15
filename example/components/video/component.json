@@ -8,7 +8,7 @@
       "id": "src",
       "type": "text",
       "label": "Video URL",
-      "bind": "src", // binding attributes
+      "bind": "src",
       "value": ""
     }
   ]
