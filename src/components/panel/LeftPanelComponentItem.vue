@@ -1,7 +1,7 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {ClassPrefix} from '../../const'
-import {addEvent, removeEvent} from '../../utils'
+import {addEvent, removeEvent, SelectorAttrComponent} from '../../utils'
 
 const mainClass = `${ClassPrefix.LEFT_PANEL}-component-items`
 const itemClass = `${ClassPrefix.MAIN}__grid-item`
@@ -26,9 +26,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'iframeBody',
       'iframeDocument',
-      'iframeOffset',
+      'iframeWindow',
       'canvasScroll',
       'componentDragging'
     ])
@@ -45,14 +44,21 @@ export default {
      * @param {DOMObject} target
      * @return void
      */
-    moveElement (target) {
+    moveElement (target, isIframe = true) {
       if (target === undefined) return false
-      let {left, top} = this.iframeOffset
 
       let {x, y} = this.dragState
       let rect = target.getBoundingClientRect()
       let {width, height} = rect
-      target.style.top = `${y - (height / 2) + top + this.canvasScroll.top}px`
+      let {left, top} = {left: 0, top: 0}
+      let canvasScrollTop = 0
+      if (isIframe) {
+        let iframeOffset = this.iframeWindow.frameElement.getBoundingClientRect()
+        left = iframeOffset.left
+        top = iframeOffset.top
+        canvasScrollTop = this.canvasScroll.top
+      }
+      target.style.top = `${y - (height / 2) + top + canvasScrollTop}px`
       target.style.left = `${x - (width / 2) + left}px`
     },
     dragStart (event) {
@@ -68,10 +74,13 @@ export default {
       this.dragState.y = pageY
 
       // Start event dragging on document iframe
+      addEvent(document, 'mousemove', this.dragMove, false)
+      addEvent(document, 'mouseup', this.dragEnd, false)
       addEvent(this.iframeDocument, 'mousemove', this.dragMove, false)
       addEvent(this.iframeDocument, 'mouseup', this.dragEnd, false)
 
-      this.enableDragComponent()
+      const componentId = this.dragState.element.getAttribute(SelectorAttrComponent)
+      this.enableDragComponent(componentId)
       this.hideLeftPanels()
     },
     dragMove (event) {
@@ -82,14 +91,17 @@ export default {
       this.dragState.x = pageX
       this.dragState.y = pageY
 
+      let isIframe = event.target.ownerDocument !== document
       // Move element UI
-      this.moveElement(this.dragState.element)
+      this.moveElement(this.dragState.element, isIframe)
     },
     dragEnd (event, moving) {
       this.dragState.element.remove()
       this.disableDragComponent()
 
       // remove event dragging on document iframe
+      removeEvent(document, 'mousemove', this.dragMove, false)
+      removeEvent(document, 'mouseup', this.dragEnd, false)
       removeEvent(this.iframeDocument, 'mousemove', this.dragMove, false)
       removeEvent(this.iframeDocument, 'mouseup', this.dragEnd, false)
 
@@ -107,9 +119,14 @@ export default {
         'no-image': !item.settings.icon
       }
 
+      const key = `${itemClass}--${item._id}`
+
       return <div
         class={itemClass}
-        onMousedown={this.dragStart}>
+        onMousedown={this.dragStart}
+        data-uno-component={item.settings.id}
+        key={key}
+        >
         <div class={imageClass} style={styles} />
         <div class="label">{item.settings.label}</div>
       </div>
