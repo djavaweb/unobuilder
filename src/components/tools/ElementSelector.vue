@@ -9,6 +9,7 @@ import RemoveButton from '../fields/CloseButton'
 const mainClass = `${ClassPrefix.CANVAS}-selector`
 const selectedClass = `${mainClass}__selected`
 const hoveredClass = `${mainClass}__hovered`
+const hoveredDraggingClass = `${hoveredClass}--dragging`
 const selectorToolClass = `${mainClass}-tools`
 const breadcrumbClass = `${mainClass}-breadcrumbs`
 const removeClass = `${mainClass}-remove`
@@ -24,7 +25,8 @@ export default {
       'selectedOffset',
       'hoveredOffset',
       'breadcrumbs',
-      'breadcrumb'
+      'breadcrumb',
+      'componentDragging'
     ])
   },
   methods: {
@@ -126,7 +128,7 @@ export default {
     }
 
     let hoverTools
-    if (this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id) {
+    if ((this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id) || this.componentDragging) {
       let {top, left, width, height} = this.hoveredOffset
       hoveredStyles = {
         top: `${top}px`,
@@ -135,7 +137,11 @@ export default {
         height: `${height}px`
       }
 
-      hoverTools = <div class={[hoveredClass]} style={hoveredClass} style={hoveredStyles}>
+      let activeClass = {}
+      activeClass[hoveredClass] = true
+      activeClass[hoveredDraggingClass] = this.componentDragging
+
+      hoverTools = <div class={activeClass} style={hoveredStyles}>
         <div class={selectorToolClass}>
           <div class={breadcrumbClass}>
             <span>{this.breadcrumb.label}</span>
