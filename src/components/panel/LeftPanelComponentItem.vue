@@ -1,7 +1,7 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {ClassPrefix} from '../../const'
-import {addEvent, removeEvent, SelectorAttrComponent} from '../../utils'
+import {addEvent, removeEvent, SelectorAttrComponent, moveElement} from '../../utils'
 
 const mainClass = `${ClassPrefix.LEFT_PANEL}-component-items`
 const itemClass = `${ClassPrefix.MAIN}__grid-item`
@@ -39,27 +39,22 @@ export default {
       'disableDragComponent'
     ]),
     /**
-     * Move element position
+     * Move dragging component position
      *
      * @param {DOMObject} target
+     * @param {Boolean} isIframe
      * @return void
      */
-    moveElement (target, isIframe = true) {
-      if (target === undefined) return false
+    moveComponent (target, isIframe = true) {
+      let iframeWindow = isIframe
+        ? this.iframeWindow
+        : undefined
 
-      let {x, y} = this.dragState
-      let rect = target.getBoundingClientRect()
-      let {width, height} = rect
-      let {left, top} = {left: 0, top: 0}
-      let canvasScrollTop = 0
-      if (isIframe) {
-        let iframeOffset = this.iframeWindow.frameElement.getBoundingClientRect()
-        left = iframeOffset.left
-        top = iframeOffset.top
-        canvasScrollTop = this.canvasScroll.top
-      }
-      target.style.top = `${y - (height / 2) + top + canvasScrollTop}px`
-      target.style.left = `${x - (width / 2) + left}px`
+      moveElement(target, {
+        iframeWindow,
+        state: this.dragState,
+        canvasScrollTop: this.canvasScroll.top
+      })
     },
     dragStart (event) {
       let {target, pageX, pageY} = event
@@ -93,7 +88,7 @@ export default {
 
       let isIframe = event.target.ownerDocument !== document
       // Move element UI
-      this.moveElement(this.dragState.element, isIframe)
+      this.moveComponent(this.dragState.element, isIframe)
     },
     dragEnd (event, moving) {
       this.dragState.element.remove()
