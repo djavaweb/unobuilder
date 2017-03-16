@@ -14,7 +14,11 @@ const state = {
   selected: null,
   hovered: null,
   lastInserted: null,
-  openBreadcrumbs: false
+  openBreadcrumbs: false,
+  dragging: {
+    status: false,
+    activeId: null
+  }
 }
 
 const getElementObject = (id, elements) => {
@@ -314,6 +318,7 @@ const mutations = {
         const appendEl = getElementObject(appendTo, state.snapshot)
         index = !index ? appendEl.childNodes.length : index
         appendEl.childNodes.splice(index, 0, element)
+        console.log(markupText)
       }
     }
   },
@@ -419,6 +424,18 @@ const mutations = {
 
       state.window.scrollTo(state.window.scrollX, value)
     }
+  },
+
+  [mutation.TOGGLE_DRAG_ELEMENT] (state, status) {
+    state.dragging.status = status === undefined
+      ? !state.dragging.status
+      : status
+  },
+  [mutation.SET_ACTIVE_ELEMENT] (state, id) {
+    state.dragging.activeId = id
+  },
+  [mutation.CLEAR_ACTIVE_ELEMENT] (state, id) {
+    state.dragging.activeId = null
   }
 }
 
@@ -504,10 +521,17 @@ const actions = {
    * @param  {String} options.id
    * @return {void}
    */
-  moveElement ({commit, state}, {action, id}) {
+  moveElement ({commit, state}, {action, id, target}) {
     commit(mutation.SNAPSHOT_ELEMENT)
 
     const srcElement = getRequiredParentElement(id, state.snapshot) || getElementObject(id, state.snapshot)
+
+    let idEl = getElementNodeById(id)
+    let targetEl = getElementNodeById(target)
+    let idObj = getElementObjectByNode(idEl)
+    let targetObj = getElementObjectByNode(targetEl)
+
+    targetObj.childNodes.push(idObj)
 
     if (srcElement) {
       commit(mutation.MOVE_ELEMENT, {
@@ -691,6 +715,17 @@ const actions = {
   refreshScroll ({commit}) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
     commit(mutation.SET_WINDOW_SCROLL, 0)
+  },
+  toggleDragElement ({commit}, status) {
+    commit(mutation.TOGGLE_DRAG_ELEMENT, status)
+  },
+  enableDragElement ({commit}, id) {
+    commit(mutation.TOGGLE_DRAG_ELEMENT, true)
+    commit(mutation.SET_ACTIVE_ELEMENT, id)
+  },
+  disableDragElement ({commit}) {
+    commit(mutation.TOGGLE_DRAG_ELEMENT, false)
+    commit(mutation.CLEAR_ACTIVE_ELEMENT)
   }
 }
 
@@ -953,6 +988,14 @@ const getters = {
     if (state.selected) {
       return isVoidElementById(state.selected.id)
     }
+  },
+
+  /**
+   * Get state dragging of element
+   * @param {Object} state
+   */
+  elementDragging: state => {
+    return state.dragging.status
   }
 }
 

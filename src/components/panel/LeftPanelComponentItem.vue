@@ -1,7 +1,12 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {ClassPrefix} from '../../const'
-import {addEvent, removeEvent, SelectorAttrComponent, moveElement} from '../../utils'
+import {
+  addEvent,
+  removeEvent,
+  SelectorAttrComponent,
+  dragElement
+} from '../../utils'
 
 const mainClass = `${ClassPrefix.LEFT_PANEL}-component-items`
 const itemClass = `${ClassPrefix.MAIN}__grid-item`
@@ -50,7 +55,7 @@ export default {
         ? this.iframeWindow
         : undefined
 
-      moveElement(target, {
+      dragElement(target, {
         iframeWindow,
         state: this.dragState,
         canvasScrollTop: this.canvasScroll.top

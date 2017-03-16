@@ -12,7 +12,8 @@ export default {
     ...mapGetters([
       'elements',
       'selectedElement',
-
+      'iframeBody',
+      'elementDragging',
       'previewMode',
       'customStyles'
     ])
@@ -59,6 +60,10 @@ export default {
     }
   },
   render (h) {
+    this.iframeBody.style.userSelect = this.elementDragging
+      ? 'none'
+      : 'initial'
+
     const classes = {
       'preview--mode': this.previewMode
     }

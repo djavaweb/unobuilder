@@ -345,11 +345,11 @@ export const removeEvent = (element, event, fn) => {
 }
 
 /**
- * Moving element (used for drag n drop)
+ * Dragging element (used for drag n drop)
  * @param {DOMObject} target
  * @param {Object} options
  */
-export const moveElement = (target, options) => {
+export const dragElement = (target, options) => {
   if (!target) return false
   // define it's default value
   let {
