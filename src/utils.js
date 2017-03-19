@@ -343,3 +343,35 @@ export const removeEvent = (element, event, fn) => {
     element.detachEvent('on' + event, fn)
   }
 }
+
+/**
+ * Dragging element (used for drag n drop)
+ * @param {DOMObject} target
+ * @param {Object} options
+ */
+export const dragElement = (target, options) => {
+  if (!target) return false
+  // define it's default value
+  let {
+    iframeWindow = undefined,
+    canvasScrollTop = 0,
+    state: {
+      x = 0,
+      y = 0
+    }
+  } = options
+
+  let rect = target.getBoundingClientRect()
+  let {width, height} = rect
+
+  let left = 0
+  let top = 0
+  if (iframeWindow) {
+    let iframeOffset = iframeWindow.frameElement.getBoundingClientRect()
+    left = iframeOffset.left
+    top = iframeOffset.top
+  }
+
+  target.style.top = `${y - (height / 2) + top + canvasScrollTop}px`
+  target.style.left = `${x - (width / 2) + left}px`
+}

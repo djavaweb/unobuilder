@@ -1,3 +1,19 @@
 @import "utils";
 @import "base";
 @import "layout";
+
+// just sample for internal
+.element-dragged {
+  @include grabbing();
+  pointer-events: none;
+  background-color: $charcoal-grey;
+  position: absolute;
+  padding: 10px 8px 2px !important;
+  min-width: auto !important;
+  width: 80px;
+  height: 80px;
+  opacity: .9;
+  border-radius: 3px;
+  box-shadow: 0 1px 10px 3px rgba(0,0,0,0.3);
+  z-index: 999
+}

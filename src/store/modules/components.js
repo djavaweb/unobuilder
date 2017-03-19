@@ -2,8 +2,10 @@ import * as mutation from '../mutation-types'
 
 const state = {
   components: [],
-  active: null,
-  dragging: false
+  dragging: {
+    status: false,
+    activeId: null
+  }
 }
 
 const mutations = {
@@ -11,15 +13,15 @@ const mutations = {
     state.components.push(component)
   },
   [mutation.TOGGLE_DRAG_COMPONENT] (state, status) {
-    state.dragging = status === undefined
-      ? !state.dragging
+    state.dragging.status = status === undefined
+      ? !state.dragging.status
       : status
   },
   [mutation.SET_ACTIVE_COMPONENT] (state, id) {
-    state.active = id
+    state.dragging.activeId = id
   },
   [mutation.CLEAR_ACTIVE_COMPONENT] (state, id) {
-    state.active = null
+    state.dragging.activeId = null
   }
 }
 
@@ -47,10 +49,10 @@ const getters = {
     })
   },
   componentDragging: state => {
-    return state.dragging
+    return state.dragging.status
   },
   componentActive: state => {
-    return state.active
+    return state.dragging.activeId
   }
 }
 

@@ -2,8 +2,18 @@
 import $ from 'jquery'
 import Uno from 'uno'
 import {mapGetters, mapActions} from 'vuex'
-import {ClassName, SelectorAttrId} from '../../utils'
-import {DomType, VoidElements} from '../../const'
+import {
+  addEvent,
+  removeEvent,
+  ClassName,
+  SelectorAttrId,
+  dragElement
+} from '../../utils'
+import {
+  MoveAction,
+  DomType,
+  VoidElements
+} from '../../const'
 
 const className = {
   SELECTED: ClassName('selected'),
@@ -27,7 +37,11 @@ export default {
       'canvasScroll',
       'previewMode',
       'componentDragging',
-      'componentActive'
+      'componentActive',
+      'iframeWindow',
+      'iframeDocument',
+      'canvasScroll',
+      'elementDragging'
     ])
   },
 
@@ -40,8 +54,21 @@ export default {
       'hideContextMenu',
       'setContextCoords',
       'disableDragComponent',
-      'addElement'
+      'addElement',
+      'enableDragElement',
+      'disableDragElement',
+      'moveElement'
     ])
+  },
+
+  data () {
+    return {
+      dragState: {
+        element: null,
+        x: 0,
+        y: 0
+      }
+    }
   },
 
   render (createElement) {
@@ -76,13 +103,73 @@ export default {
     }
 
     const mouseup = event => {
-      if (!this.componentDragging) return false
-      if (event.target === event.currentTarget) {
-        const item = Uno.getComponentItem(this.componentActive)
-        this.addElement({
-          markupText: item.template,
-          appendTo: event.target.getAttribute(SelectorAttrId),
-          index: 0
+      const {target, currentTarget} = event
+      if (this.componentDragging) {
+        if (target === currentTarget) {
+          const item = Uno.getComponentItem(this.componentActive)
+          this.addElement({
+            markupText: item.template,
+            appendTo: target.getAttribute(SelectorAttrId),
+            index: 0
+          })
+        }
+      }
+      if (this.elementDragging) {
+        if (target === currentTarget && target !== this.dragState.element) {
+          let id = target.getAttribute(SelectorAttrId)
+          if (!id) return false
+
+          this.dragState.element.remove()
+          this.disableDragElement()
+
+          removeEvent(this.iframeDocument, 'mousemove', mousemove, false)
+          removeEvent(this.iframeDocument, 'mouseup', mouseup, false)
+
+          const stateElId = this.dragState.element.getAttribute(SelectorAttrId)
+          if (stateElId !== id) {
+            console.log(`
+            ${MoveAction.CUT} Element with id: ${stateElId}, moved to element with id: ${id}
+            `)
+            this.moveElement({
+              action: MoveAction.CUT,
+              id: stateElId,
+              target: id
+            })
+          }
+        }
+      }
+    }
+
+    const mousedown = event => {
+      const {target, currentTarget, pageX, pageY} = event
+      if (target === currentTarget) {
+        this.dragState.element = target.cloneNode(true)
+        this.dragState.element.style.position = 'absolute'
+        this.dragState.element.classList.add('element-dragged')
+
+        document.body.appendChild(this.dragState.element)
+
+        addEvent(this.iframeDocument, 'mousemove', mousemove, false)
+        addEvent(this.iframeDocument, 'mouseup', mouseup, false)
+
+        this.dragState.x = pageX
+        this.dragState.y = pageY
+
+        this.enableDragElement(target.getAttribute(SelectorAttrId))
+      }
+    }
+
+    const mousemove = event => {
+      let {pageX, pageY} = event
+      if (this.elementDragging) {
+        this.dragState.x = pageX
+        this.dragState.y = pageY
+
+        // Move element UI
+        dragElement(this.dragState.element, {
+          iframeWindow: this.iframeWindow,
+          state: this.dragState,
+          canvasScrollTop: this.canvasScroll.top
         })
       }
     }
@@ -148,6 +235,8 @@ export default {
         click,
         mouseover,
         mouseup,
+        mousedown,
+        mousemove,
         contextmenu: click
       }
 

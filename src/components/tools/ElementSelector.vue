@@ -26,7 +26,8 @@ export default {
       'hoveredOffset',
       'breadcrumbs',
       'breadcrumb',
-      'componentDragging'
+      'componentDragging',
+      'elementDragging'
     ])
   },
   methods: {
@@ -128,7 +129,7 @@ export default {
     }
 
     let hoverTools
-    if ((this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id) || this.componentDragging) {
+    if ((this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id) || (this.componentDragging || this.elementDragging)) {
       let {top, left, width, height} = this.hoveredOffset
       hoveredStyles = {
         top: `${top}px`,
@@ -139,7 +140,7 @@ export default {
 
       let activeClass = {}
       activeClass[hoveredClass] = true
-      activeClass[hoveredDraggingClass] = this.componentDragging
+      activeClass[hoveredDraggingClass] = (this.componentDragging || this.elementDragging)
 
       hoverTools = <div class={activeClass} style={hoveredStyles}>
         <div class={selectorToolClass}>
