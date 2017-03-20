@@ -126,13 +126,13 @@ export default {
         <h3 class="uk-accordion-title">
           {expandCollapseIcon}
           <span class={labelClass}>{this.title}</span>
+          {advancedToggle}
+          {mouseStateSwitcher}
         </h3>
         <div class={['uk-accordion-content', contentClasses]}>
           {stateSwitchers}
           {this.$slots.default}
         </div>
-        {advancedToggle}
-        {mouseStateSwitcher}
       </li>
     )
   }
