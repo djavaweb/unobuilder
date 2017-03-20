@@ -294,7 +294,7 @@ class UnoBuilder {
         } else {
           reject(new Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/${element}.html`))
         }
-      }).fail(() => reject(new Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/${element}.html`)))
+      }).fail(() => reject(new Error(`${errorMessages.TemplateNotfound}, url: ${scriptPath}/${element}.html`)))
     })
   }
 
