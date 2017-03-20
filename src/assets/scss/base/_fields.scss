@@ -138,6 +138,14 @@
         }
       }
 
+      &.button--small {
+        padding: 3px !important;
+        .icon {
+          justify-content: center;
+          min-height: 12px;
+        }
+      }
+
       &.button--disabled,
       &.button--disabled:hover,
       &.button--disabled:active {
