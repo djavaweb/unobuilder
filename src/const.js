@@ -118,6 +118,7 @@ export const Labels = {
   NOOP: 'noop',
   UNTITLED: 'Untitled',
   NO_ITEMS: 'No Items',
+  OK: 'OK',
   SCREEN_LARGE: 'Desktop Screen',
   SCREEN_MEDIUM: 'Tablet Potrait',
   SCREEN_SMALL: 'Phone Landscape',
