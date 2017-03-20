@@ -257,6 +257,10 @@ export const ButtonType = {
   BORDERED: 'bordered'
 }
 
+export const ButtonSize = {
+  SMALL: 'small'
+}
+
 export const InputType = {
   TEXT: 'text',
   SEARCH: 'search'
