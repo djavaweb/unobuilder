@@ -1,6 +1,5 @@
 <script>
 /* eslint-disable no-unused-vars */
-import Multiselect from 'vue-multiselect'
 import {ClassPrefix, Labels} from '../../const'
 
 const mainClass = `${ClassPrefix.FIELDS}--select`
@@ -23,9 +22,11 @@ export default {
     }
 
     return (
-      <Multiselect class={mainClass} {...{props}}>
-        <span slot="noResult">{Labels.NO_ITEMS}</span>
-      </Multiselect>
+      <div>
+      </div>
+      // <Multiselect class={mainClass} {...{props}}>
+      //   <span slot="noResult">{Labels.NO_ITEMS}</span>
+      // </Multiselect>
     )
   }
 }
