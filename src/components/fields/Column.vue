@@ -14,10 +14,14 @@ export default {
     },
     icon: {
       type: String
+    },
+    width: {
+      type: Number
     }
   },
   render (h) {
     let {labelEl, icon} = {}
+    const slot = this.$slots.default ? this.$slots.default : null
 
     if (this.label) {
       labelEl = <Label class="label" {...{props: this.label}} />
@@ -27,10 +31,13 @@ export default {
       icon = <label class="icon" domPropsInnerHTML={SVGIcon(this.icon)} />
     }
 
-    const slot = this.$slots.default ? this.$slots.default : null
+    const styles = {}
+    if (this.width && this.width > 0) {
+      styles.width = `${this.width}px`
+    }
 
     return (
-      <div class={mainClass}>
+      <div class={mainClass} style={styles}>
         {labelEl} {icon} {slot}
       </div>
     )
