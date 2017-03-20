@@ -1,5 +1,5 @@
 <script>
-import {ButtonType, ClassPrefix} from '../../const'
+import {ButtonType, ButtonSize, ClassPrefix} from '../../const'
 import {SVGIcon} from '../../utils'
 
 const mainClass = `${ClassPrefix.FIELDS}--button`
@@ -27,6 +27,9 @@ export default {
     },
     tooltip: {
       type: String
+    },
+    size: {
+      type: String
     }
   },
   render (h) {
@@ -36,6 +39,7 @@ export default {
       'button--bordered': this.type === ButtonType.BORDERED,
       'button--icon': this.icon,
       'button--label': this.label,
+      'button--small': this.size === ButtonSize.SMALL,
       'button--active': this.active && !this.disabled
     }
 

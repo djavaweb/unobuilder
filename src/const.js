@@ -118,6 +118,7 @@ export const Labels = {
   NOOP: 'noop',
   UNTITLED: 'Untitled',
   NO_ITEMS: 'No Items',
+  OK: 'OK',
   SCREEN_LARGE: 'Desktop Screen',
   SCREEN_MEDIUM: 'Tablet Potrait',
   SCREEN_SMALL: 'Phone Landscape',
@@ -193,7 +194,24 @@ export const Icons = {
   ARROW_DOWN: 'arrow-down-input',
   CLOSE: 'close',
   ADD_BLOCK: 'add-block',
-  COPY: 'copy'
+  COPY: 'copy',
+  FONT_FAMILY: 'typo-font-family',
+  FONT_WEIGHT: 'typo-font-weight',
+  FONT_SIZE: 'typo-font-size',
+  FONT_COLOR: 'typo-font-color',
+  FONT_STYLE: 'typo-font-style',
+  LINE_HEIGHT: 'typo-line-height',
+  TEXT_DECORATION: 'typo-text-decoration',
+  TEXT_DECORATION_UNDERLINE: 'typo-text-decoration-underline',
+  TEXT_DECORATION_STRIKETHROUGH: 'typo-text-decoration-strikethrough',
+  TEXT_ALIGN: 'typo-text-align',
+  TEXT_ALIGN_LEFT: 'typo-text-align-left',
+  TEXT_ALIGN_CENTER: 'typo-text-align-center',
+  TEXT_ALIGN_JUSTIFY: 'typo-text-align-justify',
+  TEXT_ALIGN_RIGHT: 'typo-text-align-right',
+  LETTER_SPACING: 'typo-letter-spacing',
+  TEXT_STYLE_NORMAL: 'typo-text-style-normal',
+  TEXT_STYLE_ITALIC: 'typo-text-style-italic'
 }
 
 export const Tooltips = {
@@ -237,7 +255,15 @@ export const Tooltips = {
   UNIT_VH: 'View Height',
   UNIT_VW: 'View Width',
   UNIT_PERCENT: '% from parent',
-  COPY_ELEMENT: 'Copy Element'
+  COPY_ELEMENT: 'Copy Element',
+  TEXT_ALIGN_LEFT: 'Align Left',
+  TEXT_ALIGN_CENTER: 'Align Center',
+  TEXT_ALIGN_JUSTIFY: 'Align Justify',
+  TEXT_ALIGN_RIGHT: 'Align Right',
+  TEXT_DECORATION_UNDERLINE: 'Underline',
+  TEXT_DECORATION_STRIKETHROUGH: 'Strikethrough',
+  TEXT_STYLE_NORMAL: 'Normal',
+  TEXT_STYLE_ITALIC: 'Italic'
 }
 
 export const PropertyPanelIds = {
@@ -255,6 +281,10 @@ export const ButtonType = {
   PRIMARY: 'primary',
   SECONDARY: 'secondary',
   BORDERED: 'bordered'
+}
+
+export const ButtonSize = {
+  SMALL: 'small'
 }
 
 export const InputType = {
