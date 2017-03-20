@@ -21,6 +21,7 @@
     "uikit": "^3.0.0-beta.18",
     "vue": "^2.2.4",
     "vue-multiselect": "^1.1.4",
+    "vue-sketch-color-picker": "^1.0.1",
     "vuex": "^2.2.1"
   },
   "devDependencies": {

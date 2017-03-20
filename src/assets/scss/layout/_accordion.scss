@@ -1,7 +1,6 @@
 .#{$prefix} {
   &__accordion {
     &-item {
-      position: relative;
 
       h3 {
         @include OpenSans;
@@ -13,6 +12,7 @@
         padding: 5px 0;
         border-bottom: solid 2px $steel-young-grey;
         text-transform: uppercase;
+        position: relative;
         &:after {
           display: none;
         }
