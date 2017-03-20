@@ -11,12 +11,16 @@ export default {
     items: {
       type: Array,
       default: () => []
+    },
+    size: {
+      type: String
     }
   },
   render (h) {
     const buttons = this.items
       .filter(item => item)
       .map(props => {
+        props.size = this.size
         return <Button {...{props}} />
       })
 
