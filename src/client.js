@@ -1,5 +1,6 @@
 // Import important modules
 import $ from 'jquery'
+import async from 'async'
 import {IsJSON, RandomUID} from './utils'
 import {extend, omit} from 'lodash'
 
@@ -39,6 +40,8 @@ const getScriptPath = url => {
   return scriptPath
 }
 
+// let this.__registry__ = global.this.__registry__
+
 /**
  * Unobuilder global framework to register components
  */
@@ -50,8 +53,24 @@ class UnoBuilder {
       blocks: {},
       url: null,
       element: null,
-      builder: null
+      builder: null,
+      queue: null
     }
+
+  /**
+   * Async queues to add component or block
+   */
+    this.__registry__.queue = async.queue((task, next) => {
+      const fn = task.type === 'component'
+        ? 'initComponent'
+        : 'initBlock'
+
+      this[fn](task.url)
+        .then(() => {
+          next()
+          task.resolve()
+        })
+    }, 1)
   }
 
   /**
@@ -220,23 +239,10 @@ class UnoBuilder {
     return eventList
   }
 
-  addQueue (urls, type) {
-    const fn = type === 'component'
-      ? 'initComponent'
-      : 'initBlock'
-
-    const promiseUrls = urls.map(item => {
-      return this[fn](item)
+  addQueue (url, type) {
+    return new Promise(resolve => {
+      this.__registry__.queue.push({ url, type, resolve })
     })
-
-    return Promise.all(promiseUrls)
-      .then(res => {
-        for (let i in res) {
-          const {element, data} = res[i]
-          // Add component to list
-          this.__registry__[`${element}s`][data.settings.id] = data
-        }
-      })
   }
 
   /**
@@ -245,7 +251,6 @@ class UnoBuilder {
    */
   addComponent (url) {
     let type = 'component'
-    if (typeof url === 'string') url = [url]
     return this.addQueue(url, type)
   }
 
@@ -255,7 +260,6 @@ class UnoBuilder {
    */
   addBlock (url) {
     let type = 'block'
-    if (typeof url === 'string') url = [url]
     return this.addQueue(url, type)
   }
 
@@ -326,19 +330,22 @@ class UnoBuilder {
 
     return new Promise(resolve => {
       loadJson()
-        .catch(errorLogger)
-        .then(loadTemplate)
-        .catch(errorLogger)
-        .then(template => {
-          let html = $.parseHTML(template)
-          parser.parse(html).then(output => {
-            data.template = output
-            resolve({
-              element,
-              data
-            })
-          })
+      .catch(errorLogger)
+      .then(loadTemplate)
+      .catch(errorLogger)
+      .then(template => {
+        let html = $.parseHTML(template)
+        parser.parse(html).then(output => {
+          data.template = output
+
+          // Add component to list
+          this.__registry__[`${element}s`][data.settings.id] = data
+
+          // Register script
+          this.registerScript(url, `${element}-${data.id}`)
+          resolve()
         })
+      })
     })
   }
 
