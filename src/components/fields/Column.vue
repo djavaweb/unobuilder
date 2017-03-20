@@ -11,6 +11,9 @@ export default {
   props: {
     label: {
       type: Object
+    },
+    icon: {
+      type: String
     }
   },
   render (h) {
@@ -21,7 +24,7 @@ export default {
     }
 
     if (this.icon) {
-      icon = <span class="label" domPropsInnerHTML={SVGIcon(this.icon)} />
+      icon = <label class="icon" domPropsInnerHTML={SVGIcon(this.icon)} />
     }
 
     const slot = this.$slots.default ? this.$slots.default : null
