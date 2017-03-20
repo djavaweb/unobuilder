@@ -1,7 +1,7 @@
 // Import important modules
 import $ from 'jquery'
 import async from 'async'
-import {IsJSON, RandomUID} from './utils'
+import {RandomUID} from './utils'
 import {extend, omit} from 'lodash'
 
 import HTMLParser from './HTMLParser'
@@ -264,6 +264,41 @@ class UnoBuilder {
   }
 
   /**
+  * Load element JSON
+  * @return
+  */
+  loadElementJson (scriptPath, element) {
+    return new Promise((resolve, reject) => {
+      $.getJSON(`${scriptPath}/${element}.json`, json => {
+        if (json.id) {
+          json.icon = `${scriptPath}/${json.icon}`
+          resolve(json)
+        } else {
+          reject(new Error(`${errorMessages.invalidJSON}, url: ${scriptPath}/${element}.json`))
+        }
+      }).fail(() => reject(new Error(`${errorMessages.invalidJSON}, url: ${scriptPath}/${element}.json`)))
+    })
+  }
+
+  /**
+  * Load element template html
+  * @return
+  */
+  loadElementTemplate (scriptPath, element) {
+    // Load Markup template
+    return new Promise((resolve, reject) => {
+      $.get(`${scriptPath}/${element}.html`, res => {
+        let template = $.trim(res.replace(/[\t\n]+/g, ' '))
+        if (template !== '') {
+          resolve(template)
+        } else {
+          reject(new Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/${element}.html`))
+        }
+      }).fail(() => reject(new Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/${element}.html`)))
+    })
+  }
+
+  /**
    * Uno init element (block / component)
    * @param {String} url
    */
@@ -277,76 +312,33 @@ class UnoBuilder {
       path: scriptPath
     }
 
-    // Load json
-    const loadJson = () => {
-      return new Promise((resolve, reject) => {
-        $.ajax({
-          url: `${scriptPath}/${element}.json`,
-          type: 'GET',
-          dataType: 'json',
-          complete (xhr) {
-            if (xhr.status === 200) {
-              let json = IsJSON(xhr.responseText)
-              if (json && json.id) {
-                json.icon = `${scriptPath}/${json.icon}`
-                data.settings = json
-                resolve(data)
-              } else {
-                reject(new Error(`${errorMessages.invalidJSON}, url: ${scriptPath}/${element}.json`))
-              }
-            } else {
-              reject(new Error(`${errorMessages.JSONNotfound}, url: ${scriptPath}/${element}.json`))
-            }
-          }
-        })
-      })
-    }
-
-    // Load Markup template
-    const loadTemplate = () => {
-      return new Promise((resolve, reject) => {
-        $.ajax({
-          url: `${scriptPath}/${element}.html`,
-          type: 'GET',
-          complete (xhr) {
-            if (xhr.status === 200) {
-              let template = $.trim(xhr.responseText.replace(/[\t\n]+/g, ' '))
-              if (template !== '') {
-                resolve(template)
-              } else {
-                reject(new Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/${element}.html`))
-              }
-            } else {
-              reject(new Error(`${errorMessages.TemplateNotFound}, url: ${scriptPath}/${element}.html`))
-            }
-          }
-        })
-      })
-    }
-
     const errorLogger = err => console.error(err)
 
     const parser = new HTMLParser()
 
-    return new Promise(resolve => {
-      loadJson()
+    const req = [
+      this.loadElementJson(scriptPath, element),
+      this.loadElementTemplate(scriptPath, element)
+    ]
+
+    return Promise.all(req)
       .catch(errorLogger)
-      .then(loadTemplate)
-      .catch(errorLogger)
-      .then(template => {
+      .then(res => {
+        const [json, template] = res
+        data.settings = json
+
         let html = $.parseHTML(template)
-        parser.parse(html).then(output => {
-          data.template = output
+        parser.parse(html)
+          .then(output => {
+            data.template = output
 
-          // Add component to list
-          this.__registry__[`${element}s`][data.settings.id] = data
+            // Add component to list
+            this.__registry__[`${element}s`][data.settings.id] = data
 
-          // Register script
-          this.registerScript(url, `${element}-${data.id}`)
-          resolve()
-        })
+            // Register script
+            this.registerScript(url, `${element}-${data.id}`)
+          })
       })
-    })
   }
 
   initComponent (url) {
