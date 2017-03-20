@@ -255,7 +255,15 @@ export const Tooltips = {
   UNIT_VH: 'View Height',
   UNIT_VW: 'View Width',
   UNIT_PERCENT: '% from parent',
-  COPY_ELEMENT: 'Copy Element'
+  COPY_ELEMENT: 'Copy Element',
+  TEXT_ALIGN_LEFT: 'Align Left',
+  TEXT_ALIGN_CENTER: 'Align Center',
+  TEXT_ALIGN_JUSTIFY: 'Align Justify',
+  TEXT_ALIGN_RIGHT: 'Align Right',
+  TEXT_DECORATION_UNDERLINE: 'Underline',
+  TEXT_DECORATION_STRIKETHROUGH: 'Strikethrough',
+  TEXT_STYLE_NORMAL: 'Normal',
+  TEXT_STYLE_ITALIC: 'Italic'
 }
 
 export const PropertyPanelIds = {
