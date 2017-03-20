@@ -16,7 +16,7 @@ export default {
       type: String
     },
     width: {
-      type: Number
+      type: Number | String
     }
   },
   render (h) {
@@ -32,8 +32,12 @@ export default {
     }
 
     const styles = {}
-    if (this.width && this.width > 0) {
-      styles.width = `${this.width}px`
+    if (this.width) {
+      if (typeof this.width === 'number' && this.width > 0)
+        styles.width = `${this.width}px`
+      } else if (typeof this.width === 'string') {
+        styles.width = `${this.width}`
+      }
     }
 
     return (
