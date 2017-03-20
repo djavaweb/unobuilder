@@ -19,6 +19,7 @@
     "brace": "^0.10.0",
     "jquery": "^3.2.0",
     "uikit": "^3.0.0-beta.18",
+    "unobuilder-parser": "0.0.1-alpha.11",
     "vue": "^2.2.4",
     "vue-multiselect": "^1.1.4",
     "vue-sketch-color-picker": "^1.0.1",

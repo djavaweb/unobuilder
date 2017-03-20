@@ -108,7 +108,7 @@ export default {
         if (target === currentTarget) {
           const item = Uno.getComponentItem(this.componentActive)
           this.addElement({
-            markupText: item.template,
+            object: item.template,
             appendTo: target.getAttribute(SelectorAttrId),
             index: 0
           })
@@ -185,6 +185,8 @@ export default {
         item => typeof item === 'string' ? $.trim(item) : item
       ).filter(item => item)
 
+      // console.log(dataObject, childNodes)
+
       const { tagName, selected } = node
       const { innerHTML } = dataObject.domProps
 
@@ -246,6 +248,7 @@ export default {
           : renderElement(item)
       )
 
+      console.log(childNodes)
       return createElement(tagName, dataObject, childNodes)
     }
 

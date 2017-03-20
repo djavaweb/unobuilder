@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import Uno from 'uno'
 import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
 import {RootElementTag, VoidElements, NestedableRules, MoveAction} from '../../const'
@@ -306,8 +307,8 @@ const mutations = {
   /**
    * Add element to current state
    */
-  [mutation.ADD_ELEMENT] (state, { markupText, appendTo, index = 0 }) {
-    const element = utils.MarkupToObject(markupText)
+  [mutation.ADD_ELEMENT] (state, { object, appendTo, index = 0 }) {
+    const element = object
     if (element) {
       state.lastInserted = element.id
 
@@ -318,7 +319,6 @@ const mutations = {
         const appendEl = getElementObject(appendTo, state.snapshot)
         index = !index ? appendEl.childNodes.length : index
         appendEl.childNodes.splice(index, 0, element)
-        console.log(markupText)
       }
     }
   },

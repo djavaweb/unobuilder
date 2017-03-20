@@ -1,10 +1,11 @@
 // Import important modules
 import $ from 'jquery'
 import async from 'async'
+import UnoBuilderParser from 'unobuilder-parser'
 import {RandomUID} from './utils'
 import {extend, omit} from 'lodash'
 
-import HTMLParser from './HTMLParser'
+// import HTMLParser from './HTMLParser'
 
 // Define static vars
 const errorMessages = {
@@ -314,7 +315,7 @@ class UnoBuilder {
 
     const errorLogger = err => console.error(err)
 
-    const parser = new HTMLParser()
+    // const parser = new HTMLParser()
 
     const req = [
       this.loadElementJson(scriptPath, element),
@@ -327,17 +328,17 @@ class UnoBuilder {
         const [json, template] = res
         data.settings = json
 
-        let html = $.parseHTML(template)
-        parser.parse(html)
-          .then(output => {
-            data.template = output
+        // let html = $.parseHTML(template)
+        // parser.parse(html)
+          // .then(output => {
+        data.template = new UnoBuilderParser(template)
 
-            // Add component to list
-            this.__registry__[`${element}s`][data.settings.id] = data
+        // Add component to list
+        this.__registry__[`${element}s`][data.settings.id] = data
 
-            // Register script
-            this.registerScript(url, `${element}-${data.id}`)
-          })
+        // Register script
+        this.registerScript(url, `${element}-${data.id}`)
+          // })
       })
   }
 
