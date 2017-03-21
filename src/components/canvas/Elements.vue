@@ -132,8 +132,8 @@ export default {
             `)
             this.moveElement({
               action: MoveAction.CUT,
-              id: stateElId,
-              target: id
+              appendTo: id,
+              id: stateElId
             })
           }
         }
