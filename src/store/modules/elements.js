@@ -308,7 +308,24 @@ const mutations = {
    * Add element to current state
    */
   [mutation.ADD_ELEMENT] (state, { object, appendTo, index = 0 }) {
-    const element = object
+    let element = object
+
+    // recursively change node id
+    const recursive = obj => {
+      let id = utils.RandomUID()
+      obj.id = id
+      obj.dataObject.attrs[utils.SelectorAttrId] = id
+      obj.dataObject.ref = id.replace(/-/g, '')
+      if (obj.childNodes.length > 0) {
+        for (let i = 0; i < obj.childNodes.length; i++) {
+          recursive(obj.childNodes[i])
+        }
+      }
+
+      return obj
+    }
+
+    element = recursive(element)
     if (element) {
       state.lastInserted = element.id
 
