@@ -323,7 +323,7 @@ const mutations = {
         const value = obj[utils.attrType.KIND]
         classes[utils.GlobalClassName(value)] = true
         if (value === 'row') {
-          obj.domProps.gutter = {}
+          obj.dataObject.domProps['gutter'] = {}
         }
       }
 
