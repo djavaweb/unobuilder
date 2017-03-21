@@ -34,3 +34,7 @@ body {
     }
   }
 }
+
+svg, svg * {
+  pointer-events: none
+}
