@@ -20,7 +20,7 @@ const tagType = {
   TEXT: 'Text'
 }
 
-const attrType = {
+export const AttrType = {
   KIND: 'kind',
   CLASS: 'class',
   LABEL: 'label',
@@ -97,11 +97,11 @@ export const SchemaToObject = node => {
       : value
 
     switch (domAttrs[key].name) {
-      case attrType.CLASS:
+      case AttrType.CLASS:
         classes[value] = true
         break
 
-      case attrType.KIND:
+      case AttrType.KIND:
         kind = value
         classes[GlobalClassName(value)] = true
         if (value === 'row') {
@@ -109,15 +109,15 @@ export const SchemaToObject = node => {
         }
         break
 
-      case attrType.LABEL:
+      case AttrType.LABEL:
         label = value
         break
 
-      case attrType.EDITABLE:
+      case AttrType.EDITABLE:
         editable = true
         break
 
-      case attrType.REQUIRED_PARENT:
+      case AttrType.REQUIRED_PARENT:
         requiredParent = true
         break
 

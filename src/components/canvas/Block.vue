@@ -75,7 +75,7 @@ export default {
 
       const onClick = event => {
         this.addElement({
-          markupText: item.template,
+          object: item.template,
           appendTo: this.rootElement.id,
           index: this.blockIndex
         })

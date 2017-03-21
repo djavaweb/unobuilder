@@ -1,6 +1,7 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import {ClassPrefix, RootElementTag} from '../../const'
+import HTMLParser from 'unobuilder-parser'
 
 /* eslint-disable no-unused-vars */
 import Elements from './Elements'
@@ -47,7 +48,7 @@ export default {
     if (this.elements.length < 1) {
       // Add root element
       this.addElement({
-        markupText: `div(kind="layout", ${RootElementTag}="true")`
+        object: new HTMLParser(`<div ${RootElementTag}="true" kind="layout"></div>`)
       })
 
       // Select root element
