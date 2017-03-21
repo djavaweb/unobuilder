@@ -185,8 +185,6 @@ export default {
         item => typeof item === 'string' ? $.trim(item) : item
       ).filter(item => item)
 
-      // console.log(dataObject, childNodes)
-
       const { tagName, selected } = node
       const { innerHTML } = dataObject.domProps
 
@@ -248,7 +246,6 @@ export default {
           : renderElement(item)
       )
 
-      console.log(childNodes)
       return createElement(tagName, dataObject, childNodes)
     }
 

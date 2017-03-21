@@ -5,8 +5,6 @@ import UnoBuilderParser from 'unobuilder-parser'
 import {RandomUID} from './utils'
 import {extend, omit} from 'lodash'
 
-// import HTMLParser from './HTMLParser'
-
 // Define static vars
 const errorMessages = {
   eventRequired: 'UNO: An event type must be specified',
@@ -40,8 +38,6 @@ const getScriptPath = url => {
 
   return scriptPath
 }
-
-// let this.__registry__ = global.this.__registry__
 
 /**
  * Unobuilder global framework to register components
@@ -315,8 +311,6 @@ class UnoBuilder {
 
     const errorLogger = err => console.error(err)
 
-    // const parser = new HTMLParser()
-
     const req = [
       this.loadElementJson(scriptPath, element),
       this.loadElementTemplate(scriptPath, element)
@@ -327,10 +321,6 @@ class UnoBuilder {
       .then(res => {
         const [json, template] = res
         data.settings = json
-
-        // let html = $.parseHTML(template)
-        // parser.parse(html)
-          // .then(output => {
         data.template = new UnoBuilderParser(template)
 
         // Add component to list
@@ -338,7 +328,6 @@ class UnoBuilder {
 
         // Register script
         this.registerScript(url, `${element}-${data.id}`)
-          // })
       })
   }
 
