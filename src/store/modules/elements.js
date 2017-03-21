@@ -319,8 +319,8 @@ const mutations = {
 
       let classes = {}
 
-      if (obj[utils.attrType.KIND].length > 0) {
-        const value = obj[utils.attrType.KIND]
+      if (obj[utils.AttrType.KIND].length > 0) {
+        const value = obj[utils.AttrType.KIND]
         classes[utils.GlobalClassName(value)] = true
         if (value === 'row') {
           obj.dataObject.domProps['gutter'] = {}
