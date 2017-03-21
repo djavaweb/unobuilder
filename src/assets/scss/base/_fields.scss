@@ -459,6 +459,10 @@
 
       &>.icon {
         min-width: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-content: center;
       }
 
       label {
