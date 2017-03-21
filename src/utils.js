@@ -20,7 +20,7 @@ const tagType = {
   TEXT: 'Text'
 }
 
-const attrType = {
+export const attrType = {
   KIND: 'kind',
   CLASS: 'class',
   LABEL: 'label',
