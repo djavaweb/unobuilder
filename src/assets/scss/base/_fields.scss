@@ -226,80 +226,91 @@
     }
 
     &--select {
-      min-height: 22px !important;
-
-      .multiselect {
-        &--active {
-          .multiselect__select:before {
-            transform: initial;
-          }
-        }
-        &__select {
-          height: 20px;
-          width: auto;
-          margin: 0;
-          padding: 0 5px;
-          overflow: hidden;
-          &:before {
-            top: 15px;
-            border-width: 5px 4px 0;
-          }
-        }
-        &__tags {
-          height: auto;
-          min-height: initial;
-          border-radius: 0;
-          background: $transparent-black;
-          border: none;
-          box-sizing: border-box;
-          padding: 0 15px 0 0;
-        }
-        &__input {
+      @include OpenSans;
+      font-size: 12px;
+      font-weight: 100;
+      position: relative;
+      min-height: 20px !important;
+      width: 100%;
+      &__input {
+        margin: 0 !important;
+        background-color: $dark;
+        position: relative;
+        min-width: 40px;
+        min-height: 20px;
+        input {
           @include OpenSans;
           font-size: 12px;
+          font-weight: 100;
           background: none;
-          border-radius: 0;
-          margin-bottom: 0;
+          border: none;
+          outline: none;
+          display: block;
+          padding: 2px 20px 2px 5px;
+          width: 100%;
+          box-sizing: border-box;
           color: $white;
         }
-        &__content {
-          border-radius: 0;
-          background: $dark;
-          border-color: $dark;
-          li {
-            @include OpenSans;
-            font-size: 12px;
+        &:after {
+          border-style: solid;
+          border-width: 5px 4px 0 4px;
+          border-color: $white transparent transparent transparent;
+          position: absolute;
+          content: ' ';
+          top: 50%;
+          right: 5px;
+          transform: translate(0, -50%);
+          transition: all 0.1s linear;
+        }
+        &.input--open {
+          &:after {
+            top: 40%;
+            transform: rotate(180deg)
           }
         }
-        &__option {
+      }
+      &__selected {
+        @include OpenSans;
+        font-size: 11px;
+        color: $white;
+        pointer-events: none;
+        position: absolute;
+        top: 2px;
+        left: 5px;
+        width: 85%;
+        z-index: 32;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+        max-height: 17px;
+        margin-right: 10px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+      &__options {
+        color: $white;
+        width: 100%;
+        z-index: 99;
+        margin: 0 !important;
+        position: absolute;
+        top: 20px;
+        background-color: $dark;
+        border-top: 1px solid lighten($dark, 10);
+        max-height: 135px;
+        overflow: scroll;
+        ul {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+        li {
           @include OpenSans;
-          font-size: 12px;
-          padding: 5px;
-          min-height: initial;
-          color: $transparent-white !important;
-
+          font-size: 11px;
+          font-weight: 100;
+          padding: 3px 5px;
+          cursor: default;
           &:hover {
-            background: $transparent-black !important;
-          }
-
-          &--selected {
-            background: none !important;
-            color: $white !important;
-          }
-
-          &--highlight {
-            background: $dark;
-            color: $transparent-white;
-          }
-
-          &:after {
-            top: 5px;
-            color: $transparent-white !important;
-            padding: 0 10px 0;
-            line-height: normal;
-            background: none !important;
-            font-weight: normal;
-            font-style: italic;
+            background-color: $black;
           }
         }
       }
