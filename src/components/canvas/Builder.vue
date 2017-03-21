@@ -48,7 +48,6 @@ export default {
     if (this.elements.length < 1) {
       // Add root element
       this.addElement({
-        // object: `div(kind="layout", ${RootElementTag}="true")`
         object: new HTMLParser(`<div ${RootElementTag}="true" kind="layout"></div>`)
       })
 

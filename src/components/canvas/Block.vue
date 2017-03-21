@@ -74,7 +74,6 @@ export default {
       }
 
       const onClick = event => {
-        // console.log('item', item)
         this.addElement({
           object: item.template,
           appendTo: this.rootElement.id,
