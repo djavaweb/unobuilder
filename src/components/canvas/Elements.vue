@@ -108,7 +108,7 @@ export default {
         if (target === currentTarget) {
           const item = Uno.getComponentItem(this.componentActive)
           this.addElement({
-            markupText: item.template,
+            object: item.template,
             appendTo: target.getAttribute(SelectorAttrId),
             index: 0
           })

@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import Uno from 'uno'
 import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
 import {RootElementTag, VoidElements, NestedableRules, MoveAction} from '../../const'
@@ -306,8 +307,39 @@ const mutations = {
   /**
    * Add element to current state
    */
-  [mutation.ADD_ELEMENT] (state, { markupText, appendTo, index = 0 }) {
-    const element = utils.MarkupToObject(markupText)
+  [mutation.ADD_ELEMENT] (state, { object, appendTo, index = 0 }) {
+    let element = object
+
+    // recursively change node id
+    const recursive = obj => {
+      let id = utils.RandomUID()
+      obj.id = id
+      obj.dataObject.attrs[utils.SelectorAttrId] = id
+      obj.dataObject.ref = id.replace(/-/g, '')
+
+      let classes = {}
+
+      if (obj[utils.AttrType.KIND].length > 0) {
+        const value = obj[utils.AttrType.KIND]
+        classes[utils.GlobalClassName(value)] = true
+        if (value === 'row') {
+          obj.dataObject.domProps['gutter'] = {}
+        }
+      }
+
+      const snapshotClass = Object.assign({}, obj.dataObject.class)
+      obj.dataObject.class = Object.assign(snapshotClass, classes)
+
+      if (obj.childNodes.length > 0) {
+        for (let i = 0; i < obj.childNodes.length; i++) {
+          recursive(obj.childNodes[i])
+        }
+      }
+
+      return obj
+    }
+
+    element = recursive(element)
     if (element) {
       state.lastInserted = element.id
 
@@ -318,7 +350,6 @@ const mutations = {
         const appendEl = getElementObject(appendTo, state.snapshot)
         index = !index ? appendEl.childNodes.length : index
         appendEl.childNodes.splice(index, 0, element)
-        console.log(markupText)
       }
     }
   },
