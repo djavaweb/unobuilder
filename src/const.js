@@ -153,7 +153,9 @@ export const Labels = {
   MAX: 'Max',
   SAVE: 'Save',
   UNIT_AUTO: '-',
-  LOADING: 'Please wait loading...'
+  LOADING: 'Please wait loading...',
+  ATTR_CLASS: 'Class',
+  ATTR_ID: 'ID'
 }
 
 export const Icons = {

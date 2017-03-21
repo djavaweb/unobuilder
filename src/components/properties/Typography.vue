@@ -7,6 +7,7 @@ import Column from '../fields/Column'
 import Buttons from '../fields/ButtonGroup'
 import Colorpicker from '../fields/Colorpicker'
 import Number from '../fields/Number'
+import Select from '../fields/Select'
 
 export default {
   name: 'typographyProperties',
@@ -17,6 +18,25 @@ export default {
   },
 
   render (h) {
+    const fontFamilies = [
+      {value: 'Arial', selected: true},
+      {value: 'Georgia'},
+      {value: 'Tahoma'},
+      {value: 'Verdana'}
+    ]
+
+    const fontWeightOptions = [
+      {value: 100, selected: true},
+      {value: 200},
+      {value: 300},
+      {value: 400},
+      {value: 500},
+      {value: 600},
+      {value: 700},
+      {value: 800},
+      {value: 900}
+    ]
+
     const textAlignButtons = [
       {
         icon: Icons.TEXT_ALIGN_LEFT,
@@ -83,11 +103,15 @@ export default {
     return (
       <div>
         <Row>
-          <Column icon={Icons.FONT_FAMILY}>Font Selector</Column>
+          <Column icon={Icons.FONT_FAMILY}>
+            <Select options={fontFamilies} />
+          </Column>
         </Row>
 
         <Row>
-          <Column icon={Icons.FONT_WEIGHT}></Column>
+          <Column icon={Icons.FONT_WEIGHT}>
+            <Select options={fontWeightOptions} typehead={false} />
+          </Column>
           <Column icon={Icons.FONT_SIZE}>
             <Number value={12} units={Units.PX} excludeUnit={[Units.VW, Units.VH]} />
           </Column>

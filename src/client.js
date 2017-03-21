@@ -1,10 +1,9 @@
 // Import important modules
 import $ from 'jquery'
 import async from 'async'
+import UnoBuilderParser from 'unobuilder-parser'
 import {RandomUID} from './utils'
 import {extend, omit} from 'lodash'
-
-import HTMLParser from './HTMLParser'
 
 // Define static vars
 const errorMessages = {
@@ -39,8 +38,6 @@ const getScriptPath = url => {
 
   return scriptPath
 }
-
-// let this.__registry__ = global.this.__registry__
 
 /**
  * Unobuilder global framework to register components
@@ -314,8 +311,6 @@ class UnoBuilder {
 
     const errorLogger = err => console.error(err)
 
-    const parser = new HTMLParser()
-
     const req = [
       this.loadElementJson(scriptPath, element),
       this.loadElementTemplate(scriptPath, element)
@@ -326,18 +321,13 @@ class UnoBuilder {
       .then(res => {
         const [json, template] = res
         data.settings = json
+        data.template = new UnoBuilderParser(template)
 
-        let html = $.parseHTML(template)
-        parser.parse(html)
-          .then(output => {
-            data.template = output
+        // Add component to list
+        this.__registry__[`${element}s`][data.settings.id] = data
 
-            // Add component to list
-            this.__registry__[`${element}s`][data.settings.id] = data
-
-            // Register script
-            this.registerScript(url, `${element}-${data.id}`)
-          })
+        // Register script
+        this.registerScript(url, `${element}-${data.id}`)
       })
   }
 

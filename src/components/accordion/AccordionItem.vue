@@ -121,9 +121,17 @@ export default {
         domPropsInnerHTML={SVGIcon(item)} />
     })
 
+    const titleClick = event => {
+      const containsSwitcher = event.target.className.indexOf('switcher') > -1
+      const containsMouse = event.target.className.indexOf('mouse') > -1
+      if (containsSwitcher || containsMouse) {
+        event.stopPropagation()
+      }
+    }
+
     return (
       <li class={[mainClass, {'uk-open': this.open}]}>
-        <h3 class="uk-accordion-title">
+        <h3 class="uk-accordion-title" onClick={titleClick}>
           {expandCollapseIcon}
           <span class={labelClass}>{this.title}</span>
           {advancedToggle}
