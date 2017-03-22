@@ -155,7 +155,11 @@ export const Labels = {
   UNIT_AUTO: '-',
   LOADING: 'Please wait loading...',
   ATTR_CLASS: 'Class',
-  ATTR_ID: 'ID'
+  ATTR_ID: 'ID',
+  BACKGROUND_COLOR_SETTINGS: 'Background Color Settings',
+  BACKGROUND_IMAGE_SETTINGS: 'Background Color Settings',
+  BACKGROUND_VIDEO_SETTINGS: 'Background Color Settings',
+  BACKGROUND_GRADIENT_SETTINGS: 'Background Color Settings'
 }
 
 export const Icons = {
