@@ -165,6 +165,13 @@ export default {
       this.dragState.x = pageX
       this.dragState.y = pageY
 
+      // Move element UI
+      dragElement(this.dragState.element, {
+        iframeWindow: this.iframeWindow,
+        state: this.dragState,
+        canvasScrollTop: this.canvasScroll.top
+      })
+
       this.enableDragElement(target.getAttribute(SelectorAttrId))
     }
 
