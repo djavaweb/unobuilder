@@ -190,8 +190,8 @@ export default {
     }
 
     const mousemove = event => {
-      let {pageX, pageY} = event
       if (this.elementDragging) {
+        const {pageX, pageY} = event
         this.dragState.x = pageX
         this.dragState.y = pageY
 
