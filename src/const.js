@@ -269,7 +269,12 @@ export const Tooltips = {
   TEXT_DECORATION_UNDERLINE: 'Underline',
   TEXT_DECORATION_STRIKETHROUGH: 'Strikethrough',
   TEXT_STYLE_NORMAL: 'Normal',
-  TEXT_STYLE_ITALIC: 'Italic'
+  TEXT_STYLE_ITALIC: 'Italic',
+  BACKGROUND_NONE: 'No Background',
+  BACKGROUND_COLOR: 'Background Color',
+  BACKGROUND_IMAGE: 'Background Image',
+  BACKGROUND_VIDEO: 'Background Video',
+  BACKGROUND_GRADIENT: 'Background Gradient Color'
 }
 
 export const PropertyPanelIds = {
