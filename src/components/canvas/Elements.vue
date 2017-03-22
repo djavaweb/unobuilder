@@ -186,7 +186,7 @@ export default {
             dragStart(event)
           }
           this.dragState.intervalCount++
-        }, 250)
+        }, 100)
       }
     }
 
