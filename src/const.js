@@ -159,7 +159,11 @@ export const Labels = {
   BACKGROUND_COLOR_SETTINGS: 'Background Color Settings',
   BACKGROUND_IMAGE_SETTINGS: 'Background Color Settings',
   BACKGROUND_VIDEO_SETTINGS: 'Background Color Settings',
-  BACKGROUND_GRADIENT_SETTINGS: 'Background Color Settings'
+  BACKGROUND_GRADIENT_SETTINGS: 'Background Color Settings',
+  LAYOUT_POSITION: 'position',
+  LAYOUT_MARGIN: 'margin',
+  LAYOUT_BORDER: 'border',
+  LAYOUT_PADDING: 'padding'
 }
 
 export const Icons = {
