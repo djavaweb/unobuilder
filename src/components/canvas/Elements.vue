@@ -64,6 +64,7 @@ export default {
       if (this.interval) {
         clearInterval(this.interval)
         this.interval = null
+        this.dragState.intervalCount = 0
       }
     }
   },
