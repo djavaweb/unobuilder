@@ -58,12 +58,21 @@ export default {
       'enableDragElement',
       'disableDragElement',
       'moveElement'
-    ])
+    ]),
+
+    resetInterval () {
+      if (this.interval) {
+        clearInterval(this.interval)
+        this.interval = null
+      }
+    }
   },
 
   data () {
     return {
+      interval: null,
       dragState: {
+        intervalCount: 0,
         element: null,
         x: 0,
         y: 0
@@ -103,6 +112,7 @@ export default {
     }
 
     const mouseup = event => {
+      this.resetInterval()
       const {target, currentTarget} = event
       if (this.componentDragging) {
         if (target === currentTarget) {
@@ -140,26 +150,40 @@ export default {
       }
     }
 
+    const dragStart = event => {
+      const {target, pageX, pageY} = event
+
+      this.dragState.element = target.cloneNode(true)
+      this.dragState.element.style.position = 'absolute'
+      this.dragState.element.classList.add('element-dragged')
+
+      document.body.appendChild(this.dragState.element)
+
+      addEvent(this.iframeDocument, 'mousemove', mousemove, false)
+      addEvent(this.iframeDocument, 'mouseup', mouseup, false)
+
+      this.dragState.x = pageX
+      this.dragState.y = pageY
+
+      this.enableDragElement(target.getAttribute(SelectorAttrId))
+    }
+
     const mousedown = event => {
-      const {target, currentTarget, pageX, pageY} = event
+      const {target, currentTarget} = event
+
       if (target === currentTarget) {
-        this.dragState.element = target.cloneNode(true)
-        this.dragState.element.style.position = 'absolute'
-        this.dragState.element.classList.add('element-dragged')
-
-        document.body.appendChild(this.dragState.element)
-
-        addEvent(this.iframeDocument, 'mousemove', mousemove, false)
-        addEvent(this.iframeDocument, 'mouseup', mouseup, false)
-
-        this.dragState.x = pageX
-        this.dragState.y = pageY
-
-        this.enableDragElement(target.getAttribute(SelectorAttrId))
+        this.interval = setInterval(() => {
+          if (this.dragState.intervalCount > 2) {
+            this.resetInterval()
+            dragStart(event)
+          }
+          this.dragState.intervalCount++
+        }, 250)
       }
     }
 
     const mousemove = event => {
+      this.resetInterval()
       let {pageX, pageY} = event
       if (this.elementDragging) {
         this.dragState.x = pageX
