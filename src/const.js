@@ -217,7 +217,11 @@ export const Icons = {
   TEXT_ALIGN_RIGHT: 'typo-text-align-right',
   LETTER_SPACING: 'typo-letter-spacing',
   TEXT_STYLE_NORMAL: 'typo-text-style-normal',
-  TEXT_STYLE_ITALIC: 'typo-text-style-italic'
+  TEXT_STYLE_ITALIC: 'typo-text-style-italic',
+  BACKGROUND_COLOR: 'background-color',
+  BACKGROUND_IMAGE: 'background-image',
+  BACKGROUND_VIDEO: 'background-video',
+  BACKGROUND_GRADIENT: 'background-gradient'
 }
 
 export const Tooltips = {
