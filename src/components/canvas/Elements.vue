@@ -115,11 +115,11 @@ export default {
         }
       }
       if (this.elementDragging) {
+        this.dragState.element.remove()
         if (target === currentTarget && target !== this.dragState.element) {
           let id = target.getAttribute(SelectorAttrId)
           if (!id) return false
 
-          this.dragState.element.remove()
           this.disableDragElement()
 
           removeEvent(this.iframeDocument, 'mousemove', mousemove, false)
