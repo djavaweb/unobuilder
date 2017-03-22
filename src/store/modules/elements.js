@@ -386,23 +386,23 @@ const mutations = {
   /**
    * Paste element
    */
-  [mutation.DROP_ELEMENT] (state, element) {
-    if (element.parent) {
-      const parent = getParentElementObject(element.parent, state.snapshot)
-      element.id = parent.id
+  [mutation.DROP_ELEMENT] (state, options) {
+    if (options.parentOf) {
+      const parent = getParentElementObject(options.parentOf, state.snapshot)
+      options.id = parent.id
     }
 
-    let dropElement = element && element.id
-     ? getElementObject(element.id, state.snapshot)
+    let dropElement = options && options.id
+     ? getElementObject(options.id, state.snapshot)
      : state.snapshot
 
     if (!dropElement || !state.move.element) return
 
-    let index = element && element.index ? element.index : 0
+    let index = options && options.index ? options.index : 0
     let srcElement = utils.CloneObject(state.move.element)
     srcElement = utils.ChangeIdDeep(srcElement)
 
-    if (element && element.id) {
+    if (options && options.id) {
       const notVoidElement = !isVoidElementById(dropElement.id)
       const canNested = isNestedablePair(srcElement.kind, dropElement.kind)
       if (notVoidElement && canNested) {
@@ -554,27 +554,20 @@ const actions = {
    */
   moveElement ({commit, state}, {action, id, appendTo}) {
     commit(mutation.SNAPSHOT_ELEMENT)
-
     const srcElement = getRequiredParentElement(id, state.snapshot) || getElementObject(id, state.snapshot)
-
-    let targetEl = getElementNodeById(appendTo)
-    let targetObj = getElementObjectByNode(targetEl)
-
-    targetObj.childNodes.push(srcElement)
-    console.log(targetObj)
 
     if (srcElement) {
       commit(mutation.MOVE_ELEMENT, {
-        action,
+        action: MoveAction.COPY,
         element: utils.CloneObject(srcElement)
       })
 
       if (action === MoveAction.CUT) {
-        commit(mutation.REMOVE_ELEMENT, id)
+        commit(mutation.REMOVE_ELEMENT, srcElement.id)
       }
 
       commit(mutation.DROP_ELEMENT, {
-        parent: id
+        id: appendTo
       })
       commit(mutation.APPLY_ELEMENT)
     }
@@ -600,7 +593,7 @@ const actions = {
       })
       commit(mutation.DROP_ELEMENT, {
         index,
-        parent: id
+        parentOf: id
       })
       commit(mutation.APPLY_ELEMENT)
     }
