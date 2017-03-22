@@ -191,6 +191,10 @@ export default {
     }
 
     const mousemove = event => {
+      if (this.interval) {
+        this.dragState.intervalCount = 3
+      }
+
       if (this.elementDragging) {
         const {pageX, pageY} = event
         this.dragState.x = pageX
