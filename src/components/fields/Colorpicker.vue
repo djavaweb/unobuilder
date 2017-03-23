@@ -7,7 +7,7 @@ import Button from '../fields/Button'
 
 const mainClass = `${ClassPrefix.FIELDS}--color-picker`
 const boxClass = `${mainClass}__box`
-const overlayClass = `${mainClass}__overlay`
+const overlayClass = `${ClassPrefix.RIGHT_PANEL}__overlay`
 
 export default {
   name: 'Colorpicker',
