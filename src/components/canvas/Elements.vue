@@ -115,6 +115,7 @@ export default {
     const mouseup = event => {
       this.resetInterval()
       const {target, currentTarget} = event
+      // what we do when component (from left panel) dropped
       if (this.componentDragging) {
         if (target === currentTarget) {
           const item = Uno.getComponentItem(this.componentActive)
@@ -125,6 +126,7 @@ export default {
           })
         }
       }
+      // what we do when element (from builder canvas it self) dropped
       if (this.elementDragging) {
         this.dragState.element.remove()
         if (target === currentTarget && target !== this.dragState.element) {
