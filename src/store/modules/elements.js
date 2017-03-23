@@ -589,15 +589,17 @@ const actions = {
 
     if (srcElement) {
       const index = getIndexFromParent(id)
+      const dupeElement = utils.CloneObject(srcElement)
       commit(mutation.MOVE_ELEMENT, {
         action: MoveAction.COPY,
-        element: utils.CloneObject(srcElement)
+        element: dupeElement
       })
       commit(mutation.DROP_ELEMENT, {
         index,
         parentOf: id
       })
       commit(mutation.APPLY_ELEMENT)
+      return dupeElement
     }
   },
 

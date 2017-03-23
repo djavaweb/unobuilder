@@ -120,6 +120,11 @@ export default {
 
       const copyClick = event => {
         this.duplicateElement(this.selectedElement.id)
+          .then(element => {
+            if (element) {
+              this.selectElement(element.id)
+            }
+          })
       }
 
       copyElementBtn = <a domPropsInnerHTML={SVGIcon(Icons.COPY)}
