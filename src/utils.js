@@ -265,7 +265,6 @@ export const ChangeIdDeep = object => {
   if (object.id) {
     object.id = newId
     object.dataObject.attrs[SelectorAttrId] = newId
-    object.dataObject.attrs.testid = newId
     object.dataObject.ref = newId.replace(/-/g, '')
     for (let index in object.childNodes) {
       object.childNodes[index] = ChangeIdDeep(object.childNodes[index])
