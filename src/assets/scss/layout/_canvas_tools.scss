@@ -1,4 +1,5 @@
 $selector-border-width: 2px;
+$canvas-selector: '#{$prefix}__canvas-selector';
 
 .#{$prefix} {
   &__canvas {
@@ -61,19 +62,23 @@ $selector-border-width: 2px;
         border-width: $selector-border-width - 1;
         &--dragging {
           border-width: $selector-border-width;
-          border-color: orange;
+          border-color: $green;
           z-index: 30;
+          .#{$canvas-selector}-breadcrumbs {
+            border-color: $green !important;
+            background-color: $green !important;
+            color: $white !important;
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+          }
         }
-        .#{$prefix}__canvas-selector-tools {
-          margin-left: -($selector-border-width - 1);
-          margin-right: -($selector-border-width - 1);
-          margin-top: -19px;
-        }
-        .#{$prefix}__canvas-selector-breadcrumbs {
+        .#{$canvas-selector}-breadcrumbs {
           background-color: $white;
           border: 1px solid $normal-sky-blue;
           color: $normal-sky-blue;
           padding-top: 1px;
+          margin-left: ($selector-border-width - 1);
+          margin-top: ($selector-border-width - 1);
         }
       }
 

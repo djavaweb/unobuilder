@@ -1,3 +1,5 @@
+$layout_box: '#{$prefix}__right-panel-layout-box';
+
 .#{$prefix} {
   &__right-panel {
     @include PreventSelect;
@@ -9,10 +11,140 @@
     right: 0;
     top: 0;
     z-index: 33;
+
+    &__overlay {
+      position: absolute;
+      z-index: 99;
+      top: 0;
+      left: 0;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      align-content: center !important;
+      width: 100%;
+      height: 100%;
+      background: $transparent-black;
+      pointer-events: all !important;
+      button {
+        width: 90%;
+      }
+    }
+
+    &-layout-box {
+      div {
+        @include OpenSans;
+        font-size: 10px;
+        line-height: 11px;
+        color: $white;
+        display: flex;
+        flex-direction: column;
+        padding: 2px 1px;
+        pointer-events: none;
+      }
+
+      &__position,
+      &__margin,
+      &__border,
+      &__padding {
+        background: $transparent-black;
+        border-color: $warm-grey;
+        border-width: 1px;
+        &.hover {
+          border-color: $normal-sky-blue;
+        }
+      }
+
+      a {
+        text-decoration: none;
+        color: $white;
+        pointer-events: all;
+      }
+
+      strong a,
+      .underlined {
+        text-decoration: underline;
+        &:hover {
+          text-decoration: none;
+        }
+      }
+
+      &__position {
+        border-style: dotted;
+      }
+
+      &__margin {
+        border-style: dashed;
+      }
+
+      &__border {
+        border-style: solid;
+        .#{$layout_box}--top {
+          justify-content: space-between !important;
+          &>:first-child {
+            margin-right: auto;
+          }
+          &:last-child {
+            margin-left: auto;
+            margin-right: 0;
+          }
+        }
+      }
+
+      &__padding {
+        border-style: solid;
+        border-color: $white;
+        .#{$layout_box}--top {
+          justify-content: center !important;
+        }
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+
+      &--top {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        &>:first-child {
+          margin-right: auto;
+        }
+        &>:last-child {
+          margin-left: auto;
+          margin-right: 0;
+        }
+      }
+
+      &--bottom {
+        flex-direction: row !important;
+        justify-content: center;
+      }
+
+      &--left,
+      &--right {
+        justify-content: center;
+        text-overflow: clip;
+        overflow: hidden;
+        word-wrap: break-word;
+        max-width: 18px;
+      }
+
+      &--center {
+        pointer-events: all !important;
+      }
+
+      &--middle {
+        justify-content: space-between;
+        flex-direction: row !important;
+      }
+    }
   }
 
   &__properties {
     padding: 10px;
+    &--flex {
+      position: relative;
+    }
   }
 
   &__property-switcher {
