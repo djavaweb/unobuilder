@@ -570,6 +570,8 @@ const actions = {
         id: appendTo
       })
       commit(mutation.APPLY_ELEMENT)
+
+      return srcElement
     }
   },
 

@@ -145,6 +145,8 @@ export default {
               action: MoveAction.CUT,
               appendTo: id,
               id: stateElId
+            }).then(element => {
+              this.selectElement(id)
             })
           }
         }
