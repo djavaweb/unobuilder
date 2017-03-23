@@ -155,7 +155,15 @@ export const Labels = {
   UNIT_AUTO: '-',
   LOADING: 'Please wait loading...',
   ATTR_CLASS: 'Class',
-  ATTR_ID: 'ID'
+  ATTR_ID: 'ID',
+  BACKGROUND_COLOR_SETTINGS: 'Background Color Settings',
+  BACKGROUND_IMAGE_SETTINGS: 'Background Color Settings',
+  BACKGROUND_VIDEO_SETTINGS: 'Background Color Settings',
+  BACKGROUND_GRADIENT_SETTINGS: 'Background Color Settings',
+  LAYOUT_POSITION: 'position',
+  LAYOUT_MARGIN: 'margin',
+  LAYOUT_BORDER: 'border',
+  LAYOUT_PADDING: 'padding'
 }
 
 export const Icons = {
@@ -213,7 +221,11 @@ export const Icons = {
   TEXT_ALIGN_RIGHT: 'typo-text-align-right',
   LETTER_SPACING: 'typo-letter-spacing',
   TEXT_STYLE_NORMAL: 'typo-text-style-normal',
-  TEXT_STYLE_ITALIC: 'typo-text-style-italic'
+  TEXT_STYLE_ITALIC: 'typo-text-style-italic',
+  BACKGROUND_COLOR: 'background-color',
+  BACKGROUND_IMAGE: 'background-image',
+  BACKGROUND_VIDEO: 'background-video',
+  BACKGROUND_GRADIENT: 'background-gradient'
 }
 
 export const Tooltips = {
@@ -265,7 +277,12 @@ export const Tooltips = {
   TEXT_DECORATION_UNDERLINE: 'Underline',
   TEXT_DECORATION_STRIKETHROUGH: 'Strikethrough',
   TEXT_STYLE_NORMAL: 'Normal',
-  TEXT_STYLE_ITALIC: 'Italic'
+  TEXT_STYLE_ITALIC: 'Italic',
+  BACKGROUND_NONE: 'No Background',
+  BACKGROUND_COLOR: 'Background Color',
+  BACKGROUND_IMAGE: 'Background Image',
+  BACKGROUND_VIDEO: 'Background Video',
+  BACKGROUND_GRADIENT: 'Background Gradient Color'
 }
 
 export const PropertyPanelIds = {
