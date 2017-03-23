@@ -140,9 +140,6 @@ export default {
 
           const stateElId = this.dragState.element.getAttribute(SelectorAttrId)
           if (stateElId !== id) {
-            console.log(`
-            ${MoveAction.CUT} Element with id: ${stateElId}, moved to element with id: ${id}
-            `)
             this.moveElement({
               action: MoveAction.CUT,
               appendTo: id,
