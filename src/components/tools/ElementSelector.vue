@@ -106,7 +106,10 @@ export default {
 
       const removeClick = event => {
         this.removeElement(this.selectedElement.id)
-        this.removeHover = false
+          .then(nextElement => {
+            this.selectElement(nextElement.id)
+            this.removeHover = false
+          })
       }
 
       removeElementBtn = <RemoveButton

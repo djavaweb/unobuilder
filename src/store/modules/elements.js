@@ -530,18 +530,13 @@ const actions = {
    */
   removeElement ({commit, state}, id) {
     const element = getRequiredParentElement(id, state.current) || getElementObject(id, state.current)
-    const nextSelectedElement = getSiblingElement(id, state.current)
+    const nextElement = getSiblingElement(element.id, state.current)
 
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.REMOVE_ELEMENT, element.id)
     commit(mutation.APPLY_ELEMENT)
-    commit(mutation.SET_WINDOW_SCROLL, '+1')
-    commit(mutation.HOVER_ELEMENT, null)
-    commit(mutation.SELECT_ELEMENT, {
-      element: nextSelectedElement,
-      selected: true
-    })
-    commit(mutation.SET_WINDOW_SCROLL, '-1')
+
+    return nextElement
   },
 
   /**
