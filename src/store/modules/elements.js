@@ -555,6 +555,12 @@ const actions = {
   moveElement ({commit, state}, {action, id, appendTo}) {
     commit(mutation.SNAPSHOT_ELEMENT)
     const srcElement = getRequiredParentElement(id, state.snapshot) || getElementObject(id, state.snapshot)
+    const appendSrcElement = getRequiredParentElement(appendTo, state.snapshot) || getElementObject(appendTo, state.snapshot)
+
+    // check if have same parent
+    if (srcElement.id === appendSrcElement.id) {
+      return false
+    }
 
     if (srcElement) {
       commit(mutation.MOVE_ELEMENT, {
