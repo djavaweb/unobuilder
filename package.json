@@ -20,7 +20,7 @@
     "jquery": "^3.2.0",
     "lodash.debounce": "^4.0.8",
     "uikit": "^3.0.0-beta.18",
-    "unobuilder-parser": "0.0.1-alpha.15",
+    "unobuilder-parser": "0.0.1-alpha.16",
     "vue": "^2.2.4",
     "vue-multiselect": "^1.1.4",
     "vue-sketch-color-picker": "^1.0.1",
