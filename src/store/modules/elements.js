@@ -552,17 +552,16 @@ const actions = {
    * @param  {String} options.id
    * @return {void}
    */
-  moveElement ({commit, state}, {action, id, target}) {
+  moveElement ({commit, state}, {action, id, appendTo}) {
     commit(mutation.SNAPSHOT_ELEMENT)
 
     const srcElement = getRequiredParentElement(id, state.snapshot) || getElementObject(id, state.snapshot)
 
-    let idEl = getElementNodeById(id)
-    let targetEl = getElementNodeById(target)
-    let idObj = getElementObjectByNode(idEl)
+    let targetEl = getElementNodeById(appendTo)
     let targetObj = getElementObjectByNode(targetEl)
 
-    targetObj.childNodes.push(idObj)
+    targetObj.childNodes.push(srcElement)
+    console.log(targetObj)
 
     if (srcElement) {
       commit(mutation.MOVE_ELEMENT, {
