@@ -386,23 +386,23 @@ const mutations = {
   /**
    * Paste element
    */
-  [mutation.DROP_ELEMENT] (state, element) {
-    if (element.parent) {
-      const parent = getParentElementObject(element.parent, state.snapshot)
-      element.id = parent.id
+  [mutation.DROP_ELEMENT] (state, options) {
+    if (options.parentOf) {
+      const parent = getParentElementObject(options.parentOf, state.snapshot)
+      options.id = parent.id
     }
 
-    let dropElement = element && element.id
-     ? getElementObject(element.id, state.snapshot)
+    let dropElement = options && options.id
+     ? getElementObject(options.id, state.snapshot)
      : state.snapshot
 
     if (!dropElement || !state.move.element) return
 
-    let index = element && element.index ? element.index : 0
+    let index = options && options.index ? options.index : 0
     let srcElement = utils.CloneObject(state.move.element)
     srcElement = utils.ChangeIdDeep(srcElement)
 
-    if (element && element.id) {
+    if (options && options.id) {
       const notVoidElement = !isVoidElementById(dropElement.id)
       const canNested = isNestedablePair(srcElement.kind, dropElement.kind)
       if (notVoidElement && canNested) {
@@ -530,18 +530,13 @@ const actions = {
    */
   removeElement ({commit, state}, id) {
     const element = getRequiredParentElement(id, state.current) || getElementObject(id, state.current)
-    const nextSelectedElement = getSiblingElement(id, state.current)
+    const nextElement = getSiblingElement(element.id, state.current)
 
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.REMOVE_ELEMENT, element.id)
     commit(mutation.APPLY_ELEMENT)
-    commit(mutation.SET_WINDOW_SCROLL, '+1')
-    commit(mutation.HOVER_ELEMENT, null)
-    commit(mutation.SELECT_ELEMENT, {
-      element: nextSelectedElement,
-      selected: true
-    })
-    commit(mutation.SET_WINDOW_SCROLL, '-1')
+
+    return nextElement
   },
 
   /**
@@ -552,32 +547,32 @@ const actions = {
    * @param  {String} options.id
    * @return {void}
    */
-  moveElement ({commit, state}, {action, id, target}) {
+  moveElement ({commit, state}, {action, id, appendTo}) {
     commit(mutation.SNAPSHOT_ELEMENT)
-
     const srcElement = getRequiredParentElement(id, state.snapshot) || getElementObject(id, state.snapshot)
+    const appendSrcElement = getRequiredParentElement(appendTo, state.snapshot) || getElementObject(appendTo, state.snapshot)
 
-    let idEl = getElementNodeById(id)
-    let targetEl = getElementNodeById(target)
-    let idObj = getElementObjectByNode(idEl)
-    let targetObj = getElementObjectByNode(targetEl)
-
-    targetObj.childNodes.push(idObj)
+    // check if have same parent
+    if (srcElement.id === appendSrcElement.id) {
+      return false
+    }
 
     if (srcElement) {
       commit(mutation.MOVE_ELEMENT, {
-        action,
+        action: MoveAction.COPY,
         element: utils.CloneObject(srcElement)
       })
 
       if (action === MoveAction.CUT) {
-        commit(mutation.REMOVE_ELEMENT, id)
+        commit(mutation.REMOVE_ELEMENT, srcElement.id)
       }
 
       commit(mutation.DROP_ELEMENT, {
-        parent: id
+        id: appendTo
       })
       commit(mutation.APPLY_ELEMENT)
+
+      return srcElement
     }
   },
 
@@ -595,15 +590,17 @@ const actions = {
 
     if (srcElement) {
       const index = getIndexFromParent(id)
+      const dupeElement = utils.CloneObject(srcElement)
       commit(mutation.MOVE_ELEMENT, {
         action: MoveAction.COPY,
-        element: utils.CloneObject(srcElement)
+        element: dupeElement
       })
       commit(mutation.DROP_ELEMENT, {
         index,
-        parent: id
+        parentOf: id
       })
       commit(mutation.APPLY_ELEMENT)
+      return dupeElement
     }
   },
 
@@ -810,35 +807,45 @@ const getters = {
    * @param {Object} state
    * @return {Object}
    */
-  selectedOffset (state, rootState) {
-    const styles = {}
+  elementOffset (state, rootState) {
+    const getOffset = element => {
+      const _element = getElementNodeById(element.id)
 
-    if (state.selected) {
-      const element = getElementNodeById(state.selected.id)
-
-      if (!element) {
-        return styles
+      if (!_element) {
+        return {}
       }
 
       const {canvasScroll} = rootState
-      const bounds = element.getBoundingClientRect()
-      const pos = {
-        top: bounds.top,
-        left: bounds.left
+      let {top, left, width, height} = _element.getBoundingClientRect()
+
+      if (left < 0) {
+        width += left
+        left = 0
       }
 
       if (canvasScroll.top) {
-        pos.top += Math.abs(canvasScroll.top)
-        pos.left += Math.abs(canvasScroll.left)
+        top += Math.abs(canvasScroll.top)
+        left += Math.abs(canvasScroll.left)
       }
 
-      styles.top = pos.top
-      styles.left = pos.left
-      styles.height = bounds.height
-      styles.width = bounds.width
+      return { top, left, width, height }
     }
 
-    return styles
+    let selected
+    let hovered
+
+    if (state.selected) {
+      selected = getOffset(state.selected)
+    }
+
+    if (state.hovered) {
+      hovered = getOffset(state.hovered)
+    }
+
+    return {
+      selected,
+      hovered
+    }
   },
 
   /**
@@ -866,6 +873,10 @@ const getters = {
       if (canvasScroll.top) {
         pos.top += Math.abs(canvasScroll.top)
         pos.left += Math.abs(canvasScroll.left)
+      }
+
+      if (pos.left < 0) {
+        pos.left = 0
       }
 
       styles.top = pos.top

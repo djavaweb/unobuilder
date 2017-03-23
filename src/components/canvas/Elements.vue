@@ -58,12 +58,22 @@ export default {
       'enableDragElement',
       'disableDragElement',
       'moveElement'
-    ])
+    ]),
+
+    resetInterval () {
+      if (this.interval) {
+        clearInterval(this.interval)
+        this.interval = null
+        this.dragState.intervalCount = 0
+      }
+    }
   },
 
   data () {
     return {
+      interval: null,
       dragState: {
+        intervalCount: 0,
         element: null,
         x: 0,
         y: 0
@@ -103,7 +113,9 @@ export default {
     }
 
     const mouseup = event => {
+      this.resetInterval()
       const {target, currentTarget} = event
+      // what we do when component (from left panel) dropped
       if (this.componentDragging) {
         if (target === currentTarget) {
           const item = Uno.getComponentItem(this.componentActive)
@@ -114,12 +126,13 @@ export default {
           })
         }
       }
+      // what we do when element (from builder canvas it self) dropped
       if (this.elementDragging) {
+        this.dragState.element.remove()
         if (target === currentTarget && target !== this.dragState.element) {
           let id = target.getAttribute(SelectorAttrId)
           if (!id) return false
 
-          this.dragState.element.remove()
           this.disableDragElement()
 
           removeEvent(this.iframeDocument, 'mousemove', mousemove, false)
@@ -127,41 +140,68 @@ export default {
 
           const stateElId = this.dragState.element.getAttribute(SelectorAttrId)
           if (stateElId !== id) {
-            console.log(`
-            ${MoveAction.CUT} Element with id: ${stateElId}, moved to element with id: ${id}
-            `)
             this.moveElement({
               action: MoveAction.CUT,
-              id: stateElId,
-              target: id
+              appendTo: id,
+              id: stateElId
+            }).then(element => {
+              this.selectElement(id)
             })
           }
         }
       }
     }
 
+    const dragStart = event => {
+      const {target, pageX, pageY} = event
+
+      this.dragState.element = target.cloneNode(true)
+      this.dragState.element.style.position = 'absolute'
+      this.dragState.element.classList.add('element-dragged')
+
+      document.body.appendChild(this.dragState.element)
+
+      addEvent(this.iframeDocument, 'mousemove', mousemove, false)
+      addEvent(this.iframeDocument, 'mouseup', mouseup, false)
+
+      this.dragState.x = pageX
+      this.dragState.y = pageY
+
+      // Move element UI
+      dragElement(this.dragState.element, {
+        iframeWindow: this.iframeWindow,
+        state: this.dragState,
+        canvasScrollTop: this.canvasScroll.top
+      })
+
+      this.enableDragElement(target.getAttribute(SelectorAttrId))
+    }
+
     const mousedown = event => {
-      const {target, currentTarget, pageX, pageY} = event
+      const {target, currentTarget, which} = event
+
+      if (which === 3) {
+        return false
+      }
+
       if (target === currentTarget) {
-        this.dragState.element = target.cloneNode(true)
-        this.dragState.element.style.position = 'absolute'
-        this.dragState.element.classList.add('element-dragged')
-
-        document.body.appendChild(this.dragState.element)
-
-        addEvent(this.iframeDocument, 'mousemove', mousemove, false)
-        addEvent(this.iframeDocument, 'mouseup', mouseup, false)
-
-        this.dragState.x = pageX
-        this.dragState.y = pageY
-
-        this.enableDragElement(target.getAttribute(SelectorAttrId))
+        this.interval = setInterval(() => {
+          if (this.dragState.intervalCount > 2) {
+            this.resetInterval()
+            dragStart(event)
+          }
+          this.dragState.intervalCount++
+        }, 100)
       }
     }
 
     const mousemove = event => {
-      let {pageX, pageY} = event
+      if (this.interval) {
+        this.dragState.intervalCount = 3
+      }
+
       if (this.elementDragging) {
+        const {pageX, pageY} = event
         this.dragState.x = pageX
         this.dragState.y = pageY
 

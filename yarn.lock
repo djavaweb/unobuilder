@@ -3789,6 +3789,10 @@ lodash.create@3.1.1, lodash.create@^3.1.1:
     lodash._basecreate "^3.0.0"
     lodash._isiterateecall "^3.0.0"
 
+lodash.debounce@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
+
 lodash.defaultsdeep@4.3.2:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/lodash.defaultsdeep/-/lodash.defaultsdeep-4.3.2.tgz#6c1a586e6c5647b0e64e2d798141b8836158be8a"
@@ -6200,9 +6204,9 @@ uniqs@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/uniqs/-/uniqs-2.0.0.tgz#ffede4b36b25290696e6e165d4a59edb998e6b02"
 
-unobuilder-parser@0.0.1-alpha.12:
-  version "0.0.1-alpha.12"
-  resolved "https://registry.yarnpkg.com/unobuilder-parser/-/unobuilder-parser-0.0.1-alpha.12.tgz#4d6d79e74a1beb5f8795da9c8e15863bc10ff0b7"
+unobuilder-parser@0.0.1-alpha.16:
+  version "0.0.1-alpha.16"
+  resolved "https://registry.yarnpkg.com/unobuilder-parser/-/unobuilder-parser-0.0.1-alpha.16.tgz#55ca328e15b8b7814ec417bd932f2fef17592488"
   dependencies:
     lodash.clonedeep "^4.5.0"
 
