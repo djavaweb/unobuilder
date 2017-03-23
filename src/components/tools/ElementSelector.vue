@@ -22,8 +22,7 @@ export default {
       'openBreadcrumbs',
       'selectedElement',
       'hoveredElement',
-      'selectedOffset',
-      'hoveredOffset',
+      'elementOffset',
       'breadcrumbs',
       'breadcrumb',
       'componentDragging',
@@ -53,8 +52,8 @@ export default {
       'hover--remove': this.removeHover
     }
 
-    if (this.selectedElement) {
-      let {top, left, width, height} = this.selectedOffset
+    if (this.selectedElement && this.elementOffset.selected) {
+      let {top, left, width, height} = this.elementOffset.selected
       selectedStyles = {
         top: `${top}px`,
         left: `${left}px`,
@@ -134,8 +133,10 @@ export default {
     }
 
     let hoverTools
-    if ((this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id) || (this.componentDragging || this.elementDragging)) {
-      let {top, left, width, height} = this.hoveredOffset
+    const hoveredNotSelected = this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id
+    const isDragging = this.componentDragging || this.elementDragging
+    if ((hoveredNotSelected || isDragging) && this.elementOffset.hovered) {
+      let {top, left, width, height} = this.elementOffset.hovered
       hoveredStyles = {
         top: `${top}px`,
         left: `${left}px`,
@@ -145,7 +146,7 @@ export default {
 
       let activeClass = {}
       activeClass[hoveredClass] = true
-      activeClass[hoveredDraggingClass] = (this.componentDragging || this.elementDragging)
+      activeClass[hoveredDraggingClass] = isDragging
 
       hoverTools = <div class={activeClass} style={hoveredStyles}>
         <div class={selectorToolClass}>

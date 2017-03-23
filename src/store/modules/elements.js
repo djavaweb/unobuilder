@@ -806,35 +806,45 @@ const getters = {
    * @param {Object} state
    * @return {Object}
    */
-  selectedOffset (state, rootState) {
-    const styles = {}
+  elementOffset (state, rootState) {
+    const getOffset = element => {
+      const _element = getElementNodeById(element.id)
 
-    if (state.selected) {
-      const element = getElementNodeById(state.selected.id)
-
-      if (!element) {
-        return styles
+      if (!_element) {
+        return {}
       }
 
       const {canvasScroll} = rootState
-      const bounds = element.getBoundingClientRect()
-      const pos = {
-        top: bounds.top,
-        left: bounds.left
+      let {top, left, width, height} = _element.getBoundingClientRect()
+
+      if (left < 0) {
+        width += left
+        left = 0
       }
 
       if (canvasScroll.top) {
-        pos.top += Math.abs(canvasScroll.top)
-        pos.left += Math.abs(canvasScroll.left)
+        top += Math.abs(canvasScroll.top)
+        left += Math.abs(canvasScroll.left)
       }
 
-      styles.top = pos.top
-      styles.left = pos.left
-      styles.height = bounds.height
-      styles.width = bounds.width
+      return { top, left, width, height }
     }
 
-    return styles
+    let selected
+    let hovered
+
+    if (state.selected) {
+      selected = getOffset(state.selected)
+    }
+
+    if (state.hovered) {
+      hovered = getOffset(state.hovered)
+    }
+
+    return {
+      selected,
+      hovered
+    }
   },
 
   /**
@@ -862,6 +872,10 @@ const getters = {
       if (canvasScroll.top) {
         pos.top += Math.abs(canvasScroll.top)
         pos.left += Math.abs(canvasScroll.left)
+      }
+
+      if (pos.left < 0) {
+        pos.left = 0
       }
 
       styles.top = pos.top
