@@ -177,7 +177,11 @@ export default {
     }
 
     const mousedown = event => {
-      const {target, currentTarget} = event
+      const {target, currentTarget, which} = event
+
+      if (which === 3) {
+        return false
+      }
 
       if (target === currentTarget) {
         this.interval = setInterval(() => {
