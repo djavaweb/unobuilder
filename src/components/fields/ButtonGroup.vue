@@ -1,7 +1,7 @@
 <script>
 /* eslint-disable no-unused-vars */
 import Button from './Button'
-import {ClassPrefix} from '../../const'
+import {ClassPrefix, ButtonType} from '../../const'
 
 const mainClass = `${ClassPrefix.FIELDS}--button-group`
 
@@ -12,6 +12,10 @@ export default {
       type: Array,
       default: () => []
     },
+    type: {
+      type: String,
+      default: ButtonType.PRIMARY
+    },
     size: {
       type: String
     }
@@ -21,6 +25,7 @@ export default {
       .filter(item => item)
       .map(props => {
         props.size = this.size
+        props.type = this.type
         return <Button {...{props}} />
       })
 
