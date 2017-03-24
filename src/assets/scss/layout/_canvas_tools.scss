@@ -62,11 +62,15 @@ $canvas-selector: '#{$prefix}__canvas-selector';
         border-width: $selector-border-width - 1;
         &--dragging {
           border-width: $selector-border-width;
-          border-color: $green;
+          border-color: $orange;
           z-index: 30;
+          .#{$canvas-selector}-tools {
+            justify-content: center;
+            text-transform: uppercase;
+          }
           .#{$canvas-selector}-breadcrumbs {
-            border-color: $green !important;
-            background-color: $green !important;
+            border-color: $orange !important;
+            background-color: $orange !important;
             color: $white !important;
             margin-left: 0 !important;
             margin-top: 0 !important;
