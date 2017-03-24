@@ -4,6 +4,25 @@ import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
 import {RootElementTag, VoidElements, NestedableRules, MoveAction} from '../../const'
 import {isEqual} from 'lodash'
+import NodeUtils from '../helpers/node-utils'
+
+const defaultDropline = {
+  element: undefined,
+  position: {
+    top: false,
+    bottom: false,
+    right: false,
+    left: false
+  },
+  offset: {
+    top: null,
+    bottom: null,
+    right: null,
+    left: null,
+    width: null,
+    height: null
+  }
+}
 
 const state = {
   prev: [],
@@ -19,225 +38,11 @@ const state = {
   dragging: {
     status: false,
     activeId: null
-  }
+  },
+  dropline: Object.assign({}, defaultDropline)
 }
 
-const getElementObject = (id, elements) => {
-  elements = !elements ? state.current : elements
-  for (let i = 0; i < elements.length; i++) {
-    if (elements[i].childNodes && elements[i].childNodes.length > 0) {
-      const elementObject = getElementObject(id, elements[i].childNodes)
-      if (elementObject) {
-        return elementObject
-      }
-    }
-
-    if (elements[i].id === id) {
-      return elements[i]
-    }
-  }
-}
-
-const getElementNodeById = id => {
-  if (state.window) {
-    return state.window.document.querySelector(utils.SelectorId(id))
-  }
-}
-
-const getElementObjectByNode = (element, elements) => {
-  return getElementObject(utils.GetNodeId(element), elements)
-}
-
-const getParentElement = id => {
-  const element = getElementNodeById(id)
-  if (element) {
-    return utils.GetNodeId(element.parentElement)
-      ? element.parentElement
-      : undefined
-  }
-}
-
-const getIndexFromParent = id => {
-  const parentElement = getParentElement(id)
-  for (let i = 0; i < parentElement.childNodes.length; i++) {
-    const _id = utils.GetNodeId(parentElement.childNodes[i])
-    if (_id === id) {
-      return i
-    }
-  }
-
-  return 0
-}
-
-const getRootElement = id => {
-  const element = getElementNodeById(id)
-
-  if (!element) {
-    return
-  }
-
-  if (element.getAttribute(RootElementTag)) {
-    return element
-  }
-
-  const parentElement = getParentElement(id)
-  if (parentElement && parentElement.getAttribute(RootElementTag)) {
-    return element
-  } else {
-    return getRootElement(utils.GetNodeId(parentElement))
-  }
-}
-
-const getPrevElement = id => {
-  const element = getElementNodeById(id)
-  if (element) {
-    return utils.GetNodeId(element.previousElementSibling)
-      ? element.previousElementSibling
-      : undefined
-  }
-}
-
-const getNextElement = id => {
-  const element = getElementNodeById(id)
-  if (element) {
-    return utils.GetNodeId(element.nextElementSibling)
-      ? element.nextElementSibling
-      : undefined
-  }
-}
-
-const getParentElementObject = (id, elements) => {
-  const parentElement = getParentElement(id)
-  if (parentElement) {
-    return getElementObjectByNode(parentElement, elements)
-  }
-}
-
-const getPrevElementObject = (id, elements) => {
-  const prevElement = getPrevElement(id)
-  if (prevElement) {
-    return getElementObjectByNode(prevElement, elements)
-  }
-}
-
-const getNextElementObject = (id, elements) => {
-  const nextElement = getNextElement(id)
-  if (nextElement) {
-    return getElementObjectByNode(nextElement, elements)
-  }
-}
-
-const getSiblingElement = (id, elements) => {
-  let element = getParentElementObject(id, elements)
-  const prevElement = getPrevElementObject(id, elements)
-  const nextElement = getNextElementObject(id, elements)
-
-  if (nextElement) {
-    element = nextElement
-  } else if (prevElement) {
-    element = prevElement
-  }
-
-  return element
-}
-
-const getRequiredParentElement = (id, elements) => {
-  const parentElementObject = getParentElementObject(id, elements)
-  if (parentElementObject && parentElementObject.requiredParent) {
-    return parentElementObject
-  }
-}
-
-const getLinkElementObject = (linkNode, elements) => {
-  if (linkNode.tagName.toLowerCase() === 'a') {
-    return getElementObject(utils.GetNodeId(linkNode), elements)
-  }
-}
-
-const isRow = element => {
-  return element && element.classList.contains(utils.GlobalClassName('row'))
-}
-
-const isVoidElementById = id => {
-  const element = getElementNodeById(id)
-  if (element) {
-    return VoidElements.includes(element.tagName.toLowerCase())
-  }
-}
-
-const isNestedablePair = (fromKind, toKind) => {
-  const rule = NestedableRules[toKind]
-  return rule !== '*' ? rule.includes(fromKind) : true
-}
-
-const getBreadcrumbById = (id, elements) => {
-  const elementObject = getElementObject(id, elements)
-  if (elementObject) {
-    const { id, label } = elementObject
-    return { id, label }
-  }
-}
-
-const deleteNodeById = (id, elements) => {
-  for (let i = 0; i < elements.length; i++) {
-    if (elements[i].childNodes && elements[i].childNodes.length > 0) {
-      deleteNodeById(id, elements[i].childNodes)
-    }
-
-    if (elements[i].id === id) {
-      elements.splice(i, 1)
-    }
-  }
-}
-
-const insertChildNodesByIndex = (object, insertObject, index) => {
-  index = index === undefined ? object.childNodes.length : index
-  object.childNodes.splice(index, 0, insertObject)
-}
-
-const getStyle = (elementObject, isGlobal) => {
-  const element = getElementNodeById(elementObject.id)
-  let properties = state.window.getComputedStyle(element)
-
-  if (isGlobal) {
-    const tmpElement = element.cloneNode(true)
-    tmpElement.removeAttribute(utils.SelectorAttrId)
-
-    if (tmpElement.hasChildNodes()) {
-      tmpElement.childNodes.forEach(el => el.remove())
-    }
-
-    state.window.document.body.appendChild(tmpElement)
-    properties = state.window.getComputedStyle(tmpElement)
-    setTimeout(() => tmpElement.remove(), 1)
-  }
-
-  return properties
-}
-
-const setCursorPosition = atStart => el => {
-  const hasFeature = {
-    getSelection: typeof state.window.getSelection !== 'undefined',
-    createRange: typeof state.window.document.createRange !== 'undefined',
-    createTextRange: typeof state.window.document.body.createTextRange !== 'undefined'
-  }
-
-  if (hasFeature.getSelection && hasFeature.createRange) {
-    const range = state.window.document.createRange()
-    const sel = state.window.getSelection()
-    range.selectNodeContents(el)
-    range.collapse(atStart)
-    sel.removeAllRanges()
-    sel.addRange(range)
-  } else if (hasFeature.createTextRange) {
-    const textRange = state.window.document.body.createTextRange()
-    textRange.moveToElementText(el)
-    textRange.collapse(atStart)
-    textRange.select()
-  }
-
-  el.focus()
-}
+const NodeHelpers = new NodeUtils(state)
 
 const mutations = {
   /**
@@ -347,7 +152,7 @@ const mutations = {
         index = !index ? state.snapshot.length : index
         state.snapshot.splice(index, 0, element)
       } else {
-        const appendEl = getElementObject(appendTo, state.snapshot)
+        const appendEl = NodeHelpers.getElementObject(appendTo, state.snapshot)
         index = !index ? appendEl.childNodes.length : index
         appendEl.childNodes.splice(index, 0, element)
       }
@@ -358,7 +163,7 @@ const mutations = {
    * Remove current element state by id
    */
   [mutation.REMOVE_ELEMENT] (state, id) {
-    deleteNodeById(id, state.snapshot)
+    NodeHelpers.deleteNodeById(id, state.snapshot)
   },
 
   /**
@@ -388,12 +193,12 @@ const mutations = {
    */
   [mutation.DROP_ELEMENT] (state, options) {
     if (options.parentOf) {
-      const parent = getParentElementObject(options.parentOf, state.snapshot)
+      const parent = NodeHelpers.getParentElementObject(options.parentOf, state.snapshot)
       options.id = parent.id
     }
 
     let dropElement = options && options.id
-     ? getElementObject(options.id, state.snapshot)
+     ? NodeHelpers.getElementObject(options.id, state.snapshot)
      : state.snapshot
 
     if (!dropElement || !state.move.element) return
@@ -403,25 +208,27 @@ const mutations = {
     srcElement = utils.ChangeIdDeep(srcElement)
 
     if (options && options.id) {
-      const notVoidElement = !isVoidElementById(dropElement.id)
-      const canNested = isNestedablePair(srcElement.kind, dropElement.kind)
+      const notVoidElement = !NodeHelpers.isVoidElementById(dropElement.id)
+      const canNested = NodeHelpers.isNestedablePair(srcElement.kind, dropElement.kind)
       if (notVoidElement && canNested) {
-        insertChildNodesByIndex(dropElement, srcElement, index)
+        NodeHelpers.insertChildNodesByIndex(dropElement, srcElement, index)
       }
     } else {
       index = index === 0 ? dropElement.length : index
       dropElement.splice(index, 0, srcElement)
     }
+
+    state.dropline = Object.assign({}, defaultDropline)
   },
 
   /**
    * Enable or disable editable content
    */
   [mutation.EDIT_CONTENT] (state, editableNode) {
-    const element = getElementObjectByNode(editableNode, state.snapshot)
+    const element = NodeHelpers.getElementObjectByNode(editableNode, state.snapshot)
     if (element && element.editable) {
       element.dataObject.attrs.contenteditable = true
-      setTimeout(() => setCursorPosition(false)(editableNode), 0)
+      setTimeout(() => NodeHelpers.setCursorPosition(false)(editableNode), 0)
     }
   },
 
@@ -467,6 +274,10 @@ const mutations = {
   },
   [mutation.CLEAR_ACTIVE_ELEMENT] (state, id) {
     state.dragging.activeId = null
+  },
+
+  [mutation.SET_DROPLINE] (state, options) {
+    state.dropline = options
   }
 }
 
@@ -529,8 +340,8 @@ const actions = {
    * @return {void}
    */
   removeElement ({commit, state}, id) {
-    const element = getRequiredParentElement(id, state.current) || getElementObject(id, state.current)
-    const nextElement = getSiblingElement(element.id, state.current)
+    const element = NodeHelpers.getRequiredParentElement(id, state.current) || NodeHelpers.getElementObject(id, state.current)
+    const nextElement = NodeHelpers.getSiblingElement(element.id, state.current)
 
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.REMOVE_ELEMENT, element.id)
@@ -549,8 +360,8 @@ const actions = {
    */
   moveElement ({commit, state}, {action, id, appendTo}) {
     commit(mutation.SNAPSHOT_ELEMENT)
-    const srcElement = getRequiredParentElement(id, state.snapshot) || getElementObject(id, state.snapshot)
-    const appendSrcElement = getRequiredParentElement(appendTo, state.snapshot) || getElementObject(appendTo, state.snapshot)
+    const srcElement = NodeHelpers.getRequiredParentElement(id, state.snapshot) || NodeHelpers.getElementObject(id, state.snapshot)
+    const appendSrcElement = NodeHelpers.getRequiredParentElement(appendTo, state.snapshot) || NodeHelpers.getElementObject(appendTo, state.snapshot)
 
     // check if have same parent
     if (srcElement.id === appendSrcElement.id) {
@@ -586,10 +397,10 @@ const actions = {
    */
   duplicateElement ({commit, state}, id) {
     commit(mutation.SNAPSHOT_ELEMENT)
-    const srcElement = getElementObject(id, state.snapshot)
+    const srcElement = NodeHelpers.getElementObject(id, state.snapshot)
 
     if (srcElement) {
-      const index = getIndexFromParent(id)
+      const index = NodeHelpers.getIndexFromParent(id)
       const dupeElement = utils.CloneObject(srcElement)
       commit(mutation.MOVE_ELEMENT, {
         action: MoveAction.COPY,
@@ -644,7 +455,7 @@ const actions = {
     }
 
     // Reselect element
-    element = getElementObject(id)
+    element = NodeHelpers.getElementObject(id)
     if (element) {
       commit(mutation.SELECT_ELEMENT, {
         element,
@@ -661,7 +472,7 @@ const actions = {
     // if (state.selected) {
     //   // this.$set(this.selectedElement, 'selected', false)
     //   // if (this.selectedElement.dataObject.attrs.contenteditable) {
-    //   //   const prevElementNode = node.GetElementNodeById(this.selectedElement.id, this.elements)
+    //   //   const prevElementNode = node.NodeHelpers.GetElementNodeById(this.selectedElement.id, this.elements)
 
     //   //   if (prevElementNode.innerHTML.length > 0) {
     //   //     this.$set(this.selectedElement.dataObject.domProps, 'innerHTML', prevElementNode.innerHTML)
@@ -678,7 +489,7 @@ const actions = {
     //   // if (state.selected.dataObject.attrs.contenteditable) {
     //   //   commit(mutation.SNAPSHOT_ELEMENT)
 
-    //   //   const prevElement = getElementNodeById(state.selected.id, state.current)
+    //   //   const prevElement = NodeHelpers.getElementNodeById(state.selected.id, state.current)
     //   //   if (prevElement.innerHTML.length > 0) {
     //   //     console.log('bbaba')
     //   //   } else {
@@ -703,7 +514,7 @@ const actions = {
       id = utils.GetNodeId(id)
     }
 
-    const element = getElementObject(id)
+    const element = NodeHelpers.getElementObject(id)
     commit(mutation.HOVER_ELEMENT, element)
   },
 
@@ -713,7 +524,7 @@ const actions = {
     commit(mutation.APPLY_ELEMENT)
     // if (state.selected) {
 
-    //   const element = node.GetElementObject(state.selected.id, state.current)
+    //   const element = node.NodeHelpers.GetElementObject(state.selected.id, state.current)
     //   if (enable) {
     //     element.dataObject.attrs.contenteditable = true
     //   }
@@ -754,6 +565,10 @@ const actions = {
   disableDragElement ({commit}) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, false)
     commit(mutation.CLEAR_ACTIVE_ELEMENT)
+  },
+
+  setDropline ({commit}, options) {
+    commit(mutation.SET_DROPLINE, options)
   }
 }
 
@@ -803,92 +618,6 @@ const getters = {
   hoveredElement: state => state.hovered,
 
   /**
-   * Selected element offset
-   * @param {Object} state
-   * @return {Object}
-   */
-  elementOffset (state, rootState) {
-    const getOffset = element => {
-      const _element = getElementNodeById(element.id)
-
-      if (!_element) {
-        return {}
-      }
-
-      const {canvasScroll} = rootState
-      let {top, left, width, height} = _element.getBoundingClientRect()
-
-      if (left < 0) {
-        width += left
-        left = 0
-      }
-
-      if (canvasScroll.top) {
-        top += Math.abs(canvasScroll.top)
-        left += Math.abs(canvasScroll.left)
-      }
-
-      return { top, left, width, height }
-    }
-
-    let selected
-    let hovered
-
-    if (state.selected) {
-      selected = getOffset(state.selected)
-    }
-
-    if (state.hovered) {
-      hovered = getOffset(state.hovered)
-    }
-
-    return {
-      selected,
-      hovered
-    }
-  },
-
-  /**
-   * Hovered element offset
-   * @param {Object} state
-   * @return {Object}
-   */
-  hoveredOffset (state, rootState) {
-    const styles = {}
-
-    if (state.hovered) {
-      const element = getElementNodeById(state.hovered.id)
-
-      if (!element) {
-        return styles
-      }
-
-      const {canvasScroll} = rootState
-      const bounds = element.getBoundingClientRect()
-      const pos = {
-        top: bounds.top,
-        left: bounds.left
-      }
-
-      if (canvasScroll.top) {
-        pos.top += Math.abs(canvasScroll.top)
-        pos.left += Math.abs(canvasScroll.left)
-      }
-
-      if (pos.left < 0) {
-        pos.left = 0
-      }
-
-      styles.top = pos.top
-      styles.left = pos.left
-      styles.height = bounds.height
-      styles.width = bounds.width
-    }
-
-    return styles
-  },
-
-  /**
    * Block add placement offset
    * @param {Object} state
    * @return {Object}
@@ -900,7 +629,7 @@ const getters = {
       return position
     }
 
-    const element = getRootElement(state.hovered.id)
+    const element = NodeHelpers.getRootElement(state.hovered.id)
 
     if (!element) {
       return position
@@ -912,10 +641,10 @@ const getters = {
     if (element.getAttribute(RootElementTag)) {
       height = 0
 
-      const elementObject = getElementObjectByNode(element, state.current)
+      const elementObject = NodeHelpers.getElementObjectByNode(element, state.current)
       if (elementObject && elementObject.childNodes.length > 0) {
         const last = elementObject.childNodes.slice().pop()
-        const lastElement = getElementNodeById(last.id)
+        const lastElement = NodeHelpers.getElementNodeById(last.id)
         if (lastElement) {
           const lastBounds = lastElement.getBoundingClientRect()
           top = lastBounds.top
@@ -934,7 +663,7 @@ const getters = {
 
   rootElement (state) {
     const element = state.window.document.querySelector(`[${utils.SelectorAttrId}][${RootElementTag}]`)
-    return getElementObjectByNode(element, state.current)
+    return NodeHelpers.getElementObjectByNode(element, state.current)
   },
 
   /**
@@ -947,10 +676,10 @@ const getters = {
       return index
     }
 
-    const element = getRootElement(state.hovered.id)
+    const element = NodeHelpers.getRootElement(state.hovered.id)
     if (element) {
       if (element.getAttribute(RootElementTag)) {
-        const elementObject = getElementObjectByNode(element, state.current)
+        const elementObject = NodeHelpers.getElementObjectByNode(element, state.current)
         if (elementObject && elementObject.childNodes.length > 0) {
           index = elementObject.childNodes.length
         }
@@ -959,7 +688,7 @@ const getters = {
       }
 
       const elementId = utils.GetNodeId(element)
-      const parentElement = getParentElement(elementId)
+      const parentElement = NodeHelpers.getParentElement(elementId)
       if (parentElement) {
         const childNodes = parentElement.childNodes
         for (let i = 0; i < childNodes.length; i++) {
@@ -987,13 +716,13 @@ const getters = {
       breadcrumbs.push({ id, label })
 
       // Get parent breadcrumb
-      const parent = getParentElementObject(id, state.current)
+      const parent = NodeHelpers.getParentElementObject(id, state.current)
       if (parent) {
         breadcrumbs.push({ id: parent.id, label: parent.label })
       }
 
       // Get grandparent
-      const grandParent = parent ? getParentElementObject(parent.id, state.current) : null
+      const grandParent = parent ? NodeHelpers.getParentElementObject(parent.id, state.current) : null
       if (grandParent) {
         breadcrumbs.push({ id: grandParent.id, label: grandParent.label })
       }
@@ -1005,12 +734,19 @@ const getters = {
   /**
    * Single breadcrumb on hovered element
    */
-  breadcrumb (state) {
+  breadcrumb (state, getters, rootState) {
     let breadcrumb = {}
 
     if (state.hovered) {
       let {id, label} = state.hovered
       breadcrumb = { id, label }
+
+      if ((rootState.components.dragging.status || state.dragging.status) && state.dropline.position.bottom) {
+        const parent = NodeHelpers.getRealParent(state.hovered.id)
+        if (parent) {
+          breadcrumb = { id: parent.id, label: parent.label }
+        }
+      }
     }
 
     return breadcrumb
@@ -1028,7 +764,7 @@ const getters = {
    */
   isVoidElement (state) {
     if (state.selected) {
-      return isVoidElementById(state.selected.id)
+      return NodeHelpers.isVoidElementById(state.selected.id)
     }
   },
 
@@ -1038,6 +774,20 @@ const getters = {
    */
   elementDragging: state => {
     return state.dragging.status
+  },
+
+  dropline: (state, getter, rootState) => {
+    let dropline = state.dropline
+    if (dropline.position.bottom) {
+      const parent = NodeHelpers.getRealParent(dropline.element)
+      if (parent) {
+        const {left, width} = NodeHelpers.getElementNodeById(parent.id).getBoundingClientRect()
+        const iframeOffset = state.window.frameElement.getBoundingClientRect()
+        dropline.offset.width = width
+        dropline.offset.left = left + iframeOffset.left
+      }
+    }
+    return dropline
   }
 }
 
