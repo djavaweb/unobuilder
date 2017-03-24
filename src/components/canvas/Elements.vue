@@ -57,7 +57,8 @@ export default {
       'addElement',
       'enableDragElement',
       'disableDragElement',
-      'moveElement'
+      'moveElement',
+      'setDropline'
     ]),
 
     resetInterval () {
@@ -129,6 +130,7 @@ export default {
       // what we do when element (from builder canvas it self) dropped
       if (this.elementDragging) {
         this.dragState.element.remove()
+        this.disableDragElement()
         if (target === currentTarget && target !== this.dragState.element) {
           let id = target.getAttribute(SelectorAttrId)
           if (!id) return false
@@ -201,9 +203,57 @@ export default {
       }
 
       if (this.elementDragging) {
-        const {pageX, pageY} = event
+        const {target, pageX, pageY} = event
         this.dragState.x = pageX
         this.dragState.y = pageY
+
+        let dropline = {
+          element: target.getAttribute(SelectorAttrId),
+          position: {
+            top: false,
+            bottom: false,
+            right: false,
+            left: false
+          },
+          offset: {
+            top: null,
+            bottom: null,
+            right: null,
+            left: null,
+            width: null,
+            height: null
+          }
+        }
+        let {left, top, width, height} = target.getBoundingClientRect()
+
+        const remains = {
+          left: pageX - left,
+          top: (pageY - top) + this.canvasScroll.top
+        }
+
+        // const isLeft = remains.left < width / 2
+        const halfElement = height / 2
+        const isTop = remains.top < halfElement + (halfElement / 2)
+
+        const iframeOffset = this.iframeWindow.frameElement.getBoundingClientRect()
+        // Horizontal
+        if (isTop) {
+          dropline.position.top = true
+          top += iframeOffset.top
+          left += iframeOffset.left
+        } else {
+          dropline.position.bottom = true
+          top += iframeOffset.top + height
+          left += iframeOffset.left
+        }
+        dropline.offset = {
+          top,
+          left,
+          height,
+          width
+        }
+
+        this.setDropline(dropline)
 
         // Move element UI
         dragElement(this.dragState.element, {
