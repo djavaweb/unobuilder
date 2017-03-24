@@ -150,10 +150,6 @@ export default {
         width += gap * 2
         height += gap * 2
 
-        // const {direction} = this.droplineState
-
-        // console.log(this.droplineOffset)
-
         const droplineClasses = {
           'dropline--horizontal': this.dropline.position.top || this.dropline.position.bottom,
           'dropline--vertical': this.dropline.position.left || this.dropline.position.right
