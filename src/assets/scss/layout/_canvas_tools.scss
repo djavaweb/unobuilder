@@ -168,6 +168,18 @@ $canvas-selector: '#{$prefix}__canvas-selector';
           }
         }
       }
+
+      &-dropline {
+        position: fixed;
+        z-index: 999;
+        background-color: $normal-sky-blue;
+        &.dropline--horizontal {
+          height: 2px;
+        }
+        &.dropline--vertical {
+          width: 2px;
+        }
+      }
     }
 
     &-block-component {
