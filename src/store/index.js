@@ -5,6 +5,7 @@ import panels from './modules/panels'
 import tools from './modules/tools'
 import elements from './modules/elements'
 import components from './modules/components'
+import NodeUtils from './helpers/node-utils'
 
 Vue.use(Vuex)
 
