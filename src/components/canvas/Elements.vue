@@ -130,6 +130,7 @@ export default {
       // what we do when element (from builder canvas it self) dropped
       if (this.elementDragging) {
         this.dragState.element.remove()
+        this.disableDragElement()
         if (target === currentTarget && target !== this.dragState.element) {
           let id = target.getAttribute(SelectorAttrId)
           if (!id) return false
