@@ -4,6 +4,25 @@ import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
 import {RootElementTag, VoidElements, NestedableRules, MoveAction} from '../../const'
 import {isEqual} from 'lodash'
+import NodeUtils from '../helpers/node-utils'
+
+const defaultDropline = {
+  element: undefined,
+  position: {
+    top: false,
+    bottom: false,
+    right: false,
+    left: false
+  },
+  offset: {
+    top: null,
+    bottom: null,
+    right: null,
+    left: null,
+    width: null,
+    height: null
+  }
+}
 
 const state = {
   prev: [],
@@ -255,6 +274,10 @@ const mutations = {
   },
   [mutation.CLEAR_ACTIVE_ELEMENT] (state, id) {
     state.dragging.activeId = null
+  },
+
+  [mutation.SET_DROPLINE] (state, options) {
+    state.dropline = options
   }
 }
 
@@ -542,6 +565,10 @@ const actions = {
   disableDragElement ({commit}) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, false)
     commit(mutation.CLEAR_ACTIVE_ELEMENT)
+  },
+
+  setDropline ({commit}, options) {
+    commit(mutation.SET_DROPLINE, options)
   }
 }
 
@@ -793,12 +820,19 @@ const getters = {
   /**
    * Single breadcrumb on hovered element
    */
-  breadcrumb (state) {
+  breadcrumb (state, getters, rootState) {
     let breadcrumb = {}
 
     if (state.hovered) {
       let {id, label} = state.hovered
       breadcrumb = { id, label }
+
+      if ((rootState.components.dragging.status || state.dragging.status) && state.dropline.position.bottom) {
+        const parent = NodeHelpers.getRealParent(state.hovered.id)
+        if (parent) {
+          breadcrumb = { id: parent.id, label: parent.label }
+        }
+      }
     }
 
     return breadcrumb
@@ -826,6 +860,20 @@ const getters = {
    */
   elementDragging: state => {
     return state.dragging.status
+  },
+
+  dropline: (state, getter, rootState) => {
+    let dropline = state.dropline
+    if (dropline.position.bottom) {
+      const parent = NodeHelpers.getRealParent(dropline.element)
+      if (parent) {
+        const {left, width} = NodeHelpers.getElementNodeById(parent.id).getBoundingClientRect()
+        const iframeOffset = state.window.frameElement.getBoundingClientRect()
+        dropline.offset.width = width
+        dropline.offset.left = left + iframeOffset.left
+      }
+    }
+    return dropline
   }
 }
 

@@ -14,6 +14,7 @@ const selectorToolClass = `${mainClass}-tools`
 const breadcrumbClass = `${mainClass}-breadcrumbs`
 const removeClass = `${mainClass}-remove`
 const buttonClass = `${mainClass}-buttons`
+const droplineClass = `${mainClass}-dropline`
 
 export default {
   name: 'canvasElementSelector',
@@ -26,7 +27,8 @@ export default {
       'breadcrumbs',
       'breadcrumb',
       'componentDragging',
-      'elementDragging'
+      'elementDragging',
+      'dropline'
     ])
   },
   methods: {
@@ -136,10 +138,41 @@ export default {
     }
 
     let hoverTools
+    let droplineTools
     const hoveredNotSelected = this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id
     const isDragging = this.componentDragging || this.elementDragging
     if ((hoveredNotSelected || isDragging) && this.elementOffset.hovered) {
       let {top, left, width, height} = this.elementOffset.hovered
+      if (isDragging) {
+        const gap = 4
+        top -= gap
+        left -= gap
+        width += gap * 2
+        height += gap * 2
+
+        // const {direction} = this.droplineState
+
+        // console.log(this.droplineOffset)
+
+        const droplineClasses = {
+          'dropline--horizontal': this.dropline.position.top || this.dropline.position.bottom,
+          'dropline--vertical': this.dropline.position.left || this.dropline.position.right
+        }
+
+        const {left: dLeft, top: dTop, width: dWidth, height: dHeight} = this.dropline.offset
+        const droplineStyles = {
+          left: `${dLeft + gap}px`,
+          top: `${dTop + gap}px`,
+          width: `${dWidth - (gap * 2)}px`
+        }
+        if (this.dropline.position.bottom) {
+          droplineStyles.top = `${dTop - (gap / 2)}px`
+          droplineStyles.left = `${dLeft - gap}px`
+          droplineStyles.width = `${dWidth + (gap * 2)}px`
+        }
+        droplineTools = <div class={[droplineClass, droplineClasses]} style={droplineStyles} />
+      }
+
       hoveredStyles = {
         top: `${top}px`,
         left: `${left}px`,
@@ -160,18 +193,24 @@ export default {
       </div>
     }
 
+    let selectTools
+    if (!isDragging) {
+      selectTools = <div class={[selectedClass, selectedHoverClass]} style={selectedStyles}>
+        <div class={selectorToolClass}>
+          <div class={breadcrumbClass}>{breadcrumbEls}</div>
+          <div class={buttonClass}>
+            {copyElementBtn}
+          </div>
+          {removeElementBtn}
+        </div>
+      </div>
+    }
+
     return (
       <div class={mainClass}>
-        <div class={[selectedClass, selectedHoverClass]} style={selectedStyles}>
-          <div class={selectorToolClass}>
-            <div class={breadcrumbClass}>{breadcrumbEls}</div>
-            <div class={buttonClass}>
-              {copyElementBtn}
-            </div>
-            {removeElementBtn}
-          </div>
-        </div>
+        {selectTools}
         {hoverTools}
+        {droplineTools}
       </div>
     )
   }
