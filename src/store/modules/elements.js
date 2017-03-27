@@ -773,9 +773,7 @@ const getters = {
    * Get state dragging of element
    * @param {Object} state
    */
-  elementDragging: state => {
-    return state.dragging.status
-  },
+  elementDragging: state => state.dragging.status,
 
   dropline: (state, getter, rootState) => {
     let dropline = state.dropline
