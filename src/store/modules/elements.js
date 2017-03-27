@@ -8,6 +8,7 @@ import NodeUtils from '../helpers/node-utils'
 
 const defaultDropline = {
   element: undefined,
+  target: undefined,
   position: {
     top: false,
     bottom: false,
@@ -785,6 +786,7 @@ const getters = {
         const iframeOffset = state.window.frameElement.getBoundingClientRect()
         dropline.offset.width = width
         dropline.offset.left = left + iframeOffset.left
+        dropline.target = parent.id
       }
     }
     return dropline

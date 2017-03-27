@@ -41,7 +41,8 @@ export default {
       'iframeWindow',
       'iframeDocument',
       'canvasScroll',
-      'elementDragging'
+      'elementDragging',
+      'dropline'
     ])
   },
 
@@ -132,7 +133,7 @@ export default {
         this.dragState.element.remove()
         this.disableDragElement()
         if (target === currentTarget && target !== this.dragState.element) {
-          let id = target.getAttribute(SelectorAttrId)
+          let id = this.dropline.target
           if (!id) return false
 
           this.disableDragElement()
@@ -207,8 +208,10 @@ export default {
         this.dragState.x = pageX
         this.dragState.y = pageY
 
+        const targetId = target.getAttribute(SelectorAttrId)
         let dropline = {
-          element: target.getAttribute(SelectorAttrId),
+          element: targetId,
+          target: targetId,
           position: {
             top: false,
             bottom: false,
