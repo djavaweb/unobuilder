@@ -7,6 +7,7 @@ import {isEqual} from 'lodash'
 import NodeUtils from '../helpers/node-utils'
 
 const defaultDropline = {
+  index: 0,
   element: undefined,
   target: undefined,
   position: {
@@ -359,7 +360,7 @@ const actions = {
    * @param  {String} options.id
    * @return {void}
    */
-  moveElement ({commit, state}, {action, id, appendTo}) {
+  moveElement ({commit, state}, {action, id, appendTo, index = 0}) {
     commit(mutation.SNAPSHOT_ELEMENT)
     const srcElement = NodeHelpers.getRequiredParentElement(id, state.snapshot) || NodeHelpers.getElementObject(id, state.snapshot)
     const appendSrcElement = NodeHelpers.getRequiredParentElement(appendTo, state.snapshot) || NodeHelpers.getElementObject(appendTo, state.snapshot)
@@ -380,8 +381,10 @@ const actions = {
       }
 
       commit(mutation.DROP_ELEMENT, {
-        id: appendTo
+        id: appendTo,
+        index
       })
+
       commit(mutation.APPLY_ELEMENT)
 
       return srcElement
@@ -775,8 +778,11 @@ const getters = {
    */
   elementDragging: state => state.dragging.status,
 
-  dropline: (state, getter, rootState) => {
+  dropline (state, getter, rootState) {
     let dropline = state.dropline
+    if (dropline.target) {
+      dropline.index = NodeHelpers.getIndexFromParent(dropline.target)
+    }
     if (dropline.position.bottom) {
       const parent = NodeHelpers.getRealParent(dropline.element)
       if (parent) {
@@ -785,6 +791,7 @@ const getters = {
         dropline.offset.width = width
         dropline.offset.left = left + iframeOffset.left
         dropline.target = parent.id
+        dropline.index++
       }
     }
     return dropline

@@ -146,7 +146,8 @@ export default {
             this.moveElement({
               action: MoveAction.CUT,
               appendTo: id,
-              id: stateElId
+              id: stateElId,
+              index: this.dropline.index
             }).then(element => {
               this.selectElement(id)
             })
