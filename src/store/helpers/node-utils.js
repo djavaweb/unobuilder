@@ -69,10 +69,12 @@ class NodeUtils {
 
   getIndexFromParent = id => {
     const parentElement = this.getParentElement(id)
-    for (let i = 0; i < parentElement.childNodes.length; i++) {
-      const _id = GetNodeId(parentElement.childNodes[i])
-      if (_id === id) {
-        return i
+    if (parentElement) {
+      for (let i = 0; i < parentElement.childNodes.length; i++) {
+        const _id = GetNodeId(parentElement.childNodes[i])
+        if (_id === id) {
+          return i
+        }
       }
     }
 
