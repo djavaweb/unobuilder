@@ -804,6 +804,7 @@ const getters = {
         dropline.offset.width = width
         dropline.offset.left = left + iframeOffset.left
         dropline.target = parent.id
+        dropline.index++
       }
     }
 
@@ -850,11 +851,13 @@ const getters = {
     }
 
     const parentDragActive = NodeHelpers.getRealParent(state.dragging.activeId)
-    if (parentDragActive) {
-      if (dropline.index > state.dragging.index && dropline.target === parentDragActive.id) {
-        dropline.index -= 1
+
+    if (parentDragActive && dropline.target === parentDragActive.id) {
+      if (dropline.index > state.dragging.index) {
+        dropline.index--
       }
     }
+
     return dropline
   }
 }
