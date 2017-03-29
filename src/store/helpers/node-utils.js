@@ -20,7 +20,7 @@ class NodeUtils {
     this.state = state
   }
 
-  getElementObject = (id, elements) => {
+  getElementObject (id, elements) {
     elements = !elements ? this.state.current : elements
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].childNodes && elements[i].childNodes.length > 0) {
