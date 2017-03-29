@@ -372,8 +372,8 @@ const actions = {
 
     if (srcElement) {
       commit(mutation.MOVE_ELEMENT, {
-        action: MoveAction.COPY,
-        element: utils.CloneObject(srcElement)
+        action,
+        element: srcElement
       })
 
       if (action === MoveAction.CUT) {
