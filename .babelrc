@@ -7,6 +7,7 @@
   ],
   "plugins": [
     "transform-runtime",
+    "transform-object-rest-spread",
     "transform-vue-jsx",
     "syntax-async-functions",
     "transform-async-to-generator",
