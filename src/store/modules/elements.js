@@ -38,6 +38,7 @@ const state = {
   lastInserted: null,
   openBreadcrumbs: false,
   dragging: {
+    index: 0,
     status: false,
     activeId: null
   },
@@ -272,7 +273,10 @@ const mutations = {
       : status
   },
   [mutation.SET_ACTIVE_ELEMENT] (state, id) {
-    state.dragging.activeId = id
+    const element = NodeHelpers.getRealElement(id)
+    const index = NodeHelpers.getIndexFromParent(element.id)
+    state.dragging.index = index
+    state.dragging.activeId = element.id
   },
   [mutation.CLEAR_ACTIVE_ELEMENT] (state, id) {
     state.dragging.activeId = null
