@@ -20,7 +20,7 @@ class NodeUtils {
     this.state = state
   }
 
-  getElementObject = (id, elements) => {
+  getElementObject (id, elements) {
     elements = !elements ? this.state.current : elements
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].childNodes && elements[i].childNodes.length > 0) {
@@ -36,7 +36,18 @@ class NodeUtils {
     }
   }
 
-  getElementNodeById = id => {
+  getElementDeep (id, index = 0) {
+    const element = this.state.window.document.querySelector(SelectorId(id))
+    if (element && element.parentElement && element.parentElement.hasAttribute(SelectorAttrId)) {
+      index++
+      const parentId = element.parentElement.getAttribute(SelectorAttrId)
+      return this.getElementDeep(parentId, index)
+    }
+
+    return index
+  }
+
+  getElementNodeById (id) {
     if (this.state.window) {
       return this.state.window.document.querySelector(SelectorId(id))
     }
@@ -55,10 +66,14 @@ class NodeUtils {
     }
   }
 
+  getRealElement = id => {
+    const requiredParent = this.getRequiredParentElement(id)
+    const currentElement = this.getElementObject(id)
+    return requiredParent || currentElement
+  }
+
   getRealParent = id => {
-    const checkRequiredParent = this.getRequiredParentElement(id)
-    const checkElement = this.getElementObject(id)
-    const element = checkRequiredParent || checkElement
+    const element = this.getRealElement(id)
     if (!element) return
 
     const parent = this.getParentElementObject(element.id)
