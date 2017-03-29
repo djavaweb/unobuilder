@@ -1,6 +1,6 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, Tooltips, Icons} from '../../const'
+import {ClassPrefix, Tooltips, Icons, ElementOffsetGap} from '../../const'
 import {SVGIcon} from '../../utils'
 
 /* eslint-disable no-unused-vars */
@@ -28,6 +28,7 @@ export default {
       'breadcrumb',
       'componentDragging',
       'elementDragging',
+      'iframeWindow',
       'dropline'
     ])
   },
@@ -144,27 +145,51 @@ export default {
     if ((hoveredNotSelected || isDragging) && this.elementOffset.hovered) {
       let {top, left, width, height} = this.elementOffset.hovered
       if (isDragging) {
-        const gap = 4
-        top -= gap
-        left -= gap
-        width += gap * 2
-        height += gap * 2
+        top -= ElementOffsetGap
+        left -= ElementOffsetGap
+        width += ElementOffsetGap * 2
+        height += ElementOffsetGap * 2
+
+        if (left < 0) {
+          left = 0
+        }
+
+        const iframeOffset = this.iframeWindow.frameElement.getBoundingClientRect()
+        const right = left + width
+
+        if (right > iframeOffset.width) {
+          width = width - (right - iframeOffset.width)
+        }
+
+        if (width > iframeOffset.width) {
+          width = iframeOffset.width
+        }
 
         const droplineClasses = {
           'dropline--horizontal': this.dropline.position.top || this.dropline.position.bottom,
           'dropline--vertical': this.dropline.position.left || this.dropline.position.right
         }
 
-        const {left: dLeft, top: dTop, width: dWidth, height: dHeight} = this.dropline.offset
-        const droplineStyles = {
-          left: `${dLeft + gap}px`,
-          top: `${dTop + gap}px`,
-          width: `${dWidth - (gap * 2)}px`
-        }
+        let {left: dLeft, top: dTop, width: dWidth, height: dHeight} = this.dropline.offset
+        dLeft = dLeft + ElementOffsetGap
+        // dTop = dTop + ElementOffsetGap
+        dWidth = dWidth - (ElementOffsetGap * 2)
+
         if (this.dropline.position.bottom) {
-          droplineStyles.top = `${dTop - (gap / 2)}px`
-          droplineStyles.left = `${dLeft - gap}px`
-          droplineStyles.width = `${dWidth + (gap * 2)}px`
+          dTop = dTop - (ElementOffsetGap / 2)
+          dLeft = dLeft - ElementOffsetGap
+          dWidth = dWidth + (ElementOffsetGap * 2)
+        }
+
+        if (dLeft < iframeOffset.left) {
+          dLeft = iframeOffset.left
+          dWidth -= iframeOffset.left
+        }
+
+        const droplineStyles = {
+          left: `${dLeft}px`,
+          top: `${dTop}px`,
+          width: `${dWidth}px`
         }
         droplineTools = <div class={[droplineClass, droplineClasses]} style={droplineStyles} />
       }

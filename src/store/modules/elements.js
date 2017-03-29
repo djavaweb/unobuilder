@@ -2,7 +2,7 @@
 import Uno from 'uno'
 import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
-import {RootElementTag, VoidElements, NestedableRules, MoveAction} from '../../const'
+import {RootElementTag, VoidElements, NestedableRules, MoveAction, ElementOffsetGap} from '../../const'
 import {isEqual} from 'lodash'
 import NodeUtils from '../helpers/node-utils'
 
@@ -825,8 +825,9 @@ const getters = {
         }
 
         const droplineY = dropline.coords.y + canvasScroll.top
+
+        const gap = ElementOffsetGap * 5
         const foundDropline = droplines.filter(item => {
-          const gap = 20
           const mid = item.top
           const top = mid - gap
           const btm = mid + gap
@@ -837,7 +838,12 @@ const getters = {
           const newObj = [...foundDropline].slice().pop()
           dropline.offset.width = newObj.width
           dropline.offset.left = newObj.left + iframeOffset.left
-          dropline.offset.top = newObj.top + iframeOffset.top
+          if (!dropline.position.bottom) {
+            dropline.offset.top = newObj.top + iframeOffset.top - (gap / 4) + 4
+          } else {
+            dropline.offset.left += gap / 4
+            dropline.offset.width -= gap / 2
+          }
           dropline.index = NodeHelpers.getIndexFromParent(newObj.id)
         }
       }
@@ -849,7 +855,6 @@ const getters = {
         dropline.index -= 1
       }
     }
-
     return dropline
   }
 }
