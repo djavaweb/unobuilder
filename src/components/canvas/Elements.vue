@@ -131,12 +131,10 @@ export default {
       // what we do when element (from builder canvas it self) dropped
       if (this.elementDragging) {
         this.dragState.element.remove()
-        this.disableDragElement()
+
         if (target === currentTarget && target !== this.dragState.element) {
           let id = this.dropline.target
           if (!id) return false
-
-          this.disableDragElement()
 
           removeEvent(this.iframeDocument, 'mousemove', mousemove, false)
           removeEvent(this.iframeDocument, 'mouseup', mouseup, false)
