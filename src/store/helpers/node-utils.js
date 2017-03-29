@@ -66,10 +66,14 @@ class NodeUtils {
     }
   }
 
+  getRealElement = id => {
+    const requiredParent = this.getRequiredParentElement(id)
+    const currentElement = this.getElementObject(id)
+    return requiredParent || currentElement
+  }
+
   getRealParent = id => {
-    const checkRequiredParent = this.getRequiredParentElement(id)
-    const checkElement = this.getElementObject(id)
-    const element = checkRequiredParent || checkElement
+    const element = this.getRealElement(id)
     if (!element) return
 
     const parent = this.getParentElementObject(element.id)
