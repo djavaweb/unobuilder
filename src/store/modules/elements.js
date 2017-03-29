@@ -208,7 +208,9 @@ const mutations = {
 
     let index = options && options.index ? options.index : 0
     let srcElement = utils.CloneObject(state.move.element)
-    srcElement = utils.ChangeIdDeep(srcElement)
+    if (state.move.action === MoveAction.COPY) {
+      srcElement = utils.ChangeIdDeep(srcElement)
+    }
 
     if (options && options.id) {
       const notVoidElement = !NodeHelpers.isVoidElementById(dropElement.id)
