@@ -804,6 +804,7 @@ const getters = {
         dropline.offset.width = width
         dropline.offset.left = left + iframeOffset.left
         dropline.target = parent.id
+        dropline.index++
       }
     }
 
