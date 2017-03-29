@@ -318,3 +318,5 @@ export const Units = {
   VW: 'vw',
   PERCENT: '%'
 }
+
+export const ElementOffsetGap = 4
