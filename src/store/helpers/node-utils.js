@@ -36,7 +36,18 @@ class NodeUtils {
     }
   }
 
-  getElementNodeById = id => {
+  getElementDeep (id, index = 0) {
+    const element = this.state.window.document.querySelector(SelectorId(id))
+    if (element && element.parentElement && element.parentElement.hasAttribute(SelectorAttrId)) {
+      index++
+      const parentId = element.parentElement.getAttribute(SelectorAttrId)
+      return this.getElementDeep(parentId, index)
+    }
+
+    return index
+  }
+
+  getElementNodeById (id) {
     if (this.state.window) {
       return this.state.window.document.querySelector(SelectorId(id))
     }
