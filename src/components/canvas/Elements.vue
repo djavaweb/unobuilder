@@ -151,6 +151,8 @@ export default {
             })
           }
         }
+
+        this.disableDragElement()
       }
     }
 
@@ -203,9 +205,9 @@ export default {
       }
 
       if (this.elementDragging) {
-        const {target, pageX, pageY} = event
-        this.dragState.x = pageX
-        this.dragState.y = pageY
+        const {target, pageX: x, pageY: y} = event
+        this.dragState.x = x
+        this.dragState.y = y
 
         const targetId = target.getAttribute(SelectorAttrId)
         let dropline = {
@@ -224,18 +226,21 @@ export default {
             left: null,
             width: null,
             height: null
+          },
+          coords: {
+            x,
+            y
           }
         }
         let {left, top, width, height} = target.getBoundingClientRect()
 
         const remains = {
-          left: pageX - left,
-          top: (pageY - top) + this.canvasScroll.top
+          left: x - left,
+          top: (y - top) + this.canvasScroll.top
         }
 
-        // const isLeft = remains.left < width / 2
-        const halfElement = height / 2
-        const isTop = remains.top < halfElement + (halfElement / 2)
+        // const isLeft = remains.left < width - 10
+        const isTop = remains.top < height - 10
 
         const iframeOffset = this.iframeWindow.frameElement.getBoundingClientRect()
         // Horizontal

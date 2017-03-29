@@ -23,6 +23,10 @@ const defaultDropline = {
     left: null,
     width: null,
     height: null
+  },
+  coords: {
+    x: 0,
+    y: 0
   }
 }
 
@@ -572,6 +576,7 @@ const actions = {
     commit(mutation.TOGGLE_DRAG_ELEMENT, true)
     commit(mutation.SET_ACTIVE_ELEMENT, id)
   },
+
   disableDragElement ({commit}) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, false)
     commit(mutation.CLEAR_ACTIVE_ELEMENT)
@@ -786,20 +791,65 @@ const getters = {
 
   dropline (state, getter, rootState) {
     let dropline = state.dropline
+    const iframeOffset = state.window.frameElement.getBoundingClientRect()
+    const canvasScroll = getter.canvasScroll
     if (dropline.target) {
       dropline.index = NodeHelpers.getIndexFromParent(dropline.target)
     }
+
     if (dropline.position.bottom) {
       const parent = NodeHelpers.getRealParent(dropline.element)
       if (parent) {
         const {left, width} = NodeHelpers.getElementNodeById(parent.id).getBoundingClientRect()
-        const iframeOffset = state.window.frameElement.getBoundingClientRect()
         dropline.offset.width = width
         dropline.offset.left = left + iframeOffset.left
         dropline.target = parent.id
-        dropline.index++
       }
     }
+
+    if (dropline.target) {
+      const currentElement = NodeHelpers.getElementObject(dropline.target)
+      const childsLength = currentElement.childNodes.length
+      const droplines = []
+      if (childsLength > 1) {
+        for (let i = 0; i < childsLength; i++) {
+          const childEl = NodeHelpers.getElementNodeById(currentElement.childNodes[i].id)
+          const {top, left, width, height} = childEl.getBoundingClientRect()
+          droplines.push({
+            id: currentElement.childNodes[i].id,
+            top,
+            left,
+            width,
+            height
+          })
+        }
+
+        const droplineY = dropline.coords.y + canvasScroll.top
+        const foundDropline = droplines.filter(item => {
+          const gap = 20
+          const mid = item.top
+          const top = mid - gap
+          const btm = mid + gap
+          return top < droplineY && btm > droplineY
+        })
+
+        if (foundDropline.length > 0) {
+          const newObj = [...foundDropline].slice().pop()
+          dropline.offset.width = newObj.width
+          dropline.offset.left = newObj.left + iframeOffset.left
+          dropline.offset.top = newObj.top + iframeOffset.top
+          dropline.index = NodeHelpers.getIndexFromParent(newObj.id)
+        }
+      }
+    }
+
+    const parentDragActive = NodeHelpers.getRealParent(state.dragging.activeId)
+    if (parentDragActive) {
+      if (dropline.index > state.dragging.index && dropline.target === parentDragActive.id) {
+        dropline.index -= 1
+      }
+    }
+
     return dropline
   }
 }
