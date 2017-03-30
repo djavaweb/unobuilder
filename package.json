@@ -9,7 +9,6 @@
     "build": "node build/build.js",
     "build-uikit": "cd node_modules/uikit && npm install && npm run compile",
     "copy-uikit": "node build/uikit.js",
-    "preinstall": "npm install less -g",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
