@@ -33,8 +33,8 @@ export default {
     const head = document.querySelector('head')
 
     const styles = document.createElement('style')
-    styles.innerHTML = require('!raw-loader!assets/uikit/css/uikit.min.css')
-    styles.innerHTML += require('!raw-loader!sass-loader!assets/scss/canvas.scss')
+    styles.innerHTML = require('!css-loader!assets/uikit/css/uikit.min.css')
+    styles.innerHTML += require('!css-loader!sass-loader!assets/scss/canvas.scss')
     head.appendChild(styles)
 
     const jquery = document.createElement('script')
