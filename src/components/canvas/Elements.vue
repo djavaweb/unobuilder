@@ -211,6 +211,7 @@ export default {
 
         const targetId = target.getAttribute(SelectorAttrId)
         let dropline = {
+          index: 0,
           element: targetId,
           target: targetId,
           position: {},
