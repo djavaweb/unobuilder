@@ -289,7 +289,7 @@ const mutations = {
   },
 
   [mutation.SET_DROPLINE] (state, options) {
-    state.dropline = options
+    state.dropline = Object.assign(defaultDropline, options)
   }
 }
 
@@ -793,9 +793,6 @@ const getters = {
     let dropline = state.dropline
     const iframeOffset = state.window.frameElement.getBoundingClientRect()
     const canvasScroll = getter.canvasScroll
-    if (dropline.target) {
-      dropline.index = NodeHelpers.getIndexFromParent(dropline.target)
-    }
 
     if (dropline.position.bottom) {
       const parent = NodeHelpers.getRealParent(dropline.element)
@@ -804,7 +801,7 @@ const getters = {
         dropline.offset.width = width
         dropline.offset.left = left + iframeOffset.left
         dropline.target = parent.id
-        dropline.index++
+        dropline.index = parent.childNodes.length
       }
     }
 
@@ -826,7 +823,6 @@ const getters = {
         }
 
         const droplineY = dropline.coords.y + canvasScroll.top
-
         const gap = ElementOffsetGap * 5
         const foundDropline = droplines.filter(item => {
           const mid = item.top
@@ -851,7 +847,6 @@ const getters = {
     }
 
     const parentDragActive = NodeHelpers.getRealParent(state.dragging.activeId)
-
     if (parentDragActive && dropline.target === parentDragActive.id) {
       if (dropline.index > state.dragging.index) {
         dropline.index--
