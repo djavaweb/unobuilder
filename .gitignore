@@ -1,6 +1,7 @@
 # Files
 **/.DS_Store
 dist
+src/assets/uikit
 
 # Logs
 logs

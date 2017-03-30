@@ -1,5 +1,3 @@
-import tagLexer from 'pug-lexer'
-import tagParser from 'pug-parser'
 import {each, mapValues, map, isArray, isObject} from 'lodash'
 import {ClassPrefix} from './const'
 
@@ -15,7 +13,7 @@ const camelPrefixes = [
   'ms'
 ]
 
-const tagType = {
+export const TagType = {
   TAG: 'Tag',
   TEXT: 'Text'
 }
@@ -73,137 +71,6 @@ export const ClassName = (name = 'unnamed', selector = '') => {
 
 export const GlobalClassName = (name = 'unnamed', selector = '') => {
   return ClassName(`g-${name}`, selector)
-}
-
-/**
-* Convert pug schema to Object
-* @param  {Object} node
-* @return {Object}
-*/
-export const SchemaToObject = node => {
-  const domAttrs = node.attrs || [{name: 'label', val: 'text'}]
-  const domProps = {}
-  const classes = {}
-  const attrs = {}
-  let childNodes = []
-  let editable = false
-  let requiredParent = false
-  let kind = ''
-  let label
-
-  for (let key in domAttrs) {
-    const value = typeof domAttrs[key].val === 'string'
-      ? domAttrs[key].val.replace(/['"]/g, '')
-      : value
-
-    switch (domAttrs[key].name) {
-      case AttrType.CLASS:
-        classes[value] = true
-        break
-
-      case AttrType.KIND:
-        kind = value
-        classes[GlobalClassName(value)] = true
-        if (value === 'row') {
-          domProps.gutter = {}
-        }
-        break
-
-      case AttrType.LABEL:
-        label = value
-        break
-
-      case AttrType.EDITABLE:
-        editable = true
-        break
-
-      case AttrType.REQUIRED_PARENT:
-        requiredParent = true
-        break
-
-      default:
-        attrs[domAttrs[key].name] = value
-        break
-    }
-  }
-
-  if (node.block) {
-    const childBlockNodes = []
-    if (node.block.nodes.length === 1) {
-      const element = node.block.nodes[0]
-      if (element.type === tagType.TEXT && element.val.length > 0) {
-        domProps.innerHTML = element.val
-      }
-    } else {
-      for (let index in node.block.nodes) {
-        const nodeObject = node.block.nodes[index]
-        if (nodeObject.type === tagType.TEXT) {
-          childBlockNodes.push(nodeObject.val)
-        } else {
-          let childNode = SchemaToObject(nodeObject)
-          if (childNode) {
-            childBlockNodes.push(childNode)
-          }
-        }
-      }
-    }
-    childNodes = childNodes.concat(childBlockNodes)
-  }
-
-  if (domAttrs.length > 0 && kind) {
-    const id = RandomUID()
-    const ref = id.replace(/-/g, '')
-    const tagName = node.name || ''
-    const domType = node.type.toLowerCase() || 'div'
-    const selected = false
-    const cssProperties = {
-      large: {},
-      medium: {},
-      small: {},
-      tiny: {}
-    }
-
-    attrs[SelectorAttrId] = id
-
-    if (!label) {
-      label = kind
-    }
-
-    const dataObject = {
-      ref,
-      attrs,
-      domProps,
-      class: classes
-    }
-
-    const schemaObject = {
-      id,
-      kind,
-      label,
-      tagName,
-      domType,
-      selected,
-      editable,
-      dataObject,
-      childNodes,
-      cssProperties,
-      requiredParent
-    }
-
-    return schemaObject
-  }
-}
-
-/**
- * Convert markup based on pugjs to object
- * @param  {String} markupText
- * @return {Object}
- */
-export const MarkupToObject = markupText => {
-  let tokens = tagLexer(markupText)
-  let schema = tagParser(tokens)
-  let schemaObject = SchemaToObject(schema.nodes[0])
-  return schemaObject
 }
 
 /**
