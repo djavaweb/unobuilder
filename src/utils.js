@@ -15,7 +15,7 @@ const camelPrefixes = [
   'ms'
 ]
 
-const tagType = {
+export const TagType = {
   TAG: 'Tag',
   TEXT: 'Text'
 }
