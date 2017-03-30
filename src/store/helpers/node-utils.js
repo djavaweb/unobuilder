@@ -73,13 +73,11 @@ class NodeUtils {
   }
 
   getRealParent = id => {
-    const element = this.getRealElement(id)
-    if (!element) return
-
-    const parent = this.getParentElementObject(element.id)
-    if (!parent) return
-
-    return parent
+    const parent = this.getRealElement(id)
+    if (parent) {
+      const parentObject = this.getParentElementObject(parent.id)
+      return parentObject
+    }
   }
 
   getIndexFromParent = id => {
