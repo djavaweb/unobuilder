@@ -213,20 +213,8 @@ export default {
         let dropline = {
           element: targetId,
           target: targetId,
-          position: {
-            top: false,
-            bottom: false,
-            right: false,
-            left: false
-          },
-          offset: {
-            top: null,
-            bottom: null,
-            right: null,
-            left: null,
-            width: null,
-            height: null
-          },
+          position: {},
+          offset: {},
           coords: {
             x,
             y
