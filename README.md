@@ -27,4 +27,6 @@ npm run test
 
 ```
 
+> Make sure you have installed `less` globally on your machine by running `npm install less --global` before build **uikit**
+
 For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
