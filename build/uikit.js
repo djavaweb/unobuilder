@@ -17,12 +17,3 @@ mkdirp(path.join(uikitDstDir, 'css'), function (err) {
     console.log('UIKit CSS was copied.')
   })
 })
-
-// Copy Images
-mkdirp(path.join(uikitDstDir, 'images'), function (err) {
-  if (err) return console.error(err)
-  copy(path.join(uikitSrcDir, 'images'), path.join(uikitDstDir, 'images'), err => {
-    if (err) return console.log(err)
-    console.log('UIKit Images was copied.')
-  })
-})
