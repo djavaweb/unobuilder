@@ -289,7 +289,7 @@ const mutations = {
   },
 
   [mutation.SET_DROPLINE] (state, options) {
-    state.dropline = options
+    state.dropline = Object.assign(defaultDropline, options)
   }
 }
 
