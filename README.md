@@ -10,6 +10,9 @@
 # install dependencies
 npm install
 
+# build and copy uikit into assets folder
+npm run build:uikit
+
 # serve with hot reload at localhost:8080
 npm run dev
 
