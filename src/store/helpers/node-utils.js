@@ -53,11 +53,11 @@ class NodeUtils {
     }
   }
 
-  getElementObjectByNode = (element, elements) => {
+  getElementObjectByNode (element, elements) {
     return this.getElementObject(GetNodeId(element), elements)
   }
 
-  getParentElement = id => {
+  getParentElement (id) {
     const element = this.getElementNodeById(id)
     if (element) {
       return GetNodeId(element.parentElement)
@@ -66,13 +66,13 @@ class NodeUtils {
     }
   }
 
-  getRealElement = id => {
+  getRealElement (id) {
     const requiredParent = this.getRequiredParentElement(id)
     const currentElement = this.getElementObject(id)
     return requiredParent || currentElement
   }
 
-  getRealParent = id => {
+  getRealParent (id) {
     const parent = this.getRealElement(id)
     if (parent) {
       const parentObject = this.getParentElementObject(parent.id)
@@ -80,7 +80,7 @@ class NodeUtils {
     }
   }
 
-  getIndexFromParent = id => {
+  getIndexFromParent (id) {
     const parentElement = this.getParentElement(id)
     if (parentElement) {
       for (let i = 0; i < parentElement.childNodes.length; i++) {
@@ -94,7 +94,7 @@ class NodeUtils {
     return 0
   }
 
-  getRootElement = id => {
+  getRootElement (id) {
     const element = this.getElementNodeById(id)
 
     if (!element) {
@@ -113,7 +113,7 @@ class NodeUtils {
     }
   }
 
-  getPrevElement = id => {
+  getPrevElement (id) {
     const element = this.getElementNodeById(id)
     if (element) {
       return GetNodeId(element.previousElementSibling)
@@ -122,7 +122,7 @@ class NodeUtils {
     }
   }
 
-  getNextElement = id => {
+  getNextElement (id) {
     const element = this.getElementNodeById(id)
     if (element) {
       return GetNodeId(element.nextElementSibling)
@@ -131,28 +131,28 @@ class NodeUtils {
     }
   }
 
-  getParentElementObject = (id, elements) => {
+  getParentElementObject (id, elements) {
     const parentElement = this.getParentElement(id)
     if (parentElement) {
       return this.getElementObjectByNode(parentElement, elements)
     }
   }
 
-  getPrevElementObject = (id, elements) => {
+  getPrevElementObject (id, elements) {
     const prevElement = this.getPrevElement(id)
     if (prevElement) {
       return this.getElementObjectByNode(prevElement, elements)
     }
   }
 
-  getNextElementObject = (id, elements) => {
+  getNextElementObject (id, elements) {
     const nextElement = this.getNextElement(id)
     if (nextElement) {
       return this.getElementObjectByNode(nextElement, elements)
     }
   }
 
-  getSiblingElement = (id, elements) => {
+  getSiblingElement (id, elements) {
     let element = this.getParentElementObject(id, elements)
     const prevElement = this.getPrevElementObject(id, elements)
     const nextElement = this.getNextElementObject(id, elements)
@@ -166,36 +166,36 @@ class NodeUtils {
     return element
   }
 
-  getRequiredParentElement = (id, elements) => {
+  getRequiredParentElement (id, elements) {
     const parentElementObject = this.getParentElementObject(id, elements)
     if (parentElementObject && parentElementObject.requiredParent) {
       return parentElementObject
     }
   }
 
-  getLinkElementObject = (linkNode, elements) => {
+  getLinkElementObject (linkNode, elements) {
     if (linkNode.tagName.toLowerCase() === 'a') {
       return this.getElementObject(GetNodeId(linkNode), elements)
     }
   }
 
-  isRow = element => {
+  isRow (element) {
     return element && element.classList.contains(GlobalClassName('row'))
   }
 
-  isVoidElementById = id => {
+  isVoidElementById (id) {
     const element = this.getElementNodeById(id)
     if (element) {
       return VoidElements.includes(element.tagName.toLowerCase())
     }
   }
 
-  isNestedablePair = (fromKind, toKind) => {
+  isNestedablePair (fromKind, toKind) {
     const rule = NestedableRules[toKind]
     return rule !== '*' ? rule.includes(fromKind) : true
   }
 
-  getBreadcrumbById = (id, elements) => {
+  getBreadcrumbById (id, elements) {
     const elementObject = this.getElementObject(id, elements)
     if (elementObject) {
       const { id, label } = elementObject
@@ -203,7 +203,7 @@ class NodeUtils {
     }
   }
 
-  deleteNodeById = (id, elements) => {
+  deleteNodeById (id, elements) {
     for (let i = 0; i < elements.length; i++) {
       if (elements[i].childNodes && elements[i].childNodes.length > 0) {
         this.deleteNodeById(id, elements[i].childNodes)
@@ -215,12 +215,12 @@ class NodeUtils {
     }
   }
 
-  insertChildNodesByIndex = (object, insertObject, index) => {
+  insertChildNodesByIndex (object, insertObject, index) {
     index = index === undefined ? object.childNodes.length : index
     object.childNodes.splice(index, 0, insertObject)
   }
 
-  getStyle = (elementObject, isGlobal) => {
+  getElementStyle (elementObject, isGlobal) {
     const element = this.getElementNodeById(elementObject.id)
     let properties = this.state.window.getComputedStyle(element)
 
