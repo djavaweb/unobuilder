@@ -49,27 +49,30 @@ export default {
 
   data () {
     return {
-      mouseOpen: false,
-      activeState: Labels.MOUSE_STATE_NONE
+      mouseOpen: false
     }
   },
 
   computed: {
     ...mapGetters([
-      'advancedPanels'
+      'advancedPanels',
+      'mouseStatePanel'
     ])
   },
 
   methods: {
     ...mapActions([
       'toggleAdvancedPanel',
-      'registerAdvancedPanel'
+      'registerAdvancedPanel',
+      'registerMouseState',
+      'setMouseState'
     ])
   },
 
   created () {
     const {id, advanced} = this
     this.registerAdvancedPanel({ id, value: advanced })
+    this.registerMouseState(id)
   },
 
   render (h) {
@@ -77,13 +80,18 @@ export default {
 
     if (this.mouseState && this.mouseOpen) {
       const stateSwitcherItems = stateSwitcher.map(item => {
-        const switcherClick = event => {
-          this.activeState = item
+        const handleClick = event => {
+          this.setMouseState({
+            id: this.id,
+            value: item
+          })
+          this.$forceUpdate()
         }
+        // console.log('asfsad,.fjjkads', this.mouseStatePanel[this.id], item)
         const anchorClass = {
-          'state--active': this.activeState === item
+          'state--active': this.mouseStatePanel[this.id] === item
         }
-        return <a onClick={switcherClick} class={anchorClass}>{item}</a>
+        return <a onClick={handleClick} class={anchorClass}>{item}</a>
       })
 
       stateSwitchers = <div class={stateClasses}>{stateSwitcherItems}</div>

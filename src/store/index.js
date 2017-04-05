@@ -6,13 +6,12 @@ import tools from './modules/tools'
 import elements from './modules/elements'
 import components from './modules/components'
 import NodeUtils from './helpers/node-utils'
+import { Labels } from '../const'
 
 Vue.use(Vuex)
 
 const snapshotPlugin = store => {
-  store.subscribe((mutation, state) => {
-    // console.log(state.elements)
-  })
+
 }
 
 const actions = {
@@ -36,6 +35,16 @@ const actions = {
   hideAllPanels ({dispatch}) {
     dispatch('hideLeftPanels')
     dispatch('toggleInputPanel', '')
+  },
+
+  setStyle ({getters, dispatch}, {mouseState = Labels.MOUSE_STATE_NONE, disabled = false, styles}) {
+    dispatch('setElementStyle', {
+      global: false,
+      screenSize: getters.screenSize,
+      mouseState,
+      disabled,
+      styles
+    })
   },
 
   /**

@@ -1,4 +1,4 @@
-import {Panels} from '../../const'
+import {Panels, Labels} from '../../const'
 import * as mutation from '../mutation-types'
 
 const state = {
@@ -10,7 +10,8 @@ const state = {
   toggleBlockPanel: false,
   openBlockPanel: '',
   openLeftPanel: '',
-  openInputPanel: ''
+  openInputPanel: '',
+  mouseStatePanel: {}
 }
 
 const mutations = {
@@ -82,6 +83,14 @@ const mutations = {
 
   [mutation.OPEN_BLOCK_PANEL] (state, id) {
     state.openBlockPanel = id
+  },
+
+  [mutation.REGISTER_MOUSE_STATE_PANEL] (state, id) {
+    state.mouseStatePanel[id] = Labels.MOUSE_STATE_NONE
+  },
+
+  [mutation.SET_MOUSE_STATE] (state, {id, value}) {
+    state.mouseStatePanel[id] = value
   }
 }
 
@@ -189,6 +198,14 @@ const actions = {
 
   switchBlockItem ({commit}, id) {
     commit(mutation.OPEN_BLOCK_PANEL, id)
+  },
+
+  registerMouseState ({commit}, id) {
+    commit(mutation.REGISTER_MOUSE_STATE_PANEL, id)
+  },
+
+  setMouseState ({commit}, options) {
+    commit(mutation.SET_MOUSE_STATE, options)
   }
 }
 
@@ -208,7 +225,8 @@ const getters = {
    * Current opened input panel
    * @type {Object}
    */
-  openInputPanel: state => state.openInputPanel
+  openInputPanel: state => state.openInputPanel,
+  mouseStatePanel: state => state.mouseStatePanel
 }
 
 export default {
