@@ -241,3 +241,15 @@ export const dragElement = (target, options) => {
   target.style.top = `${y - (height / 2) + top + canvasScrollTop}px`
   target.style.left = `${x - (width / 2) + left}px`
 }
+
+export const valueFormatter = property => {
+  const valueType = typeof property.value
+  if (valueType === 'object' && 'rgba' in property.value) {
+  }
+
+  if ('unit' in property) {
+    return `${property.value}${property.unit}`
+  }
+
+  return property.value
+}

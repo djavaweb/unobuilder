@@ -301,13 +301,16 @@ const mutations = {
   },
 
   [mutation.SET_ELEMENT_STYLE] (state, {screenSize, mouseState, disabled, styles}) {
+    const selected = NodeHelpers.getElementObject(state.selected.id)
+    const object = {}
     for (let key in styles) {
       const value = styles[key]
-      state.selected.cssProperties[screenSize][mouseState][key] = {
+      object[key] = {
         disabled,
         value
       }
     }
+    selected.cssProperties[screenSize][mouseState] = object
   }
 }
 
@@ -610,93 +613,6 @@ const actions = {
 }
 
 const getters = {
-  styles (state, getters) {
-    if (state.selected && state.window) {
-      const element = state.window.document.querySelector(utils.SelectorId(state.selected.id))
-
-      let computedStyle = state.window.getComputedStyle(element)
-      let nativeProps = {}
-
-      for (let key in computedStyle) {
-        const hasProperty = computedStyle.hasOwnProperty(key)
-        const style = computedStyle[key]
-        if (hasProperty && style !== '' && isNaN(parseInt(key))) {
-          nativeProps[key] = computedStyle[key]
-        }
-      }
-      const breakpointStore = getters.screenSize
-      const properties = Object.assign({}, state.selected.cssProperties)
-
-      const getStyles = mousestateStore => {
-        const breakpoint = ['large', 'medium', 'small', 'tiny']
-        const mousestate = ['none', 'hover', 'active', 'focus']
-        let breakpointIndex = breakpoint.indexOf(breakpointStore)
-        let mousestateIndex = mousestate.indexOf(mousestateStore)
-        let cssProperties = {}
-
-        for (let propName in nativeProps) {
-          breakpointIndex = breakpoint.indexOf(breakpointStore)
-          while (true) {
-            const currentScreensize = breakpoint[breakpointIndex]
-            mousestateIndex = mousestate.indexOf(mousestateStore)
-            while (true) {
-              const currentMouseState = mousestate[mousestateIndex]
-              const currentProps = properties[currentScreensize][currentMouseState]
-              const inProperties = propName in currentProps
-              // console.log(`cari ${propName} di ${currentScreensize}: ${currentMouseState}`)
-              if (inProperties) {
-                const validProps = currentProps[propName].value && currentProps[propName].disabled !== true
-                const inCssProperties = propName in cssProperties
-
-                if (validProps && !inCssProperties) {
-                  // console.log(`--- cari ${propName} di ${currentScreensize}: ${currentMouseState} ada`)
-                  cssProperties[propName] = currentProps[propName].value
-                }
-              }
-
-              if (mousestateIndex === 0) break
-              if (mousestateIndex > 0 && mousestateIndex !== 1) {
-                mousestateIndex = 0
-              } else {
-                mousestateIndex--
-              }
-            }
-            if (breakpointIndex === 0) break
-            breakpointIndex--
-          }
-        }
-
-        cssProperties = Object.assign(nativeProps, cssProperties)
-        return cssProperties
-      }
-
-      return {
-        get none () {
-          return getStyles('none')
-        },
-
-        get hover () {
-          return getStyles('hover')
-        },
-
-        get active () {
-          return getStyles('active')
-        },
-
-        get focus () {
-          return getStyles('focus')
-        }
-      }
-    }
-
-    return {
-      none: {},
-      hover: {},
-      active: {},
-      focus: {}
-    }
-  },
-
   /**
    * Get iframe window
    * @param {Object} state
@@ -963,68 +879,124 @@ const getters = {
     }
 
     return dropline
+  },
+
+  styles (state, getters) {
+    if (state.selected && state.window) {
+      const element = state.window.document.querySelector(utils.SelectorId(state.selected.id))
+
+      let computedStyle = state.window.getComputedStyle(element)
+      let nativeProps = {}
+
+      for (let key in computedStyle) {
+        const hasProperty = computedStyle.hasOwnProperty(key)
+        const style = computedStyle[key]
+        if (hasProperty && style !== '' && isNaN(parseInt(key))) {
+          nativeProps[key] = computedStyle[key]
+        }
+      }
+      const breakpointStore = getters.screenSize
+      const properties = Object.assign({}, state.selected.cssProperties)
+
+      const getStyles = mousestateStore => {
+        const breakpoint = ['large', 'medium', 'small', 'tiny']
+        const mousestate = ['none', 'hover', 'active', 'focus']
+        let breakpointIndex = breakpoint.indexOf(breakpointStore)
+        let mousestateIndex = mousestate.indexOf(mousestateStore)
+        let cssProperties = {}
+
+        for (let propName in nativeProps) {
+          breakpointIndex = breakpoint.indexOf(breakpointStore)
+          while (true) {
+            const currentScreensize = breakpoint[breakpointIndex]
+            mousestateIndex = mousestate.indexOf(mousestateStore)
+            while (true) {
+              const currentMouseState = mousestate[mousestateIndex]
+              const currentProps = properties[currentScreensize][currentMouseState]
+              const inProperties = propName in currentProps
+              // console.log(`cari ${propName} di ${currentScreensize}: ${currentMouseState}`)
+              if (inProperties) {
+                const validProps = currentProps[propName].value && currentProps[propName].disabled !== true
+                const inCssProperties = propName in cssProperties
+
+                if (validProps && !inCssProperties) {
+                  // console.log(`--- cari ${propName} di ${currentScreensize}: ${currentMouseState} ada`)
+                  cssProperties[propName] = currentProps[propName].value
+                }
+              }
+
+              if (mousestateIndex === 0) break
+              if (mousestateIndex > 0 && mousestateIndex !== 1) {
+                mousestateIndex = 0
+              } else {
+                mousestateIndex--
+              }
+            }
+            if (breakpointIndex === 0) break
+            breakpointIndex--
+          }
+        }
+
+        cssProperties = Object.assign(nativeProps, cssProperties)
+        return cssProperties
+      }
+
+      return {
+        get none () {
+          return getStyles('none')
+        },
+
+        get hover () {
+          return getStyles('hover')
+        },
+
+        get active () {
+          return getStyles('active')
+        },
+
+        get focus () {
+          return getStyles('focus')
+        }
+      }
+    }
+
+    return {
+      none: {},
+      hover: {},
+      active: {},
+      focus: {}
+    }
+  },
+
+  localCSS (state) {
+    const getStylesheets = elements => {
+      let stylesheets = []
+
+      elements.forEach(element => {
+        if (typeof element !== 'string') {
+          if (element.childNodes.length > 0) {
+            stylesheets = stylesheets.concat(getStylesheets(element.childNodes))
+          }
+
+          const selector = utils.SelectorId(element.id)
+          for (let breakpoint in element.cssProperties) {
+            const properties = element.cssProperties[breakpoint]
+            if (Object.keys(properties).length > 0) {
+              let data = {
+                selector,
+                breakpoint,
+                properties
+              }
+              stylesheets.push(utils.CloneObject(data))
+            }
+          }
+        }
+      })
+      return stylesheets
+    }
+
+    return getStylesheets(state.current)
   }
-
-  // cssProperties (state) {
-  //   console.log('oke')
-  //   if (state.selected) return state.selected.cssProperties.large
-  //   return {}
-  //   // if (state.selected && state.window) {
-  //   //   const iframeDocument = state.window.document
-  //   //   const element = iframeDocument.querySelector(utils.SelectorId(state.selected.id))
-
-  //   //   let computedStyle = state.window.getComputedStyle(element)
-  //   //   let computedProps = {}
-
-  //   //   for (let key in computedStyle) {
-  //   //     const hasProperty = computedStyle.hasOwnProperty(key)
-  //   //     const style = computedStyle[key]
-  //   //     if (hasProperty && style !== '' && isNaN(parseInt(key))) {
-  //   //       computedProps[key] = computedStyle[key]
-  //   //     }
-  //   //   }
-
-  //   //   let selectedProps = utils.CloneObject(state.selected.cssProperties)
-  //   //   const screenTypes = Object.values(ScreenType)
-  //   //   for (let i = 0; i < screenTypes.length; i++) {
-  //   //     let breakpoint = screenTypes[i]
-  //   //     let prevBreakpoint = i > 0 ? screenTypes[i - 1] : breakpoint
-
-  //   //     console.groupCollapsed(breakpoint)
-
-  //   //     const mouseTypes = Object.values(MouseType)
-  //   //     for (let m = 0; m < mouseTypes.length; m++) {
-  //   //       const mouseType = mouseTypes[m]
-  //   //       const prevMouseType = m > 0 ? mouseTypes[m - 1] : mouseType
-
-  //   //       selectedProps[breakpoint][mouseType] = utils.CloneObject(computedProps)
-
-  //   //       let mouseState = selectedProps[breakpoint][mouseType]
-  //   //       let prevMouseState = selectedProps[breakpoint][prevMouseType]
-
-  //   //       if (Object.keys(mouseState).length < 1) {
-  //   //         mouseState = prevMouseState
-
-  //   //         if (Object.keys(prevMouseState).length < 1) {
-  //   //           mouseState = selectedProps[prevBreakpoint][mouseType]
-  //   //         }
-  //   //       }
-
-  //   //       selectedProps[breakpoint][mouseType] = Object.assign({}, mouseState)
-  //   //       console.log(mouseType, selectedProps)
-  //   //       // for (let propName in selectedProps[breakpoint][mouseType]) {
-
-  //   //       // }
-  //   //     }
-
-  //   //     console.groupEnd()
-  //   //   }
-
-  //   //   // result = getter.selectedElement.cssProperties
-  //   //   result = selectedProps
-  //   // }
-  //   // return result
-  // }
 }
 
 export default {
