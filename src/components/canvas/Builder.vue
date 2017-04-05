@@ -16,7 +16,8 @@ export default {
       'iframeBody',
       'elementDragging',
       'previewMode',
-      'customStyles'
+      'customStyles',
+      'localCSS'
     ])
   },
   methods: {
@@ -80,6 +81,7 @@ export default {
     return (
       <div class={[ClassPrefix.MAIN, classes]} onClick={onClick}>
         <Stylesheet content={this.customStyles} />
+        <Stylesheet content={this.localCSS} />
         {elements}
       </div>
     )
