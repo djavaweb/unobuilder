@@ -18,6 +18,9 @@ export default {
     },
     size: {
       type: String
+    },
+    value: {
+      type: String
     }
   },
   render (h) {
@@ -26,7 +29,11 @@ export default {
       .map(props => {
         props.size = this.size
         props.type = this.type
-        return <Button {...{props}} />
+        const handleClick = event => {
+          this.$emit('click', props.value)
+          this.$forceUpdate()
+        }
+        return <Button nativeOnClick={handleClick} {...{props}} />
       })
 
     return (

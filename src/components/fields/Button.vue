@@ -32,6 +32,11 @@ export default {
       type: String
     }
   },
+  methods: {
+    handleClick (e) {
+      this.$emit('click', e)
+    }
+  },
   render (h) {
     const stateClasses = {
       'button--disabled': this.disabled,
@@ -61,7 +66,7 @@ export default {
     }
 
     return (
-      <button class={[mainClass, stateClasses]} {...{attrs: attrs}}>
+      <button onClick={this.handleClick} class={[mainClass, stateClasses]} {...{attrs: attrs}}>
         {iconEl} {labelEl}
       </button>
     )

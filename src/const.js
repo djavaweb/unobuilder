@@ -19,6 +19,13 @@ export const ScreenType = {
   TINY: 'tiny'
 }
 
+export const MouseType = {
+  NONE: 'none',
+  HOVER: 'hover',
+  FOCUS: 'focus',
+  ACTIVE: 'active'
+}
+
 export const ScreenSize = {
   LARGE: 991,
   MEDIUM: 768,
@@ -143,10 +150,10 @@ export const Labels = {
   FLEX_ORDER: 'Order',
   FLEX_ORDER_AUTO: 'auto',
   GRID_GUTTER: 'Grid Gutter',
-  MOUSE_STATE_NONE: 'none',
-  MOUSE_STATE_HOVER: 'hover',
-  MOUSE_STATE_ACTIVE: 'active',
-  MOUSE_STATE_FOCUS: 'focus',
+  MOUSE_STATE_NONE: MouseType.NONE,
+  MOUSE_STATE_HOVER: MouseType.HOVER,
+  MOUSE_STATE_ACTIVE: MouseType.ACTIVE,
+  MOUSE_STATE_FOCUS: MouseType.FOCUS,
   WIDTH: 'Width',
   HEIGHT: 'Height',
   MIN: 'Min',
