@@ -1,49 +1,95 @@
 <script>
-import {mapGetters} from 'vuex'
-import {PropertyPanelIds, Icons, Labels, ButtonType, Tooltips} from '../../const'
+import {mapGetters, mapActions} from 'vuex'
+import {
+  PropertyPanelIds,
+  Icons,
+  Labels,
+  ButtonType,
+  Tooltips
+  // MouseType,
+  // ScreenType
+} from '../../const'
 
 /* eslint-disable no-unused-vars */
 import Row from '../fields/Row'
 import ButtonGroup from '../fields/ButtonGroup'
 import AccordionContent from '../accordion/AccordionContent'
 import AccordionContentItem from '../accordion/AccordionContentItem'
+import {
+  CloneObject,
+  SelectorId
+} from '../../utils'
+
+const panelId = PropertyPanelIds.DISPLAY
 
 export default {
   name: 'displayProperties',
   computed: {
     ...mapGetters([
-      'cssProperties',
-      'advancedPanels'
+      'advancedPanels',
+      'mouseStatePanel',
+      'selectedElement',
+      'iframeDocument',
+      'iframeWindow',
+      'screenSize',
+      'styles'
     ])
   },
+  methods: {
+    ...mapActions([
+      'setStyle'
+    ]),
+
+    setDisplay (value) {
+      this.setStyle({
+        mouseState: this.mouseStatePanel[panelId],
+        styles: {
+          display: value
+        }
+      }).then(() => {
+        this.$forceUpdate()
+      })
+    }
+  },
   render (h) {
-    const id = PropertyPanelIds.DISPLAY
-    const isAdvanced = this.advancedPanels[id]
+    const isAdvanced = this.advancedPanels[panelId]
+    const currentMouseState = this.mouseStatePanel[panelId]
+    const propStyles = this.styles[currentMouseState]
 
     const typeSelectorButtons = [
       {
         icon: Icons.DISPLAY_BLOCK,
-        tooltip: Tooltips.DISPLAY_BLOCK
+        tooltip: Tooltips.DISPLAY_BLOCK,
+        active: propStyles.display === 'block',
+        value: 'block'
       },
 
       this.advancedPanels.display ? {
         icon: Icons.DISPLAY_INLINE_BLOCK,
-        tooltip: Tooltips.DISPLAY_INLINE_BLOCK
+        tooltip: Tooltips.DISPLAY_INLINE_BLOCK,
+        active: propStyles.display === 'inline-block',
+        value: 'inline-block'
       } : null,
 
       {
         icon: Icons.DISPLAY_INLINE,
-        tooltip: Tooltips.DISPLAY_INLINE
+        tooltip: Tooltips.DISPLAY_INLINE,
+        active: propStyles.display === 'inline',
+        value: 'inline'
       },
 
       this.advancedPanels.display ? {
         icon: Icons.DISPLAY_FLEX,
-        tooltip: Tooltips.DISPLAY_FLEX
+        tooltip: Tooltips.DISPLAY_FLEX,
+        active: propStyles.display === 'flex',
+        value: 'flex'
       } : null,
 
       {
         icon: Icons.DISPLAY_NONE,
-        tooltip: Tooltips.DISPLAY_NONE
+        tooltip: Tooltips.DISPLAY_NONE,
+        active: propStyles.display === 'none',
+        value: 'none'
       }
     ]
 
@@ -156,7 +202,7 @@ export default {
     return (
       <div>
         <Row label={{text: Labels.SELECT_TYPE, bold: true}}>
-          <ButtonGroup type={ButtonType.SECONDARY} items={typeSelectorButtons} />
+          <ButtonGroup type={ButtonType.SECONDARY} items={typeSelectorButtons} on-click={this.setDisplay} />
         </Row>
         {advancedRow}
       </div>

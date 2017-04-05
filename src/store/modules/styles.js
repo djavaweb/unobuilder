@@ -196,19 +196,19 @@ const getters = {
   //  */
   // globalPropertyActive: state => state.globalProperty.active,
 
-  // /**
-  //  * Generate css properties from elements state
-  //  * @param  {Object} state
-  //  * @param  {Object} rootState
-  //  * @return {Object}
-  //  */
+  /**
+   * Generate css properties from elements state
+   * @param  {Object} state
+   * @param  {Object} rootState
+   * @return {Object}
+   */
   // cssProperties (state, rootState) {
   //   if (rootState.selectedElement) {
-  //     return getStyle(rootState.selectedElement, state.globalProperty.active)
+  //     // return getElementStyle(rootState.selectedElement, state.globalProperty.active)
   //   }
 
   //   return {}
-  // },
+  // }
 
   // /**
   //  * Check whether property is inherited or has own style
