@@ -2,6 +2,10 @@
   font-family: 'Open Sans', arial, sans-serif;
 }
 
+@mixin Lato {
+  font-family: 'Lato', arial, sans-serif;
+}
+
 @mixin PreventSelect {
   -webkit-user-select: none;
   -moz-user-select: none;
