@@ -301,7 +301,7 @@ const mutations = {
   },
 
   [mutation.SET_ELEMENT_STYLE] (state, {screenSize, mouseState, disabled, styles}) {
-    const selected = NodeHelpers.getElementObject(state.selected.id)
+    const selected = NodeHelpers.getElementObject(state.selected.id, state.snapshot)
     const object = {}
     for (let key in styles) {
       const value = styles[key]
@@ -327,17 +327,14 @@ const actions = {
    * @param  {Function} store.commit
    * @return {void}
    */
-  undoElement ({commit, state}) {
+  undoElement ({commit, state, dispatch}) {
+    dispatch('reselectElement')
     if (state.prev.length > 1) {
       commit(mutation.UNDO_ELEMENT)
 
       // Select root element
       commit(mutation.SET_WINDOW_SCROLL, '+1')
       commit(mutation.HOVER_ELEMENT, null)
-      commit(mutation.SELECT_ELEMENT, {
-        element: state.current[0],
-        selected: true
-      })
       commit(mutation.SET_WINDOW_SCROLL, '-1')
     }
   },
@@ -347,8 +344,15 @@ const actions = {
    * @param  {Function} store.commit
    * @return {void}
    */
-  redoElement ({commit}) {
-    commit(mutation.REDO_ELEMENT)
+  redoElement ({commit, dispatch}) {
+    if (state.next.length > 0) {
+      dispatch('reselectElement')
+      commit(mutation.REDO_ELEMENT)
+      // Select root element
+      commit(mutation.SET_WINDOW_SCROLL, '+1')
+      commit(mutation.HOVER_ELEMENT, null)
+      commit(mutation.SET_WINDOW_SCROLL, '-1')
+    }
   },
 
   /**
@@ -607,8 +611,23 @@ const actions = {
     commit(mutation.SET_DROPLINE, options)
   },
 
-  setElementStyle ({state, commit}, object) {
+  setElementStyle ({state, commit, dispatch}, object) {
+    commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.SET_ELEMENT_STYLE, object)
+    commit(mutation.APPLY_ELEMENT)
+    dispatch('reselectElement')
+  },
+
+  reselectElement ({commit}) {
+    if (!state.selected) return
+
+    const selected = NodeHelpers.getElementObject(state.selected.id)
+    if (selected) {
+      commit(mutation.SELECT_ELEMENT, {
+        element: selected,
+        selected: true
+      })
+    }
   }
 }
 

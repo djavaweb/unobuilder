@@ -2,19 +2,18 @@ import * as mutation from '../mutation-types'
 
 const state = {
   customStyles: '',
-  globalPropertyActive: false
-  // globalProperty: {
-  //   active: false,
-  //   current: {
-  //     xlarge: {},
-  //     large: {},
-  //     medium: {},
-  //     small: {}
-  //   },
-  //   snapshot: {},
-  //   prev: [],
-  //   next: []
-  // }
+  globalStyleActive: false,
+  globalProperties: {
+    current: {
+      xlarge: {},
+      large: {},
+      medium: {},
+      small: {}
+    },
+    snapshot: {},
+    prev: [],
+    next: []
+  }
 }
 
 const mutations = {
@@ -25,6 +24,10 @@ const mutations = {
    */
   [mutation.SET_CUSTOM_STYLES] (state, value) {
     state.customStyles = value
+  },
+
+  [mutation.SET_GLOBAL_STYLE] (state, object) {
+    // state.globalProperties = object
   }
 
   // [mutation.SET_PROPERTY] (state, {element, kind, properties}) {
@@ -122,6 +125,10 @@ const actions = {
    */
   setCustomStyles ({commit}, value) {
     commit(mutation.SET_CUSTOM_STYLES, value)
+  },
+
+  setGlobalStyle ({state, commit}, object) {
+    commit(mutation.SET_GLOBAL_STYLE, object)
   }
 
   // /**
@@ -180,7 +187,7 @@ const getters = {
    * @return {String}
    */
   customStyles: state => state.customStyles,
-  isGlobalProperty: state => state.globalPropertyActive
+  isGlobalProperty: state => state.globalStyleActive
 
   // /**
   //  * Global Properties
