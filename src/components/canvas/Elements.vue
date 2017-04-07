@@ -1,7 +1,7 @@
 <script>
 import $ from 'jquery'
 import Uno from 'uno'
-import {mapGetters, mapActions} from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import {
   addEvent,
   removeEvent,
@@ -92,11 +92,12 @@ export default {
         return
       }
 
-      let {x, y, which} = event
+      const { x, which } = event
+      let { y } = event
 
       if (which === 3) {
         y += Math.abs(this.canvasScroll.top)
-        this.setContextCoords({x, y})
+        this.setContextCoords({ x, y })
         this.showContextMenu()
       } else if (which === 1) {
         this.hideContextMenu()
@@ -116,7 +117,7 @@ export default {
 
     const mouseup = event => {
       this.resetInterval()
-      const {target, currentTarget} = event
+      const { target, currentTarget } = event
       // what we do when component (from left panel) dropped
       if (this.componentDragging) {
         if (target === currentTarget) {
@@ -133,7 +134,7 @@ export default {
         this.dragState.element.remove()
 
         if (target === currentTarget && target !== this.dragState.element) {
-          let id = this.dropline.target
+          const id = this.dropline.target
           if (!id) return false
 
           removeEvent(this.iframeDocument, 'mousemove', mousemove, false)
@@ -157,7 +158,7 @@ export default {
     }
 
     const dragStart = event => {
-      const {target, pageX, pageY} = event
+      const { target, pageX, pageY } = event
 
       this.dragState.element = target.cloneNode(true)
       this.dragState.element.style.position = 'absolute'
@@ -182,7 +183,7 @@ export default {
     }
 
     const mousedown = event => {
-      const {target, currentTarget, which} = event
+      const { target, currentTarget, which } = event
 
       if (which === 3) {
         return false
@@ -205,12 +206,12 @@ export default {
       }
 
       if (this.elementDragging) {
-        const {target, pageX: x, pageY: y} = event
+        const { target, pageX: x, pageY: y } = event
         this.dragState.x = x
         this.dragState.y = y
 
         const targetId = target.getAttribute(SelectorAttrId)
-        let dropline = {
+        const dropline = {
           index: 0,
           element: targetId,
           target: targetId,
@@ -221,7 +222,9 @@ export default {
             y
           }
         }
-        let {left, top, width, height} = target.getBoundingClientRect()
+        const targetBounds = target.getBoundingClientRect()
+        let { left, top } = targetBounds
+        const { width, height } = targetBounds
 
         const remains = {
           left: x - left,
@@ -309,7 +312,7 @@ export default {
       }
 
       const classes = {}
-      for (let i in classEvents) {
+      for (const i in classEvents) {
         classEvents[i].className.forEach(className => {
           classes[className] = classEvents[i].occurs
         })

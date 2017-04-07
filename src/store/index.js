@@ -18,26 +18,26 @@ const actions = {
   /**
    * Undo Action
    */
-  undo ({dispatch}) {
+  undo ({ dispatch }) {
     dispatch('undoElement')
   },
 
   /**
    * Redo Action
    */
-  redo ({dispatch}) {
+  redo ({ dispatch }) {
     dispatch('redoElement')
   },
 
   /**
    * Hide all panels including popup, left panels selector, etc
    */
-  hideAllPanels ({dispatch}) {
+  hideAllPanels ({ dispatch }) {
     dispatch('hideLeftPanels')
     dispatch('toggleInputPanel', '')
   },
 
-  setStyle ({getters, dispatch}, {mouseState = Labels.MOUSE_STATE_NONE, disabled = false, styles}) {
+  setStyle ({ getters, dispatch }, { mouseState = Labels.MOUSE_STATE_NONE, disabled = false, styles }) {
     dispatch('setElementStyle', {
       global: false,
       screenSize: getters.screenSize,
@@ -58,8 +58,8 @@ const actions = {
 const getters = {
   /**
    * Selected element offset
-   * @param {Object} state
-   * @return {Object}
+   * @param { Object } state
+   * @return { Object }
    */
   elementOffset (state, getter) {
     const NodeHelpers = new NodeUtils(state.elements)
@@ -70,7 +70,7 @@ const getters = {
         return {}
       }
 
-      let {top, left, width, height} = _element.getBoundingClientRect()
+      let { top, left, width, height } = _element.getBoundingClientRect() // eslint-disable-line prefer-const
 
       if (left < 0) {
         width += left

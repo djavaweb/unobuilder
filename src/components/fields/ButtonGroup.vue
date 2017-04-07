@@ -1,9 +1,9 @@
 <script>
 /* eslint-disable no-unused-vars */
 import Button from './Button'
-import {ClassPrefix, ButtonType} from '../../const'
+import { ClassPrefix, ButtonType } from '../../const'
 
-const mainClass = `${ClassPrefix.FIELDS}--button-group`
+const mainClass = `${ ClassPrefix.FIELDS }--button-group`
 
 export default {
   name: 'buttonGroup',
@@ -33,11 +33,11 @@ export default {
           this.$emit('click', props.value)
           this.$forceUpdate()
         }
-        return <Button nativeOnClick={handleClick} {...{props}} />
+        return <Button nativeOnClick={ handleClick } {...{ props }} />
       })
 
     return (
-      <div class={mainClass}>{buttons}</div>
+      <div class={ mainClass }>{ buttons }</div>
     )
   }
 }

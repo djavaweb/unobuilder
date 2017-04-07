@@ -1,6 +1,6 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, Tooltips, Icons, PropertyPanelIds} from '../../const'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix, Tooltips, Icons, PropertyPanelIds } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import NavItem from './LeftPanelItem'
@@ -8,7 +8,7 @@ import ComponentsPanel from './LeftPanelComponents'
 import CSSEditor from './LeftPanelCssEditor'
 
 const mainClass = ClassPrefix.LEFT_PANEL
-const navClass = `${ClassPrefix.LEFT_PANEL}__nav`
+const navClass = `${ ClassPrefix.LEFT_PANEL }__nav`
 
 const panels = [
   {
@@ -54,13 +54,13 @@ export default {
 
     const navPanels = panels.map(props => {
       return <li>
-        <NavItem {...{props}} />
+        <NavItem {...{ props }} />
       </li>
     })
 
     return (
-      <div class={[mainClass, classes]}>
-        <ul class={navClass} onClick={leftPanelClick}>{navPanels}</ul>
+      <div class={ [mainClass, classes] }>
+        <ul class={ navClass } onClick={ leftPanelClick }>{ navPanels }</ul>
         <ComponentsPanel />
         <CSSEditor />
       </div>

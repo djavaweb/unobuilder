@@ -1,12 +1,12 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, PropertyPanelIds} from '../../const'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix, PropertyPanelIds } from '../../const'
 import ace from 'brace'
 import 'brace/ext/language_tools'
 import 'brace/mode/css'
 import 'brace/theme/monokai'
 
-const mainClass = `${ClassPrefix.LEFT_PANEL}-css-editor`
+const mainClass = `${ ClassPrefix.LEFT_PANEL }-css-editor`
 
 export default {
   name: 'leftPanelCssEditor',
@@ -43,7 +43,7 @@ export default {
   },
   render (h) {
     const openPanel = this.openLeftPanel === PropertyPanelIds.CSS_EDITOR
-    let classes = {
+    const classes = {
       'animate--fade-in': openPanel && this.toggleLeftPanel,
       'animate--fade-out': !openPanel || !this.toggleLeftPanel
     }
@@ -68,8 +68,8 @@ export default {
     }
 
     return (
-      <div ref="editorPanel" class={[mainClass, classes]}>
-        <div ref="editor"></div>
+      <div ref='editorPanel' class={ [mainClass, classes] }>
+        <div ref='editor'></div>
       </div>
     )
   }

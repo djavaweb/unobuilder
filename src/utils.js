@@ -1,5 +1,5 @@
-import {each, mapValues, map, isArray, isObject} from 'lodash'
-import {ClassPrefix} from './const'
+import { each, mapValues, map, isArray, isObject } from 'lodash'
+import { ClassPrefix } from './const'
 
 const cssPrefixes = [
   '-webkit-',
@@ -31,19 +31,19 @@ const camelizeRE = /-(\w)/g
 
 /**
  * Data ID from attribute prefix
- * @type {[type]}
+ * @type { [type] }
  */
-export const SelectorAttrId = `data-${ClassPrefix.SHORT}-id`
+export const SelectorAttrId = `data-${ ClassPrefix.SHORT }-id`
 
 /**
  * Data component name from attribute prefix
- * @type {[type]}
+ * @type { [type] }
  */
-export const SelectorAttrComponent = `data-${ClassPrefix.SHORT}-component`
+export const SelectorAttrComponent = `data-${ ClassPrefix.SHORT }-component`
 
 /**
  * Generate random UID
- * @return {String}
+ * @return { String }
  */
 export const RandomUID = () => {
   const getUID = () => (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
@@ -58,36 +58,36 @@ export const RandomUID = () => {
 
 /**
  * Generate data selector id
- * @param  {String} id
- * @return {String}
+ * @param  { String } id
+ * @return { String }
  */
 export const SelectorId = id => {
-  return `[${SelectorAttrId}="${id}"]`
+  return `[${ SelectorAttrId }="${ id }"]`
 }
 
 export const ClassName = (name = 'unnamed', selector = '') => {
-  return `${selector}${ClassPrefix.SHORT}-${name}`
+  return `${ selector }${ ClassPrefix.SHORT }-${ name }`
 }
 
 export const GlobalClassName = (name = 'unnamed', selector = '') => {
-  return ClassName(`g-${name}`, selector)
+  return ClassName(`g-${ name }`, selector)
 }
 
 /**
  * CSS Prefixer, convert camelize to kebab and camelize
- * @param {String} propName
- * @return {Object}
+ * @param { String } propName
+ * @return { Object }
  */
 export const CssPrefixer = propName => {
-  let prop = propName.replace(hyphenateRE, '$1-$2').toLowerCase()
-  let camel = prop.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
-  let upper = camel.charAt(0).toUpperCase() + camel.slice(1)
-  let testEl = document.createElement('div')
+  const prop = propName.replace(hyphenateRE, '$1-$2').toLowerCase()
+  const camel = prop.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
+  const upper = camel.charAt(0).toUpperCase() + camel.slice(1)
+  const testEl = document.createElement('div')
   let i = cssPrefixes.length
   let prefixed
 
   if (camel !== 'filter' && (camel in testEl.style)) {
-    return {kebab: prop, camel: camel}
+    return { kebab: prop, camel: camel }
   }
 
   while (i--) {
@@ -103,8 +103,8 @@ export const CssPrefixer = propName => {
 
 /**
  * Clone object
- * @param  {Object} object
- * @return {Object}
+ * @param  { Object } object
+ * @return { Object }
  */
 export const CloneObject = object => {
   return JSON.parse(JSON.stringify(object))
@@ -112,9 +112,9 @@ export const CloneObject = object => {
 
 /**
 * Check if json is valid
-* @param  {String} json
-* @param  {String} message
-* @return {Boolean}
+* @param  { String } json
+* @param  { String } message
+* @return { Boolean }
 */
 export const IsJSON = (json, message = 'Invalid JSON') => {
   try {
@@ -133,7 +133,7 @@ export const ChangeIdDeep = object => {
     object.id = newId
     object.dataObject.attrs[SelectorAttrId] = newId
     object.dataObject.ref = newId.replace(/-/g, '')
-    for (let index in object.childNodes) {
+    for (const index in object.childNodes) {
       object.childNodes[index] = ChangeIdDeep(object.childNodes[index])
     }
   }
@@ -142,9 +142,9 @@ export const ChangeIdDeep = object => {
 
 /**
  * Replace object deep
- * @param {Object} object
- * @param {Array} replace
- * @return {Object}
+ * @param { Object } object
+ * @param { Array } replace
+ * @return { Object }
  */
 export const ReplaceDeep = (obj, replace) => {
   const replaceItem = item => {
@@ -168,10 +168,10 @@ export const ReplaceDeep = (obj, replace) => {
 
 /**
  * Request svg file from assets/img
- * @type {String}
+ * @type { String }
  */
 export const SVGIcon = filename => {
-  return require(`!raw-loader!assets/img/${filename}.svg`)
+  return require(`!raw-loader!assets/img/${ filename }.svg`)
 }
 
 /**
@@ -183,9 +183,9 @@ export const GetNodeId = element => {
 
 /**
  * Add event listener crossbrowser
- * @param {ElementNode} element
- * @param {String} event
- * @param {Function} fn
+ * @param { ElementNode } element
+ * @param { String } event
+ * @param { Function } fn
  */
 export const addEvent = (element, event, fn) => {
   if (element.addEventListener) {
@@ -199,8 +199,8 @@ export const addEvent = (element, event, fn) => {
 
 /**
  * Remove event listener crossbrowser
- * @param {ElementNode} element
- * @param {Function} fn
+ * @param { ElementNode } element
+ * @param { Function } fn
  */
 export const removeEvent = (element, event, fn) => {
   if (element.addEventListener) {
@@ -212,13 +212,13 @@ export const removeEvent = (element, event, fn) => {
 
 /**
  * Dragging element (used for drag n drop)
- * @param {DOMObject} target
- * @param {Object} options
+ * @param { DOMObject } target
+ * @param { Object } options
  */
 export const dragElement = (target, options) => {
   if (!target) return false
   // define it's default value
-  let {
+  const {
     iframeWindow = undefined,
     canvasScrollTop = 0,
     state: {
@@ -227,19 +227,19 @@ export const dragElement = (target, options) => {
     }
   } = options
 
-  let rect = target.getBoundingClientRect()
-  let {width, height} = rect
+  const rect = target.getBoundingClientRect()
+  const { width, height } = rect
 
   let left = 0
   let top = 0
   if (iframeWindow) {
-    let iframeOffset = iframeWindow.frameElement.getBoundingClientRect()
+    const iframeOffset = iframeWindow.frameElement.getBoundingClientRect()
     left = iframeOffset.left
     top = iframeOffset.top
   }
 
-  target.style.top = `${y - (height / 2) + top + canvasScrollTop}px`
-  target.style.left = `${x - (width / 2) + left}px`
+  target.style.top = `${ y - (height / 2) + top + canvasScrollTop }px`
+  target.style.left = `${ x - (width / 2) + left }px`
 }
 
 export const valueFormatter = property => {
@@ -248,7 +248,7 @@ export const valueFormatter = property => {
   }
 
   if ('unit' in property) {
-    return `${property.value}${property.unit}`
+    return `${ property.value }${ property.unit }`
   }
 
   return property.value

@@ -1,9 +1,9 @@
 <script>
-import {mapGetters} from 'vuex'
-import {ClassPrefix, Labels, Icons} from '../../const'
-import {SVGIcon} from '../../utils'
+import { mapGetters } from 'vuex'
+import { ClassPrefix, Labels, Icons } from '../../const'
+import { SVGIcon } from '../../utils'
 
-const mainClass = `${ClassPrefix.SCREEN}-loader`
+const mainClass = `${ ClassPrefix.SCREEN }-loader`
 
 export default {
   name: 'screenLoader',
@@ -23,9 +23,9 @@ export default {
     }
 
     return (
-      <div class={[mainClass, classes]}>
-        <div domPropsInnerHTML={SVGIcon(Icons.LOGO)} />
-        <div class="loading-message">{this.loaderMessage}</div>
+      <div class={ [mainClass, classes] }>
+        <div domPropsInnerHTML={ SVGIcon(Icons.LOGO) } />
+        <div class='loading-message'>{ this.loaderMessage }</div>
       </div>
     )
   }

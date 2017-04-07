@@ -1,18 +1,18 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, Labels, Icons, Tooltips} from '../../const'
-import {SVGIcon} from '../../utils'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix, Labels, Icons, Tooltips } from '../../const'
+import { SVGIcon } from '../../utils'
 
 /* eslint-disable no-unused-vars */
 import Switcher from '../fields/Switcher'
 
-const mainClass = `${ClassPrefix.ACCORDION}-item`
-const contentClasses = `${mainClass}__content`
-const labelClass = `${ClassPrefix.ACCORDION}-label`
-const iconClass = `${ClassPrefix.ACCORDION}-icon`
-const mouseStateClass = `${ClassPrefix.ACCORDION}-mouse-state`
-const stateClasses = `${ClassPrefix.ACCORDION}-state-switcher`
-const advancedClasses = `${ClassPrefix.ACCORDION}-advanced-switcher`
+const mainClass = `${ ClassPrefix.ACCORDION }-item`
+const contentClasses = `${ mainClass }__content`
+const labelClass = `${ ClassPrefix.ACCORDION }-label`
+const iconClass = `${ ClassPrefix.ACCORDION }-icon`
+const mouseStateClass = `${ ClassPrefix.ACCORDION }-mouse-state`
+const stateClasses = `${ ClassPrefix.ACCORDION }-state-switcher`
+const advancedClasses = `${ ClassPrefix.ACCORDION }-advanced-switcher`
 
 const iconList = [
   Icons.EXPAND,
@@ -70,13 +70,13 @@ export default {
   },
 
   created () {
-    const {id, advanced} = this
+    const { id, advanced } = this
     this.registerAdvancedPanel({ id, value: advanced })
     this.registerMouseState(id)
   },
 
   render (h) {
-    let {stateSwitchers, advancedToggle, mouseStateSwitcher} = {}
+    let { stateSwitchers, advancedToggle, mouseStateSwitcher } = {}
 
     if (this.mouseState && this.mouseOpen) {
       const stateSwitcherItems = stateSwitcher.map(item => {
@@ -91,10 +91,10 @@ export default {
         const anchorClass = {
           'state--active': this.mouseStatePanel[this.id] === item
         }
-        return <a onClick={handleClick} class={anchorClass}>{item}</a>
+        return <a onClick={ handleClick } class={ anchorClass }>{ item }</a>
       })
 
-      stateSwitchers = <div class={stateClasses}>{stateSwitcherItems}</div>
+      stateSwitchers = <div class={ stateClasses }>{ stateSwitcherItems }</div>
     }
 
     if (this.advanced) {
@@ -103,11 +103,11 @@ export default {
         this.$forceUpdate()
       }
 
-      advancedToggle = <div class={advancedClasses}>
-        <Switcher active={this.advancedPanels[this.id]}
-          title={Tooltips.ADVANCED_VIEW}
-          uk-tooltip="pos: bottom-right"
-          nativeOnClick={advancedToggleClick} />
+      advancedToggle = <div class={ advancedClasses }>
+        <Switcher active={ this.advancedPanels[this.id] }
+          title={ Tooltips.ADVANCED_VIEW }
+          uk-tooltip='pos: bottom-right'
+          nativeOnClick={ advancedToggleClick } />
       </div>
     }
 
@@ -117,16 +117,16 @@ export default {
       }
 
       mouseStateSwitcher = <a
-        class={[mouseStateClass, {'mouse--active': this.mouseOpen}]}
-        title={Tooltips.MOUSE_STATE}
-        onClick={mouseStateClick}
-        domPropsInnerHTML={SVGIcon(Icons.MOUSE)} />
+        class={ [mouseStateClass, { 'mouse--active': this.mouseOpen }] }
+        title={ Tooltips.MOUSE_STATE }
+        onClick={ mouseStateClick }
+        domPropsInnerHTML={ SVGIcon(Icons.MOUSE) } />
     }
 
     const expandCollapseIcon = iconList.map(item => {
       return <span
-        class={[`icon--${item}`, iconClass]}
-        domPropsInnerHTML={SVGIcon(item)} />
+        class={ [`icon--${ item }`, iconClass] }
+        domPropsInnerHTML={ SVGIcon(item) } />
     })
 
     const titleClick = event => {
@@ -138,16 +138,16 @@ export default {
     }
 
     return (
-      <li class={[mainClass, {'uk-open': this.open}]}>
-        <h3 class="uk-accordion-title" onClick={titleClick}>
-          {expandCollapseIcon}
-          <span class={labelClass}>{this.title}</span>
-          {advancedToggle}
-          {mouseStateSwitcher}
+      <li class={ [mainClass, { 'uk-open': this.open }] }>
+        <h3 class='uk-accordion-title' onClick={ titleClick }>
+          { expandCollapseIcon }
+          <span class={ labelClass }>{ this.title }</span>
+          { advancedToggle }
+          { mouseStateSwitcher }
         </h3>
-        <div class={['uk-accordion-content', contentClasses]}>
-          {stateSwitchers}
-          {this.$slots.default}
+        <div class={ ['uk-accordion-content', contentClasses] }>
+          { stateSwitchers }
+          { this.$slots.default }
         </div>
       </li>
     )

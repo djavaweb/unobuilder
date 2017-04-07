@@ -11,7 +11,7 @@ import {
   ScreenType,
   MouseType
 } from '../../const'
-import {isEqual} from 'lodash'
+import { isEqual } from 'lodash'
 import NodeUtils from '../helpers/node-utils'
 
 const defaultDropline = {
@@ -54,7 +54,7 @@ const state = {
     status: false,
     activeId: null
   },
-  dropline: Object.assign({}, defaultDropline)
+  dropline: Object.assign({ }, defaultDropline)
 }
 
 const NodeHelpers = new NodeUtils(state)
@@ -74,7 +74,7 @@ const mutations = {
    * - Clear the next state.
    */
   [mutation.APPLY_ELEMENT] (state) {
-    let { prev, current, snapshot } = state
+    const { prev, current, snapshot } = state
     const snapshotObject = utils.CloneObject(snapshot)
 
     if (!isEqual(snapshotObject, current)) {
@@ -111,7 +111,7 @@ const mutations = {
     const { prev, current, next } = state
 
     if (next.length > 0) {
-      state.prev = [ ...prev, current ]
+      state.prev = [...prev, current]
       state.current = next[0]
       state.next = next.slice(1)
     }
@@ -132,12 +132,12 @@ const mutations = {
 
     // recursively change node id
     const recursive = obj => {
-      let id = utils.RandomUID()
+      const id = utils.RandomUID()
       obj.id = id
       obj.dataObject.attrs[utils.SelectorAttrId] = id
       obj.dataObject.ref = id.replace(/-/g, '')
 
-      let classes = {}
+      const classes = {}
 
       if (obj[utils.AttrType.KIND].length > 0) {
         const value = obj[utils.AttrType.KIND]
@@ -184,7 +184,7 @@ const mutations = {
   /**
    * Set selected element
    */
-  [mutation.SELECT_ELEMENT] (state, {element, selected}) {
+  [mutation.SELECT_ELEMENT] (state, { element, selected }) {
     element.selected = selected
     state.selected = element
   },
@@ -212,7 +212,7 @@ const mutations = {
       options.id = parent.id
     }
 
-    let dropElement = options && options.id
+    const dropElement = options && options.id
      ? NodeHelpers.getElementObject(options.id, state.snapshot)
      : state.snapshot
 
@@ -235,7 +235,7 @@ const mutations = {
       dropElement.splice(index, 0, srcElement)
     }
 
-    state.dropline = Object.assign({}, defaultDropline)
+    state.dropline = Object.assign({ }, defaultDropline)
   },
 
   /**
@@ -263,16 +263,15 @@ const mutations = {
   [mutation.SET_WINDOW_SCROLL] (state, value) {
     if (state.window) {
       if (typeof value === 'string') {
-        let [operator, intvalue] = value.split('')
-        intvalue = parseInt(intvalue)
+        const [operator, intvalue] = value.split('')
 
         switch (operator) {
           case '+':
-            value = state.window.scrollY + intvalue
+            value = state.window.scrollY + parseInt(intvalue)
             break
 
           case '-':
-            value = state.window.scrollY - intvalue
+            value = state.window.scrollY - parseInt(intvalue)
             break
         }
       }
@@ -300,10 +299,10 @@ const mutations = {
     state.dropline = Object.assign(defaultDropline, options)
   },
 
-  [mutation.SET_ELEMENT_STYLE] (state, {screenSize, mouseState, disabled, styles}) {
+  [mutation.SET_ELEMENT_STYLE] (state, { screenSize, mouseState, disabled, styles }) {
     const selected = NodeHelpers.getElementObject(state.selected.id)
     const object = {}
-    for (let key in styles) {
+    for (const key in styles) {
       const value = styles[key]
       object[key] = {
         disabled,
@@ -318,16 +317,16 @@ const actions = {
   /**
    * Set owner window
    */
-  setOwnerWindow ({commit}, win) {
+  setOwnerWindow ({ commit }, win) {
     commit(mutation.SET_OWNER_WINDOW, win)
   },
 
   /**
    * Undo Action
-   * @param  {Function} store.commit
-   * @return {void}
+   * @param  { Function } store.commit
+   * @return { void }
    */
-  undoElement ({commit, state}) {
+  undoElement ({ commit, state }) {
     if (state.prev.length > 1) {
       commit(mutation.UNDO_ELEMENT)
 
@@ -344,21 +343,21 @@ const actions = {
 
   /**
    * Redo Action
-   * @param  {Function} store.commit
-   * @return {void}
+   * @param  { Function } store.commit
+   * @return { void }
    */
-  redoElement ({commit}) {
+  redoElement ({ commit }) {
     commit(mutation.REDO_ELEMENT)
   },
 
   /**
    * Add Element to the current state
-   * @param {Function} store.commit
-   * @param {String} options.markupText
-   * @param {String} options.appendTo
-   * @return {void}
+   * @param { Function } store.commit
+   * @param { String } options.markupText
+   * @param { String } options.appendTo
+   * @return { void }
    */
-  addElement ({commit}, options) {
+  addElement ({ commit }, options) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.ADD_ELEMENT, options)
@@ -368,11 +367,11 @@ const actions = {
 
   /**
    * Remove Element
-   * @param  {Function} store.commit
-   * @param  {String} id
-   * @return {void}
+   * @param  { Function } store.commit
+   * @param  { String } id
+   * @return { void }
    */
-  removeElement ({commit, state}, id) {
+  removeElement ({ commit, state }, id) {
     const element = NodeHelpers.getRequiredParentElement(id, state.current) || NodeHelpers.getElementObject(id, state.current)
     const nextElement = NodeHelpers.getSiblingElement(element.id, state.current)
 
@@ -385,13 +384,13 @@ const actions = {
 
   /**
    * Copy and Cut actions in memory
-   * @param  {Function} options.commit
-   * @param  {Function} options.state
-   * @param  {String} options.action
-   * @param  {String} options.id
-   * @return {void}
+   * @param  { Function } options.commit
+   * @param  { Function } options.state
+   * @param  { String } options.action
+   * @param  { String } options.id
+   * @return { void }
    */
-  moveElement ({commit, state}, {action, id, appendTo, index = 0}) {
+  moveElement ({ commit, state }, { action, id, appendTo, index = 0 }) {
     commit(mutation.SNAPSHOT_ELEMENT)
     const srcElement = NodeHelpers.getRequiredParentElement(id, state.snapshot) || NodeHelpers.getElementObject(id, state.snapshot)
     const appendSrcElement = NodeHelpers.getRequiredParentElement(appendTo, state.snapshot) || NodeHelpers.getElementObject(appendTo, state.snapshot)
@@ -424,13 +423,13 @@ const actions = {
 
   /**
    * Duplicate
-   * @param  {Function} options.commit
-   * @param  {Function} options.state
-   * @param  {String} options.action
-   * @param  {String} options.id
-   * @return {void}
+   * @param  { Function } options.commit
+   * @param  { Function } options.state
+   * @param  { String } options.action
+   * @param  { String } options.id
+   * @return { void }
    */
-  duplicateElement ({commit, state}, id) {
+  duplicateElement ({ commit, state }, id) {
     commit(mutation.SNAPSHOT_ELEMENT)
     const srcElement = NodeHelpers.getElementObject(id, state.snapshot)
 
@@ -452,11 +451,11 @@ const actions = {
 
   /**
    * Drop element to another element with given index
-   * @param  {Function} options.commit
-   * @param  {Object} options
-   * @return {void}
+   * @param  { Function } options.commit
+   * @param  { Object } options
+   * @return { void }
    */
-  dropElement ({commit}, options) {
+  dropElement ({ commit }, options) {
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.DROP_ELEMENT, options)
     commit(mutation.APPLY_ELEMENT)
@@ -464,12 +463,12 @@ const actions = {
 
   /**
    * Select element by ID
-   * @param  {Function} options.commit
-   * @param  {Object}   options.state
-   * @param  {String}   id
-   * @return {void}
+   * @param  { Function } options.commit
+   * @param  { Object }   options.state
+   * @param  { String }   id
+   * @return { void }
    */
-  selectElement ({commit, state}, id) {
+  selectElement ({ commit, state }, id) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
 
     if (!id && state.selected) {
@@ -481,7 +480,7 @@ const actions = {
     }
 
     // It has been selected before
-    let {selected: element} = state
+    let { selected: element } = state
     if (element) {
       commit(mutation.SELECT_ELEMENT, {
         element,
@@ -519,7 +518,7 @@ const actions = {
     //   //     this.setContentEditable(false)
     //   //   }
     //   // }
-    //   commit(mutation.SELECT_ELEMENT, {element: state.selected, selected: false})
+    //   commit(mutation.SELECT_ELEMENT, { element: state.selected, selected: false })
 
     //   // if (state.selected.dataObject.attrs.contenteditable) {
     //   //   commit(mutation.SNAPSHOT_ELEMENT)
@@ -536,11 +535,11 @@ const actions = {
     // }
 
     // if (element) {
-    //   commit(mutation.SELECT_ELEMENT, {element, selected: true})
+    //   commit(mutation.SELECT_ELEMENT, { element, selected: true })
     // }
   },
 
-  hoverElement ({commit}, id) {
+  hoverElement ({ commit }, id) {
     if (!id) {
       return
     }
@@ -553,7 +552,7 @@ const actions = {
     commit(mutation.HOVER_ELEMENT, element)
   },
 
-  editContent ({commit}, element) {
+  editContent ({ commit }, element) {
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.EDIT_CONTENT, element)
     commit(mutation.APPLY_ELEMENT)
@@ -574,40 +573,40 @@ const actions = {
     // }
   },
 
-  toggleBreadcrumbs ({commit}) {
+  toggleBreadcrumbs ({ commit }) {
     commit(mutation.TOGGLE_BREADCRUMB)
   },
 
-  showBreadcrumbs ({commit}) {
+  showBreadcrumbs ({ commit }) {
     commit(mutation.TOGGLE_BREADCRUMB, true)
   },
 
-  hideBreadcrumbs ({commit}) {
+  hideBreadcrumbs ({ commit }) {
     commit(mutation.TOGGLE_BREADCRUMB, false)
   },
 
-  refreshScroll ({commit}) {
+  refreshScroll ({ commit }) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
     commit(mutation.SET_WINDOW_SCROLL, 0)
   },
-  toggleDragElement ({commit}, status) {
+  toggleDragElement ({ commit }, status) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, status)
   },
-  enableDragElement ({commit}, id) {
+  enableDragElement ({ commit }, id) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, true)
     commit(mutation.SET_ACTIVE_ELEMENT, id)
   },
 
-  disableDragElement ({commit}) {
+  disableDragElement ({ commit }) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, false)
     commit(mutation.CLEAR_ACTIVE_ELEMENT)
   },
 
-  setDropline ({commit}, options) {
+  setDropline ({ commit }, options) {
     commit(mutation.SET_DROPLINE, options)
   },
 
-  setElementStyle ({state, commit}, object) {
+  setElementStyle ({ state, commit }, object) {
     commit(mutation.SET_ELEMENT_STYLE, object)
   }
 }
@@ -615,22 +614,22 @@ const actions = {
 const getters = {
   /**
    * Get iframe window
-   * @param {Object} state
-   * @return {Object}
+   * @param { Object } state
+   * @return { Object }
    */
   iframeWindow: state => state.window,
 
   /**
    * Get iframe document
-   * @param {Object} state
-   * @return {Object}
+   * @param { Object } state
+   * @return { Object }
    */
   iframeDocument: state => state.window.document,
 
   /**
    * Get iframe document
-   * @param {Object} state
-   * @return {Object}
+   * @param { Object } state
+   * @return { Object }
    */
   iframeBody: state => state.window.document.body,
 
@@ -638,29 +637,29 @@ const getters = {
 
   /**
    * Element list
-   * @param  {Object} state
-   * @return {Object}
+   * @param  { Object } state
+   * @return { Object }
    */
   elements: state => state.current,
 
   /**
    * Selected Element
-   * @param  {Object} state
-   * @return {Object}
+   * @param  { Object } state
+   * @return { Object }
    */
   selectedElement: state => state.selected,
 
   /**
    * Hovered Element
-   * @param  {Object} state
-   * @return {Object}
+   * @param  { Object } state
+   * @return { Object }
    */
   hoveredElement: state => state.hovered,
 
   /**
    * Block add placement offset
-   * @param {Object} state
-   * @return {Object}
+   * @param { Object } state
+   * @return { Object }
    */
   blockPosition (state, rootState) {
     let position = 0
@@ -675,8 +674,8 @@ const getters = {
       return position
     }
 
-    const {canvasScroll} = rootState
-    let {top, height} = element.getBoundingClientRect()
+    const { canvasScroll } = rootState
+    let { top, height } = element.getBoundingClientRect()
 
     if (element.getAttribute(RootElementTag)) {
       height = 0
@@ -702,7 +701,7 @@ const getters = {
   },
 
   rootElement (state) {
-    const element = state.window.document.querySelector(`[${utils.SelectorAttrId}][${RootElementTag}]`)
+    const element = state.window.document.querySelector(`[${ utils.SelectorAttrId }][${ RootElementTag }]`)
     return NodeHelpers.getElementObjectByNode(element, state.current)
   },
 
@@ -745,14 +744,14 @@ const getters = {
 
   /**
    * Breadcrumbs on selected element
-   * @return {Array}
+   * @return { Array }
    */
   breadcrumbs (state) {
     const breadcrumbs = []
 
     if (state.selected) {
       // Get current breacrumb
-      let {id, label} = state.selected
+      const { id, label } = state.selected
       breadcrumbs.push({ id, label })
 
       // Get parent breadcrumb
@@ -778,7 +777,7 @@ const getters = {
     let breadcrumb = {}
 
     if (state.hovered) {
-      let {id, label} = state.hovered
+      const { id, label } = state.hovered
       breadcrumb = { id, label }
 
       if ((rootState.components.dragging.status || state.dragging.status) && state.dropline.position.bottom) {
@@ -799,8 +798,8 @@ const getters = {
 
   /**
    * Check wheter selected element is void element
-   * @param  {Object}  state
-   * @return {Boolean}
+   * @param  { Object }  state
+   * @return { Boolean }
    */
   isVoidElement (state) {
     if (state.selected) {
@@ -810,19 +809,19 @@ const getters = {
 
   /**
    * Get state dragging of element
-   * @param {Object} state
+   * @param { Object } state
    */
   elementDragging: state => state.dragging.status,
 
   dropline (state, getter, rootState) {
-    let dropline = Object.assign({}, state.dropline)
+    const dropline = Object.assign({}, state.dropline)
     const iframeOffset = state.window.frameElement.getBoundingClientRect()
     const canvasScroll = getter.canvasScroll
 
     if (dropline.position.bottom) {
       const parent = NodeHelpers.getRealParent(dropline.element)
       if (parent) {
-        const {left, width} = NodeHelpers.getElementNodeById(parent.id).getBoundingClientRect()
+        const { left, width } = NodeHelpers.getElementNodeById(parent.id).getBoundingClientRect()
         dropline.offset.width = width
         dropline.offset.left = left + iframeOffset.left
         dropline.target = parent.id
@@ -837,7 +836,7 @@ const getters = {
       if (childsLength > 1) {
         for (let i = 0; i < childsLength; i++) {
           const childEl = NodeHelpers.getElementNodeById(currentElement.childNodes[i].id)
-          const {top, left, width, height} = childEl.getBoundingClientRect()
+          const { top, left, width, height } = childEl.getBoundingClientRect()
           droplines.push({
             id: currentElement.childNodes[i].id,
             top,
@@ -885,10 +884,10 @@ const getters = {
     if (state.selected && state.window) {
       const element = state.window.document.querySelector(utils.SelectorId(state.selected.id))
 
-      let computedStyle = state.window.getComputedStyle(element)
-      let nativeProps = {}
+      const computedStyle = state.window.getComputedStyle(element)
+      const nativeProps = {}
 
-      for (let key in computedStyle) {
+      for (const key in computedStyle) {
         const hasProperty = computedStyle.hasOwnProperty(key)
         const style = computedStyle[key]
         if (hasProperty && style !== '' && isNaN(parseInt(key))) {
@@ -905,7 +904,7 @@ const getters = {
         let mousestateIndex = mousestate.indexOf(mousestateStore)
         let cssProperties = {}
 
-        for (let propName in nativeProps) {
+        for (const propName in nativeProps) {
           breakpointIndex = breakpoint.indexOf(breakpointStore)
           while (true) {
             const currentScreensize = breakpoint[breakpointIndex]
@@ -914,13 +913,13 @@ const getters = {
               const currentMouseState = mousestate[mousestateIndex]
               const currentProps = properties[currentScreensize][currentMouseState]
               const inProperties = propName in currentProps
-              // console.log(`cari ${propName} di ${currentScreensize}: ${currentMouseState}`)
+              // console.log(`cari ${ propName } di ${ currentScreensize }: ${ currentMouseState }`)
               if (inProperties) {
                 const validProps = currentProps[propName].value && currentProps[propName].disabled !== true
                 const inCssProperties = propName in cssProperties
 
                 if (validProps && !inCssProperties) {
-                  // console.log(`--- cari ${propName} di ${currentScreensize}: ${currentMouseState} ada`)
+                  // console.log(`--- cari ${ propName } di ${ currentScreensize }: ${ currentMouseState } ada`)
                   cssProperties[propName] = currentProps[propName].value
                 }
               }
@@ -979,10 +978,10 @@ const getters = {
           }
 
           const selector = utils.SelectorId(element.id)
-          for (let breakpoint in element.cssProperties) {
+          for (const breakpoint in element.cssProperties) {
             const properties = element.cssProperties[breakpoint]
             if (Object.keys(properties).length > 0) {
-              let data = {
+              const data = {
                 selector,
                 breakpoint,
                 properties

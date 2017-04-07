@@ -1,7 +1,7 @@
 <script>
-import {ClassPrefix} from '../../const'
+import { ClassPrefix } from '../../const'
 
-const mainClass = `${ClassPrefix.FIELDS}--label`
+const mainClass = `${ ClassPrefix.FIELDS }--label`
 
 export default {
   name: 'label',
@@ -35,7 +35,7 @@ export default {
     }
 
     return (
-      <label class={[mainClass, classes]} for={this.target}>{this.text}</label>
+      <label class={ [mainClass, classes] } for={ this.target }>{ this.text }</label>
     )
   }
 }

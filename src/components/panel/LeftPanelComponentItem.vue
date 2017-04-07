@@ -1,6 +1,6 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix} from '../../const'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix } from '../../const'
 import {
   addEvent,
   removeEvent,
@@ -8,9 +8,9 @@ import {
   dragElement
 } from '../../utils'
 
-const mainClass = `${ClassPrefix.LEFT_PANEL}-component-items`
-const itemClass = `${ClassPrefix.MAIN}__grid-item`
-const itemDraggingClass = `${itemClass}--dragging`
+const mainClass = `${ ClassPrefix.LEFT_PANEL }-component-items`
+const itemClass = `${ ClassPrefix.MAIN }__grid-item`
+const itemDraggingClass = `${ itemClass }--dragging`
 
 export default {
   name: 'leftPanelComponentItem',
@@ -46,12 +46,12 @@ export default {
     /**
      * Move dragging component position
      *
-     * @param {DOMObject} target
-     * @param {Boolean} isIframe
+     * @param { DOMObject } target
+     * @param { Boolean } isIframe
      * @return void
      */
     moveComponent (target, isIframe = true) {
-      let iframeWindow = isIframe
+      const iframeWindow = isIframe
         ? this.iframeWindow
         : undefined
 
@@ -62,7 +62,7 @@ export default {
       })
     },
     dragStart (event) {
-      let {target, pageX, pageY} = event
+      const { target, pageX, pageY } = event
 
       this.dragState.element = target.cloneNode(true)
       this.dragState.element.style.pointerEvents = 'none'
@@ -86,12 +86,12 @@ export default {
     dragMove (event) {
       if (!this.componentDragging) return false
 
-      let {pageX, pageY} = event
+      const { pageX, pageY } = event
 
       this.dragState.x = pageX
       this.dragState.y = pageY
 
-      let isIframe = event.target.ownerDocument !== document
+      const isIframe = event.target.ownerDocument !== document
       // Move element UI
       this.moveComponent(this.dragState.element, isIframe)
     },
@@ -111,7 +111,7 @@ export default {
   render (h) {
     const itemEls = this.items.map(item => {
       const styles = {
-        backgroundImage: `url(${item.settings.icon})`
+        backgroundImage: `url(${ item.settings.icon })`
       }
 
       const imageClass = {
@@ -119,16 +119,16 @@ export default {
         'no-image': !item.settings.icon
       }
 
-      const key = `${itemClass}--${item._id}`
+      const key = `${ itemClass }--${ item._id }`
 
       return <div
-        class={itemClass}
-        onMousedown={this.dragStart}
-        data-uno-component={item.settings.id}
-        key={key}
+        class={ itemClass }
+        onMousedown={ this.dragStart }
+        data-uno-component={ item.settings.id }
+        key={ key }
         >
-        <div class={imageClass} style={styles} />
-        <div class="label">{item.settings.label}</div>
+        <div class={ imageClass } style={ styles } />
+        <div class='label'>{ item.settings.label }</div>
       </div>
     })
 
@@ -137,7 +137,7 @@ export default {
     }
 
     return (
-      <div class={[mainClass, classes]}>{itemEls}</div>
+      <div class={ [mainClass, classes] }>{ itemEls }</div>
     )
   }
 }

@@ -1,5 +1,5 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import {
   PropertyPanelIds,
   Icons,
@@ -180,20 +180,20 @@ export default {
 
     if (isAdvanced) {
       advancedRow = <AccordionContent>
-        <AccordionContentItem label={Labels.FLEX_LAYOUT_SETTINGS}>
+        <AccordionContentItem label={ Labels.FLEX_LAYOUT_SETTINGS }>
         </AccordionContentItem>
-        <AccordionContentItem label={Labels.FLEX_CHILD_SETTINGS}>
-          <Row label={{text: Labels.FLEX_SIZING}}>
-            <ButtonGroup type={ButtonType.SECONDARY} items={sizingButtons} />
+        <AccordionContentItem label={ Labels.FLEX_CHILD_SETTINGS }>
+          <Row label={ { text: Labels.FLEX_SIZING } }>
+            <ButtonGroup type={ ButtonType.SECONDARY } items={ sizingButtons } />
           </Row>
-          <Row label={{text: Labels.FLEX_ALIGN_SELF}}>
-            <ButtonGroup type={ButtonType.SECONDARY} items={flexAlignSelfButtons} />
+          <Row label={ { text: Labels.FLEX_ALIGN_SELF } }>
+            <ButtonGroup type={ ButtonType.SECONDARY } items={ flexAlignSelfButtons } />
           </Row>
-          <Row label={{text: Labels.FLEX_ORDER}}>
-            <ButtonGroup type={ButtonType.SECONDARY} items={flexOrderButtons} />
+          <Row label={ { text: Labels.FLEX_ORDER } }>
+            <ButtonGroup type={ ButtonType.SECONDARY } items={ flexOrderButtons } />
           </Row>
-          <Row label={{text: Labels.GRID_GUTTER}}>
-            <ButtonGroup type={ButtonType.SECONDARY} items={gutterButtons} />
+          <Row label={ { text: Labels.GRID_GUTTER } }>
+            <ButtonGroup type={ ButtonType.SECONDARY } items={ gutterButtons } />
           </Row>
         </AccordionContentItem>
       </AccordionContent>
@@ -201,10 +201,10 @@ export default {
 
     return (
       <div>
-        <Row label={{text: Labels.SELECT_TYPE, bold: true}}>
-          <ButtonGroup type={ButtonType.SECONDARY} items={typeSelectorButtons} on-click={this.setDisplay} />
+        <Row label={ { text: Labels.SELECT_TYPE, bold: true } }>
+          <ButtonGroup type={ ButtonType.SECONDARY } items={ typeSelectorButtons } on-click={ this.setDisplay } />
         </Row>
-        {advancedRow}
+        { advancedRow }
       </div>
     )
   }

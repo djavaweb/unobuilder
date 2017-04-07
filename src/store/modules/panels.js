@@ -1,4 +1,4 @@
-import {Panels, Labels} from '../../const'
+import { Panels, Labels } from '../../const'
 import * as mutation from '../mutation-types'
 
 const state = {
@@ -52,7 +52,7 @@ const mutations = {
   /**
    * Register advanced panels whether open or not
    */
-  [mutation.REGISTER_ADVANCED_PANEL] (state, {id, value}) {
+  [mutation.REGISTER_ADVANCED_PANEL] (state, { id, value }) {
     if (value !== undefined) {
       state.advancedPanels[id] = value
     }
@@ -89,7 +89,7 @@ const mutations = {
     state.mouseStatePanel[id] = Labels.MOUSE_STATE_NONE
   },
 
-  [mutation.SET_MOUSE_STATE] (state, {id, value}) {
+  [mutation.SET_MOUSE_STATE] (state, { id, value }) {
     state.mouseStatePanel[id] = value
   }
 }
@@ -98,69 +98,69 @@ const actions = {
   /**
    * Hover left panel
    */
-  hoverLeftPanel ({commit}) {
+  hoverLeftPanel ({ commit }) {
     commit(mutation.SET_HOVER_STATUS, Panels.LEFT)
   },
 
   /**
    * Hover right sidebar
    */
-  hoverRightPanel ({commit}) {
+  hoverRightPanel ({ commit }) {
     commit(mutation.SET_HOVER_STATUS, Panels.RIGHT)
   },
 
   /**
    * Hover workspace
    */
-  hoverCenterPanel ({commit}) {
+  hoverCenterPanel ({ commit }) {
     commit(mutation.SET_HOVER_STATUS, Panels.CENTER)
   },
 
   /**
    * Hide left panels
-   * @param  {Object}
-   * @return {void}
+   * @param  { Object }
+   * @return { void }
    */
-  hideLeftPanels ({commit}) {
+  hideLeftPanels ({ commit }) {
     commit(mutation.HIDE_LEFT_PANELS)
   },
 
   /**
    * When users click left panel nav
-   * @param  {Object} options.state
-   * @param  {Function} options.commit
-   * @param  {String} id
-   * @return {void}
+   * @param  { Object } options.state
+   * @param  { Function } options.commit
+   * @param  { String } id
+   * @return { void }
    */
-  showLeftPanel ({state, commit}, id) {
+  showLeftPanel ({ state, commit }, id) {
     commit(mutation.SHOW_LEFT_PANEL, id)
   },
 
   /**
    * When users search component on left panel
-   * @param  {Function} options.commit
-   * @param  {String} value
-   * @return {void}
+   * @param  { Function } options.commit
+   * @param  { String } value
+   * @return { void }
    */
-  findComponent ({commit}, value) {
+  findComponent ({ commit }, value) {
     commit(mutation.FIND_COMPONENT, value)
   },
 
   /**
    * Register advanced panels
-   * @param {Function} options.commit
-   * @param {Object} options
-   * @return {void}
+   * @param { Function } options.commit
+   * @param { Object } options
+   * @return { void }
    */
-  registerAdvancedPanel ({commit}, options) {
+  registerAdvancedPanel ({ commit }, options) {
     commit(mutation.REGISTER_ADVANCED_PANEL, options)
   },
 
   /**
    * Toggle advanced panel in right panel
-   * @param  {Function} {commit}
+   * @param  { Function } { commit }
    */
-  toggleAdvancedPanel ({commit}, propName) {
+  toggleAdvancedPanel ({ commit }, propName) {
     commit(mutation.TOGGLE_ADVANCED_PANEL, propName)
   },
 
@@ -168,7 +168,7 @@ const actions = {
    * Toggle input panel
    * @param Function commit
    */
-  toggleInputPanel ({commit}, id) {
+  toggleInputPanel ({ commit }, id) {
     commit(mutation.TOGGLE_INPUT_PANEL, id)
   },
 
@@ -176,7 +176,7 @@ const actions = {
    * Toggle block panel
    * @param Function commit
    */
-  toggleBlock ({commit}) {
+  toggleBlock ({ commit }) {
     commit(mutation.TOGGLE_BLOCK_PANEL)
   },
 
@@ -184,7 +184,7 @@ const actions = {
    * Display block panel
    * @param Function commit
    */
-  showBlockPanel ({commit}) {
+  showBlockPanel ({ commit }) {
     commit(mutation.TOGGLE_BLOCK_PANEL, true)
   },
 
@@ -192,19 +192,19 @@ const actions = {
    * Hide block panel
    * @param Function commit
    */
-  hideBlockPanel ({commit}) {
+  hideBlockPanel ({ commit }) {
     commit(mutation.TOGGLE_BLOCK_PANEL, false)
   },
 
-  switchBlockItem ({commit}, id) {
+  switchBlockItem ({ commit }, id) {
     commit(mutation.OPEN_BLOCK_PANEL, id)
   },
 
-  registerMouseState ({commit}, id) {
+  registerMouseState ({ commit }, id) {
     commit(mutation.REGISTER_MOUSE_STATE_PANEL, id)
   },
 
-  setMouseState ({commit}, options) {
+  setMouseState ({ commit }, options) {
     commit(mutation.SET_MOUSE_STATE, options)
   }
 }
@@ -212,7 +212,7 @@ const actions = {
 const getters = {
   /**
    * Advanced panel list
-   * @type {Object}
+   * @type { Object }
    */
   advancedPanels: state => state.advancedPanels,
   searchComponents: state => state.searchComponents,
@@ -223,7 +223,7 @@ const getters = {
 
   /**
    * Current opened input panel
-   * @type {Object}
+   * @type { Object }
    */
   openInputPanel: state => state.openInputPanel,
   mouseStatePanel: state => state.mouseStatePanel
