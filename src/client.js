@@ -47,7 +47,7 @@ class UnoBuilder {
     this.__registry__ = {
       eventList: {},
       components: {},
-      blocks: { },
+      blocks: {},
       url: null,
       element: null,
       builder: null,
@@ -72,8 +72,8 @@ class UnoBuilder {
 
   /**
    * Init builder
-   * @param  { String } element
-   * @return { Object }
+   * @param  {String} element
+   * @return {Object}
    */
   builder (element) {
     this.__registry__.builder = element
@@ -83,7 +83,7 @@ class UnoBuilder {
 
   /**
    * get builder selector
-   * @return { String }
+   * @return {String}
    */
   getBuilderSelector () {
     return this.__registry__.builder
@@ -91,7 +91,7 @@ class UnoBuilder {
 
   /**
    * Get builder url
-   * @return { String }
+   * @return {String}
    */
   getBuilderUrl () {
     return this.__registry__.url
@@ -99,7 +99,7 @@ class UnoBuilder {
 
   /**
    * Uno load URL to uno canvas
-   * @param { Object } options
+   * @param {Object} options
    */
   loadCanvas (options) {
     if (options.url && options.element) {
@@ -118,8 +118,8 @@ class UnoBuilder {
 
   /**
    * Uno event register
-   * @param  { String } eventType
-   * @param  { Function } fn
+   * @param  {String} eventType
+   * @param  {Function} fn
    */
   on (...args) {
     const argsLength = args.length
@@ -161,7 +161,7 @@ class UnoBuilder {
 
   /**
    * Turn off event
-   * @param  { String } eventType [description]
+   * @param  {String} eventType [description]
    */
   off (...args) {
     const argsLength = args.length
@@ -190,7 +190,7 @@ class UnoBuilder {
 
   /**
    * Uno event emitter
-   * @param  { String } eventType
+   * @param  {String} eventType
    * @param  { Object|String|Number|Array } variables
    */
   emit (...args) {
@@ -221,7 +221,7 @@ class UnoBuilder {
 
   /**
    * Get event list
-   * @return { Object } eventList
+   * @return {Object} eventList
    */
   events () {
     return this.__registry__.eventList
@@ -244,7 +244,7 @@ class UnoBuilder {
 
   /**
    * Uno add component to list
-   * @param { String } url
+   * @param {String} url
    */
   addComponent (url) {
     const type = 'component'
@@ -253,7 +253,7 @@ class UnoBuilder {
 
   /**
    * Uno add block to list
-   * @param { String } url
+   * @param {String} url
    */
   addBlock (url) {
     const type = 'block'
@@ -297,7 +297,7 @@ class UnoBuilder {
 
   /**
    * Uno init element (block / component)
-   * @param { String } url
+   * @param {String} url
    */
   initElement (element, url) {
     const scriptPath = getScriptPath(url)
@@ -369,8 +369,8 @@ class UnoBuilder {
 
   /**
    * Register element (block or component)
-   * @param { String } name
-   * @param { Object } options
+   * @param {String} name
+   * @param {Object} options
    */
   registerElement (element, name, options) {
     const registry = this.__registry__

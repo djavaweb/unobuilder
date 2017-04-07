@@ -11,7 +11,7 @@ const state = {
   //     medium: {},
   //     small: {}
   //   },
-  //   snapshot: { },
+  //   snapshot: {},
   //   prev: [],
   //   next: []
   //  }
@@ -156,8 +156,8 @@ const actions = {
 
   // /**
   //  * Enable global property
-  //  * @param  { Object } options.state
-  //  * @return { void }
+  //  * @param  {Object} options.state
+  //  * @return {void}
   //  */
   // enableGlobalProperty ({ commit }) {
   //   commit(mutation.ENABLE_GLOBAL_PROPERTY)
@@ -165,8 +165,8 @@ const actions = {
 
   // /**
   //  * Disable global property
-  //  * @param  { Object } options.state
-  //  * @return { void }
+  //  * @param  {Object} options.state
+  //  * @return {void}
   //  */
   // disableGlobalProperty ({ commit }) {
   //   commit(mutation.DISABLE_GLOBAL_PROPERTY)
@@ -176,31 +176,31 @@ const actions = {
 const getters = {
   /**
    * Custom CSS
-   * @param  { Object } state
-   * @return { String }
+   * @param  {Object} state
+   * @return {String}
    */
   customStyles: state => state.customStyles,
   isGlobalProperty: state => state.globalPropertyActive
 
   // /**
   //  * Global Properties
-  //  * @param  { Object } state
-  //  * @return { Object }
+  //  * @param  {Object} state
+  //  * @return {Object}
   //  */
   // globalProperties: state => state.globalProperty.current,
 
   // /**
   //  * Global properties active
-  //  * @param  { Object } state
-  //  * @return { Boolean }
+  //  * @param  {Object} state
+  //  * @return {Boolean}
   //  */
   // globalPropertyActive: state => state.globalProperty.active,
 
   /**
    * Generate css properties from elements state
-   * @param  { Object } state
-   * @param  { Object } rootState
-   * @return { Object }
+   * @param  {Object} state
+   * @param  {Object} rootState
+   * @return {Object}
    */
   // cssProperties (state, rootState) {
   //   if (rootState.selectedElement) {
@@ -212,8 +212,8 @@ const getters = {
 
   // /**
   //  * Check whether property is inherited or has own style
-  //  * @param  { [type] }  state [description]
-  //  * @return { Boolean }       [description]
+  //  * @param  {[type]}  state [description]
+  //  * @return {Boolean}       [description]
   //  */
   // cssInherited (state, rootState) {
   //   let cssProperties = {}
@@ -245,9 +245,9 @@ const getters = {
 
   // /**
   //  * Generate individual elements' css
-  //  * @param  { Object } state
-  //  * @param  { Object } rootState
-  //  * @return { Array }
+  //  * @param  {Object} state
+  //  * @param  {Object} rootState
+  //  * @return {Array}
   //  */
   // localCSS (state, rootState) {
   //   const getStylesheets = elements => {
@@ -281,8 +281,8 @@ const getters = {
 
   // /**
   //  * Generate global CSS
-  //  * @param { Object } state
-  //  * @return { Array }
+  //  * @param {Object} state
+  //  * @return {Array}
   //  */
   // globalCSS (state) {
   //   const stylesheets = []
@@ -303,7 +303,7 @@ const getters = {
 
   // /**
   //  * Check whether element is an item of flex element
-  //  * @return { Boolean }
+  //  * @return {Boolean}
   //  */
   // isFlexItem (state, rootState) {
   //   if (rootState.selectedElement) {

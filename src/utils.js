@@ -31,19 +31,19 @@ const camelizeRE = /-(\w)/g
 
 /**
  * Data ID from attribute prefix
- * @type { [type] }
+ * @type {[type]}
  */
 export const SelectorAttrId = `data-${ ClassPrefix.SHORT }-id`
 
 /**
  * Data component name from attribute prefix
- * @type { [type] }
+ * @type {[type]}
  */
 export const SelectorAttrComponent = `data-${ ClassPrefix.SHORT }-component`
 
 /**
  * Generate random UID
- * @return { String }
+ * @return {String}
  */
 export const RandomUID = () => {
   const getUID = () => (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
@@ -58,8 +58,8 @@ export const RandomUID = () => {
 
 /**
  * Generate data selector id
- * @param  { String } id
- * @return { String }
+ * @param  {String} id
+ * @return {String}
  */
 export const SelectorId = id => {
   return `[${ SelectorAttrId }="${ id }"]`
@@ -75,8 +75,8 @@ export const GlobalClassName = (name = 'unnamed', selector = '') => {
 
 /**
  * CSS Prefixer, convert camelize to kebab and camelize
- * @param { String } propName
- * @return { Object }
+ * @param {String} propName
+ * @return {Object}
  */
 export const CssPrefixer = propName => {
   const prop = propName.replace(hyphenateRE, '$1-$2').toLowerCase()
@@ -103,8 +103,8 @@ export const CssPrefixer = propName => {
 
 /**
  * Clone object
- * @param  { Object } object
- * @return { Object }
+ * @param  {Object} object
+ * @return {Object}
  */
 export const CloneObject = object => {
   return JSON.parse(JSON.stringify(object))
@@ -112,9 +112,9 @@ export const CloneObject = object => {
 
 /**
 * Check if json is valid
-* @param  { String } json
-* @param  { String } message
-* @return { Boolean }
+* @param  {String} json
+* @param  {String} message
+* @return {Boolean}
 */
 export const IsJSON = (json, message = 'Invalid JSON') => {
   try {
@@ -142,9 +142,9 @@ export const ChangeIdDeep = object => {
 
 /**
  * Replace object deep
- * @param { Object } object
- * @param { Array } replace
- * @return { Object }
+ * @param {Object} object
+ * @param {Array} replace
+ * @return {Object}
  */
 export const ReplaceDeep = (obj, replace) => {
   const replaceItem = item => {
@@ -168,7 +168,7 @@ export const ReplaceDeep = (obj, replace) => {
 
 /**
  * Request svg file from assets/img
- * @type { String }
+ * @type {String}
  */
 export const SVGIcon = filename => {
   return require(`!raw-loader!assets/img/${ filename }.svg`)
@@ -184,8 +184,8 @@ export const GetNodeId = element => {
 /**
  * Add event listener crossbrowser
  * @param { ElementNode } element
- * @param { String } event
- * @param { Function } fn
+ * @param {String} event
+ * @param {Function} fn
  */
 export const addEvent = (element, event, fn) => {
   if (element.addEventListener) {
@@ -200,7 +200,7 @@ export const addEvent = (element, event, fn) => {
 /**
  * Remove event listener crossbrowser
  * @param { ElementNode } element
- * @param { Function } fn
+ * @param {Function} fn
  */
 export const removeEvent = (element, event, fn) => {
   if (element.addEventListener) {
@@ -213,7 +213,7 @@ export const removeEvent = (element, event, fn) => {
 /**
  * Dragging element (used for drag n drop)
  * @param { DOMObject } target
- * @param { Object } options
+ * @param {Object} options
  */
 export const dragElement = (target, options) => {
   if (!target) return false

@@ -54,7 +54,7 @@ const state = {
     status: false,
     activeId: null
   },
-  dropline: Object.assign({ }, defaultDropline)
+  dropline: Object.assign({}, defaultDropline)
 }
 
 const NodeHelpers = new NodeUtils(state)
@@ -235,7 +235,7 @@ const mutations = {
       dropElement.splice(index, 0, srcElement)
     }
 
-    state.dropline = Object.assign({ }, defaultDropline)
+    state.dropline = Object.assign({}, defaultDropline)
   },
 
   /**
@@ -323,8 +323,8 @@ const actions = {
 
   /**
    * Undo Action
-   * @param  { Function } store.commit
-   * @return { void }
+   * @param  {Function} store.commit
+   * @return {void}
    */
   undoElement ({ commit, state }) {
     if (state.prev.length > 1) {
@@ -343,8 +343,8 @@ const actions = {
 
   /**
    * Redo Action
-   * @param  { Function } store.commit
-   * @return { void }
+   * @param  {Function} store.commit
+   * @return {void}
    */
   redoElement ({ commit }) {
     commit(mutation.REDO_ELEMENT)
@@ -352,10 +352,10 @@ const actions = {
 
   /**
    * Add Element to the current state
-   * @param { Function } store.commit
-   * @param { String } options.markupText
-   * @param { String } options.appendTo
-   * @return { void }
+   * @param {Function} store.commit
+   * @param {String} options.markupText
+   * @param {String} options.appendTo
+   * @return {void}
    */
   addElement ({ commit }, options) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
@@ -367,9 +367,9 @@ const actions = {
 
   /**
    * Remove Element
-   * @param  { Function } store.commit
-   * @param  { String } id
-   * @return { void }
+   * @param  {Function} store.commit
+   * @param  {String} id
+   * @return {void}
    */
   removeElement ({ commit, state }, id) {
     const element = NodeHelpers.getRequiredParentElement(id, state.current) || NodeHelpers.getElementObject(id, state.current)
@@ -384,11 +384,11 @@ const actions = {
 
   /**
    * Copy and Cut actions in memory
-   * @param  { Function } options.commit
-   * @param  { Function } options.state
-   * @param  { String } options.action
-   * @param  { String } options.id
-   * @return { void }
+   * @param  {Function} options.commit
+   * @param  {Function} options.state
+   * @param  {String} options.action
+   * @param  {String} options.id
+   * @return {void}
    */
   moveElement ({ commit, state }, { action, id, appendTo, index = 0 }) {
     commit(mutation.SNAPSHOT_ELEMENT)
@@ -423,11 +423,11 @@ const actions = {
 
   /**
    * Duplicate
-   * @param  { Function } options.commit
-   * @param  { Function } options.state
-   * @param  { String } options.action
-   * @param  { String } options.id
-   * @return { void }
+   * @param  {Function} options.commit
+   * @param  {Function} options.state
+   * @param  {String} options.action
+   * @param  {String} options.id
+   * @return {void}
    */
   duplicateElement ({ commit, state }, id) {
     commit(mutation.SNAPSHOT_ELEMENT)
@@ -451,9 +451,9 @@ const actions = {
 
   /**
    * Drop element to another element with given index
-   * @param  { Function } options.commit
-   * @param  { Object } options
-   * @return { void }
+   * @param  {Function} options.commit
+   * @param  {Object} options
+   * @return {void}
    */
   dropElement ({ commit }, options) {
     commit(mutation.SNAPSHOT_ELEMENT)
@@ -463,10 +463,10 @@ const actions = {
 
   /**
    * Select element by ID
-   * @param  { Function } options.commit
-   * @param  { Object }   options.state
-   * @param  { String }   id
-   * @return { void }
+   * @param  {Function} options.commit
+   * @param  {Object}   options.state
+   * @param  {String}   id
+   * @return {void}
    */
   selectElement ({ commit, state }, id) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
@@ -614,22 +614,22 @@ const actions = {
 const getters = {
   /**
    * Get iframe window
-   * @param { Object } state
-   * @return { Object }
+   * @param {Object} state
+   * @return {Object}
    */
   iframeWindow: state => state.window,
 
   /**
    * Get iframe document
-   * @param { Object } state
-   * @return { Object }
+   * @param {Object} state
+   * @return {Object}
    */
   iframeDocument: state => state.window.document,
 
   /**
    * Get iframe document
-   * @param { Object } state
-   * @return { Object }
+   * @param {Object} state
+   * @return {Object}
    */
   iframeBody: state => state.window.document.body,
 
@@ -637,29 +637,29 @@ const getters = {
 
   /**
    * Element list
-   * @param  { Object } state
-   * @return { Object }
+   * @param  {Object} state
+   * @return {Object}
    */
   elements: state => state.current,
 
   /**
    * Selected Element
-   * @param  { Object } state
-   * @return { Object }
+   * @param  {Object} state
+   * @return {Object}
    */
   selectedElement: state => state.selected,
 
   /**
    * Hovered Element
-   * @param  { Object } state
-   * @return { Object }
+   * @param  {Object} state
+   * @return {Object}
    */
   hoveredElement: state => state.hovered,
 
   /**
    * Block add placement offset
-   * @param { Object } state
-   * @return { Object }
+   * @param {Object} state
+   * @return {Object}
    */
   blockPosition (state, rootState) {
     let position = 0
@@ -744,7 +744,7 @@ const getters = {
 
   /**
    * Breadcrumbs on selected element
-   * @return { Array }
+   * @return {Array}
    */
   breadcrumbs (state) {
     const breadcrumbs = []
@@ -798,8 +798,8 @@ const getters = {
 
   /**
    * Check wheter selected element is void element
-   * @param  { Object }  state
-   * @return { Boolean }
+   * @param  {Object}  state
+   * @return {Boolean}
    */
   isVoidElement (state) {
     if (state.selected) {
@@ -809,7 +809,7 @@ const getters = {
 
   /**
    * Get state dragging of element
-   * @param { Object } state
+   * @param {Object} state
    */
   elementDragging: state => state.dragging.status,
 

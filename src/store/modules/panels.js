@@ -118,8 +118,8 @@ const actions = {
 
   /**
    * Hide left panels
-   * @param  { Object }
-   * @return { void }
+   * @param  {Object}
+   * @return {void}
    */
   hideLeftPanels ({ commit }) {
     commit(mutation.HIDE_LEFT_PANELS)
@@ -127,10 +127,10 @@ const actions = {
 
   /**
    * When users click left panel nav
-   * @param  { Object } options.state
-   * @param  { Function } options.commit
-   * @param  { String } id
-   * @return { void }
+   * @param  {Object} options.state
+   * @param  {Function} options.commit
+   * @param  {String} id
+   * @return {void}
    */
   showLeftPanel ({ state, commit }, id) {
     commit(mutation.SHOW_LEFT_PANEL, id)
@@ -138,9 +138,9 @@ const actions = {
 
   /**
    * When users search component on left panel
-   * @param  { Function } options.commit
-   * @param  { String } value
-   * @return { void }
+   * @param  {Function} options.commit
+   * @param  {String} value
+   * @return {void}
    */
   findComponent ({ commit }, value) {
     commit(mutation.FIND_COMPONENT, value)
@@ -148,9 +148,9 @@ const actions = {
 
   /**
    * Register advanced panels
-   * @param { Function } options.commit
-   * @param { Object } options
-   * @return { void }
+   * @param {Function} options.commit
+   * @param {Object} options
+   * @return {void}
    */
   registerAdvancedPanel ({ commit }, options) {
     commit(mutation.REGISTER_ADVANCED_PANEL, options)
@@ -158,7 +158,7 @@ const actions = {
 
   /**
    * Toggle advanced panel in right panel
-   * @param  { Function } { commit }
+   * @param  {Function} { commit }
    */
   toggleAdvancedPanel ({ commit }, propName) {
     commit(mutation.TOGGLE_ADVANCED_PANEL, propName)
@@ -212,7 +212,7 @@ const actions = {
 const getters = {
   /**
    * Advanced panel list
-   * @type { Object }
+   * @type {Object}
    */
   advancedPanels: state => state.advancedPanels,
   searchComponents: state => state.searchComponents,
@@ -223,7 +223,7 @@ const getters = {
 
   /**
    * Current opened input panel
-   * @type { Object }
+   * @type {Object}
    */
   openInputPanel: state => state.openInputPanel,
   mouseStatePanel: state => state.mouseStatePanel

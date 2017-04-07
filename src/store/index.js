@@ -58,8 +58,8 @@ const actions = {
 const getters = {
   /**
    * Selected element offset
-   * @param { Object } state
-   * @return { Object }
+   * @param {Object} state
+   * @return {Object}
    */
   elementOffset (state, getter) {
     const NodeHelpers = new NodeUtils(state.elements)

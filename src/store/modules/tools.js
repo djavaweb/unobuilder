@@ -91,9 +91,9 @@ const mutations = {
 const actions = {
   /**
    * Change screen size
-   * @param  { Function } options.commit
-   * @param  { String } size
-   * @return { void }
+   * @param  {Function} options.commit
+   * @param  {String} size
+   * @return {void}
    */
   changeScreenSize ({ commit }, size) {
     commit(mutation.SET_SCREEN_SIZE, size)
@@ -101,8 +101,8 @@ const actions = {
 
   /**
    * Toggle Preview
-   * @param  { [type] } { commit } [description]
-   * @return { [type] }          [description]
+   * @param  {[type]} { commit } [description]
+   * @return {[type]}          [description]
    */
   togglePreview ({ commit }) {
     commit(mutation.TOGGLE_PREVIEW)
@@ -110,8 +110,8 @@ const actions = {
 
   /**
    * Show Preview
-   * @param  { [type] } { commit } [description]
-   * @return { [type] }          [description]
+   * @param  {[type]} { commit } [description]
+   * @return {[type]}          [description]
    */
   showPreview ({ commit }) {
     commit(mutation.TOGGLE_PREVIEW, true)
@@ -119,8 +119,8 @@ const actions = {
 
   /**
    * Hide Preview
-   * @param  { [type] } { commit } [description]
-   * @return { [type] }          [description]
+   * @param  {[type]} { commit } [description]
+   * @return {[type]}          [description]
    */
   hidePreview ({ commit }) {
     commit(mutation.TOGGLE_PREVIEW, false)
@@ -128,7 +128,7 @@ const actions = {
 
   /**
    * Toggle loader screen
-   * @param { Function } commit
+   * @param {Function} commit
    * @return void
    */
   toggleLoader ({ commit }, toggle) {
@@ -137,7 +137,7 @@ const actions = {
 
   /**
    * Set loader message
-   * @param { Function } commit
+   * @param {Function} commit
    * @return void
    */
   setLoaderMessage ({ commit }, message) {
@@ -175,8 +175,8 @@ const actions = {
 
   /**
    * Toggle Context Menu
-   * @param  { Function } { commit }
-   * @return { void }
+   * @param  {Function} { commit }
+   * @return {void}
    */
   toggleContextMenu ({ commit }) {
     commit(mutation.TOGGLE_CONTEXT_MENU)
@@ -184,8 +184,8 @@ const actions = {
 
   /**
    * Show Preview
-   * @param  { Function } { commit }
-   * @return { void }
+   * @param  {Function} { commit }
+   * @return {void}
    */
   showContextMenu ({ commit }) {
     commit(mutation.TOGGLE_CONTEXT_MENU, true)
@@ -193,8 +193,8 @@ const actions = {
 
   /**
    * Hide Preview
-   * @param  { Function } { commit }
-   * @return { void }
+   * @param  {Function} { commit }
+   * @return {void}
    */
   hideContextMenu ({ commit }) {
     commit(mutation.TOGGLE_CONTEXT_MENU, false)
@@ -211,14 +211,14 @@ const actions = {
 const getters = {
   /**
    * Screen Size
-   * @param  { Object } state
-   * @return { String }
+   * @param  {Object} state
+   * @return {String}
    */
   screenSize: state => state.screenSize,
 
   /**
    * Preview Mode
-   * @type { Boolean }
+   * @type {Boolean}
    */
   previewMode: state => state.previewMode,
 
@@ -229,13 +229,13 @@ const getters = {
 
   /**
    * Loader Message
-   * @type { Boolean }
+   * @type {Boolean}
    */
   loaderMessage: state => state.loaderMessage,
 
   /**
    * Canvas status
-   * @type { Boolean }
+   * @type {Boolean}
    */
   canvasLoaded: state => state.canvasLoaded,
   canvasScroll: state => state.canvasScroll,
