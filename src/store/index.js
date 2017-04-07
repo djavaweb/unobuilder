@@ -37,8 +37,8 @@ const actions = {
     dispatch('toggleInputPanel', '')
   },
 
-  setStyle ({getters, dispatch}, payload) {
-    const {mouseState = Labels.MOUSE_STATE_NONE, disabled = false, styles} = payload
+  setStyle ({ getters, dispatch }, payload) {
+    const { mouseState = Labels.MOUSE_STATE_NONE, disabled = false, styles } = payload
     dispatch('setElementStyle', {
       global: false,
       screenSize: getters.screenSize,

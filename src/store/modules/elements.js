@@ -326,7 +326,7 @@ const actions = {
    * @param  {Function} store.commit
    * @return {void}
    */
-  undoElement ({commit, state, dispatch}) {
+  undoElement ({ commit, state, dispatch }) {
     dispatch('reselectElement')
     if (state.prev.length > 1) {
       commit(mutation.UNDO_ELEMENT)
@@ -343,7 +343,7 @@ const actions = {
    * @param  {Function} store.commit
    * @return {void}
    */
-  redoElement ({commit, dispatch}) {
+  redoElement ({ commit, dispatch }) {
     if (state.next.length > 0) {
       dispatch('reselectElement')
       commit(mutation.REDO_ELEMENT)
@@ -610,14 +610,14 @@ const actions = {
     commit(mutation.SET_DROPLINE, options)
   },
 
-  setElementStyle ({state, commit, dispatch}, object) {
+  setElementStyle ({ state, commit, dispatch }, object) {
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.SET_ELEMENT_STYLE, object)
     commit(mutation.APPLY_ELEMENT)
     dispatch('reselectElement')
   },
 
-  reselectElement ({commit}) {
+  reselectElement ({ commit }) {
     if (!state.selected) return
 
     const selected = NodeHelpers.getElementObject(state.selected.id)

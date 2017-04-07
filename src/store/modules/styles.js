@@ -127,7 +127,7 @@ const actions = {
     commit(mutation.SET_CUSTOM_STYLES, value)
   },
 
-  setGlobalStyle ({state, commit}, object) {
+  setGlobalStyle ({ state, commit }, object) {
     commit(mutation.SET_GLOBAL_STYLE, object)
   }
 
