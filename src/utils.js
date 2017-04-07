@@ -183,7 +183,7 @@ export const GetNodeId = element => {
 
 /**
  * Add event listener crossbrowser
- * @param { ElementNode } element
+ * @param {ElementNode} element
  * @param {String} event
  * @param {Function} fn
  */
@@ -199,7 +199,7 @@ export const addEvent = (element, event, fn) => {
 
 /**
  * Remove event listener crossbrowser
- * @param { ElementNode } element
+ * @param {ElementNode} element
  * @param {Function} fn
  */
 export const removeEvent = (element, event, fn) => {
@@ -212,7 +212,7 @@ export const removeEvent = (element, event, fn) => {
 
 /**
  * Dragging element (used for drag n drop)
- * @param { DOMObject } target
+ * @param {DOMObject} target
  * @param {Object} options
  */
 export const dragElement = (target, options) => {

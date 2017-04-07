@@ -46,7 +46,7 @@ export default {
     /**
      * Move dragging component position
      *
-     * @param { DOMObject } target
+     * @param {DOMObject} target
      * @param {Boolean} isIframe
      * @return void
      */

@@ -191,7 +191,7 @@ class UnoBuilder {
   /**
    * Uno event emitter
    * @param  {String} eventType
-   * @param  { Object|String|Number|Array } variables
+   * @param  {Object|String|Number|Array} variables
    */
   emit (...args) {
     const argsLength = args.length
