@@ -22,6 +22,6 @@ Uno.on('init', app => {
   new Vue({
     el: app.builder,
     store,
-    render: h => <App ref="root" />
+    render: h => <App ref='root' />
   })
 })

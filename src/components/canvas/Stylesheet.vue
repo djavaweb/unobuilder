@@ -1,7 +1,7 @@
 <script>
 /* eslint-disable */
-import {ScreenType, ScreenSize, MouseType} from '../../const'
-import {CssPrefixer, valueFormatter} from '../../utils'
+import { ScreenType, ScreenSize, MouseType } from '../../const'
+import { CssPrefixer, valueFormatter } from '../../utils'
 
 export default {
   name: 'stylesheet',
@@ -31,10 +31,10 @@ export default {
           if (props.length > 0) {
             let mouseEvent = ''
             if (mouse !== MouseType.NONE) {
-              mouseEvent = `:${mouse}`
+              mouseEvent = `:${ mouse }`
             }
 
-            compiled.push(`${selector}${mouseEvent}{${props.join(';')}}`)
+            compiled.push(`${ selector }${ mouseEvent }{ ${ props.join(';')  }}`)
           }
         }
 
@@ -67,7 +67,7 @@ export default {
 
         if (raw.length > 0) {
           if (size > 0) {
-            output += `@media (max-width: ${size}px){${raw}}`
+            output += `@media (max-width: ${ size }px){ ${ raw  }}`
           } else {
             output += raw
           }
@@ -83,7 +83,7 @@ export default {
       cssString = this.contentStringify()
     }
     return (
-      <style scoped>{cssString}</style>
+      <style scoped>{ cssString }</style>
     )
   }
 }

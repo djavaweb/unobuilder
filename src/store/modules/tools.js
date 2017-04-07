@@ -1,4 +1,4 @@
-import {ScreenType, Labels, ClassPrefix} from '../../const'
+import { ScreenType, Labels, ClassPrefix } from '../../const'
 import * as mutation from '../mutation-types'
 
 const previewClass = [
@@ -25,11 +25,11 @@ const mutations = {
     toggle = typeof toggle === 'undefined' ? !state.previewMode : toggle
     state.previewMode = toggle
 
-    const {documentElement: htmlTag} = document
-    htmlTag.className = `${ClassPrefix.MAIN}--avoid-top-bar`
+    const { documentElement: htmlTag } = document
+    htmlTag.className = `${ ClassPrefix.MAIN }--avoid-top-bar`
 
     previewClass.forEach(item => {
-      const className = `${ClassPrefix.MAIN}--${item}`
+      const className = `${ ClassPrefix.MAIN }--${ item }`
       if (state.previewMode) {
         htmlTag.classList.remove(className)
       } else {
@@ -95,34 +95,34 @@ const actions = {
    * @param  {String} size
    * @return {void}
    */
-  changeScreenSize ({commit}, size) {
+  changeScreenSize ({ commit }, size) {
     commit(mutation.SET_SCREEN_SIZE, size)
   },
 
   /**
    * Toggle Preview
-   * @param  {[type]} {commit} [description]
+   * @param  {[type]} { commit } [description]
    * @return {[type]}          [description]
    */
-  togglePreview ({commit}) {
+  togglePreview ({ commit }) {
     commit(mutation.TOGGLE_PREVIEW)
   },
 
   /**
    * Show Preview
-   * @param  {[type]} {commit} [description]
+   * @param  {[type]} { commit } [description]
    * @return {[type]}          [description]
    */
-  showPreview ({commit}) {
+  showPreview ({ commit }) {
     commit(mutation.TOGGLE_PREVIEW, true)
   },
 
   /**
    * Hide Preview
-   * @param  {[type]} {commit} [description]
+   * @param  {[type]} { commit } [description]
    * @return {[type]}          [description]
    */
-  hidePreview ({commit}) {
+  hidePreview ({ commit }) {
     commit(mutation.TOGGLE_PREVIEW, false)
   },
 
@@ -131,7 +131,7 @@ const actions = {
    * @param {Function} commit
    * @return void
    */
-  toggleLoader ({commit}, toggle) {
+  toggleLoader ({ commit }, toggle) {
     commit(mutation.TOGGLE_LOADER, toggle)
   },
 
@@ -140,14 +140,14 @@ const actions = {
    * @param {Function} commit
    * @return void
    */
-  setLoaderMessage ({commit}, message) {
+  setLoaderMessage ({ commit }, message) {
     commit(mutation.SET_LOADER_MESSAGE, message)
   },
 
   /**
    * Show loader screen
    */
-  showLoaderMessage ({commit}, message) {
+  showLoaderMessage ({ commit }, message) {
     commit(mutation.SET_LOADER_MESSAGE, message)
     commit(mutation.TOGGLE_LOADER, true)
   },
@@ -155,55 +155,55 @@ const actions = {
   /**
    * Hide loader screen
    */
-  hideLoaderMessage ({commit}, message) {
+  hideLoaderMessage ({ commit }, message) {
     commit(mutation.TOGGLE_LOADER, false)
   },
 
   /**
    * Notify that canvas already loaded
    */
-  canvasReady ({commit}) {
+  canvasReady ({ commit }) {
     commit(mutation.SET_INITIATED_CANVAS)
   },
 
   /**
    * Set canvas scroll bounds top
    */
-  setCanvasScroll ({commit}, scrollValue) {
+  setCanvasScroll ({ commit }, scrollValue) {
     commit(mutation.SET_CANVAS_SCROLL, scrollValue)
   },
 
   /**
    * Toggle Context Menu
-   * @param  {Function} {commit}
+   * @param  {Function} { commit }
    * @return {void}
    */
-  toggleContextMenu ({commit}) {
+  toggleContextMenu ({ commit }) {
     commit(mutation.TOGGLE_CONTEXT_MENU)
   },
 
   /**
    * Show Preview
-   * @param  {Function} {commit}
+   * @param  {Function} { commit }
    * @return {void}
    */
-  showContextMenu ({commit}) {
+  showContextMenu ({ commit }) {
     commit(mutation.TOGGLE_CONTEXT_MENU, true)
   },
 
   /**
    * Hide Preview
-   * @param  {Function} {commit}
+   * @param  {Function} { commit }
    * @return {void}
    */
-  hideContextMenu ({commit}) {
+  hideContextMenu ({ commit }) {
     commit(mutation.TOGGLE_CONTEXT_MENU, false)
   },
 
   /**
    * Set context menu coords
    */
-  setContextCoords ({commit}, coords) {
+  setContextCoords ({ commit }, coords) {
     commit(mutation.SET_CONTEXT_COORDS, coords)
   }
 }

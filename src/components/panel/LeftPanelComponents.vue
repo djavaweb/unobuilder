@@ -1,7 +1,7 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import uno from '../../client'
-import {ClassPrefix, PropertyPanelIds} from '../../const'
+import { ClassPrefix, PropertyPanelIds } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import Accordion from '../accordion/Accordion'
@@ -10,9 +10,9 @@ import SearchBox from './LeftPanelSearchBox'
 import ComponentItem from './LeftPanelComponentItem'
 import CloseButton from '../fields/CloseButton'
 
-const mainClass = `${ClassPrefix.LEFT_PANEL}-components`
-const listClass = `${ClassPrefix.LEFT_PANEL}-list-components`
-const searchClass = `${ClassPrefix.LEFT_PANEL}-search-components`
+const mainClass = `${ ClassPrefix.LEFT_PANEL }-components`
+const listClass = `${ ClassPrefix.LEFT_PANEL }-list-components`
+const searchClass = `${ ClassPrefix.LEFT_PANEL }-search-components`
 
 export default {
   name: 'leftPanelComponents',
@@ -30,7 +30,7 @@ export default {
   },
   render (h) {
     const openPanel = this.openLeftPanel === PropertyPanelIds.COMPONENT
-    let classes = {
+    const classes = {
       'animate--slide-in': openPanel && this.toggleLeftPanel,
       'animate--slide-out': !openPanel || !this.toggleLeftPanel
     }
@@ -40,7 +40,7 @@ export default {
     }
 
     const itemGroups = {}
-    for (let item in uno.getComponentList()) {
+    for (const item in uno.getComponentList()) {
       const component = uno.getComponentItem(item)
       if (!(component.settings.group in itemGroups)) {
         itemGroups[component.settings.group] = []
@@ -49,16 +49,16 @@ export default {
     }
 
     const componentGroups = []
-    for (let title in itemGroups) {
+    for (const title in itemGroups) {
       const components = itemGroups[title]
       componentGroups.push({ title, components })
     }
 
     const accordionItems = componentGroups.map((item, index) => {
-      let {title, components} = item
+      let { title, components } = item // eslint-disable-line prefer-const
       const props = {
         title,
-        id: `component-${index}`,
+        id: `component-${ index }`,
         open: index === 0
       }
 
@@ -72,20 +72,20 @@ export default {
         return true
       })
 
-      return <AccordionItem {...{props}}>
-        <ComponentItem items={components} />
+      return <AccordionItem {...{ props }}>
+        <ComponentItem items={ components } />
       </AccordionItem>
     })
 
     return (
-      <div class={[mainClass, classes]}>
-        <div class={searchClass}>
-          <CloseButton nativeOnClick={closeOnClick} class="close" />
+      <div class={ [mainClass, classes] }>
+        <div class={ searchClass }>
+          <CloseButton nativeOnClick={ closeOnClick } class='close' />
           <SearchBox />
         </div>
 
-        <div class={listClass}>
-          <Accordion>{accordionItems}</Accordion>
+        <div class={ listClass }>
+          <Accordion>{ accordionItems }</Accordion>
         </div>
       </div>
     )

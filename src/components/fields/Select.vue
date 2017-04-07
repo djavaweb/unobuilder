@@ -1,11 +1,11 @@
 <script>
 /* eslint-disable no-unused-vars */
-import {ClassPrefix, Labels} from '../../const'
+import { ClassPrefix, Labels } from '../../const'
 
-const mainClass = `${ClassPrefix.FIELDS}--select`
-const selectedClass = `${mainClass}__selected`
-const inputClass = `${mainClass}__input`
-const optionsClass = `${mainClass}__options`
+const mainClass = `${ ClassPrefix.FIELDS }--select`
+const selectedClass = `${ mainClass }__selected`
+const inputClass = `${ mainClass }__input`
+const optionsClass = `${ mainClass }__options`
 
 export default {
   name: 'select',
@@ -57,12 +57,12 @@ export default {
   render (h) {
     let selectedEl
     if (this.inputValue.length === 0) {
-      selectedEl = <span class={selectedClass}>{this.selected.value}</span>
+      selectedEl = <span class={ selectedClass }>{ this.selected.value }</span>
     }
 
     let inputEl
     if (this.typehead) {
-      inputEl = <input type="text" ref="input" onInput={this.setInputValue} />
+      inputEl = <input type='text' ref='input' onInput={ this.setInputValue } />
     }
 
     const options = this.options.filter(item => {
@@ -74,13 +74,13 @@ export default {
 
       return true
     }).map(item => {
-      return <li onClick={() => this.setSelected(item)}>{item.value}</li>
+      return <li onClick={ () => this.setSelected(item) }>{ item.value }</li>
     })
 
     let optionsEl
     if (this.displayOptions) {
-      optionsEl = <div class={optionsClass}>
-        <ul>{options}</ul>
+      optionsEl = <div class={ optionsClass }>
+        <ul>{ options }</ul>
       </div>
     }
 
@@ -90,12 +90,12 @@ export default {
     }
 
     return (
-      <div class={mainClass}>
-        <div class={[inputClasses, inputClass]} onClick={this.toggleOptions}>
-          {selectedEl}
-          {inputEl}
+      <div class={ mainClass }>
+        <div class={ [inputClasses, inputClass] } onClick={ this.toggleOptions }>
+          { selectedEl }
+          { inputEl }
         </div>
-        {optionsEl}
+        { optionsEl }
       </div>
     )
   }

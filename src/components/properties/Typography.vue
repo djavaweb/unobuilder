@@ -1,5 +1,5 @@
 <script>
-import {Icons, Tooltips, ButtonType, ButtonSize, Units} from '../../const'
+import { Icons, Tooltips, ButtonType, ButtonSize, Units } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import Row from '../fields/Row'
@@ -19,22 +19,22 @@ export default {
 
   render (h) {
     const fontFamilies = [
-      {value: 'Arial', selected: true},
-      {value: 'Georgia'},
-      {value: 'Tahoma'},
-      {value: 'Verdana'}
+      { value: 'Arial', selected: true },
+      { value: 'Georgia' },
+      { value: 'Tahoma' },
+      { value: 'Verdana' }
     ]
 
     const fontWeightOptions = [
-      {value: 100, selected: true},
-      {value: 200},
-      {value: 300},
-      {value: 400},
-      {value: 500},
-      {value: 600},
-      {value: 700},
-      {value: 800},
-      {value: 900}
+      { value: 100, selected: true },
+      { value: 200 },
+      { value: 300 },
+      { value: 400 },
+      { value: 500 },
+      { value: 600 },
+      { value: 700 },
+      { value: 800 },
+      { value: 900 }
     ]
 
     const textAlignButtons = [
@@ -94,41 +94,41 @@ export default {
     return (
       <div>
         <Row>
-          <Column icon={Icons.FONT_FAMILY}>
-            <Select options={fontFamilies} />
+          <Column icon={ Icons.FONT_FAMILY }>
+            <Select options={ fontFamilies } />
           </Column>
         </Row>
 
         <Row>
-          <Column icon={Icons.FONT_WEIGHT}>
-            <Select options={fontWeightOptions} typehead={false} />
+          <Column icon={ Icons.FONT_WEIGHT }>
+            <Select options={ fontWeightOptions } typehead={ false } />
           </Column>
-          <Column icon={Icons.FONT_SIZE}>
-            <Number value={12} units={Units.PX} excludeUnit={[Units.VW, Units.VH]} />
+          <Column icon={ Icons.FONT_SIZE }>
+            <Number value={ 12 } units={ Units.PX } excludeUnit={ [Units.VW, Units.VH] } />
           </Column>
-          <Column icon={Icons.LINE_HEIGHT}>
-            <Number value={50} units={Units.PX} excludeUnit={[Units.VW, Units.VH]} />
-          </Column>
-        </Row>
-
-        <Row>
-          <Column icon={Icons.FONT_COLOR}>
-            <Colorpicker popup={true} on-update={this.fontColorUpdate} />
-          </Column>
-          <Column icon={Icons.FONT_STYLE}>
-            <ButtonGroup type={ButtonType.SECONDARY} size={ButtonSize.SMALL} items={textStyleButtons} />
-          </Column>
-          <Column icon={Icons.TEXT_DECORATION}>
-            <ButtonGroup type={ButtonType.SECONDARY} size={ButtonSize.SMALL} items={textDecorationButtons} />
+          <Column icon={ Icons.LINE_HEIGHT }>
+            <Number value={ 50 } units={ Units.PX } excludeUnit={ [Units.VW, Units.VH] } />
           </Column>
         </Row>
 
         <Row>
-          <Column icon={Icons.TEXT_ALIGN} width={280}>
-            <ButtonGroup type={ButtonType.SECONDARY} size={ButtonSize.SMALL} items={textAlignButtons} />
+          <Column icon={ Icons.FONT_COLOR }>
+            <Colorpicker popup={ true } on-update={ this.fontColorUpdate } />
           </Column>
-          <Column icon={Icons.LETTER_SPACING}>
-            <Number value={50} units={Units.PX} excludeUnit={[Units.VW, Units.VH]} />
+          <Column icon={ Icons.FONT_STYLE }>
+            <ButtonGroup type={ ButtonType.SECONDARY } size={ ButtonSize.SMALL } items={ textStyleButtons } />
+          </Column>
+          <Column icon={ Icons.TEXT_DECORATION }>
+            <ButtonGroup type={ ButtonType.SECONDARY } size={ ButtonSize.SMALL } items={ textDecorationButtons } />
+          </Column>
+        </Row>
+
+        <Row>
+          <Column icon={ Icons.TEXT_ALIGN } width={ 280 }>
+            <ButtonGroup type={ ButtonType.SECONDARY } size={ ButtonSize.SMALL } items={ textAlignButtons } />
+          </Column>
+          <Column icon={ Icons.LETTER_SPACING }>
+            <Number value={ 50 } units={ Units.PX } excludeUnit={ [Units.VW, Units.VH] } />
           </Column>
         </Row>
       </div>

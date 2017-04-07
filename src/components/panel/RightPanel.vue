@@ -1,6 +1,6 @@
 <script>
-import {mapGetters} from 'vuex'
-import {ClassPrefix} from '../../const'
+import { mapGetters } from 'vuex'
+import { ClassPrefix } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import RightPanelSwitcher from './RightPanelSwitcher'
@@ -14,13 +14,13 @@ export default {
     ])
   },
   render (h) {
-    let classes = {
+    const classes = {
       'animate--slide-out-right': this.previewMode,
       'animate--slide-in-right': !this.previewMode
     }
 
     return (
-      <div class={[ClassPrefix.RIGHT_PANEL, classes]}>
+      <div class={ [ClassPrefix.RIGHT_PANEL, classes] }>
         <RightPanelSwitcher />
         <PropertiesPanels />
       </div>

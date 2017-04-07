@@ -1,6 +1,6 @@
 <script>
-import {ClassPrefix, Labels} from '../../const'
-const mainClass = `${ClassPrefix.FIELDS}--textarea`
+import { ClassPrefix, Labels } from '../../const'
+const mainClass = `${ ClassPrefix.FIELDS }--textarea`
 export default {
   name: 'textarea',
   props: {
@@ -14,8 +14,8 @@ export default {
   },
   render (createElement) {
     return (
-      <textarea class={mainClass} placeholder={this.placeholder}>
-        {this.value}
+      <textarea class={ mainClass } placeholder={ this.placeholder }>
+        { this.value }
       </textarea>
     )
   }

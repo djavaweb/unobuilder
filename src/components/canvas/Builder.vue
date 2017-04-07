@@ -1,9 +1,8 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, RootElementTag} from '../../const'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix, RootElementTag } from '../../const'
 import HTMLParser from 'unobuilder-parser'
 
-/* eslint-disable no-unused-vars */
 import Elements from './Elements'
 import Stylesheet from './Stylesheet'
 
@@ -30,7 +29,7 @@ export default {
     ])
   },
   mounted () {
-    const {ownerDocument: document} = this.$el
+    const { ownerDocument: document } = this.$el
     const head = document.querySelector('head')
 
     const styles = document.createElement('style')
@@ -49,7 +48,7 @@ export default {
     if (this.elements.length < 1) {
       // Add root element
       this.addElement({
-        object: new HTMLParser(`<div ${RootElementTag}="true" kind="layout"></div>`)
+        object: new HTMLParser(`<div ${ RootElementTag }="true" kind="layout"></div>`)
       })
 
       // Select root element
@@ -75,14 +74,14 @@ export default {
     }
 
     const elements = this.elements.map(element => {
-      return <Elements node={element} />
+      return <Elements node={ element } />
     })
 
     return (
-      <div class={[ClassPrefix.MAIN, classes]} onClick={onClick}>
-        <Stylesheet content={this.customStyles} />
-        <Stylesheet content={this.localCSS} />
-        {elements}
+      <div class={ [ClassPrefix.MAIN, classes] } onClick={ onClick }>
+        <Stylesheet content={ this.customStyles } />
+        <Stylesheet content={ this.localCSS } />
+        { elements }
       </div>
     )
   }

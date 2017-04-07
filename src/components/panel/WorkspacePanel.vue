@@ -1,6 +1,6 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix} from '../../const'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import Canvas from '../canvas/Container'
@@ -30,7 +30,7 @@ export default {
     }
 
     return (
-      <div onClick={onClick} class={[mainClass, classes]}>
+      <div onClick={ onClick } class={ [mainClass, classes] }>
         <Canvas />
       </div>
     )

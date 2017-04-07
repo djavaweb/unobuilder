@@ -2,14 +2,14 @@ export const MainPrefix = 'uno-builder'
 export const ClassPrefix = {
   MAIN: MainPrefix,
   SHORT: 'uno',
-  FIELDS: `${MainPrefix}-fields`,
-  SCREEN: `${MainPrefix}__screen`,
-  ACCORDION: `${MainPrefix}__accordion`,
-  LEFT_PANEL: `${MainPrefix}__left-panel`,
-  RIGHT_PANEL: `${MainPrefix}__right-panel`,
-  TOP_PANEL: `${MainPrefix}__top-panel`,
-  WORKSPACE: `${MainPrefix}__workspace`,
-  CANVAS: `${MainPrefix}__canvas`
+  FIELDS: `${ MainPrefix }-fields`,
+  SCREEN: `${ MainPrefix }__screen`,
+  ACCORDION: `${ MainPrefix }__accordion`,
+  LEFT_PANEL: `${ MainPrefix }__left-panel`,
+  RIGHT_PANEL: `${ MainPrefix }__right-panel`,
+  TOP_PANEL: `${ MainPrefix }__top-panel`,
+  WORKSPACE: `${ MainPrefix }__workspace`,
+  CANVAS: `${ MainPrefix }__canvas`
 }
 
 export const ScreenType = {
@@ -135,7 +135,7 @@ export const Labels = {
   PAGE_PROPERTIES: 'Page Options',
   GLOBAL_PROPERTIES: 'Global Options',
   BROWSER_TOO_SMALL: 'Your browser is too small',
-  RESIZE_BROWSER: `Resize your browser to be at least ${SafeScreenSize - 1}px wide to get back into design mode.`,
+  RESIZE_BROWSER: `Resize your browser to be at least ${ SafeScreenSize - 1 }px wide to get back into design mode.`,
   DISPLAY_PROPERTIES: 'Display',
   LAYOUT_PROPERTIES: 'Layout',
   SIZE_PROPERTIES: 'Size',

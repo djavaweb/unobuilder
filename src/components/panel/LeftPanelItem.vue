@@ -1,6 +1,6 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {SVGIcon} from '../../utils'
+import { mapGetters, mapActions } from 'vuex'
+import { SVGIcon } from '../../utils'
 
 export default {
   name: 'leftPanelNavItem',
@@ -59,10 +59,10 @@ export default {
     }
 
     return (
-      <a class={classes}
-      onClick={onClick}
-      domPropsInnerHTML={SVGIcon(this.icon)}
-      {...{attrs}} />
+      <a class={ classes }
+      onClick={ onClick }
+      domPropsInnerHTML={ SVGIcon(this.icon) }
+      {...{ attrs }} />
     )
   }
 }

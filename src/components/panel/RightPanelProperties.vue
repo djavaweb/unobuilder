@@ -1,6 +1,6 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, PropertyPanelIds, Labels} from '../../const'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix, PropertyPanelIds, Labels } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import Accordion from '../accordion/Accordion'
@@ -12,7 +12,7 @@ import TypographyProperties from '../properties/Typography'
 import BackgroundProperties from '../properties/Bg'
 import AttrProperties from '../properties/Attr'
 
-const mainClass = `${ClassPrefix.MAIN}__properties`
+const mainClass = `${ ClassPrefix.MAIN }__properties`
 
 export default {
   name: 'rightPanelProperties',
@@ -101,7 +101,7 @@ export default {
       }
 
       return (
-        <AccordionItem {...{props}}>{propEl}</AccordionItem>
+        <AccordionItem {...{ props }}>{ propEl }</AccordionItem>
       )
     })
 
@@ -111,8 +111,8 @@ export default {
     }
 
     return (
-      <div class={mainClass} onClick={onClick}>
-        <Accordion>{propertiesEls}</Accordion>
+      <div class={ mainClass } onClick={ onClick }>
+        <Accordion>{ propertiesEls }</Accordion>
       </div>
     )
   }

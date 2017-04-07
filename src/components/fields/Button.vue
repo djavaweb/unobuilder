@@ -1,8 +1,8 @@
 <script>
-import {ButtonType, ButtonSize, ClassPrefix} from '../../const'
-import {SVGIcon} from '../../utils'
+import { ButtonType, ButtonSize, ClassPrefix } from '../../const'
+import { SVGIcon } from '../../utils'
 
-const mainClass = `${ClassPrefix.FIELDS}--button`
+const mainClass = `${ ClassPrefix.FIELDS }--button`
 
 export default {
   name: 'button',
@@ -55,19 +55,19 @@ export default {
       attrs['uk-tooltip'] = true
     }
 
-    let {iconEl, labelEl} = {}
+    let { iconEl, labelEl } = {}
 
     if (this.icon) {
-      iconEl = <span class="icon" domPropsInnerHTML={SVGIcon(this.icon)} />
+      iconEl = <span class='icon' domPropsInnerHTML={ SVGIcon(this.icon) } />
     }
 
     if (this.label) {
-      labelEl = <span class="label">{this.label}</span>
+      labelEl = <span class='label'>{ this.label }</span>
     }
 
     return (
-      <button onClick={this.handleClick} class={[mainClass, stateClasses]} {...{attrs: attrs}}>
-        {iconEl} {labelEl}
+      <button onClick={ this.handleClick } class={ [mainClass, stateClasses] } {...{ attrs: attrs }}>
+        { iconEl } { labelEl }
       </button>
     )
   }
