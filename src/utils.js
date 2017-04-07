@@ -1,5 +1,5 @@
-import {each, mapValues, map, isArray, isObject} from 'lodash'
-import {ClassPrefix} from './const'
+import { each, mapValues, map, isArray, isObject } from 'lodash'
+import { ClassPrefix } from './const'
 
 const cssPrefixes = [
   '-webkit-',
@@ -33,13 +33,13 @@ const camelizeRE = /-(\w)/g
  * Data ID from attribute prefix
  * @type {[type]}
  */
-export const SelectorAttrId = `data-${ClassPrefix.SHORT}-id`
+export const SelectorAttrId = `data-${ ClassPrefix.SHORT }-id`
 
 /**
  * Data component name from attribute prefix
  * @type {[type]}
  */
-export const SelectorAttrComponent = `data-${ClassPrefix.SHORT}-component`
+export const SelectorAttrComponent = `data-${ ClassPrefix.SHORT }-component`
 
 /**
  * Generate random UID
@@ -62,15 +62,15 @@ export const RandomUID = () => {
  * @return {String}
  */
 export const SelectorId = id => {
-  return `[${SelectorAttrId}="${id}"]`
+  return `[${ SelectorAttrId }="${ id }"]`
 }
 
 export const ClassName = (name = 'unnamed', selector = '') => {
-  return `${selector}${ClassPrefix.SHORT}-${name}`
+  return `${ selector }${ ClassPrefix.SHORT }-${ name }`
 }
 
 export const GlobalClassName = (name = 'unnamed', selector = '') => {
-  return ClassName(`g-${name}`, selector)
+  return ClassName(`g-${ name }`, selector)
 }
 
 /**
@@ -79,15 +79,15 @@ export const GlobalClassName = (name = 'unnamed', selector = '') => {
  * @return {Object}
  */
 export const CssPrefixer = propName => {
-  let prop = propName.replace(hyphenateRE, '$1-$2').toLowerCase()
-  let camel = prop.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
-  let upper = camel.charAt(0).toUpperCase() + camel.slice(1)
-  let testEl = document.createElement('div')
+  const prop = propName.replace(hyphenateRE, '$1-$2').toLowerCase()
+  const camel = prop.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
+  const upper = camel.charAt(0).toUpperCase() + camel.slice(1)
+  const testEl = document.createElement('div')
   let i = cssPrefixes.length
   let prefixed
 
   if (camel !== 'filter' && (camel in testEl.style)) {
-    return {kebab: prop, camel: camel}
+    return { kebab: prop, camel: camel }
   }
 
   while (i--) {
@@ -133,7 +133,7 @@ export const ChangeIdDeep = object => {
     object.id = newId
     object.dataObject.attrs[SelectorAttrId] = newId
     object.dataObject.ref = newId.replace(/-/g, '')
-    for (let index in object.childNodes) {
+    for (const index in object.childNodes) {
       object.childNodes[index] = ChangeIdDeep(object.childNodes[index])
     }
   }
@@ -171,7 +171,7 @@ export const ReplaceDeep = (obj, replace) => {
  * @type {String}
  */
 export const SVGIcon = filename => {
-  return require(`!raw-loader!assets/img/${filename}.svg`)
+  return require(`!raw-loader!assets/img/${ filename }.svg`)
 }
 
 /**
@@ -218,7 +218,7 @@ export const removeEvent = (element, event, fn) => {
 export const dragElement = (target, options) => {
   if (!target) return false
   // define it's default value
-  let {
+  const {
     iframeWindow = undefined,
     canvasScrollTop = 0,
     state: {
@@ -227,19 +227,19 @@ export const dragElement = (target, options) => {
     }
   } = options
 
-  let rect = target.getBoundingClientRect()
-  let {width, height} = rect
+  const rect = target.getBoundingClientRect()
+  const { width, height } = rect
 
   let left = 0
   let top = 0
   if (iframeWindow) {
-    let iframeOffset = iframeWindow.frameElement.getBoundingClientRect()
+    const iframeOffset = iframeWindow.frameElement.getBoundingClientRect()
     left = iframeOffset.left
     top = iframeOffset.top
   }
 
-  target.style.top = `${y - (height / 2) + top + canvasScrollTop}px`
-  target.style.left = `${x - (width / 2) + left}px`
+  target.style.top = `${ y - (height / 2) + top + canvasScrollTop }px`
+  target.style.left = `${ x - (width / 2) + left }px`
 }
 
 export const valueFormatter = property => {
@@ -248,7 +248,7 @@ export const valueFormatter = property => {
   }
 
   if ('unit' in property) {
-    return `${property.value}${property.unit}`
+    return `${ property.value }${ property.unit }`
   }
 
   return property.value

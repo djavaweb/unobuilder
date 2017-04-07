@@ -18,21 +18,21 @@ const actions = {
   /**
    * Undo Action
    */
-  undo ({dispatch}) {
+  undo ({ dispatch }) {
     dispatch('undoElement')
   },
 
   /**
    * Redo Action
    */
-  redo ({dispatch}) {
+  redo ({ dispatch }) {
     dispatch('redoElement')
   },
 
   /**
    * Hide all panels including popup, left panels selector, etc
    */
-  hideAllPanels ({dispatch}) {
+  hideAllPanels ({ dispatch }) {
     dispatch('hideLeftPanels')
     dispatch('toggleInputPanel', '')
   },
@@ -71,7 +71,7 @@ const getters = {
         return {}
       }
 
-      let {top, left, width, height} = _element.getBoundingClientRect()
+      let { top, left, width, height } = _element.getBoundingClientRect() // eslint-disable-line prefer-const
 
       if (left < 0) {
         width += left

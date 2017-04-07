@@ -1,20 +1,20 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, Tooltips, Icons, ElementOffsetGap} from '../../const'
-import {SVGIcon} from '../../utils'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix, Tooltips, Icons, ElementOffsetGap } from '../../const'
+import { SVGIcon } from '../../utils'
 
 /* eslint-disable no-unused-vars */
 import RemoveButton from '../fields/CloseButton'
 
-const mainClass = `${ClassPrefix.CANVAS}-selector`
-const selectedClass = `${mainClass}__selected`
-const hoveredClass = `${mainClass}__hovered`
-const hoveredDraggingClass = `${hoveredClass}--dragging`
-const selectorToolClass = `${mainClass}-tools`
-const breadcrumbClass = `${mainClass}-breadcrumbs`
-const removeClass = `${mainClass}-remove`
-const buttonClass = `${mainClass}-buttons`
-const droplineClass = `${mainClass}-dropline`
+const mainClass = `${ ClassPrefix.CANVAS }-selector`
+const selectedClass = `${ mainClass }__selected`
+const hoveredClass = `${ mainClass }__hovered`
+const hoveredDraggingClass = `${ hoveredClass }--dragging`
+const selectorToolClass = `${ mainClass }-tools`
+const breadcrumbClass = `${ mainClass }-breadcrumbs`
+const removeClass = `${ mainClass }-remove`
+const buttonClass = `${ mainClass }-buttons`
+const droplineClass = `${ mainClass }-dropline`
 
 export default {
   name: 'canvasElementSelector',
@@ -49,19 +49,19 @@ export default {
     }
   },
   render (h) {
-    let {selectedStyles, hoveredStyles} = {}
+    let { selectedStyles, hoveredStyles } = {}
 
     const selectedHoverClass = {
       'hover--remove': this.removeHover
     }
 
     if (this.selectedElement && this.elementOffset.selected) {
-      let {top, left, width, height} = this.elementOffset.selected
+      const { top, left, width, height } = this.elementOffset.selected
       selectedStyles = {
-        top: `${top}px`,
-        left: `${left}px`,
-        width: `${width}px`,
-        height: `${height}px`
+        top: `${ top }px`,
+        left: `${ left }px`,
+        width: `${ width }px`,
+        height: `${ height }px`
       }
     }
 
@@ -91,8 +91,8 @@ export default {
         this.hoverElement(item.id)
       }
 
-      return <span class={className}>
-        <a onClick={onClick} onMouseover={onMouseOver}>{item.label}</a>
+      return <span class={ className }>
+        <a onClick={ onClick } onMouseover={ onMouseOver }>{ item.label }</a>
       </span>
     })
 
@@ -116,11 +116,11 @@ export default {
       }
 
       removeElementBtn = <RemoveButton
-        class={removeClass}
-        nativeOnMouseover={removeHover}
-        nativeOnMouseleave={removeLeave}
-        nativeOnContextmenu={this.noop}
-        nativeOnClick={removeClick}
+        class={ removeClass }
+        nativeOnMouseover={ removeHover }
+        nativeOnMouseleave={ removeLeave }
+        nativeOnContextmenu={ this.noop }
+        nativeOnClick={ removeClick }
       />
 
       const copyClick = event => {
@@ -132,10 +132,10 @@ export default {
           })
       }
 
-      copyElementBtn = <a domPropsInnerHTML={SVGIcon(Icons.COPY)}
-        onClick={copyClick}
-        title={Tooltips.COPY_ELEMENT}
-        uk-tooltip="pos: top" />
+      copyElementBtn = <a domPropsInnerHTML={ SVGIcon(Icons.COPY) }
+        onClick={ copyClick }
+        title={ Tooltips.COPY_ELEMENT }
+        uk-tooltip='pos: top' />
     }
 
     let hoverTools
@@ -143,7 +143,7 @@ export default {
     const hoveredNotSelected = this.hoveredElement && this.selectedElement.id !== this.hoveredElement.id
     const isDragging = this.componentDragging || this.elementDragging
     if ((hoveredNotSelected || isDragging) && this.elementOffset.hovered) {
-      let {top, left, width, height} = this.elementOffset.hovered
+      let { top, left, width, height } = this.elementOffset.hovered
       if (isDragging) {
         top -= ElementOffsetGap
         left -= ElementOffsetGap
@@ -170,7 +170,7 @@ export default {
           'dropline--vertical': this.dropline.position.left || this.dropline.position.right
         }
 
-        let {left: dLeft, top: dTop, width: dWidth, height: dHeight} = this.dropline.offset
+        let { left: dLeft, top: dTop, width: dWidth, height: dHeight } = this.dropline.offset // eslint-disable-line
         dLeft = dLeft + ElementOffsetGap
         // dTop = dTop + ElementOffsetGap
         dWidth = dWidth - (ElementOffsetGap * 2)
@@ -187,28 +187,28 @@ export default {
         }
 
         const droplineStyles = {
-          left: `${dLeft}px`,
-          top: `${dTop}px`,
-          width: `${dWidth}px`
+          left: `${ dLeft }px`,
+          top: `${ dTop }px`,
+          width: `${ dWidth }px`
         }
-        droplineTools = <div class={[droplineClass, droplineClasses]} style={droplineStyles} />
+        droplineTools = <div class={ [droplineClass, droplineClasses] } style={ droplineStyles } />
       }
 
       hoveredStyles = {
-        top: `${top}px`,
-        left: `${left}px`,
-        width: `${width}px`,
-        height: `${height}px`
+        top: `${ top }px`,
+        left: `${ left }px`,
+        width: `${ width }px`,
+        height: `${ height }px`
       }
 
-      let activeClass = {}
+      const activeClass = {}
       activeClass[hoveredClass] = true
       activeClass[hoveredDraggingClass] = isDragging
 
-      hoverTools = <div class={activeClass} style={hoveredStyles}>
-        <div class={selectorToolClass}>
-          <div class={breadcrumbClass}>
-            <span>{this.breadcrumb.label}</span>
+      hoverTools = <div class={ activeClass } style={ hoveredStyles }>
+        <div class={ selectorToolClass }>
+          <div class={ breadcrumbClass }>
+            <span>{ this.breadcrumb.label }</span>
           </div>
         </div>
       </div>
@@ -216,22 +216,22 @@ export default {
 
     let selectTools
     if (!isDragging) {
-      selectTools = <div class={[selectedClass, selectedHoverClass]} style={selectedStyles}>
-        <div class={selectorToolClass}>
-          <div class={breadcrumbClass}>{breadcrumbEls}</div>
-          <div class={buttonClass}>
-            {copyElementBtn}
+      selectTools = <div class={ [selectedClass, selectedHoverClass] } style={ selectedStyles }>
+        <div class={ selectorToolClass }>
+          <div class={ breadcrumbClass }>{ breadcrumbEls }</div>
+          <div class={ buttonClass }>
+            { copyElementBtn }
           </div>
-          {removeElementBtn}
+          { removeElementBtn }
         </div>
       </div>
     }
 
     return (
-      <div class={mainClass}>
-        {selectTools}
-        {hoverTools}
-        {droplineTools}
+      <div class={ mainClass }>
+        { selectTools }
+        { hoverTools }
+        { droplineTools }
       </div>
     )
   }

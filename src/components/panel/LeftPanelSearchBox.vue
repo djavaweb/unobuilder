@@ -1,14 +1,14 @@
 <script>
-import {mapActions} from 'vuex'
-import {ClassPrefix, Labels, InputType} from '../../const'
-import {RandomUID} from '../../utils'
+import { mapActions } from 'vuex'
+import { ClassPrefix, Labels, InputType } from '../../const'
+import { RandomUID } from '../../utils'
 
 /* eslint-disable no-unused-vars */
 import Label from '../fields/Label'
 import Textbox from '../fields/Textbox'
 
-const mainClass = `${ClassPrefix.MAIN}__component-search-box`
-const textboxId = `input-${RandomUID()}`
+const mainClass = `${ ClassPrefix.MAIN }__component-search-box`
+const textboxId = `input-${ RandomUID() }`
 
 export default {
   name: 'LeftPanelSearchBox',
@@ -36,9 +36,9 @@ export default {
     }
 
     return (
-      <div class={mainClass}>
-        <Label {...{props: labelProps}} />
-        <Textbox nativeOnInput={onInput} props={{type: InputType.SEARCH}} {...{attrs: textAttrs}} />
+      <div class={ mainClass }>
+        <Label {...{ props: labelProps }} />
+        <Textbox nativeOnInput={ onInput } props={ { type: InputType.SEARCH } } { ...{ attrs: textAttrs } } />
       </div>
     )
   }

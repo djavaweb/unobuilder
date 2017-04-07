@@ -1,7 +1,7 @@
 <script>
-import {ClassPrefix} from '../../const'
+import { ClassPrefix } from '../../const'
 
-const mainClass = `${ClassPrefix.FIELDS}--switcher`
+const mainClass = `${ ClassPrefix.FIELDS }--switcher`
 
 export default {
   name: 'switcher',
@@ -13,7 +13,7 @@ export default {
   },
   render (h) {
     return (
-      <span class={[mainClass, {'switcher--checked': this.active}]} />
+      <span class={[mainClass, { 'switcher--checked': this.active }]} />
     )
   }
 }

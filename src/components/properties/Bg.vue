@@ -1,5 +1,5 @@
 <script>
-import {Icons, Labels, ButtonType, Tooltips} from '../../const'
+import { Icons, Labels, ButtonType, Tooltips } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import AccordionContent from '../accordion/AccordionContent'
@@ -64,7 +64,7 @@ export default {
     switch (this.openPanel) {
       case BACKGROUND_COLOR:
         bgPropTitleEl = Labels.BACKGROUND_COLOR_SETTINGS
-        bgPropContentEl = <Colorpicker on-update={this.bgColorUpdate} />
+        bgPropContentEl = <Colorpicker on-update={ this.bgColorUpdate } />
         break
 
       case BACKGROUND_IMAGE:
@@ -86,16 +86,16 @@ export default {
     let bgPropEl
     if (this.openPanel) {
       bgPropEl = <AccordionContent>
-        <AccordionContentItem label={bgPropTitleEl}>{bgPropContentEl}</AccordionContentItem>
+        <AccordionContentItem label={ bgPropTitleEl }>{ bgPropContentEl }</AccordionContentItem>
       </AccordionContent>
     }
 
     return (
       <div>
-        <Row label={{text: Labels.SELECT_TYPE, bold: true}}>
-          <ButtonGroup type={ButtonType.SECONDARY} items={typeSelectorButtons} />
+        <Row label={ { text: Labels.SELECT_TYPE, bold: true } }>
+          <ButtonGroup type={ ButtonType.SECONDARY } items={ typeSelectorButtons } />
         </Row>
-        {bgPropEl}
+        { bgPropEl }
       </div>
     )
   }

@@ -1,10 +1,10 @@
 <script>
-import {ClassPrefix, Labels} from '../../const'
+import { ClassPrefix, Labels } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import Label from '../fields/Label'
 
-const mainClass = `${ClassPrefix.ACCORDION}-content-item`
+const mainClass = `${ ClassPrefix.ACCORDION }-content-item`
 
 export default {
   name: 'accordionContent',
@@ -23,13 +23,13 @@ export default {
         uppercase: true,
         bold: true
       }
-      itemLabel = <Label {...{props}} />
+      itemLabel = <Label { ...{ props } } />
     }
 
     return (
-      <div class={mainClass}>
-        {itemLabel}
-        {this.$slots.default}
+      <div class={ mainClass }>
+        { itemLabel }
+        { this.$slots.default }
       </div>
     )
   }

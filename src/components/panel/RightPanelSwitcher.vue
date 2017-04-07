@@ -1,8 +1,8 @@
 <script>
-import {ClassPrefix, Labels, Tooltips} from '../../const'
-import {mapGetters, mapActions} from 'vuex'
+import { ClassPrefix, Labels, Tooltips } from '../../const'
+import { mapGetters, mapActions } from 'vuex'
 
-const mainClass = `${ClassPrefix.MAIN}__property-switcher`
+const mainClass = `${ ClassPrefix.MAIN }__property-switcher`
 const switcher = [
   {
     global: false,
@@ -53,13 +53,13 @@ export default {
         }
       }
 
-      return <a class={classes} {...{attrs}} onClick={switcherOnClick}>
-        {item.label}
+      return <a class={ classes } {...{ attrs }} onClick={ switcherOnClick }>
+        { item.label }
       </a>
     })
 
     return (
-      <div class={mainClass}>{switcherEls}</div>
+      <div class={ mainClass }>{ switcherEls }</div>
     )
   }
 }

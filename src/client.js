@@ -2,8 +2,8 @@
 import $ from 'jquery'
 import async from 'async'
 import UnoBuilderParser from 'unobuilder-parser'
-import {RandomUID} from './utils'
-import {extend, omit} from 'lodash'
+import { RandomUID } from './utils'
+import { extend, omit } from 'lodash'
 
 // Define static vars
 const errorMessages = {
@@ -122,7 +122,7 @@ class UnoBuilder {
    * @param  {Function} fn
    */
   on (...args) {
-    let argsLength = args.length
+    const argsLength = args.length
     let eventType
     let fn
     let callback
@@ -164,7 +164,7 @@ class UnoBuilder {
    * @param  {String} eventType [description]
    */
   off (...args) {
-    let argsLength = args.length
+    const argsLength = args.length
     let eventType
 
     switch (argsLength) {
@@ -194,8 +194,8 @@ class UnoBuilder {
    * @param  {Object|String|Number|Array} variables
    */
   emit (...args) {
-    let argsLength = args.length
-    let eventType = args[0]
+    const argsLength = args.length
+    const eventType = args[0]
     let variables
     let vars
 
@@ -211,7 +211,7 @@ class UnoBuilder {
     const { eventList } = this.__registry__
 
     if (eventList[eventType]) {
-      let arr = eventList[eventType]
+      const arr = eventList[eventType]
       // emit callback
       for (let i = 0; i < arr.length; i++) {
         arr[i].callback && arr[i].callback.call(this, vars)
@@ -247,7 +247,7 @@ class UnoBuilder {
    * @param {String} url
    */
   addComponent (url) {
-    let type = 'component'
+    const type = 'component'
     return this.addQueue(url, type)
   }
 
@@ -256,7 +256,7 @@ class UnoBuilder {
    * @param {String} url
    */
   addBlock (url) {
-    let type = 'block'
+    const type = 'block'
     return this.addQueue(url, type)
   }
 
@@ -266,14 +266,14 @@ class UnoBuilder {
   */
   loadElementJson (scriptPath, element) {
     return new Promise((resolve, reject) => {
-      $.getJSON(`${scriptPath}/${element}.json`, json => {
+      $.getJSON(`${ scriptPath }/${ element }.json`, json => {
         if (json.id) {
-          json.icon = `${scriptPath}/${json.icon}`
+          json.icon = `${ scriptPath }/${ json.icon }`
           resolve(json)
         } else {
-          reject(new Error(`${errorMessages.invalidJSON}, url: ${scriptPath}/${element}.json`))
+          reject(new Error(`${ errorMessages.invalidJSON }, url: ${ scriptPath }/${ element }.json`))
         }
-      }).fail(() => reject(new Error(`${errorMessages.invalidJSON}, url: ${scriptPath}/${element}.json`)))
+      }).fail(() => reject(new Error(`${ errorMessages.invalidJSON }, url: ${ scriptPath }/${ element }.json`)))
     })
   }
 
@@ -284,14 +284,14 @@ class UnoBuilder {
   loadElementTemplate (scriptPath, element) {
     // Load Markup template
     return new Promise((resolve, reject) => {
-      $.get(`${scriptPath}/${element}.html`, res => {
-        let template = $.trim(res.replace(/[\t\n]+/g, ' '))
+      $.get(`${ scriptPath }/${ element }.html`, res => {
+        const template = $.trim(res.replace(/[\t\n]+/g, ' '))
         if (template !== '') {
           resolve(template)
         } else {
-          reject(new Error(`${errorMessages.invalidTemplate}, url: ${scriptPath}/${element}.html`))
+          reject(new Error(`${ errorMessages.invalidTemplate }, url: ${ scriptPath }/${ element }.html`))
         }
-      }).fail(() => reject(new Error(`${errorMessages.TemplateNotfound}, url: ${scriptPath}/${element}.html`)))
+      }).fail(() => reject(new Error(`${ errorMessages.TemplateNotfound }, url: ${ scriptPath }/${ element }.html`)))
     })
   }
 
@@ -304,7 +304,7 @@ class UnoBuilder {
 
     // Get component object from js file
     // For closure purpose
-    let data = {
+    const data = {
       _id: RandomUID(),
       path: scriptPath
     }
@@ -324,10 +324,10 @@ class UnoBuilder {
         data.template = new UnoBuilderParser(template)
 
         // Add component to list
-        this.__registry__[`${element}s`][data.settings.id] = data
+        this.__registry__[`${ element }s`][data.settings.id] = data
 
         // Register script
-        this.registerScript(url, `${element}-${data.id}`)
+        this.registerScript(url, `${ element }-${ data.id }`)
       })
   }
 
@@ -362,7 +362,7 @@ class UnoBuilder {
   }
 
   registerScript (url) {
-    let script = document.createElement('script')
+    const script = document.createElement('script')
     script.src = url
     document.body.appendChild(script)
   }
@@ -382,7 +382,7 @@ class UnoBuilder {
 
       // Duplicate data that doesn't have events name
       if (options.data) {
-        let data = omit(options.data, actionObjectException)
+        const data = omit(options.data, actionObjectException)
         extend(registry[element][name], data)
       }
 

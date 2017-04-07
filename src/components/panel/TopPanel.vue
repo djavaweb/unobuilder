@@ -1,6 +1,6 @@
 <script>
-import {ClassPrefix} from '../../const'
-import {mapGetters, mapActions} from 'vuex'
+import { ClassPrefix } from '../../const'
+import { mapGetters, mapActions } from 'vuex'
 
 /* eslint-disable no-unused-vars */
 import ScreenSwitcher from './TopPanelScreenSwitcher'
@@ -30,7 +30,7 @@ export default {
     }
 
     return (
-      <div onClick={onClick} class={[ClassPrefix.TOP_PANEL, previewClasses]}>
+      <div onClick={ onClick } class={ [ClassPrefix.TOP_PANEL, previewClasses] }>
         <ScreenSwitcher />
         <StateTools />
       </div>

@@ -30,7 +30,7 @@ const mutations = {
     // state.globalProperties = object
   }
 
-  // [mutation.SET_PROPERTY] (state, {element, kind, properties}) {
+  // [mutation.SET_PROPERTY] (state, { element, kind, properties }) {
   //   let cssObject = element.cssProperties[state.screenSize]
 
   //   if (state.globalProperty.active) {
@@ -123,7 +123,7 @@ const actions = {
    * @param String value
    * @return void
    */
-  setCustomStyles ({commit}, value) {
+  setCustomStyles ({ commit }, value) {
     commit(mutation.SET_CUSTOM_STYLES, value)
   },
 
@@ -134,13 +134,13 @@ const actions = {
   // /**
   //  * Change property value
   //  *
-  //  * @param Function {commit}
-  //  * @param Object {rootState}
-  //  * @param Object {state}
+  //  * @param Function { commit }
+  //  * @param Object { rootState }
+  //  * @param Object { state }
   //  * @param Object properties
   //  * @return void
   //  **/
-  // setPropertyValue ({commit, rootState, state}, properties) {
+  // setPropertyValue ({ commit, rootState, state }, properties) {
   //   const { elements } = rootState
   //   const { selected } = elements
 
@@ -166,7 +166,7 @@ const actions = {
   //  * @param  {Object} options.state
   //  * @return {void}
   //  */
-  // enableGlobalProperty ({commit}) {
+  // enableGlobalProperty ({ commit }) {
   //   commit(mutation.ENABLE_GLOBAL_PROPERTY)
   // },
 
@@ -175,7 +175,7 @@ const actions = {
   //  * @param  {Object} options.state
   //  * @return {void}
   //  */
-  // disableGlobalProperty ({commit}) {
+  // disableGlobalProperty ({ commit }) {
   //   commit(mutation.DISABLE_GLOBAL_PROPERTY)
   // }
 }
@@ -229,7 +229,7 @@ const getters = {
   //     cssProperties[item] = true
   //   })
 
-  //   const {selectedElement, screenSize} = rootState
+  //   const { selectedElement, screenSize } = rootState
   //   if (selectedElement) {
   //     let cssObject = selectedElement.cssProperties[screenSize]
   //     const globalClassName = utils.GlobalClassName(selectedElement.kind, '.')

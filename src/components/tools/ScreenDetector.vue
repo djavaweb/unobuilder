@@ -1,10 +1,10 @@
 <script>
-import {ClassPrefix, SafeScreenSize, Labels} from '../../const'
+import { ClassPrefix, SafeScreenSize, Labels } from '../../const'
 
-const alertClass = `${ClassPrefix.SCREEN}-alert`
-const alertIconClass = `${alertClass}__icon`
-const alertBrowserClass = `${alertClass}__browser`
-const alertResizeClass = `${alertClass}__resize`
+const alertClass = `${ ClassPrefix.SCREEN }-alert`
+const alertIconClass = `${ alertClass }__icon`
+const alertBrowserClass = `${ alertClass }__browser`
+const alertResizeClass = `${ alertClass }__resize`
 
 export default {
   name: 'screenDetector',
@@ -39,11 +39,11 @@ export default {
     }
 
     return (
-      <div class={[ClassPrefix.SCREEN, classes]}>
-        <div class={alertClass}>
-          <div class={alertIconClass} uk-icon="icon: expand; ratio: 5" />
-          <div class={alertBrowserClass}>{Labels.BROWSER_TOO_SMALL}</div>
-          <div class={alertResizeClass}>{Labels.RESIZE_BROWSER}</div>
+      <div class={ [ClassPrefix.SCREEN, classes] }>
+        <div class={ alertClass }>
+          <div class={ alertIconClass } uk-icon='icon: expand; ratio: 5' />
+          <div class={ alertBrowserClass }>{ Labels.BROWSER_TOO_SMALL }</div>
+          <div class={ alertResizeClass }>{ Labels.RESIZE_BROWSER }</div>
         </div>
       </div>
     )
