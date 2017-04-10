@@ -28,7 +28,9 @@ export default {
       'hideContextMenu',
       'hideBlockPanel',
       'addElement',
-      'switchBlockItem'
+      'selectElement',
+      'switchBlockItem',
+      'setDefaultStyle'
     ])
   },
   data () {
@@ -78,8 +80,11 @@ export default {
           object: item.template,
           appendTo: this.rootElement.id,
           index: this.blockIndex
+        }).then(object => {
+          this.selectElement(object.id)
+          this.setDefaultStyle(object)
+          this.hideBlockPanel()
         })
-        this.hideBlockPanel()
       }
 
       const styles = {
