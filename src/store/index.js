@@ -6,7 +6,6 @@ import tools from './modules/tools'
 import elements from './modules/elements'
 import components from './modules/components'
 import NodeUtils from './helpers/node-utils'
-import { Labels } from '../const'
 
 Vue.use(Vuex)
 
@@ -37,13 +36,11 @@ const actions = {
     dispatch('toggleInputPanel', '')
   },
 
-  setStyle ({ getters, dispatch }, payload) {
-    const { mouseState = Labels.MOUSE_STATE_NONE, disabled = false, styles } = payload
+  setStyle ({ getters, dispatch }, { styles = {}, element, snapshot }) {
     dispatch('setElementStyle', {
       global: false,
       screenSize: getters.screenSize,
-      mouseState,
-      disabled,
+      element,
       styles
     })
   },

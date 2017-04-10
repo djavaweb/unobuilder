@@ -3,13 +3,15 @@ import Uno from 'uno'
 import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
 import {
+  Labels,
   RootElementTag,
   VoidElements,
   NestedableRules,
   MoveAction,
   ElementOffsetGap,
   ScreenType,
-  MouseType
+  MouseType,
+  AvailableProps
 } from '../../const'
 import { isEqual } from 'lodash'
 import NodeUtils from '../helpers/node-utils'
@@ -92,12 +94,16 @@ const mutations = {
    * - Insert the old current state at the beginning of the next state.
    */
   [mutation.UNDO_ELEMENT] (state) {
-    const { prev, current, next } = state
+    const { prev, current, next, selected } = state
 
-    if (prev.length > 0) {
+    if (prev.length > 1) {
       state.prev = prev.slice(0, prev.length - 1)
       state.current = prev[prev.length - 1]
       state.next = [current, ...next]
+      const newSelected = NodeHelpers.getElementObject(selected.id, state.current)
+      if (newSelected) {
+        state.selected = newSelected
+      }
     }
   },
 
@@ -108,12 +114,16 @@ const mutations = {
    * - Insert the old current state at the end of the prev state.
    */
   [mutation.REDO_ELEMENT] (state) {
-    const { prev, current, next } = state
+    const { prev, current, next, selected } = state
 
     if (next.length > 0) {
       state.prev = [...prev, current]
       state.current = next[0]
       state.next = next.slice(1)
+      const newSelected = NodeHelpers.getElementObject(selected.id, state.current)
+      if (newSelected) {
+        state.selected = newSelected
+      }
     }
   },
 
@@ -299,17 +309,18 @@ const mutations = {
     state.dropline = Object.assign(defaultDropline, options)
   },
 
-  [mutation.SET_ELEMENT_STYLE] (state, { screenSize, mouseState, disabled, styles }) {
-    const selected = NodeHelpers.getElementObject(state.selected.id, state.snapshot)
-    const object = {}
+  [mutation.SET_ELEMENT_STYLE] (state, { element, snapshot, screenSize, mouseState, disabled, styles }) {
+    const fromElement = snapshot ? state.snapshot : state.current
+    const el = element ? NodeHelpers.getElementObjectByNode(element).id : state.selected.id
+
+    const selected = NodeHelpers.getElementObject(el, fromElement)
     for (const key in styles) {
       const value = styles[key]
-      object[key] = {
+      selected.cssProperties[screenSize][mouseState][key] = {
         disabled,
         value
       }
     }
-    selected.cssProperties[screenSize][mouseState] = object
   }
 }
 
@@ -327,7 +338,6 @@ const actions = {
    * @return {void}
    */
   undoElement ({ commit, state, dispatch }) {
-    dispatch('reselectElement')
     if (state.prev.length > 1) {
       commit(mutation.UNDO_ELEMENT)
 
@@ -345,7 +355,6 @@ const actions = {
    */
   redoElement ({ commit, dispatch }) {
     if (state.next.length > 0) {
-      dispatch('reselectElement')
       commit(mutation.REDO_ELEMENT)
       // Select root element
       commit(mutation.SET_WINDOW_SCROLL, '+1')
@@ -361,12 +370,13 @@ const actions = {
    * @param {String} options.appendTo
    * @return {void}
    */
-  addElement ({ commit }, options) {
+  addElement ({ commit, state, dispatch }, options) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
     commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.ADD_ELEMENT, options)
     commit(mutation.APPLY_ELEMENT)
     commit(mutation.SET_WINDOW_SCROLL, '-1')
+    return options.object
   },
 
   /**
@@ -475,72 +485,25 @@ const actions = {
   selectElement ({ commit, state }, id) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
 
-    if (!id && state.selected) {
-      id = state.selected.id
+    if (!id) {
+      return
     }
 
     if (id.tagName) {
       id = utils.GetNodeId(id)
     }
 
-    // It has been selected before
-    let { selected: element } = state
-    if (element) {
-      commit(mutation.SELECT_ELEMENT, {
-        element,
-        selected: false
-      })
-    }
-
-    // Reselect element
-    element = NodeHelpers.getElementObject(id)
-    if (element) {
-      commit(mutation.SELECT_ELEMENT, {
-        element,
-        selected: true
-      })
-    }
+    const element = NodeHelpers.getElementObject(id)
+    commit(mutation.SELECT_ELEMENT, {
+      element,
+      selected: true
+    })
 
     // Hide all breadcrumbs again
     commit(mutation.TOGGLE_BREADCRUMB, false)
     commit(mutation.SET_WINDOW_SCROLL, '-1')
 
-    // const element
-
-    // if (state.selected) {
-    //   // this.$set(this.selectedElement, 'selected', false)
-    //   // if (this.selectedElement.dataObject.attrs.contenteditable) {
-    //   //   const prevElementNode = node.NodeHelpers.GetElementNodeById(this.selectedElement.id, this.elements)
-
-    //   //   if (prevElementNode.innerHTML.length > 0) {
-    //   //     this.$set(this.selectedElement.dataObject.domProps, 'innerHTML', prevElementNode.innerHTML)
-    //   //   } else {
-    //   //     this.removeElement(this.selectedElement.id)
-    //   //   }
-
-    //   //   if (this.selectedElement.id !== id) {
-    //   //     this.setContentEditable(false)
-    //   //   }
-    //   // }
-    //   commit(mutation.SELECT_ELEMENT, { element: state.selected, selected: false })
-
-    //   // if (state.selected.dataObject.attrs.contenteditable) {
-    //   //   commit(mutation.SNAPSHOT_ELEMENT)
-
-    //   //   const prevElement = NodeHelpers.getElementNodeById(state.selected.id, state.current)
-    //   //   if (prevElement.innerHTML.length > 0) {
-    //   //     console.log('bbaba')
-    //   //   } else {
-    //   //     commit(mutation.REMOVE_ELEMENT, state.selected.id)
-    //   //   }
-
-    //   //   commit(mutation.APPLY_ELEMENT)
-    //   // }
-    // }
-
-    // if (element) {
-    //   commit(mutation.SELECT_ELEMENT, { element, selected: true })
-    // }
+    return element
   },
 
   hoverElement ({ commit }, id) {
@@ -610,10 +573,19 @@ const actions = {
     commit(mutation.SET_DROPLINE, options)
   },
 
-  setElementStyle ({ state, commit, dispatch }, object) {
-    commit(mutation.SNAPSHOT_ELEMENT)
+  setElementStyle ({ state, commit, dispatch }, payload) {
+    const object = Object.assign({
+      element: undefined,
+      mouseState: Labels.MOUSE_STATE_NONE,
+      disabled: false,
+      snapshot: true
+    }, payload)
+
+    console.log(object)
+
+    if (object.snapshot) commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.SET_ELEMENT_STYLE, object)
-    commit(mutation.APPLY_ELEMENT)
+    if (object.snapshot) commit(mutation.APPLY_ELEMENT)
     dispatch('reselectElement')
   },
 
@@ -626,6 +598,39 @@ const actions = {
         element: selected,
         selected: true
       })
+    }
+  },
+
+  setDefaultStyle ({ getters, dispatch }, object) {
+    const { iframeWindow, screenSize } = getters
+
+    if (iframeWindow) {
+      const recursive = elObject => {
+        const element = NodeHelpers.getElementNodeById(elObject.id)
+        const computedStyle = iframeWindow.getComputedStyle(element)
+        const styles = {}
+        AvailableProps.forEach(propName => {
+          if (computedStyle[propName] && !object.cssProperties[screenSize].none[propName]) {
+            styles[propName] = computedStyle[propName]
+          }
+        })
+
+        dispatch('setElementStyle', {
+          element,
+          screenSize,
+          snapshot: false,
+          styles
+        })
+
+        if (elObject.childNodes.length > 0) {
+          for (let i = 0; i < elObject.childNodes.length; i++) {
+            const child = elObject.childNodes[i]
+            recursive(child)
+          }
+        }
+      }
+
+      recursive(object)
     }
   }
 }
@@ -932,13 +937,11 @@ const getters = {
               const currentMouseState = mousestate[mousestateIndex]
               const currentProps = properties[currentScreensize][currentMouseState]
               const inProperties = propName in currentProps
-              // console.log(`cari ${ propName } di ${ currentScreensize }: ${ currentMouseState }`)
               if (inProperties) {
                 const validProps = currentProps[propName].value && currentProps[propName].disabled !== true
                 const inCssProperties = propName in cssProperties
 
                 if (validProps && !inCssProperties) {
-                  // console.log(`--- cari ${ propName } di ${ currentScreensize }: ${ currentMouseState } ada`)
                   cssProperties[propName] = currentProps[propName].value
                 }
               }

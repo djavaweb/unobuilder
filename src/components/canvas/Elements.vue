@@ -59,7 +59,9 @@ export default {
       'enableDragElement',
       'disableDragElement',
       'moveElement',
-      'setDropline'
+      'setDropline',
+      'setDefaultStyle',
+      'selectElement'
     ]),
 
     resetInterval () {
@@ -126,6 +128,9 @@ export default {
             object: item.template,
             appendTo: target.getAttribute(SelectorAttrId),
             index: 0
+          }).then(object => {
+            this.selectElement(object.id)
+            this.setDefaultStyle(object)
           })
         }
       }
