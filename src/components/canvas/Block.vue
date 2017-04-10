@@ -1,14 +1,14 @@
 <script>
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, Icons} from '../../const'
-import {SVGIcon} from '../../utils'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix, Icons } from '../../const'
+import { SVGIcon } from '../../utils'
 import uno from '../../client'
 
-const mainClass = `${ClassPrefix.CANVAS}-block-component`
-const addClass = `${mainClass}__add-button`
-const boxClass = `${mainClass}__box`
-const itemClass = `${mainClass}__block-item`
-const blockItemsClass = `${mainClass}__block-items`
+const mainClass = `${ ClassPrefix.CANVAS }-block-component`
+const addClass = `${ mainClass }__add-button`
+const boxClass = `${ mainClass }__box`
+const itemClass = `${ mainClass }__block-item`
+const blockItemsClass = `${ mainClass }__block-items`
 
 export default {
   name: 'canvasBlockComponent',
@@ -41,9 +41,9 @@ export default {
     const blockNavList = []
     const blockItemList = []
 
-    for (let id in blockList) {
+    for (const id in blockList) {
       const item = uno.getBlockItem(id)
-      const {group} = item.settings
+      const { group } = item.settings
 
       blockItemList.push(item)
 
@@ -64,7 +64,7 @@ export default {
         'active': this.openBlockPanel === item
       }
       return <li>
-        <a onClick={onClick} class={classes}>{item}</a>
+        <a onClick={ onClick } class={ classes }>{ item }</a>
       </li>
     })
 
@@ -83,7 +83,7 @@ export default {
       }
 
       const styles = {
-        backgroundImage: `url(${item.settings.icon})`
+        backgroundImage: `url(${ item.settings.icon })`
       }
 
       const imageClass = {
@@ -91,9 +91,9 @@ export default {
         'no-image': !item.settings.icon
       }
 
-      return <div class={itemClass}>
-        <div class={imageClass} style={styles} onClick={onClick} />
-        <div class="label">{item.settings.label}</div>
+      return <div class={ itemClass }>
+        <div class={ imageClass } style={ styles } onClick={ onClick } />
+        <div class='label'>{ item.settings.label }</div>
       </div>
     })
 
@@ -102,11 +102,11 @@ export default {
     }
 
     const addBlockStyles = {
-      top: `${this.blockPosition - 15}px`
+      top: `${ this.blockPosition - 15 }px`
     }
 
     const boxStyles = {
-      top: `${this.blockPosition}px`
+      top: `${ this.blockPosition }px`
     }
 
     const addOnClick = event => {
@@ -115,16 +115,16 @@ export default {
     }
 
     return (
-      <div class={mainClass}>
-        <a class={addClass}
-          onClick={addOnClick}
-          onContextmenu={this.noop}
-          domPropsInnerHTML={SVGIcon(Icons.ADD_BLOCK)}
-          style={addBlockStyles} />
-        <div class={[boxClass, boxClasses]} style={boxStyles}>
-          <ul>{blockNav}</ul>
-          <div class={blockItemsClass}>
-            {blockItem}
+      <div class={ mainClass }>
+        <a class={ addClass }
+          onClick={ addOnClick }
+          onContextmenu={ this.noop }
+          domPropsInnerHTML={ SVGIcon(Icons.ADD_BLOCK) }
+          style={ addBlockStyles } />
+        <div class={ [boxClass, boxClasses] } style={ boxStyles }>
+          <ul>{ blockNav }</ul>
+          <div class={ blockItemsClass }>
+            { blockItem }
           </div>
         </div>
       </div>

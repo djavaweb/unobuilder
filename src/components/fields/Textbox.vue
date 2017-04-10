@@ -1,6 +1,6 @@
 <script>
-import {ClassPrefix, InputType} from '../../const'
-const mainClass = `${ClassPrefix.FIELDS}--text-box`
+import { ClassPrefix, InputType } from '../../const'
+const mainClass = `${ ClassPrefix.FIELDS }--text-box`
 export default {
   name: 'textbox',
   props: {
@@ -14,7 +14,7 @@ export default {
   },
   render (h) {
     return (
-      <input class={mainClass} type={this.type} value={this.value} />
+      <input class={ mainClass } type={ this.type } value={ this.value } />
     )
   }
 }

@@ -26,17 +26,17 @@ const mutations = {
 }
 
 const actions = {
-  addComponent ({commit}, component) {
+  addComponent ({ commit }, component) {
     commit(mutation.ADD_COMPONENT, component)
   },
-  toggleDragComponent ({commit}, status) {
+  toggleDragComponent ({ commit }, status) {
     commit(mutation.TOGGLE_DRAG_COMPONENT, status)
   },
-  enableDragComponent ({commit}, id) {
+  enableDragComponent ({ commit }, id) {
     commit(mutation.TOGGLE_DRAG_COMPONENT, true)
     commit(mutation.SET_ACTIVE_COMPONENT, id)
   },
-  disableDragComponent ({commit}) {
+  disableDragComponent ({ commit }) {
     commit(mutation.TOGGLE_DRAG_COMPONENT, false)
     commit(mutation.CLEAR_ACTIVE_COMPONENT)
   }

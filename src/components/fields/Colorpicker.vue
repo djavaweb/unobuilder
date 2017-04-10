@@ -1,13 +1,13 @@
 <script>
-import {ClassPrefix, Labels} from '../../const'
+import { ClassPrefix, Labels } from '../../const'
 
 /* eslint-disable no-unused-vars */
 import Colorpicker from 'vue-sketch-color-picker'
 import Button from '../fields/Button'
 
-const mainClass = `${ClassPrefix.FIELDS}--color-picker`
-const boxClass = `${mainClass}__box`
-const overlayClass = `${ClassPrefix.RIGHT_PANEL}__overlay`
+const mainClass = `${ ClassPrefix.FIELDS }--color-picker`
+const boxClass = `${ mainClass }__box`
+const overlayClass = `${ ClassPrefix.RIGHT_PANEL }__overlay`
 
 export default {
   name: 'Colorpicker',
@@ -79,10 +79,10 @@ export default {
       const boxStyles = {
         backgroundColor: this.currentColor.hex
       }
-      boxPicker = <a class={boxClass} style={boxStyles} onClick={this.openPopup}></a>
+      boxPicker = <a class={ boxClass } style={ boxStyles } onClick={ this.openPopup }></a>
     }
 
-    const sketchColorPicker = <Colorpicker scheme="dark" on-update={this.update} {...{props: {colors: this.colors}}} />
+    const sketchColorPicker = <Colorpicker scheme='dark' on-update={ this.update } {...{ props: { colors: this.colors } } } /> // eslint-disable-line
     let colorPicker
 
     if (!this.popup) {
@@ -90,14 +90,14 @@ export default {
     }
 
     if (this.popup && this.display) {
-      colorPicker = <div class={overlayClass} onClick={this.closePopup}>
-        {sketchColorPicker}
-        <Button nativeOnClick={this.hidePopup} label={Labels.OK} />
+      colorPicker = <div class={ overlayClass } onClick={ this.closePopup }>
+        { sketchColorPicker }
+        <Button nativeOnClick={ this.hidePopup } label={ Labels.OK } />
       </div>
     }
 
     return (
-      <div class={mainClass}> {boxPicker} {colorPicker}</div>
+      <div class={ mainClass }> { boxPicker } { colorPicker }</div>
     )
   }
 }

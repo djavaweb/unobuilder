@@ -1,8 +1,8 @@
 <script>
-import {mapActions, mapGetters} from 'vuex'
-import {ClassPrefix} from '../../const'
+import { mapActions, mapGetters } from 'vuex'
+import { ClassPrefix } from '../../const'
 
-const mainClass = `${ClassPrefix.CANVAS}-context-menu`
+const mainClass = `${ ClassPrefix.CANVAS }-context-menu`
 
 const contextMenus = [
   {
@@ -78,25 +78,25 @@ export default {
     ])
   },
   render (h) {
-    const {x, y} = this.contextMenuCoords
+    const { x, y } = this.contextMenuCoords
     const styles = {
-      left: `${x}px`,
-      top: `${y}px`
+      left: `${ x }px`,
+      top: `${ y }px`
     }
 
     const contextMenuEls = contextMenus.map(item => {
       if (item === '-') {
-        return <span class="separator"></span>
+        return <span class='separator'></span>
       }
 
-      return <a onContextmenu={this.noop}>
-        <span class="label">{item.label}</span>
-        <span class="shortcut" domPropsInnerHTML={item.shortcut}></span>
+      return <a onContextmenu={ this.noop }>
+        <span class='label'>{ item.label }</span>
+        <span class='shortcut' domPropsInnerHTML={ item.shortcut }></span>
       </a>
     })
 
     return (
-      <div class={mainClass} style={styles}>{contextMenuEls}</div>
+      <div class={ mainClass } style={ styles }>{ contextMenuEls }</div>
     )
   }
 }

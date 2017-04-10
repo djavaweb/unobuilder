@@ -1,7 +1,7 @@
 <script>
 import uno from 'uno'
-import {mapGetters, mapActions} from 'vuex'
-import {ClassPrefix, Labels} from '../const'
+import { mapGetters, mapActions } from 'vuex'
+import { ClassPrefix, Labels } from '../const'
 
 /* eslint-disable no-unused-vars */
 import ScreenDetector from './tools/ScreenDetector'
@@ -49,13 +49,13 @@ export default {
   },
   render (h) {
     return (
-      <div class={ClassPrefix.MAIN}>
-        <ScreenLoader ref="screenLoader" />
-        <ScreenDetector ref="screenDetector" />
-        <TopPanel ref="topPanel" onMouseOver={this.hoverTopPanel} />
-        <LeftPanel ref="leftPanel" onMouseOver={this.hoverLeftPanel} />
-        <Workspace ref="workspace" onMouseOver={this.hoverCenterPanel} />
-        <RightPanel ref="rightPanel" onMouseOver={this.hoverRightPanel} />
+      <div class={ ClassPrefix.MAIN }>
+        <ScreenLoader ref='screenLoader' />
+        <ScreenDetector ref='screenDetector' />
+        <TopPanel ref='topPanel' onMouseOver={ this.hoverTopPanel } />
+        <LeftPanel ref='leftPanel' onMouseOver={ this.hoverLeftPanel } />
+        <Workspace ref='workspace' onMouseOver={ this.hoverCenterPanel } />
+        <RightPanel ref='rightPanel' onMouseOver={ this.hoverRightPanel } />
       </div>
     )
   }

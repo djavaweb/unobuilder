@@ -1,9 +1,9 @@
 <script>
-import {ClassPrefix, ScreenType, Tooltips, Icons} from '../../const'
-import {SVGIcon} from '../../utils'
-import {mapGetters, mapActions} from 'vuex'
+import { ClassPrefix, ScreenType, Tooltips, Icons } from '../../const'
+import { SVGIcon } from '../../utils'
+import { mapGetters, mapActions } from 'vuex'
 
-const mainClass = `${ClassPrefix.TOP_PANEL}-screen-switcher`
+const mainClass = `${ ClassPrefix.TOP_PANEL }-screen-switcher`
 
 export default {
   name: 'topPanelScreenSwitcher',
@@ -25,10 +25,10 @@ export default {
       const classes = {
         'screen-switcher--active': this.screenSize === screenSize
       }
-      classes[`${ClassPrefix.MAIN}__screen-switcher--${screenSize}`] = true
+      classes[`${ ClassPrefix.MAIN }__screen-switcher--${ screenSize }`] = true
 
       const attrs = {
-        title: Tooltips[`SCREEN_${size}`],
+        title: Tooltips[`SCREEN_${ size }`],
         'uk-tooltip': true
       }
 
@@ -38,14 +38,14 @@ export default {
       }
 
       return <a
-        class={[classes]}
-        domPropsInnerHTML={SVGIcon(Icons[`SCREEN_${size}`])}
-        onClick={onClick}
-        {...{attrs}} />
+        class={ [classes] }
+        domPropsInnerHTML={SVGIcon(Icons[`SCREEN_${ size }`])}
+        onClick={ onClick }
+        {...{ attrs }} />
     })
 
     return (
-      <div class={mainClass}>{toolbars}</div>
+      <div class={ mainClass }>{ toolbars }</div>
     )
   }
 }
