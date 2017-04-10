@@ -13,6 +13,8 @@ export default {
       'elements',
       'selectedElement',
       'iframeBody',
+      'iframeWindow',
+      'iframeDocument',
       'elementDragging',
       'previewMode',
       'customStyles',
@@ -25,7 +27,9 @@ export default {
       'addElement',
       'removeElement',
       'selectElement',
-      'editContent'
+      'editContent',
+      'setStyle',
+      'setDefaultStyle'
     ])
   },
   mounted () {
@@ -49,7 +53,9 @@ export default {
       // Add root element
       this.addElement({
         object: new HTMLParser(`<div ${ RootElementTag }="true" kind="layout"></div>`)
-      })
+      }).then(
+        object => this.setDefaultStyle(object)
+      )
 
       // Select root element
       this.$nextTick(() => {
