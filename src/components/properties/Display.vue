@@ -37,7 +37,8 @@ export default {
   },
   methods: {
     ...mapActions([
-      'setStyle'
+      'setStyle',
+      'reselectElement'
     ]),
 
     setDisplay (value) {
@@ -46,7 +47,8 @@ export default {
         styles: {
           display: value
         }
-      }).then(() => {
+      })
+      .then(() => {
         this.$forceUpdate()
       })
     }
