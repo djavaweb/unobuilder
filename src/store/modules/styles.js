@@ -28,19 +28,19 @@ const mutations = {
 
   [mutation.SET_GLOBAL_STYLE] (state, object) {
     // state.globalProperties = object
-  }
+  },
 
   // [mutation.SET_PROPERTY] (state, { element, kind, properties }) {
   //   let cssObject = element.cssProperties[state.screenSize]
 
-  //   if (state.globalProperty.active) {
+  //   if (state.globalStyleActive) {
   //     const globalClassName = utils.GlobalClassName(kind, '.')
-  //     const globalProperty = state.globalProperty.snapshot[state.screenSize]
+  //     const globalStyleActive = state.globalStyleActive.snapshot[state.screenSize]
 
-  //     if (!globalProperty[globalClassName]) {
-  //       globalProperty[globalClassName] = {}
+  //     if (!globalStyleActive[globalClassName]) {
+  //       globalStyleActive[globalClassName] = {}
   //     }
-  //     cssObject = globalProperty[globalClassName]
+  //     cssObject = globalStyleActive[globalClassName]
   //   }
 
   //   for (let key in properties) {
@@ -56,14 +56,14 @@ const mutations = {
   //  * - Clear the next state.
   //  */
   // [mutation.APPLY_PROPERTY] (state) {
-  //   let { prev, current, snapshot } = state.globalProperty
+  //   let { prev, current, snapshot } = state.globalStyleActive
   //   const snapshotObject = utils.CloneObject(snapshot)
 
   //   if (!isEqual(snapshotObject, current)) {
-  //     state.globalProperty.prev = [...prev, current]
-  //     state.globalProperty.current = snapshotObject
-  //     state.globalProperty.snapshot = {}
-  //     state.globalProperty.next = []
+  //     state.globalStyleActive.prev = [...prev, current]
+  //     state.globalStyleActive.current = snapshotObject
+  //     state.globalStyleActive.snapshot = {}
+  //     state.globalStyleActive.next = []
   //   }
   // },
 
@@ -71,19 +71,19 @@ const mutations = {
   //  * Save current state
   //  */
   // [mutation.SNAPSHOT_GLOBAL_PROPERTY] (state) {
-  //   state.globalProperty.snapshot = utils.CloneObject(state.globalProperty.current)
+  //   state.globalStyleActive.snapshot = utils.CloneObject(state.globalStyleActive.current)
   // },
 
   // /**
   //  * Rollback undo to the previous property
   //  */
   // [mutation.UNDO_GLOBAL_PROPERTY] (state) {
-  //   const { prev, current, next } = state.globalProperty
+  //   const { prev, current, next } = state.globalStyleActive
 
   //   if (prev.length > 0) {
-  //     state.globalProperty.prev = prev.slice(0, prev.length - 1)
-  //     state.globalProperty.current = prev[prev.length - 1]
-  //     state.globalProperty.next = [ current, ...next ]
+  //     state.globalStyleActive.prev = prev.slice(0, prev.length - 1)
+  //     state.globalStyleActive.current = prev[prev.length - 1]
+  //     state.globalStyleActive.next = [ current, ...next ]
   //   }
   // },
 
@@ -91,28 +91,28 @@ const mutations = {
   //  * Rollback redo to the future property
   //  */
   // [mutation.REDO_GLOBAL_PROPERTY] (state) {
-  //   const { prev, current, next } = state.globalProperty
+  //   const { prev, current, next } = state.globalStyleActive
 
   //   if (next.length > 0) {
-  //     state.globalProperty.prev = [ ...prev, current ]
-  //     state.globalProperty.current = next[0]
-  //     state.globalProperty.next = next.slice(1)
+  //     state.globalStyleActive.prev = [ ...prev, current ]
+  //     state.globalStyleActive.current = next[0]
+  //     state.globalStyleActive.next = next.slice(1)
   //   }
   // },
 
-  // /**
-  //  * Enable global property state
-  //  */
-  // [mutation.ENABLE_GLOBAL_PROPERTY] (state) {
-  //   state.globalProperty.active = true
-  // },
+  /**
+   * Enable global property state
+   */
+  [mutation.ENABLE_GLOBAL_PROPERTY] (state) {
+    state.globalStyleActive = true
+  },
 
-  // /**
-  //  * Disable global property state
-  //  */
-  // [mutation.DISABLE_GLOBAL_PROPERTY] (state) {
-  //   state.globalProperty.active = false
-  // }
+  /**
+   * Disable global property state
+   */
+  [mutation.DISABLE_GLOBAL_PROPERTY] (state) {
+    state.globalStyleActive = false
+  }
 }
 
 const actions = {
@@ -129,7 +129,7 @@ const actions = {
 
   setGlobalStyle ({ state, commit }, object) {
     commit(mutation.SET_GLOBAL_STYLE, object)
-  }
+  },
 
   // /**
   //  * Change property value
@@ -161,23 +161,23 @@ const actions = {
   //   }
   // },
 
-  // /**
-  //  * Enable global property
-  //  * @param  {Object} options.state
-  //  * @return {void}
-  //  */
-  // enableGlobalProperty ({ commit }) {
-  //   commit(mutation.ENABLE_GLOBAL_PROPERTY)
-  // },
+  /**
+   * Enable global property
+   * @param  {Object} options.state
+   * @return {void}
+   */
+  enableGlobalStyleActive ({ commit }) {
+    commit(mutation.ENABLE_GLOBAL_PROPERTY)
+  },
 
-  // /**
-  //  * Disable global property
-  //  * @param  {Object} options.state
-  //  * @return {void}
-  //  */
-  // disableGlobalProperty ({ commit }) {
-  //   commit(mutation.DISABLE_GLOBAL_PROPERTY)
-  // }
+  /**
+   * Disable global property
+   * @param  {Object} options.state
+   * @return {void}
+   */
+  disableGlobalStyleActive ({ commit }) {
+    commit(mutation.DISABLE_GLOBAL_PROPERTY)
+  }
 }
 
 const getters = {
@@ -187,21 +187,21 @@ const getters = {
    * @return {String}
    */
   customStyles: state => state.customStyles,
-  isGlobalProperty: state => state.globalStyleActive
+  isGlobalStyleActive: state => state.globalStyleActive
 
   // /**
   //  * Global Properties
   //  * @param  {Object} state
   //  * @return {Object}
   //  */
-  // globalProperties: state => state.globalProperty.current,
+  // globalProperties: state => state.globalStyleActive.current,
 
   // /**
   //  * Global properties active
   //  * @param  {Object} state
   //  * @return {Boolean}
   //  */
-  // globalPropertyActive: state => state.globalProperty.active,
+  // globalStyleActive: state => state.globalStyleActive,
 
   /**
    * Generate css properties from elements state
@@ -211,7 +211,7 @@ const getters = {
    */
   // cssProperties (state, rootState) {
   //   if (rootState.selectedElement) {
-  //     // return getElementStyle(rootState.selectedElement, state.globalProperty.active)
+  //     // return getElementStyle(rootState.selectedElement, state.globalStyleActive)
   //   }
 
   //   return {}
@@ -234,12 +234,12 @@ const getters = {
   //     let cssObject = selectedElement.cssProperties[screenSize]
   //     const globalClassName = utils.GlobalClassName(selectedElement.kind, '.')
 
-  //     if (state.globalProperty.active) {
-  //       cssObject = state.globalProperty.current[screenSize]
+  //     if (state.globalStyleActive) {
+  //       cssObject = state.globalStyleActive.current[screenSize]
   //     }
 
   //     for (let key in cssProperties) {
-  //       if (state.globalProperty.active) {
+  //       if (state.globalStyleActive) {
   //         cssProperties[key] = cssObject[globalClassName] ? !cssObject[globalClassName][key] : true
   //       } else {
   //         cssProperties[key] = !(key in cssObject)
@@ -293,9 +293,9 @@ const getters = {
   //  */
   // globalCSS (state) {
   //   const stylesheets = []
-  //   for (let breakpoint in state.globalProperty.current) {
-  //     for (let selector in state.globalProperty.current[breakpoint]) {
-  //       const properties = state.globalProperty.current[breakpoint][selector]
+  //   for (let breakpoint in state.globalStyleActive.current) {
+  //     for (let selector in state.globalStyleActive.current[breakpoint]) {
+  //       const properties = state.globalStyleActive.current[breakpoint][selector]
   //       if (Object.keys(properties).length > 0) {
   //         stylesheets.push({
   //           selector,
@@ -316,7 +316,7 @@ const getters = {
   //   if (rootState.selectedElement) {
   //     const parentElement = getParentElementObject(rootState.selectedElement.id, rootState.elements)
   //     if (parentElement) {
-  //       const style = getStyle(parentElement, state.globalProperty.active)
+  //       const style = getStyle(parentElement, state.globalStyleActive)
   //       return style['display'] === 'flex'
   //     }
   //   }

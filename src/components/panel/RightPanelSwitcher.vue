@@ -20,21 +20,21 @@ export default {
   name: 'rightPanelSwitcher',
   computed: {
     ...mapGetters([
-      'isGlobalProperty'
+      'isGlobalStyleActive'
     ])
   },
   methods: {
     ...mapActions([
       'hideAllPanels',
-      'disableGlobalProperty',
-      'enableGlobalProperty',
+      'disableGlobalStyleActive',
+      'enableGlobalStyleActive',
       'hideBlockPanel'
     ])
   },
   render (h) {
     const switcherEls = switcher.map(item => {
       const classes = {
-        'property--active': item.global === this.isGlobalProperty
+        'property--active': item.global === this.isGlobalStyleActive
       }
 
       const attrs = {
@@ -47,9 +47,9 @@ export default {
         this.hideBlockPanel()
 
         if (!item.global) {
-          this.disableGlobalProperty()
+          this.disableGlobalStyleActive()
         } else {
-          this.enableGlobalProperty()
+          this.enableGlobalStyleActive()
         }
       }
 
