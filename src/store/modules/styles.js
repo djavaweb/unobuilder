@@ -5,10 +5,10 @@ const state = {
   globalStyleActive: false,
   globalProperties: {
     current: {
-      xlarge: {},
       large: {},
       medium: {},
-      small: {}
+      small: {},
+      tiny: {}
     },
     snapshot: {},
     prev: [],
