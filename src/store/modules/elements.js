@@ -581,8 +581,6 @@ const actions = {
       snapshot: true
     }, payload)
 
-    console.log(object)
-
     if (object.snapshot) commit(mutation.SNAPSHOT_ELEMENT)
     commit(mutation.SET_ELEMENT_STYLE, object)
     if (object.snapshot) commit(mutation.APPLY_ELEMENT)
@@ -922,8 +920,8 @@ const getters = {
       const properties = Object.assign({}, state.selected.cssProperties)
 
       const getStyles = mousestateStore => {
-        const breakpoint = ['large', 'medium', 'small', 'tiny']
-        const mousestate = ['none', 'hover', 'active', 'focus']
+        const breakpoint = Object.values(ScreenType)
+        const mousestate = Object.values(MouseType)
         let breakpointIndex = breakpoint.indexOf(breakpointStore)
         let mousestateIndex = mousestate.indexOf(mousestateStore)
         let cssProperties = {}
@@ -964,19 +962,19 @@ const getters = {
 
       return {
         get none () {
-          return getStyles('none')
+          return getStyles(MouseType.NONE)
         },
 
         get hover () {
-          return getStyles('hover')
+          return getStyles(MouseType.HOVER)
         },
 
         get active () {
-          return getStyles('active')
+          return getStyles(MouseType.ACTIVE)
         },
 
         get focus () {
-          return getStyles('focus')
+          return getStyles(MouseType.FOCUS)
         }
       }
     }
