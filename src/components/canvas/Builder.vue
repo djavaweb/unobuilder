@@ -18,6 +18,7 @@ export default {
       'elementDragging',
       'previewMode',
       'customStyles',
+      'globalCSS',
       'localCSS'
     ])
   },
@@ -85,8 +86,9 @@ export default {
 
     return (
       <div class={ [ClassPrefix.MAIN, classes] } onClick={ onClick }>
-        <Stylesheet content={ this.customStyles } />
+        <Stylesheet content={ this.globalCSS } />
         <Stylesheet content={ this.localCSS } />
+        <Stylesheet content={ this.customStyles } />
         { elements }
       </div>
     )

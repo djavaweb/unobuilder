@@ -1,3 +1,11 @@
+/* eslint-disable */
+import { isEqual, set } from 'lodash'
+import {
+  MouseType,
+  ScreenType,
+  Labels
+} from '../../const'
+import * as utils from '../../utils'
 import * as mutation from '../mutation-types'
 
 const state = {
@@ -26,8 +34,64 @@ const mutations = {
     state.customStyles = value
   },
 
-  [mutation.SET_GLOBAL_STYLE] (state, object) {
-    // state.globalProperties = object
+  [mutation.SET_GLOBAL_PROPERTY] (state, payload) {
+    const { element, snapshot, screenSize, mouseState, disabled, styles } = payload
+
+    const { kind } = element
+
+    for (const key in styles) {
+      const value = styles[key]
+      const setTo = snapshot ? state.globalProperties.snapshot : state.globalProperties.current
+      set(setTo, [screenSize, kind, mouseState, key], {
+        disabled,
+        value
+      })
+    }
+  },
+
+  /**
+   * Save current state
+   */
+  [mutation.SNAPSHOT_GLOBAL_PROPERTY] (state) {
+    state.globalProperties.snapshot = utils.CloneObject(state.globalProperties.current)
+  },
+
+  [mutation.APPLY_GLOBAL_PROPERTY] (state) {
+    const { prev, current, snapshot } = state.globalProperties
+    const snapshotObject = utils.CloneObject(snapshot)
+
+    if (!isEqual(snapshotObject, current)) {
+      state.globalProperties = Object.assign({}, state.globalProperties, {
+        prev: [...prev, current],
+        current: snapshotObject,
+        snapshot: [],
+        next: []
+      })
+    }
+  },
+
+  [mutation.UNDO_GLOBAL_PROPERTY] (state) {
+    const { prev, current, next } = state.globalProperties
+
+    if (prev.length > 0) {
+      state.globalProperties = Object.assign({}, state.globalProperties, {
+        prev: prev.slice(0, prev.length - 1),
+        current: prev[prev.length - 1],
+        next: [current, ...next]
+      })
+    }
+  },
+
+  [mutation.REDO_GLOBAL_PROPERTY] (state) {
+    const { prev, current, next } = state.globalProperties
+
+    if (next.length > 0) {
+      state.globalProperties = Object.assign({}, state.globalProperties, {
+        prev: [...prev, current],
+        current: next[0],
+        next: next.slice(1)
+      })
+    }
   },
 
   // [mutation.SET_PROPERTY] (state, { element, kind, properties }) {
@@ -127,8 +191,34 @@ const actions = {
     commit(mutation.SET_CUSTOM_STYLES, value)
   },
 
-  setGlobalStyle ({ state, commit }, object) {
-    commit(mutation.SET_GLOBAL_STYLE, object)
+  setGlobalStyle ({ state, commit, dispatch, getters }, payload) {
+    let object = Object.assign({
+      element: undefined,
+      mouseState: Labels.MOUSE_STATE_NONE,
+      disabled: false,
+      snapshot: true
+    }, payload)
+
+    if (!object.element && getters.selectedElement) {
+      object.element = getters.selectedElement
+    }
+
+    if (object.snapshot) commit(mutation.SNAPSHOT_GLOBAL_PROPERTY)
+    commit(mutation.SET_GLOBAL_PROPERTY, object)
+    if (object.snapshot) commit(mutation.APPLY_GLOBAL_PROPERTY)
+    dispatch('reselectElement')
+  },
+
+  undoGlobalStyle ({ commit, state }) {
+    if (state.globalProperties.prev.length > 0) {
+      commit(mutation.UNDO_GLOBAL_PROPERTY)
+    }
+  },
+
+  redoGlobalStyle ({ commit, state }) {
+    if (state.globalProperties.next.length > 0) {
+      commit(mutation.REDO_GLOBAL_PROPERTY)
+    }
   },
 
   // /**
@@ -187,7 +277,121 @@ const getters = {
    * @return {String}
    */
   customStyles: state => state.customStyles,
-  isGlobalStyleActive: state => state.globalStyleActive
+  isGlobalStyleActive: state => state.globalStyleActive,
+
+  globalStyles (state, getters) {
+    const { selectedElement: selected, iframeWindow: window } = getters
+    if (selected && window && getters.isGlobalStyleActive) {
+      const element = window.document.querySelector(utils.SelectorId(selected.id))
+      const { kind } = selected
+
+      const nativeProps = {}
+
+      const breakpointStore = getters.screenSize
+      const properties = Object.assign({}, state.globalProperties.current)
+
+      const getStyles = mousestateStore => {
+        const breakpoint = Object.values(ScreenType)
+        const mousestate = Object.values(MouseType)
+        let breakpointIndex = breakpoint.indexOf(breakpointStore)
+        let mousestateIndex = mousestate.indexOf(mousestateStore)
+        let cssProperties = {}
+
+        breakpointIndex = breakpoint.indexOf(breakpointStore)
+        const currentScreensize = breakpoint[breakpointIndex]
+
+        breakpointIndex = breakpoint.indexOf(breakpointStore)
+        while (true) {
+          const currentScreensize = breakpoint[breakpointIndex]
+          mousestateIndex = mousestate.indexOf(mousestateStore)
+
+          for (const keykind in properties[currentScreensize]) {
+            if (keykind !== selected.kind) continue
+            const keykind = selected.kind
+            while (true) {
+              const currentMouseState = mousestate[mousestateIndex]
+              const currentProps = properties[currentScreensize][keykind][currentMouseState]
+              for (const propName in currentProps) {
+                const validProps = currentProps[propName].value && currentProps[propName].disabled !== true
+                const inCssProperties = propName in cssProperties
+
+                if (validProps && !inCssProperties) {
+                  cssProperties[propName] = currentProps[propName].value
+                }
+
+              }
+
+              if (mousestateIndex === 0) break
+              if (mousestateIndex > 0 && mousestateIndex !== 1) {
+                mousestateIndex = 0
+              } else {
+                mousestateIndex--
+              }
+            }
+          }
+
+          if (breakpointIndex === 0) break
+          breakpointIndex--
+        }
+
+        cssProperties = Object.assign({}, cssProperties)
+        return cssProperties
+      }
+
+      return {
+        get none () {
+          return getStyles(MouseType.NONE)
+        },
+
+        get hover () {
+          return getStyles(MouseType.HOVER)
+        },
+
+        get active () {
+          return getStyles(MouseType.ACTIVE)
+        },
+
+        get focus () {
+          return getStyles(MouseType.FOCUS)
+        }
+      }
+    }
+
+    return {
+      none: {},
+      hover: {},
+      active: {},
+      focus: {}
+    }
+  },
+
+  globalCSS (state) {
+    const getStylesheets = elements => {
+      let stylesheets = []
+
+      for (const breakpoint in elements) {
+        const selectors = elements[breakpoint]
+        for (const s in selectors) {
+          const selector = `.${ utils.GlobalClassName(s) }`
+          const properties = selectors[s]
+
+          if (Object.keys(properties).length > 0) {
+            const data = {
+              selector,
+              breakpoint,
+              properties
+            }
+
+            stylesheets.push(utils.CloneObject(data))
+          }
+        }
+
+      }
+
+      return stylesheets
+    }
+    return getStylesheets(state.globalProperties.current)
+  }
 
   // /**
   //  * Global Properties

@@ -311,7 +311,7 @@ const mutations = {
 
   [mutation.SET_ELEMENT_STYLE] (state, { element, snapshot, screenSize, mouseState, disabled, styles }) {
     const fromElement = snapshot ? state.snapshot : state.current
-    const el = element ? NodeHelpers.getElementObjectByNode(element).id : state.selected.id
+    const el = element ? element.id : state.selected.id
 
     const selected = NodeHelpers.getElementObject(el, fromElement)
     for (const key in styles) {
@@ -613,12 +613,15 @@ const actions = {
           }
         })
 
-        dispatch('setElementStyle', {
-          element,
+        const newStyle = {
+          element: elObject,
           screenSize,
           snapshot: false,
           styles
-        })
+        }
+
+        dispatch('setGlobalStyle', newStyle)
+        dispatch('setElementStyle', newStyle)
 
         if (elObject.childNodes.length > 0) {
           for (let i = 0; i < elObject.childNodes.length; i++) {
@@ -646,16 +649,22 @@ const getters = {
    * @param {Object} state
    * @return {Object}
    */
-  iframeDocument: state => state.window.document,
+  iframeDocument (state) {
+    if (state.window) return state.window.document
+  },
 
   /**
    * Get iframe document
    * @param {Object} state
    * @return {Object}
    */
-  iframeBody: state => state.window.document.body,
+  iframeBody (state) {
+    if (state.window) return state.window.document.body
+  },
 
-  iframeOffset: state => state.window.frameElement.getBoundingClientRect(),
+  iframeOffset (state) {
+    if (state.window) return state.window.frameElement.getBoundingClientRect()
+  },
 
   /**
    * Element list
@@ -902,7 +911,7 @@ const getters = {
     return dropline
   },
 
-  styles (state, getters) {
+  elementStyles (state, getters) {
     if (state.selected && state.window) {
       const element = state.window.document.querySelector(utils.SelectorId(state.selected.id))
 
@@ -1015,6 +1024,10 @@ const getters = {
     }
 
     return getStylesheets(state.current)
+  },
+
+  elementHelpers () {
+    return NodeHelpers
   }
 }
 
