@@ -49,7 +49,7 @@ export default {
 
       for (let breakpoint in content) {
         let size = 0
-        const raw = content[breakpoint]
+        let raw = content[breakpoint]
 
         switch (breakpoint) {
           case ScreenType.MEDIUM:
@@ -63,6 +63,10 @@ export default {
           case ScreenType.TINY:
             size = ScreenSize.TINY
             break
+        }
+
+        if (typeof raw === 'object') {
+          raw = raw.join('')
         }
 
         if (raw.length > 0) {
