@@ -5,27 +5,64 @@ import panels from './modules/panels'
 import tools from './modules/tools'
 import elements from './modules/elements'
 import components from './modules/components'
+import history from './modules/history'
 import NodeUtils from './helpers/node-utils'
+import * as mutation from './mutation-types'
 
 Vue.use(Vuex)
 
-const snapshotPlugin = store => {
+const snapshotPlugin = (store) => {
+  const { dispatch } = store
+  store.subscribe(({ type }, state) => {
+    switch (type) {
+      case mutation.ADD_ELEMENT:
+      case mutation.SET_ELEMENT_STYLE:
+        dispatch('addHistory', 'ELEMENT')
+        break
 
+      case mutation.SET_GLOBAL_PROPERTY:
+        dispatch('addHistory', 'GLOBAL')
+        break
+    }
+  })
 }
 
 const actions = {
+
   /**
    * Undo Action
    */
-  undo ({ dispatch }) {
-    dispatch('undoElement')
+  undo ({ dispatch, getters }) {
+    const { currentHistory } = getters
+    switch (currentHistory) {
+      case 'ELEMENT':
+        dispatch('undoElement')
+        break
+
+      case 'GLOBAL':
+        dispatch('undoGlobalStyle')
+        break
+    }
+
+    dispatch('undoHistory')
   },
 
   /**
    * Redo Action
    */
-  redo ({ dispatch }) {
-    dispatch('redoElement')
+  redo ({ dispatch, getters }) {
+    const { currentHistory } = getters
+    switch (currentHistory) {
+      case 'ELEMENT':
+        dispatch('redoElement')
+        break
+
+      case 'GLOBAL':
+        dispatch('redoGlobalStyle')
+        break
+    }
+
+    dispatch('redoHistory')
   },
 
   /**
@@ -36,9 +73,14 @@ const actions = {
     dispatch('toggleInputPanel', '')
   },
 
-  setStyle ({ getters, dispatch }, { styles = {}, element, snapshot }) {
-    dispatch('setElementStyle', {
-      global: false,
+  setStyle ({ getters, dispatch }, { mouseState, styles = {}, element, snapshot }) {
+    let defaultAction = 'setElementStyle'
+    if (getters.isGlobalStyleActive) {
+      defaultAction = 'setGlobalStyle'
+    }
+
+    dispatch(defaultAction, {
+      mouseState,
       screenSize: getters.screenSize,
       element,
       styles
@@ -104,6 +146,14 @@ const getters = {
       selected,
       hovered
     }
+  },
+
+  styles (state, getters) {
+    if (!getters.isGlobalStyleActive) {
+      return getters.elementStyles
+    }
+
+    return getters.globalStyles
   }
 }
 
@@ -113,6 +163,7 @@ export default new Vuex.Store({
   modules: {
     styles,
     panels,
+    history,
     tools,
     elements,
     components
