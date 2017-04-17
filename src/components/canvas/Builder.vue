@@ -54,16 +54,9 @@ export default {
       // Add root element
       this.addElement({
         object: new HTMLParser(`<div ${ RootElementTag }="true" kind="layout"></div>`)
-      }).then(
-        object => this.setDefaultStyle(object)
-      )
-
-      // Select root element
-      this.$nextTick(() => {
-        const firstElement = this.elements[0]
-        if (firstElement) {
-          this.selectElement(firstElement.id)
-        }
+      }).then(object => {
+        this.setDefaultStyle(object)
+        this.selectElement(object.id)
       })
     }
   },
