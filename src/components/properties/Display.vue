@@ -57,7 +57,6 @@ export default {
     const isAdvanced = this.advancedPanels[panelId]
     const currentMouseState = this.mouseStatePanel[panelId]
     const propStyles = this.styles[currentMouseState]
-    console.log(this.styles)
 
     const typeSelectorButtons = [
       {

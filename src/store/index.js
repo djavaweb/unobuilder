@@ -73,13 +73,14 @@ const actions = {
     dispatch('toggleInputPanel', '')
   },
 
-  setStyle ({ getters, dispatch }, { styles = {}, element, snapshot }) {
+  setStyle ({ getters, dispatch }, { mouseState, styles = {}, element, snapshot }) {
     let defaultAction = 'setElementStyle'
     if (getters.isGlobalStyleActive) {
       defaultAction = 'setGlobalStyle'
     }
 
     dispatch(defaultAction, {
+      mouseState,
       screenSize: getters.screenSize,
       element,
       styles
