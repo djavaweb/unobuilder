@@ -600,13 +600,15 @@ const actions = {
   },
 
   setDefaultStyle ({ getters, dispatch }, object) {
-    const { iframeWindow, screenSize } = getters
+    const { iframeWindow, screenSize, globalProperties } = getters
 
     if (iframeWindow) {
       const recursive = elObject => {
-        const element = NodeHelpers.getElementNodeById(elObject.id)
+        const { id, kind } = elObject
+        const element = NodeHelpers.getElementNodeById(id)
         const computedStyle = iframeWindow.getComputedStyle(element)
         const styles = {}
+
         AvailableProps.forEach(propName => {
           if (computedStyle[propName] && !object.cssProperties[screenSize].none[propName]) {
             styles[propName] = computedStyle[propName]
@@ -621,7 +623,21 @@ const actions = {
         }
 
         dispatch('setGlobalStyle', newStyle)
-        dispatch('setElementStyle', newStyle)
+          .then(globalObject => {
+            if (globalProperties[screenSize][kind]) {
+              const newStyles = {}
+              AvailableProps.forEach(propName => {
+                if (!object.cssProperties[screenSize].none[propName]) {
+                  newStyles[propName] = globalProperties[screenSize][kind].none[propName].value
+                }
+              })
+              dispatch('setElementStyle', Object.assign({}, newStyle, {
+                styles: newStyles
+              }))
+            } else {
+              dispatch('setElementStyle', newStyle)
+            }
+          })
 
         if (elObject.childNodes.length > 0) {
           for (let i = 0; i < elObject.childNodes.length; i++) {

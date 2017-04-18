@@ -49,7 +49,8 @@ export default {
     const uikit = document.createElement('script')
     uikit.src = require('url-loader!uikit/js/uikit.min.js')
     document.body.appendChild(uikit)
-
+  },
+  created () {
     if (this.elements.length < 1) {
       // Add root element
       this.addElement({
@@ -57,6 +58,7 @@ export default {
       }).then(object => {
         this.setDefaultStyle(object)
         this.selectElement(object.id)
+        this.$forceUpdate()
       })
     }
   },

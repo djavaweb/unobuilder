@@ -207,6 +207,7 @@ const actions = {
     commit(mutation.SET_GLOBAL_PROPERTY, object)
     if (object.snapshot) commit(mutation.APPLY_GLOBAL_PROPERTY)
     dispatch('reselectElement')
+    return object
   },
 
   undoGlobalStyle ({ commit, state }) {
@@ -391,6 +392,10 @@ const getters = {
       return stylesheets
     }
     return getStylesheets(state.globalProperties.current)
+  },
+
+  globalProperties (state) {
+    return state.globalProperties.current
   }
 
   // /**
