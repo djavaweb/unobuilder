@@ -38,7 +38,8 @@ export default {
     if (this.elements.length < 1) {
       // Add root element
       this.addElement({
-        object: new HTMLParser(`<div ${ RootElementTag }="true" kind="layout"></div>`)
+        object: new HTMLParser(`<div ${ RootElementTag }="true" kind="layout"></div>`),
+        snapshot: false
       }).then(object => {
         this.selectElement(object.id)
         this.setDefaultStyle(object)
