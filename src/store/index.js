@@ -79,7 +79,7 @@ const actions = {
       defaultAction = 'setGlobalStyle'
     }
 
-    dispatch(defaultAction, {
+    return dispatch(defaultAction, {
       mouseState,
       screenSize: getters.screenSize,
       element,

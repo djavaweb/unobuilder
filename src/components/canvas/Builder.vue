@@ -33,6 +33,20 @@ export default {
       'setDefaultStyle'
     ])
   },
+
+  created () {
+    if (this.elements.length < 1) {
+      // Add root element
+      this.addElement({
+        object: new HTMLParser(`<div ${ RootElementTag }="true" kind="layout"></div>`)
+      }).then(object => {
+        this.selectElement(object.id)
+        this.setDefaultStyle(object)
+        this.$forceUpdate()
+      })
+    }
+  },
+
   mounted () {
     const { ownerDocument: document } = this.$el
     const head = document.querySelector('head')
@@ -50,18 +64,7 @@ export default {
     uikit.src = require('url-loader!uikit/js/uikit.min.js')
     document.body.appendChild(uikit)
   },
-  created () {
-    if (this.elements.length < 1) {
-      // Add root element
-      this.addElement({
-        object: new HTMLParser(`<div ${ RootElementTag }="true" kind="layout"></div>`)
-      }).then(object => {
-        this.setDefaultStyle(object)
-        this.selectElement(object.id)
-        this.$forceUpdate()
-      })
-    }
-  },
+
   render (h) {
     this.iframeBody.style.userSelect = this.elementDragging
       ? 'none'

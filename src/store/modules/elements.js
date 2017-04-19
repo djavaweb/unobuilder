@@ -1031,7 +1031,7 @@ const getters = {
                 breakpoint,
                 properties
               }
-              stylesheets.push(utils.CloneObject(data))
+              stylesheets.push(data)
             }
           }
         }
