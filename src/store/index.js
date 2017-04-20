@@ -13,16 +13,22 @@ Vue.use(Vuex)
 
 const snapshotPlugin = (store) => {
   const { dispatch } = store
-  store.subscribe(({ type }, state) => {
-    switch (type) {
-      case mutation.ADD_ELEMENT:
-      case mutation.SET_ELEMENT_STYLE:
-        dispatch('addHistory', 'ELEMENT')
-        break
+  store.subscribe((mutations, state) => {
+    const { type, payload } = mutations
+    if (typeof mutations.payload === 'object') {
+      const { snapshot = true } = payload
+      if (snapshot) {
+        switch (type) {
+          case mutation.ADD_ELEMENT:
+          case mutation.SET_ELEMENT_STYLE:
+            dispatch('addHistory', 'ELEMENT')
+            break
 
-      case mutation.SET_GLOBAL_PROPERTY:
-        dispatch('addHistory', 'GLOBAL')
-        break
+          case mutation.SET_GLOBAL_PROPERTY:
+            dispatch('addHistory', 'GLOBAL')
+            break
+        }
+      }
     }
   })
 }
@@ -79,7 +85,7 @@ const actions = {
       defaultAction = 'setGlobalStyle'
     }
 
-    dispatch(defaultAction, {
+    return dispatch(defaultAction, {
       mouseState,
       screenSize: getters.screenSize,
       element,
