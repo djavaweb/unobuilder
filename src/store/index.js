@@ -16,7 +16,7 @@ const snapshotPlugin = (store) => {
   store.subscribe((mutations, state) => {
     const { type, payload } = mutations
     if (typeof mutations.payload === 'object') {
-      const { snapshot = true } = payload
+      const snapshot = (payload && 'snapshot' in payload) ? payload.snapshot : true
       if (snapshot) {
         switch (type) {
           case mutation.ADD_ELEMENT:
