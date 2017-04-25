@@ -142,6 +142,7 @@ const mutations = {
 
     // recursively change node id
     const recursive = obj => {
+      if (typeof obj !== 'object') return obj
       const id = utils.RandomUID()
       obj.id = id
       obj.dataObject.attrs[utils.SelectorAttrId] = id
@@ -604,6 +605,7 @@ const actions = {
 
     if (iframeWindow) {
       const recursive = elObject => {
+        if (typeof elObject !== 'object') return elObject
         const { id, kind } = elObject
         const element = NodeHelpers.getElementNodeById(id)
         const computedStyle = iframeWindow.getComputedStyle(element)
