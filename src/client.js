@@ -2,7 +2,6 @@
 import $ from 'jquery'
 import async from 'async'
 import ComponentParser from 'unobuilder-component-parser'
-import { RandomUID } from './utils'
 import { extend, omit } from 'lodash'
 
 // Define static vars
@@ -274,13 +273,6 @@ class UnoBuilder {
    * @param {String} url
    */
   initElement (element, url) {
-    // Get component object from js file
-    // For closure purpose
-    const data = {
-      _id: RandomUID(),
-      path: url
-    }
-
     const errorLogger = err => console.error(err)
 
     const req = [
@@ -293,6 +285,12 @@ class UnoBuilder {
         const { template, parsed } = res[0]
         const { script } = parsed
         const { settings, events, data: dataParsed } = script
+        // Get component object from js file
+        // For closure purpose
+        const data = {
+          _id: template.id,
+          path: url
+        }
         data.settings = settings
         data.template = template
 
