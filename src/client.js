@@ -289,10 +289,11 @@ class UnoBuilder {
         // For closure purpose
         const data = {
           _id: template.id,
-          path: url
+          path: url,
+          settings,
+          template,
+          events
         }
-        data.settings = settings
-        data.template = template
 
         this.registerComponent(data.settings.id, {
           events: events,
@@ -324,6 +325,22 @@ class UnoBuilder {
     if (item in components) {
       return components[item]
     }
+  }
+
+  getComponentItemById (id) {
+    return new Promise(resolve => {
+      const { components } = this.__registry__
+      Object.keys(components).forEach(k => {
+        const v = components[k]
+        if (v._id === id) {
+          resolve(v, k)
+        }
+      })
+    })
+  }
+
+  getComponentNameById (id) {
+    return this.getComponentItemById(id).then((v, k) => k)
   }
 
   getBlockList () {

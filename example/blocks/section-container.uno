@@ -15,6 +15,12 @@
     },
     data: {},
     events: {
+      dblclick: function () {
+        console.log('section container hit double click')
+      },
+      ready: function () {
+        console.log('section container ready')
+      },
       beforeInit: function () {
         console.log('before init section')
       },

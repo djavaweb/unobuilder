@@ -2,7 +2,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { ClassPrefix, Icons } from '../../const'
 import { SVGIcon } from '../../utils'
-import uno from '../../client'
+import uno from 'uno'
 
 const mainClass = `${ ClassPrefix.CANVAS }-block-component`
 const addClass = `${ mainClass }__add-button`
@@ -70,13 +70,14 @@ export default {
       </li>
     })
 
-    const blockItem = blockItemList.map(item => {
+    const blockItem = blockItemList.map((item, itemIndex) => {
       if (item.settings.group !== this.openBlockPanel) {
         return
       }
 
       const onClick = event => {
         this.addElement({
+          name: Object.keys(blockList)[itemIndex],
           object: item.template,
           appendTo: this.rootElement.id,
           index: this.blockIndex
