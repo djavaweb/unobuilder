@@ -1,8 +1,7 @@
 // Import important modules
 import $ from 'jquery'
 import async from 'async'
-import UnoBuilderParser from 'unobuilder-parser'
-import { RandomUID } from './utils'
+import ComponentParser from 'unobuilder-component-parser'
 import { extend, omit } from 'lodash'
 
 // Define static vars
@@ -30,14 +29,6 @@ const actionObjectException = [
   'added',
   'ready'
 ]
-
-const getScriptPath = url => {
-  let scriptPath = url.split('/')
-  scriptPath.splice(-1)
-  scriptPath = scriptPath.join('/')
-
-  return scriptPath
-}
 
 /**
  * Unobuilder global framework to register components
@@ -261,37 +252,19 @@ class UnoBuilder {
   }
 
   /**
-  * Load element JSON
-  * @return
-  */
-  loadElementJson (scriptPath, element) {
+   * Load uno component
+   *
+   * @param {any} scriptPath
+   * @param {any} element
+   * @returns
+   *
+   * @memberOf UnoBuilder
+   */
+  loadComponent (url, element) {
     return new Promise((resolve, reject) => {
-      $.getJSON(`${ scriptPath }/${ element }.json`, json => {
-        if (json.id) {
-          json.icon = `${ scriptPath }/${ json.icon }`
-          resolve(json)
-        } else {
-          reject(new Error(`${ errorMessages.invalidJSON }, url: ${ scriptPath }/${ element }.json`))
-        }
-      }).fail(() => reject(new Error(`${ errorMessages.invalidJSON }, url: ${ scriptPath }/${ element }.json`)))
-    })
-  }
-
-  /**
-  * Load element template html
-  * @return
-  */
-  loadElementTemplate (scriptPath, element) {
-    // Load Markup template
-    return new Promise((resolve, reject) => {
-      $.get(`${ scriptPath }/${ element }.html`, res => {
-        const template = $.trim(res.replace(/[\t\n]+/g, ' '))
-        if (template !== '') {
-          resolve(template)
-        } else {
-          reject(new Error(`${ errorMessages.invalidTemplate }, url: ${ scriptPath }/${ element }.html`))
-        }
-      }).fail(() => reject(new Error(`${ errorMessages.TemplateNotfound }, url: ${ scriptPath }/${ element }.html`)))
+      $.get(`${ url }`, res => {
+        ComponentParser(res).then(data => resolve(data))
+      }).fail(() => reject(new Error(`${ errorMessages.TemplateNotfound }, url: ${ url }`)))
     })
   }
 
@@ -300,34 +273,37 @@ class UnoBuilder {
    * @param {String} url
    */
   initElement (element, url) {
-    const scriptPath = getScriptPath(url)
-
-    // Get component object from js file
-    // For closure purpose
-    const data = {
-      _id: RandomUID(),
-      path: scriptPath
-    }
-
     const errorLogger = err => console.error(err)
 
     const req = [
-      this.loadElementJson(scriptPath, element),
-      this.loadElementTemplate(scriptPath, element)
+      this.loadComponent(url, element)
     ]
 
     return Promise.all(req)
       .catch(errorLogger)
       .then(res => {
-        const [json, template] = res
-        data.settings = json
-        data.template = new UnoBuilderParser(template)
+        const { template, parsed } = res[0]
+        const { script } = parsed
+        const { settings, events, data: dataParsed } = script
+        // Get component object from js file
+        // For closure purpose
+        const data = {
+          _id: template.id,
+          path: url
+        }
+        data.settings = settings
+        data.template = template
+
+        this.registerComponent(data.settings.id, {
+          events: events,
+          data: dataParsed
+        })
 
         // Add component to list
         this.__registry__[`${ element }s`][data.settings.id] = data
 
         // Register script
-        this.registerScript(url, `${ element }-${ data.id }`)
+        // this.registerScript(events, `${ element }-${ data.id }`)
       })
   }
 
@@ -361,9 +337,12 @@ class UnoBuilder {
     }
   }
 
-  registerScript (url) {
+  registerScript (string) {
     const script = document.createElement('script')
-    script.src = url
+    script.onload = () => {
+      script.remove()
+    }
+    script.innerHTML = string
     document.body.appendChild(script)
   }
 
