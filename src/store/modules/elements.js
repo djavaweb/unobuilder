@@ -46,6 +46,7 @@ const state = {
   snapshot: [],
   next: [],
   move: {},
+  editable: undefined,
   window: undefined,
   selected: null,
   hovered: null,
@@ -342,6 +343,33 @@ const mutations = {
         value
       }
     }
+  },
+
+  [mutation.SET_ATTRS_ELEMENT] (state, payload) {
+    const { id, name, value } = payload
+    const element = NodeHelpers.getElementObject(id)
+    element.dataObject.attrs[name] = value
+  },
+
+  [mutation.REMOVE_ATTRS_ELEMENT] (state, payload) {
+    const { id, name } = payload
+    const element = NodeHelpers.getElementObject(id)
+
+    if (element.dataObject.attrs[name]) {
+      element.dataObject.attrs[name] = false
+    }
+  },
+
+  [mutation.SWITCH_EDITABLE] (state, id) {
+    if (id) {
+      const element = NodeHelpers.getElementObject(id)
+      if (!element) {
+        state.editable = undefined
+        return
+      }
+    }
+
+    state.editable = id
   }
 }
 
@@ -506,12 +534,20 @@ const actions = {
   selectElement ({ commit, state }, id) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
 
-    if (!id) {
+    if (!id && state.editable === id) {
       return
     }
 
     if (id.tagName) {
       id = utils.GetNodeId(id)
+    }
+
+    if (state.editable && state.editable !== id) {
+      commit(mutation.REMOVE_ATTRS_ELEMENT, {
+        id: state.editable,
+        name: 'contenteditable'
+      })
+      commit(mutation.SWITCH_EDITABLE)
     }
 
     const element = NodeHelpers.getElementObject(id)
@@ -538,27 +574,6 @@ const actions = {
 
     const element = NodeHelpers.getElementObject(id)
     commit(mutation.HOVER_ELEMENT, element)
-  },
-
-  editContent ({ commit }, element) {
-    commit(mutation.SNAPSHOT_ELEMENT)
-    commit(mutation.EDIT_CONTENT, element)
-    commit(mutation.APPLY_ELEMENT)
-    // if (state.selected) {
-
-    //   const element = node.NodeHelpers.GetElementObject(state.selected.id, state.current)
-    //   if (enable) {
-    //     element.dataObject.attrs.contenteditable = true
-    //   }
-
-    //   // if (enable) {
-    //   //   this.$set(state.selected.dataObject.attrs, CONTENT_EDITABLE_ATTR, true)
-    //   //   setTimeout(() => node.SetCursorPosition(false)(element), 0)
-    //   // } else {
-    //   //   this.$delete(state.selectedElement.dataObject.attrs, CONTENT_EDITABLE_ATTR)
-    //   //   element.removeAttribute(CONTENT_EDITABLE_ATTR)
-    //   // }
-    // }
   },
 
   toggleBreadcrumbs ({ commit }) {
@@ -670,6 +685,30 @@ const actions = {
       }
 
       recursive(object)
+    }
+  },
+
+  setAttrsElement ({ commit }, payload) {
+    if (payload.id) {
+      commit(mutation.SET_ATTRS_ELEMENT, payload)
+    }
+  },
+
+  removeAttrsElement ({ commit }, payload) {
+    if (payload.id) {
+      commit(mutation.REMOVE_ATTRS_ELEMENT, payload)
+    }
+  },
+
+  editContent ({ commit, dispatch }, id) {
+    if (id) {
+      commit(mutation.SET_ATTRS_ELEMENT, {
+        id,
+        name: 'contenteditable',
+        value: true
+      })
+
+      commit(mutation.SWITCH_EDITABLE, id)
     }
   }
 }
