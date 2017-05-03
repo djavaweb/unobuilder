@@ -125,6 +125,7 @@ export default {
         if (target === currentTarget) {
           const item = Uno.getComponentItem(this.componentActive)
           this.addElement({
+            name: this.componentActive,
             object: item.template,
             appendTo: target.getAttribute(SelectorAttrId),
             index: 0
@@ -325,13 +326,21 @@ export default {
 
       dataObject = Object.assign({}, dataObject)
       dataObject.class = Object.assign(dataObject.class, classes)
-      dataObject.on = {
+
+      const dataObjectEvents = {
         click,
         mouseover,
         mouseup,
         mousedown,
         mousemove,
         contextmenu: click
+      }
+
+      if (node.name) {
+        const { events } = Uno.getComponentItem(node.name) || Uno.getBlockItem(node.name)
+        dataObject.on = Object.assign(events, dataObjectEvents)
+      } else {
+        dataObject.on = dataObjectEvents
       }
 
       childNodes = childNodes.map(

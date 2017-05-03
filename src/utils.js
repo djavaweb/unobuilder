@@ -45,9 +45,13 @@ export const SelectorAttrComponent = `data-${ ClassPrefix.SHORT }-component`
  * Generate random UID
  * @return {String}
  */
-export const RandomUID = () => {
+export const RandomUID = prefix => {
   const getUID = () => (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
   const UIDs = []
+
+  if (prefix) {
+    UIDs.push(prefix)
+  }
 
   for (let i = 0; i < 4; i++) {
     UIDs.push(getUID(i))

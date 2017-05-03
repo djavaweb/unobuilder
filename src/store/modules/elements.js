@@ -137,14 +137,19 @@ const mutations = {
   /**
    * Add element to current state
    */
-  [mutation.ADD_ELEMENT] (state, { object, appendTo, index = 0 }) {
+  [mutation.ADD_ELEMENT] (state, { object, name, appendTo, index = 0 }) { //
     let element = object
+
+    if (name) {
+      element.name = name
+    }
 
     // recursively change node id
     const recursive = obj => {
       if (typeof obj !== 'object') return obj
       const id = utils.RandomUID()
       obj.id = id
+      // register uno component event
       obj.dataObject.attrs[utils.SelectorAttrId] = id
       obj.dataObject.ref = id.replace(/-/g, '')
 
@@ -171,6 +176,19 @@ const mutations = {
     }
 
     element = recursive(element)
+    const specialEvents = ['beforeInit', 'afterInit']
+
+    // Register all events that passed
+    if ('name' in element) {
+      const { events } = Uno.getComponentItem(element.name) || Uno.getBlockItem(element.name)
+      Object.keys(events).forEach((eventName) => {
+        const fn = events[eventName]
+        if (specialEvents.indexOf(eventName) < 0) {
+          Uno.on(`${ element.id }:${ eventName }`, fn)
+        }
+      })
+    }
+
     if (element) {
       state.lastInserted = element.id
 
@@ -183,6 +201,8 @@ const mutations = {
         appendEl.childNodes.splice(index, 0, element)
       }
     }
+
+    Uno.emit(`${ element.id }:added`, element)
   },
 
   /**
@@ -1046,6 +1066,10 @@ const getters = {
 
   elementHelpers () {
     return NodeHelpers
+  },
+
+  lastInsertedElement (state) {
+    return state.lastInserted
   }
 }
 

@@ -31,6 +31,7 @@ export default {
       'setLoaderMessage'
     ])
   },
+
   created () {
     uno.on('finish', () => {
       this.hidePreview()
@@ -42,11 +43,13 @@ export default {
       setTimeout(() => this.setLoaderMessage(Labels.NOOP), 1250)
     })
   },
+
   beforeMount () {
     this.$nextTick(() => {
       uno.emit('ready')
     })
   },
+
   render (h) {
     return (
       <div class={ ClassPrefix.MAIN }>

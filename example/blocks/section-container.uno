@@ -15,13 +15,21 @@
     },
     data: {},
     events: {
+      dblclick: function () {
+        console.log('section container hit double click')
+      },
+      ready: function () {
+        console.log('section container ready')
+      },
       beforeInit: function () {
         console.log('before init section')
       },
       afterInit: function () {
         console.log('after init section')
       },
-      added: function () {}
+      added: function () {
+        console.log('section-container has been added to canvas')
+      }
     }
   }
 </script>
