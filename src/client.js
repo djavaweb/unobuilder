@@ -2,7 +2,7 @@
 import $ from 'jquery'
 import async from 'async'
 import ComponentParser from 'unobuilder-component-parser'
-import { extend, omit } from 'lodash'
+// import { extend, omit } from 'lodash'
 
 // Define static vars
 const errorMessages = {
@@ -17,18 +17,23 @@ const errorMessages = {
   optionsUndefined: 'UNO: Options Undefined'
 }
 
-const actionObjectException = [
-  'template',
-  'path',
-  'settings',
-  'beforeInit',
-  'afterInit',
-  'dragStart',
-  'dragMove',
-  'dragEnd',
-  'added',
-  'ready'
-]
+// const actionObjectException = [
+//   'template',
+//   'path',
+//   'settings',
+//   'beforeInit',
+//   'afterInit',
+//   'dragStart',
+//   'dragMove',
+//   'dragEnd',
+//   'added',
+//   'ready'
+// ]
+
+const componentType = {
+  COMPONENT: 'component',
+  BLOCK: 'block'
+}
 
 /**
  * Unobuilder global framework to register components
@@ -49,7 +54,7 @@ class UnoBuilder {
    * Async queues to add component or block
    */
     this.__registry__.queue = async.queue((task, next) => {
-      const fn = task.type === 'component'
+      const fn = task.type === componentType.COMPONENT
         ? 'initComponent'
         : 'initBlock'
 
@@ -238,8 +243,7 @@ class UnoBuilder {
    * @param {String} url
    */
   addComponent (url) {
-    const type = 'component'
-    return this.addQueue(url, type)
+    return this.addQueue(url, componentType.COMPONENT)
   }
 
   /**
@@ -247,8 +251,7 @@ class UnoBuilder {
    * @param {String} url
    */
   addBlock (url) {
-    const type = 'block'
-    return this.addQueue(url, type)
+    return this.addQueue(url, componentType.BLOCK)
   }
 
   /**
@@ -260,7 +263,7 @@ class UnoBuilder {
    *
    * @memberOf UnoBuilder
    */
-  loadComponent (url, element) {
+  loadElement (url, element) {
     return new Promise((resolve, reject) => {
       $.get(`${ url }`, res => {
         ComponentParser(res).then(data => resolve(data))
@@ -272,19 +275,13 @@ class UnoBuilder {
    * Uno init element (block / component)
    * @param {String} url
    */
-  initElement (element, url) {
+  initElement (type, url) {
     const errorLogger = err => console.error(err)
-
-    const req = [
-      this.loadComponent(url, element)
-    ]
-
-    return Promise.all(req)
+    return this.loadElement(url, type)
       .catch(errorLogger)
-      .then(res => {
-        const { template, parsed } = res[0]
-        const { script } = parsed
-        const { settings, events, data: dataParsed } = script
+      .then(element => {
+        const { template, script } = element
+        const { settings, events } = script
         // Get component object from js file
         // For closure purpose
         const data = {
@@ -295,25 +292,19 @@ class UnoBuilder {
           events
         }
 
-        this.registerComponent(data.settings.id, {
-          events: events,
-          data: dataParsed
-        })
+        this.registerComponent(script)
 
         // Add component to list
-        this.__registry__[`${ element }s`][data.settings.id] = data
-
-        // Register script
-        // this.registerScript(events, `${ element }-${ data.id }`)
+        this.__registry__[`${ type }s`][data.settings.id] = data
       })
   }
 
   initComponent (url) {
-    return this.initElement('component', url)
+    return this.initElement(componentType.COMPONENT, url)
   }
 
   initBlock (url) {
-    return this.initElement('block', url)
+    return this.initElement(componentType.BLOCK, url)
   }
 
   getComponentList () {
@@ -354,15 +345,6 @@ class UnoBuilder {
     }
   }
 
-  registerScript (string) {
-    const script = document.createElement('script')
-    script.onload = () => {
-      script.remove()
-    }
-    script.innerHTML = string
-    document.body.appendChild(script)
-  }
-
   /**
    * Register element (block or component)
    * @param {String} name
@@ -370,30 +352,15 @@ class UnoBuilder {
    */
   registerElement (element, name, options) {
     const registry = this.__registry__
-    if (registry[element][name]) {
+    if (options) {
       // Call before init event
       if (options.events.beforeInit) {
-        options.events.beforeInit.apply(registry[element][name])
-      }
-
-      // Duplicate data that doesn't have events name
-      if (options.data) {
-        const data = omit(options.data, actionObjectException)
-        extend(registry[element][name], data)
-      }
-
-      // Duplicate all events
-      if (options.events) {
-        actionObjectException.forEach(eventName => {
-          if (options.events[eventName]) {
-            registry[element][name][eventName] = options.events[eventName]
-          }
-        })
+        options.events.beforeInit.call(registry[element][name])
       }
 
       // Call after init event
       if (options.events.afterInit) {
-        options.events.afterInit.apply(registry[element][name])
+        options.events.afterInit.call(registry[element][name])
       }
     }
 
@@ -403,16 +370,18 @@ class UnoBuilder {
   /**
    * Register components
    */
-  registerComponent (name, options) {
-    this.registerElement('components', name, options)
+  registerComponent (object) {
+    const { settings } = object
+    this.registerElement(componentType.COMPONENT + 's', settings.id, object)
     return this
   }
 
   /**
    * Register blocks
    */
-  registerBlock (name, options) {
-    this.registerElement('blocks', name, options)
+  registerBlock (object) {
+    const { settings } = object
+    this.registerElement(componentType.BLOCK + 's', settings.id, object)
     return this
   }
 }

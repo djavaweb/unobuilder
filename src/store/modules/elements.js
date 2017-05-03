@@ -176,20 +176,21 @@ const mutations = {
     }
 
     element = recursive(element)
+    const specialEvents = ['beforeInit', 'afterInit']
 
     // Register all events that passed
     if ('name' in element) {
       const { events } = Uno.getComponentItem(element.name) || Uno.getBlockItem(element.name)
       Object.keys(events).forEach((eventName) => {
         const fn = events[eventName]
-        Uno.on(`${ element.id }:${ eventName }`, fn)
+        if (specialEvents.indexOf(eventName) < 0) {
+          Uno.on(`${ element.id }:${ eventName }`, fn)
+        }
       })
     }
 
     if (element) {
       state.lastInserted = element.id
-      Uno.emit(`${ element.id }:beforeInit`, element)
-      Uno.off(`${ element.id }:beforeInit`)
 
       if (!appendTo) {
         index = !index ? state.snapshot.length : index
@@ -199,10 +200,9 @@ const mutations = {
         index = !index ? appendEl.childNodes.length : index
         appendEl.childNodes.splice(index, 0, element)
       }
-
-      Uno.emit(`${ element.id }:afterInit`, element)
-      Uno.off(`${ element.id }:afterInit`)
     }
+
+    Uno.emit(`${ element.id }:added`, element)
   },
 
   /**

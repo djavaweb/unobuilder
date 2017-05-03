@@ -27,7 +27,9 @@
       afterInit: function () {
         console.log('after init section')
       },
-      added: function () {}
+      added: function () {
+        console.log('section-container has been added to canvas')
+      }
     }
   }
 </script>

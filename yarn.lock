@@ -6061,9 +6061,9 @@ uniqs@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/uniqs/-/uniqs-2.0.0.tgz#ffede4b36b25290696e6e165d4a59edb998e6b02"
 
-unobuilder-component-parser@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/unobuilder-component-parser/-/unobuilder-component-parser-1.2.3.tgz#173877c8a93e604c682ac046ed6faa3df7cb9376"
+unobuilder-component-parser@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/unobuilder-component-parser/-/unobuilder-component-parser-1.3.0.tgz#aa1014be52eb5a7794a0d9aa0410de574873f3e5"
   dependencies:
     unobuilder-parser next
     unobuilder-style-to-object "^1.1.0"
