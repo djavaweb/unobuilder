@@ -66,7 +66,8 @@ export default {
       'selectElement',
       'setAttrsElement',
       'removeAttrsElement',
-      'editContent'
+      'editContent',
+      'saveEditable'
     ]),
 
     resetInterval () {
@@ -363,8 +364,8 @@ export default {
         }
 
         dataObjectEvents.input = event => {
-          this.selectElement(node.id).then(() => {
-            this.$forceUpdate()
+          this.saveEditable().then(() => {
+            this.selectElement(node.id).then(() => this.$forceUpdate())
           })
         }
       }

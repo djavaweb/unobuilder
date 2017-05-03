@@ -370,6 +370,14 @@ const mutations = {
     }
 
     state.editable = id
+  },
+
+  [mutation.SAVE_EDITABLE] (state) {
+    const element = NodeHelpers.getElementObject(state.editable)
+    const editableNode = NodeHelpers.getElementNodeById(state.editable)
+    element.childNodes[0] = editableNode.innerText
+
+    setTimeout(() => NodeHelpers.setCursorPosition(false)(editableNode), 0)
   }
 }
 
@@ -712,7 +720,12 @@ const actions = {
       const editableNode = NodeHelpers.getElementNodeById(id)
       setTimeout(() => NodeHelpers.setCursorPosition(false)(editableNode), 0)
     }
+  },
+
+  saveEditable ({ commit }) {
+    commit(mutation.SAVE_EDITABLE)
   }
+
 }
 
 const getters = {
