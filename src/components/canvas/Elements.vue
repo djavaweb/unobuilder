@@ -50,6 +50,7 @@ export default {
   methods: {
     ...mapActions([
       'selectElement',
+      'reselectElement',
       'hoverElement',
       'hideBlockPanel',
       'showContextMenu',
@@ -357,6 +358,12 @@ export default {
       if (editable) {
         dataObjectEvents.dblclick = event => {
           this.editContent(node.id).then(() => {
+            this.$forceUpdate()
+          })
+        }
+
+        dataObjectEvents.input = event => {
+          this.selectElement(node.id).then(() => {
             this.$forceUpdate()
           })
         }
