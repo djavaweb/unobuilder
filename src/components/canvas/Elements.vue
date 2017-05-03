@@ -42,7 +42,8 @@ export default {
       'iframeDocument',
       'canvasScroll',
       'elementDragging',
-      'dropline'
+      'dropline',
+      'editable'
     ])
   },
 
@@ -212,7 +213,7 @@ export default {
         return false
       }
 
-      if (target === currentTarget) {
+      if (target === currentTarget && this.editable !== target.getAttribute(SelectorAttrId)) {
         this.interval = setInterval(() => {
           if (this.dragState.intervalCount > 2) {
             this.resetInterval()

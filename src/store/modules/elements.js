@@ -707,8 +707,10 @@ const actions = {
         name: 'contenteditable',
         value: true
       })
-
       commit(mutation.SWITCH_EDITABLE, id)
+
+      const editableNode = NodeHelpers.getElementNodeById(id)
+      setTimeout(() => NodeHelpers.setCursorPosition(false)(editableNode), 0)
     }
   }
 }
@@ -1105,6 +1107,10 @@ const getters = {
 
   elementHelpers () {
     return NodeHelpers
+  },
+
+  editable (state) {
+    return state.editable
   },
 
   lastInsertedElement (state) {
