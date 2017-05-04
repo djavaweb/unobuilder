@@ -375,9 +375,8 @@ const mutations = {
   [mutation.SAVE_EDITABLE] (state) {
     const element = NodeHelpers.getElementObject(state.editable)
     const editableNode = NodeHelpers.getElementNodeById(state.editable)
-    element.childNodes[0] = editableNode.innerText
 
-    setTimeout(() => NodeHelpers.setCursorPosition(false)(editableNode), 0)
+    element.childNodes[0] = editableNode.innerText
   }
 }
 
@@ -539,7 +538,7 @@ const actions = {
    * @param  {String}   id
    * @return {void}
    */
-  selectElement ({ commit, state }, id) {
+  selectElement ({ commit, state, dispatch }, id) {
     commit(mutation.SET_WINDOW_SCROLL, '+1')
 
     if (!id && state.editable === id) {
@@ -551,6 +550,7 @@ const actions = {
     }
 
     if (state.editable && state.editable !== id) {
+      dispatch('saveEditable')
       commit(mutation.REMOVE_ATTRS_ELEMENT, {
         id: state.editable,
         name: 'contenteditable'

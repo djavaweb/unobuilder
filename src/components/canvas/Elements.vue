@@ -364,9 +364,7 @@ export default {
         }
 
         dataObjectEvents.input = event => {
-          this.saveEditable().then(() => {
-            this.selectElement(node.id).then(() => this.$forceUpdate())
-          })
+          this.selectElement(node.id).then(() => this.$forceUpdate())
         }
       }
 
