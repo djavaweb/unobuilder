@@ -42,13 +42,15 @@ export default {
       'iframeDocument',
       'canvasScroll',
       'elementDragging',
-      'dropline'
+      'dropline',
+      'editable'
     ])
   },
 
   methods: {
     ...mapActions([
       'selectElement',
+      'reselectElement',
       'hoverElement',
       'hideBlockPanel',
       'showContextMenu',
@@ -61,7 +63,11 @@ export default {
       'moveElement',
       'setDropline',
       'setDefaultStyle',
-      'selectElement'
+      'selectElement',
+      'setAttrsElement',
+      'removeAttrsElement',
+      'editContent',
+      'saveEditable'
     ]),
 
     resetInterval () {
@@ -70,6 +76,18 @@ export default {
         this.interval = null
         this.dragState.intervalCount = 0
       }
+    },
+
+    setAttrs (options) {
+      if (!options.id) return false
+
+      return Promise.resolve(this.setAttrsElement(options))
+    },
+
+    removeAttrs (options) {
+      if (!options.id && !options.name) return false
+
+      return Promise.resolve(this.removeAttrsElement(options))
     }
   },
 
@@ -105,10 +123,12 @@ export default {
         this.hideContextMenu()
       }
 
-      this.selectElement(event.target)
-      if (this.toggleBlockPanel) {
-        this.hideBlockPanel()
-      }
+      this.selectElement(event.target).then(() => {
+        this.$forceUpdate()
+        if (this.toggleBlockPanel) {
+          this.hideBlockPanel()
+        }
+      })
     }
 
     const mouseover = event => {
@@ -195,7 +215,7 @@ export default {
         return false
       }
 
-      if (target === currentTarget) {
+      if (target === currentTarget && this.editable !== target.getAttribute(SelectorAttrId)) {
         this.interval = setInterval(() => {
           if (this.dragState.intervalCount > 2) {
             this.resetInterval()
@@ -280,7 +300,7 @@ export default {
         item => typeof item === 'string' ? $.trim(item) : item
       ).filter(item => item)
 
-      const { tagName, selected } = node
+      const { tagName, selected, editable } = node
       const { innerHTML } = dataObject.domProps
 
       const notVoidElements = !VoidElements.includes(tagName)
@@ -334,6 +354,18 @@ export default {
         mousedown,
         mousemove,
         contextmenu: click
+      }
+
+      if (editable) {
+        dataObjectEvents.dblclick = event => {
+          this.editContent(node.id).then(() => {
+            this.$forceUpdate()
+          })
+        }
+
+        dataObjectEvents.input = event => {
+          this.selectElement(node.id).then(() => this.$forceUpdate())
+        }
       }
 
       if (node.name) {

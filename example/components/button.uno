@@ -1,7 +1,7 @@
 <template>
-  <button class="uk-button uk-button-primary" kind="button" editable>
+  <div class="uk-button uk-button-primary" kind="button" editable>
     Sample button
-  </button>
+  </div>
 </template>
 
 <script>
