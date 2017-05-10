@@ -11,7 +11,6 @@ import {
 } from '../../utils'
 import {
   MoveAction,
-  DomType,
   VoidElements
 } from '../../const'
 
@@ -43,7 +42,8 @@ export default {
       'canvasScroll',
       'elementDragging',
       'dropline',
-      'editable'
+      'editable',
+      'elementHelpers'
     ])
   },
 
@@ -150,7 +150,7 @@ export default {
             appendTo: target.getAttribute(SelectorAttrId),
             index: 0
           }).then(object => {
-            this.selectElement(object.id)
+            this.selectElement(object.id).then(() => this.$forceUpdate())
             this.setDefaultStyle(object)
           })
         }
@@ -215,7 +215,13 @@ export default {
         return false
       }
 
-      if (target === currentTarget && this.editable !== target.getAttribute(SelectorAttrId)) {
+      const element = target.getAttribute(SelectorAttrId)
+      const elementObj = this.elementHelpers.getElementObject(element)
+      if (
+        elementObj && elementObj.kind &&
+        target === currentTarget &&
+        this.editable !== element
+      ) {
         this.interval = setInterval(() => {
           if (this.dragState.intervalCount > 2) {
             this.resetInterval()
@@ -345,7 +351,9 @@ export default {
       }
 
       dataObject = Object.assign({}, dataObject)
-      dataObject.class = Object.assign(dataObject.class, classes)
+      if (Object.keys(classes).length > 0 && node.kind) {
+        dataObject.class = Object.assign(dataObject.class, classes)
+      }
 
       const dataObjectEvents = {
         click,
@@ -366,6 +374,26 @@ export default {
         dataObjectEvents.input = event => {
           this.selectElement(node.id).then(() => this.$forceUpdate())
         }
+
+        dataObjectEvents.keydown = event => {
+          if (!event.target.getAttribute('contenteditable')) {
+            return
+          }
+
+          const keyCode = {
+            ENTER: 13
+          }
+
+          switch (event.keyCode) {
+            case keyCode.ENTER:
+              this.iframeDocument.execCommand('insertHTML', false, '<br>')
+              event.preventDefault()
+              event.stopPropagation()
+              break
+            default:
+              break
+          }
+        }
       }
 
       if (node.name) {
@@ -375,11 +403,18 @@ export default {
         dataObject.on = dataObjectEvents
       }
 
-      childNodes = childNodes.map(
-        item => item.domType === DomType.TEXT
-          ? item.dataObject.domProps.innerHTML
-          : renderElement(item)
-      )
+      if (childNodes.length === 1 && !childNodes[0].kind) {
+        dataObject.domProps.innerHTML = childNodes[0]
+      } else {
+        childNodes = childNodes.map(
+          item => renderElement(item)
+        )
+      }
+
+      if (!node.kind) {
+        delete dataObject.attrs['data-uno-id']
+        delete dataObject.class
+      }
 
       return createElement(tagName, dataObject, childNodes)
     }

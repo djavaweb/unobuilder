@@ -1,5 +1,5 @@
 <template>
-  <image />
+  <img kind="image" src="https://www.w3schools.com/css/img_fjords.jpg"/>
 </template>
 
 <script>

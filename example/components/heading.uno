@@ -1,5 +1,5 @@
 <template>
-  <content label="heading">Heading</content>
+  <div kind="heading" editable>Heading</div>
 </template>
 
 <script>
