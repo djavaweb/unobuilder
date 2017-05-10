@@ -228,7 +228,12 @@ export const Icons = {
   BACKGROUND_COLOR: 'background-color',
   BACKGROUND_IMAGE: 'background-image',
   BACKGROUND_VIDEO: 'background-video',
-  BACKGROUND_GRADIENT: 'background-gradient'
+  BACKGROUND_GRADIENT: 'background-gradient',
+  TEXT_TOOLBAR_BOLD: 'text-toolbar-bold',
+  TEXT_TOOLBAR_ITALIC: 'text-toolbar-italic',
+  TEXT_TOOLBAR_STRIKETHROUGH: 'text-toolbar-strikethrough',
+  TEXT_TOOLBAR_ANCHOR: 'text-toolbar-anchor',
+  TEXT_TOOLBAR_COLOR_PICKER: 'text-toolbar-color-picker'
 }
 
 export const Tooltips = {
