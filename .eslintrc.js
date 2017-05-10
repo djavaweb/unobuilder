@@ -9,6 +9,7 @@ module.exports = {
   // required to lint *.vue files
   plugins: [
     'vue',
+    'import',
     'html'
   ],
   // add your custom rules here
@@ -20,6 +21,7 @@ module.exports = {
     'generator-star-spacing': 0,
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
-    'no-use-before-define': 0
+    'no-use-before-define': 0,
+    'import/no-webpack-loader-syntax': 0
   }
 }

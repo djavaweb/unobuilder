@@ -69,6 +69,7 @@ export const KindList = [
   'input',
   'image',
   'button',
+  'video',
   'heading',
   'section',
   'container'
@@ -107,11 +108,6 @@ export const NestedableRules = {
   heading: [],
   section: KindList.filter(item => !['section', 'input'].includes(item)),
   container: KindList.filter(item => !['section', 'container', 'input'].includes(item))
-}
-
-export const DomType = {
-  TAG: 'tag',
-  TEXT: 'text'
 }
 
 export const Panels = {

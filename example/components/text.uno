@@ -1,5 +1,5 @@
 <template>
-  <content inline="true" label="text">You can edit this content by double-clicking it.</content>
+  <div editable kind="text">You can edit this content by double-clicking it. </div>
 </template>
 
 <script>

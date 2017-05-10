@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import Uno from 'uno'
+import HTMLParser from 'unobuilder-parser'
 import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
 import {
@@ -148,15 +149,14 @@ const mutations = {
     // recursively change node id
     const recursive = obj => {
       if (typeof obj !== 'object') return obj
-      const id = utils.RandomUID()
-      obj.id = id
-      // register uno component event
-      obj.dataObject.attrs[utils.SelectorAttrId] = id
-      obj.dataObject.ref = id.replace(/-/g, '')
-
       const classes = {}
 
-      if (obj[utils.AttrType.KIND].length > 0) {
+      if (obj[utils.AttrType.KIND] && obj[utils.AttrType.KIND].length > 0) {
+        const id = utils.RandomUID()
+        obj.id = id
+        obj.dataObject.attrs[utils.SelectorAttrId] = id
+        obj.dataObject.ref = id.replace(/-/g, '')
+
         const value = obj[utils.AttrType.KIND]
         classes[utils.GlobalClassName(value)] = true
         if (value === 'row') {
@@ -165,7 +165,9 @@ const mutations = {
       }
 
       const snapshotClass = Object.assign({}, obj.dataObject.class)
-      obj.dataObject.class = Object.assign(snapshotClass, classes)
+      if (Object.keys(classes).length > 0 && obj.kind) {
+        obj.dataObject.class = Object.assign(snapshotClass, classes)
+      }
 
       if (obj.childNodes.length > 0) {
         for (let i = 0; i < obj.childNodes.length; i++) {
@@ -376,7 +378,12 @@ const mutations = {
     const element = NodeHelpers.getElementObject(state.editable)
     const editableNode = NodeHelpers.getElementNodeById(state.editable)
 
-    element.childNodes[0] = editableNode.innerText
+    const wrapper = document.createElement(element.tagName)
+    wrapper.innerHTML = editableNode.outerHTML
+
+    // console.log(wrapper.innerHTML, wrapper)
+    const newChildNodes = new HTMLParser(wrapper.innerHTML)
+    element.childNodes = newChildNodes.childNodes
   }
 }
 
@@ -549,20 +556,22 @@ const actions = {
       id = utils.GetNodeId(id)
     }
 
-    if (state.editable && state.editable !== id) {
-      dispatch('saveEditable')
-      commit(mutation.REMOVE_ATTRS_ELEMENT, {
-        id: state.editable,
-        name: 'contenteditable'
-      })
-      commit(mutation.SWITCH_EDITABLE)
-    }
-
     const element = NodeHelpers.getElementObject(id)
-    commit(mutation.SELECT_ELEMENT, {
-      element,
-      selected: true
-    })
+    if (element && element.kind) {
+      if (state.editable && state.editable !== id) {
+        dispatch('saveEditable')
+        commit(mutation.REMOVE_ATTRS_ELEMENT, {
+          id: state.editable,
+          name: 'contenteditable'
+        })
+        commit(mutation.SWITCH_EDITABLE)
+      }
+
+      commit(mutation.SELECT_ELEMENT, {
+        element,
+        selected: true
+      })
+    }
 
     // Hide all breadcrumbs again
     commit(mutation.TOGGLE_BREADCRUMB, false)
@@ -581,7 +590,9 @@ const actions = {
     }
 
     const element = NodeHelpers.getElementObject(id)
-    commit(mutation.HOVER_ELEMENT, element)
+    if (element && element.kind) {
+      commit(mutation.HOVER_ELEMENT, element)
+    }
   },
 
   toggleBreadcrumbs ({ commit }) {
@@ -651,7 +662,10 @@ const actions = {
         if (typeof elObject !== 'object') return elObject
         const { id, kind } = elObject
         const element = NodeHelpers.getElementNodeById(id)
-        const computedStyle = iframeWindow.getComputedStyle(element)
+        let computedStyle = {}
+        if (element) {
+          computedStyle = iframeWindow.getComputedStyle(element)
+        }
         const styles = {}
 
         AvailableProps.forEach(propName => {
