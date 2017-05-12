@@ -70,41 +70,7 @@ export default {
       'saveEditable'
     ]),
 
-    resetInterval () {
-      if (this.interval) {
-        clearInterval(this.interval)
-        this.interval = null
-        this.dragState.intervalCount = 0
-      }
-    },
-
-    setAttrs (options) {
-      if (!options.id) return false
-
-      return Promise.resolve(this.setAttrsElement(options))
-    },
-
-    removeAttrs (options) {
-      if (!options.id && !options.name) return false
-
-      return Promise.resolve(this.removeAttrsElement(options))
-    }
-  },
-
-  data () {
-    return {
-      interval: null,
-      dragState: {
-        intervalCount: 0,
-        element: null,
-        x: 0,
-        y: 0
-      }
-    }
-  },
-
-  render (createElement) {
-    const click = event => {
+    click (event) {
       event.preventDefault()
       event.stopPropagation()
 
@@ -129,15 +95,15 @@ export default {
           this.hideBlockPanel()
         }
       })
-    }
+    },
 
-    const mouseover = event => {
+    mouseover (event) {
       if (!this.previewMode && !this.toggleBlockPanel) {
         this.hoverElement(event.target)
       }
-    }
+    },
 
-    const mouseup = event => {
+    mouseup (event) {
       this.resetInterval()
       const { target, currentTarget } = event
       // what we do when component (from left panel) dropped
@@ -163,8 +129,8 @@ export default {
           const id = this.dropline.target
           if (!id) return false
 
-          removeEvent(this.iframeDocument, 'mousemove', mousemove, false)
-          removeEvent(this.iframeDocument, 'mouseup', mouseup, false)
+          removeEvent(this.iframeDocument, 'mousemove', this.mousemove, false)
+          removeEvent(this.iframeDocument, 'mouseup', this.mouseup, false)
 
           const stateElId = this.dragState.element.getAttribute(SelectorAttrId)
           if (stateElId !== id) {
@@ -181,9 +147,9 @@ export default {
 
         this.disableDragElement()
       }
-    }
+    },
 
-    const dragStart = event => {
+    dragStart (event) {
       const { target, pageX, pageY } = event
 
       this.dragState.element = target.cloneNode(true)
@@ -192,8 +158,8 @@ export default {
 
       document.body.appendChild(this.dragState.element)
 
-      addEvent(this.iframeDocument, 'mousemove', mousemove, false)
-      addEvent(this.iframeDocument, 'mouseup', mouseup, false)
+      addEvent(this.iframeDocument, 'mousemove', this.mousemove, false)
+      addEvent(this.iframeDocument, 'mouseup', this.mouseup, false)
 
       this.dragState.x = pageX
       this.dragState.y = pageY
@@ -206,9 +172,9 @@ export default {
       })
 
       this.enableDragElement(target.getAttribute(SelectorAttrId))
-    }
+    },
 
-    const mousedown = event => {
+    mousedown (event) {
       const { target, currentTarget, which } = event
 
       if (which === 3) {
@@ -225,14 +191,14 @@ export default {
         this.interval = setInterval(() => {
           if (this.dragState.intervalCount > 2) {
             this.resetInterval()
-            dragStart(event)
+            this.dragStart(event)
           }
           this.dragState.intervalCount++
         }, 100)
       }
-    }
+    },
 
-    const mousemove = event => {
+    mousemove (event) {
       if (this.interval) {
         this.dragState.intervalCount = 3
       }
@@ -293,8 +259,42 @@ export default {
           canvasScrollTop: this.canvasScroll.top
         })
       }
-    }
+    },
 
+    resetInterval () {
+      if (this.interval) {
+        clearInterval(this.interval)
+        this.interval = null
+        this.dragState.intervalCount = 0
+      }
+    },
+
+    setAttrs (options) {
+      if (!options.id) return false
+
+      return Promise.resolve(this.setAttrsElement(options))
+    },
+
+    removeAttrs (options) {
+      if (!options.id && !options.name) return false
+
+      return Promise.resolve(this.removeAttrsElement(options))
+    }
+  },
+
+  data () {
+    return {
+      interval: null,
+      dragState: {
+        intervalCount: 0,
+        element: null,
+        x: 0,
+        y: 0
+      }
+    }
+  },
+
+  render (createElement) {
     const renderElement = node => {
       if (typeof node === 'string') {
         return node
@@ -356,12 +356,12 @@ export default {
       }
 
       const dataObjectEvents = {
-        click,
-        mouseover,
-        mouseup,
-        mousedown,
-        mousemove,
-        contextmenu: click
+        click: this.click,
+        mouseover: this.mouseover,
+        mouseup: this.mouseup,
+        mousedown: this.mousedown,
+        mousemove: this.mousemove,
+        contextmenu: this.click
       }
 
       if (editable) {
