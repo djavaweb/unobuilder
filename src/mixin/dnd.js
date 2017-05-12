@@ -83,11 +83,12 @@ export default {
           removeEvent(document, 'mouseup', this.mouseup, false)
 
           const item = await Uno.getComponentItemById(this.componentActive)
+          const id = this.dropline.target
           this.addElement({
             name: await Uno.getComponentNameById(this.componentActive),
             object: item.template,
-            appendTo: target.getAttribute(SelectorAttrId),
-            index: 0
+            appendTo: id,
+            index: this.dropline.index
           }).then(object => {
             this.selectElement(object.id).then(() => this.$forceUpdate())
             this.setDefaultStyle(object)
