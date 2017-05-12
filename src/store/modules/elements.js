@@ -980,14 +980,16 @@ const getters = {
       if (childsLength > 1) {
         for (let i = 0; i < childsLength; i++) {
           const childEl = NodeHelpers.getElementNodeById(currentElement.childNodes[i].id)
-          const { top, left, width, height } = childEl.getBoundingClientRect()
-          droplines.push({
-            id: currentElement.childNodes[i].id,
-            top,
-            left,
-            width,
-            height
-          })
+          if (childEl) {
+            const { top, left, width, height } = childEl.getBoundingClientRect()
+            droplines.push({
+              id: currentElement.childNodes[i].id,
+              top,
+              left,
+              width,
+              height
+            })
+          }
         }
 
         const droplineY = dropline.coords.y + canvasScroll.top
