@@ -327,7 +327,7 @@ const mutations = {
       elementId = NodeHelpers.getRealElement(id).id
       index = NodeHelpers.getIndexFromParent(elementId)
     }
-    console.log(elementId)
+
     state.dragging.index = index
     state.dragging.activeId = elementId
   },
@@ -338,6 +338,10 @@ const mutations = {
 
   [mutation.SET_DROPLINE] (state, options) {
     state.dropline = Object.assign(defaultDropline, options)
+  },
+
+  [mutation.RESET_DROPLINE] (state) {
+    state.dropline = defaultDropline
   },
 
   [mutation.SET_ELEMENT_STYLE] (state, { element, snapshot, screenSize, mouseState, disabled, styles }) {
@@ -446,6 +450,7 @@ const actions = {
     commit(mutation.ADD_ELEMENT, options)
     commit(mutation.APPLY_ELEMENT)
     commit(mutation.SET_WINDOW_SCROLL, '-1')
+    dispatch('resetDropline')
     return options.object
   },
 
@@ -474,7 +479,7 @@ const actions = {
    * @param  {String} options.id
    * @return {void}
    */
-  moveElement ({ commit, state }, { action, id, appendTo, index = 0 }) {
+  moveElement ({ commit, state, dispatch }, { action, id, appendTo, index = 0 }) {
     commit(mutation.SNAPSHOT_ELEMENT)
     const srcElement = NodeHelpers.getRequiredParentElement(id, state.snapshot) || NodeHelpers.getElementObject(id, state.snapshot)
     const appendSrcElement = NodeHelpers.getRequiredParentElement(appendTo, state.snapshot) || NodeHelpers.getElementObject(appendTo, state.snapshot)
@@ -500,6 +505,8 @@ const actions = {
       })
 
       commit(mutation.APPLY_ELEMENT)
+
+      dispatch('resetDropline')
 
       return srcElement
     }
@@ -633,6 +640,10 @@ const actions = {
 
   setDropline ({ commit }, options) {
     commit(mutation.SET_DROPLINE, options)
+  },
+
+  resetDropline ({ commit }) {
+    commit(mutation.RESET_DROPLINE)
   },
 
   setElementStyle ({ state, commit, dispatch }, payload) {
