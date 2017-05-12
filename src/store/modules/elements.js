@@ -319,12 +319,19 @@ const mutations = {
       ? !state.dragging.status
       : status
   },
-  [mutation.SET_ACTIVE_ELEMENT] (state, id) {
-    const element = NodeHelpers.getRealElement(id)
-    const index = NodeHelpers.getIndexFromParent(element.id)
+
+  [mutation.SET_ACTIVE_ELEMENT] (state, { id, force = false }) {
+    let index = 0
+    let elementId = id
+    if (!force) {
+      elementId = NodeHelpers.getRealElement(id).id
+      index = NodeHelpers.getIndexFromParent(elementId)
+    }
+    console.log(elementId)
     state.dragging.index = index
-    state.dragging.activeId = element.id
+    state.dragging.activeId = elementId
   },
+
   [mutation.CLEAR_ACTIVE_ELEMENT] (state, id) {
     state.dragging.activeId = null
   },
@@ -614,9 +621,9 @@ const actions = {
   toggleDragElement ({ commit }, status) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, status)
   },
-  enableDragElement ({ commit }, id) {
+  enableDragElement ({ commit }, option) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, true)
-    commit(mutation.SET_ACTIVE_ELEMENT, id)
+    commit(mutation.SET_ACTIVE_ELEMENT, option)
   },
 
   disableDragElement ({ commit }) {

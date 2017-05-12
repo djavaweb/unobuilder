@@ -2,15 +2,11 @@
 import $ from 'jquery'
 import Uno from 'uno'
 import { mapGetters, mapActions } from 'vuex'
+import DnDMixin from '../../mixin/dnd'
 import {
-  addEvent,
-  removeEvent,
-  ClassName,
-  SelectorAttrId,
-  dragElement
+  ClassName
 } from '../../utils'
 import {
-  MoveAction,
   VoidElements
 } from '../../const'
 
@@ -23,6 +19,7 @@ const className = {
 
 export default {
   name: 'elements',
+  mixins: [DnDMixin],
   props: {
     node: {
       type: Object,
@@ -34,16 +31,7 @@ export default {
     ...mapGetters([
       'toggleBlockPanel',
       'canvasScroll',
-      'previewMode',
-      'componentDragging',
-      'componentActive',
-      'iframeWindow',
-      'iframeDocument',
-      'canvasScroll',
-      'elementDragging',
-      'dropline',
-      'editable',
-      'elementHelpers'
+      'previewMode'
     ])
   },
 
@@ -56,12 +44,6 @@ export default {
       'showContextMenu',
       'hideContextMenu',
       'setContextCoords',
-      'disableDragComponent',
-      'addElement',
-      'enableDragElement',
-      'disableDragElement',
-      'moveElement',
-      'setDropline',
       'setDefaultStyle',
       'selectElement',
       'setAttrsElement',
@@ -69,205 +51,6 @@ export default {
       'editContent',
       'saveEditable'
     ]),
-
-    click (event) {
-      event.preventDefault()
-      event.stopPropagation()
-
-      if (this.previewMode) {
-        return
-      }
-
-      const { x, which } = event
-      let { y } = event
-
-      if (which === 3) {
-        y += Math.abs(this.canvasScroll.top)
-        this.setContextCoords({ x, y })
-        this.showContextMenu()
-      } else if (which === 1) {
-        this.hideContextMenu()
-      }
-
-      this.selectElement(event.target).then(() => {
-        this.$forceUpdate()
-        if (this.toggleBlockPanel) {
-          this.hideBlockPanel()
-        }
-      })
-    },
-
-    mouseover (event) {
-      if (!this.previewMode && !this.toggleBlockPanel) {
-        this.hoverElement(event.target)
-      }
-    },
-
-    mouseup (event) {
-      this.resetInterval()
-      const { target, currentTarget } = event
-      // what we do when component (from left panel) dropped
-      if (this.componentDragging) {
-        if (target === currentTarget) {
-          const item = Uno.getComponentItem(this.componentActive)
-          this.addElement({
-            name: this.componentActive,
-            object: item.template,
-            appendTo: target.getAttribute(SelectorAttrId),
-            index: 0
-          }).then(object => {
-            this.selectElement(object.id).then(() => this.$forceUpdate())
-            this.setDefaultStyle(object)
-          })
-        }
-      }
-      // what we do when element (from builder canvas it self) dropped
-      if (this.elementDragging) {
-        this.dragState.element.remove()
-
-        if (target === currentTarget && target !== this.dragState.element) {
-          const id = this.dropline.target
-          if (!id) return false
-
-          removeEvent(this.iframeDocument, 'mousemove', this.mousemove, false)
-          removeEvent(this.iframeDocument, 'mouseup', this.mouseup, false)
-
-          const stateElId = this.dragState.element.getAttribute(SelectorAttrId)
-          if (stateElId !== id) {
-            this.moveElement({
-              action: MoveAction.CUT,
-              appendTo: id,
-              id: stateElId,
-              index: this.dropline.index
-            }).then(element => {
-              this.selectElement(id)
-            })
-          }
-        }
-
-        this.disableDragElement()
-      }
-    },
-
-    dragStart (event) {
-      const { target, pageX, pageY } = event
-
-      this.dragState.element = target.cloneNode(true)
-      this.dragState.element.style.position = 'absolute'
-      this.dragState.element.classList.add('element-dragged')
-
-      document.body.appendChild(this.dragState.element)
-
-      addEvent(this.iframeDocument, 'mousemove', this.mousemove, false)
-      addEvent(this.iframeDocument, 'mouseup', this.mouseup, false)
-
-      this.dragState.x = pageX
-      this.dragState.y = pageY
-
-      // Move element UI
-      dragElement(this.dragState.element, {
-        iframeWindow: this.iframeWindow,
-        state: this.dragState,
-        canvasScrollTop: this.canvasScroll.top
-      })
-
-      this.enableDragElement(target.getAttribute(SelectorAttrId))
-    },
-
-    mousedown (event) {
-      const { target, currentTarget, which } = event
-
-      if (which === 3) {
-        return false
-      }
-
-      const element = target.getAttribute(SelectorAttrId)
-      const elementObj = this.elementHelpers.getElementObject(element)
-      if (
-        elementObj && elementObj.kind &&
-        target === currentTarget &&
-        this.editable !== element
-      ) {
-        this.interval = setInterval(() => {
-          if (this.dragState.intervalCount > 2) {
-            this.resetInterval()
-            this.dragStart(event)
-          }
-          this.dragState.intervalCount++
-        }, 100)
-      }
-    },
-
-    mousemove (event) {
-      if (this.interval) {
-        this.dragState.intervalCount = 3
-      }
-
-      if (this.elementDragging) {
-        const { target, pageX: x, pageY: y } = event
-        this.dragState.x = x
-        this.dragState.y = y
-
-        const targetId = target.getAttribute(SelectorAttrId)
-        const dropline = {
-          index: 0,
-          element: targetId,
-          target: targetId,
-          position: {},
-          offset: {},
-          coords: {
-            x,
-            y
-          }
-        }
-        const targetBounds = target.getBoundingClientRect()
-        let { left, top } = targetBounds
-        const { width, height } = targetBounds
-
-        const remains = {
-          left: x - left,
-          top: (y - top) + this.canvasScroll.top
-        }
-
-        // const isLeft = remains.left < width - 10
-        const isTop = remains.top < height - 10
-
-        const iframeOffset = this.iframeWindow.frameElement.getBoundingClientRect()
-        // Horizontal
-        if (isTop) {
-          dropline.position.top = true
-          top += iframeOffset.top
-          left += iframeOffset.left
-        } else {
-          dropline.position.bottom = true
-          top += iframeOffset.top + height
-          left += iframeOffset.left
-        }
-        dropline.offset = {
-          top,
-          left,
-          height,
-          width
-        }
-
-        this.setDropline(dropline)
-
-        // Move element UI
-        dragElement(this.dragState.element, {
-          iframeWindow: this.iframeWindow,
-          state: this.dragState,
-          canvasScrollTop: this.canvasScroll.top
-        })
-      }
-    },
-
-    resetInterval () {
-      if (this.interval) {
-        clearInterval(this.interval)
-        this.interval = null
-        this.dragState.intervalCount = 0
-      }
-    },
 
     setAttrs (options) {
       if (!options.id) return false
@@ -279,18 +62,6 @@ export default {
       if (!options.id && !options.name) return false
 
       return Promise.resolve(this.removeAttrsElement(options))
-    }
-  },
-
-  data () {
-    return {
-      interval: null,
-      dragState: {
-        intervalCount: 0,
-        element: null,
-        x: 0,
-        y: 0
-      }
     }
   },
 
