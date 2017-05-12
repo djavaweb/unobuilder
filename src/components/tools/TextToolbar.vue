@@ -9,8 +9,14 @@ export default {
   name: 'textToolbar',
   computed: {
     ...mapGetters([
-      'textToolbarOffset'
+      'textToolbarOffset',
+      'iframeDocument'
     ])
+  },
+  methods: {
+    handleExec (cmdName, showUi = false, value) {
+      return this.iframeDocument.execCommand(cmdName, showUi, value)
+    }
   },
   render (h) {
     const { left, top } = this.textToolbarOffset
@@ -18,12 +24,29 @@ export default {
       left: left + 'px',
       top: top + 'px'
     }
+
+    const handleBold = () => {
+      this.handleExec('bold')
+    }
+
+    const handleItalic = () => {
+      this.handleExec('italic')
+    }
+
+    const handleStrikethrough = () => {
+      this.handleExec('strikeThrough')
+    }
+
+    const handleAnchor = () => {
+
+    }
+
     return <div class={ mainClass } style={ styles }>
-      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_BOLD) } />
-      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_ITALIC) } />
-      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_STRIKETHROUGH) } />
-      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_ANCHOR) } />
-      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_COLOR_PICKER) } />
+      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_BOLD) } onClick={ handleBold } />
+      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_ITALIC) } onClick={ handleItalic } />
+      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_STRIKETHROUGH) } onClick={ handleStrikethrough } />
+      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_ANCHOR) } onClick={ handleAnchor } />
+      <button domPropsInnerHTML={ SVGIcon(Icons.TEXT_TOOLBAR_COLOR_PICKER) } onClick={ handleBold } />
     </div>
   }
 }
