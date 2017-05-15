@@ -79,6 +79,7 @@ export default {
 
       // what we do when component (from left panel) dropped
       if (this.componentDragging) {
+        this.resetDropline()
         if (target === currentTarget) {
           removeEvent(document, 'mousemove', this.mousemove, false)
           removeEvent(document, 'mouseup', this.mouseup, false)
@@ -95,7 +96,6 @@ export default {
             this.setDefaultStyle(object)
           })
         }
-        this.disableDragComponent()
       }
 
       // what we do when element (from builder canvas it self) dropped
@@ -111,7 +111,6 @@ export default {
           removeEvent(this.iframeDocument, 'mouseup', this.mouseup, false)
 
           const stateElId = this.dragState.element.getAttribute(SelectorAttrId)
-          console.log(this.componentDragging)
           if (!this.componentDragging && stateElId !== id) {
             this.moveElement({
               action: MoveAction.CUT,
@@ -125,6 +124,7 @@ export default {
         }
       }
 
+      this.disableDragComponent()
       this.disableDragElement()
       // Little hack
       if (this.dragState.element) {
@@ -273,7 +273,6 @@ export default {
         clearInterval(this.interval)
         this.interval = null
         this.dragState.intervalCount = 0
-        this.resetDropline()
       }
     }
   },
