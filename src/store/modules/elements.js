@@ -319,18 +319,29 @@ const mutations = {
       ? !state.dragging.status
       : status
   },
-  [mutation.SET_ACTIVE_ELEMENT] (state, id) {
-    const element = NodeHelpers.getRealElement(id)
-    const index = NodeHelpers.getIndexFromParent(element.id)
+
+  [mutation.SET_ACTIVE_ELEMENT] (state, { id, force = false }) {
+    let index = 0
+    let elementId = id
+    if (!force) {
+      elementId = NodeHelpers.getRealElement(id).id
+      index = NodeHelpers.getIndexFromParent(elementId)
+    }
+
     state.dragging.index = index
-    state.dragging.activeId = element.id
+    state.dragging.activeId = elementId
   },
+
   [mutation.CLEAR_ACTIVE_ELEMENT] (state, id) {
     state.dragging.activeId = null
   },
 
   [mutation.SET_DROPLINE] (state, options) {
     state.dropline = Object.assign(defaultDropline, options)
+  },
+
+  [mutation.RESET_DROPLINE] (state) {
+    state.dropline = defaultDropline
   },
 
   [mutation.SET_ELEMENT_STYLE] (state, { element, snapshot, screenSize, mouseState, disabled, styles }) {
@@ -439,6 +450,7 @@ const actions = {
     commit(mutation.ADD_ELEMENT, options)
     commit(mutation.APPLY_ELEMENT)
     commit(mutation.SET_WINDOW_SCROLL, '-1')
+    dispatch('resetDropline')
     return options.object
   },
 
@@ -467,7 +479,7 @@ const actions = {
    * @param  {String} options.id
    * @return {void}
    */
-  moveElement ({ commit, state }, { action, id, appendTo, index = 0 }) {
+  moveElement ({ commit, state, dispatch }, { action, id, appendTo, index = 0 }) {
     commit(mutation.SNAPSHOT_ELEMENT)
     const srcElement = NodeHelpers.getRequiredParentElement(id, state.snapshot) || NodeHelpers.getElementObject(id, state.snapshot)
     const appendSrcElement = NodeHelpers.getRequiredParentElement(appendTo, state.snapshot) || NodeHelpers.getElementObject(appendTo, state.snapshot)
@@ -493,6 +505,8 @@ const actions = {
       })
 
       commit(mutation.APPLY_ELEMENT)
+
+      dispatch('resetDropline')
 
       return srcElement
     }
@@ -614,9 +628,9 @@ const actions = {
   toggleDragElement ({ commit }, status) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, status)
   },
-  enableDragElement ({ commit }, id) {
+  enableDragElement ({ commit }, option) {
     commit(mutation.TOGGLE_DRAG_ELEMENT, true)
-    commit(mutation.SET_ACTIVE_ELEMENT, id)
+    commit(mutation.SET_ACTIVE_ELEMENT, option)
   },
 
   disableDragElement ({ commit }) {
@@ -626,6 +640,10 @@ const actions = {
 
   setDropline ({ commit }, options) {
     commit(mutation.SET_DROPLINE, options)
+  },
+
+  resetDropline ({ commit }) {
+    commit(mutation.RESET_DROPLINE)
   },
 
   setElementStyle ({ state, commit, dispatch }, payload) {
@@ -973,14 +991,16 @@ const getters = {
       if (childsLength > 1) {
         for (let i = 0; i < childsLength; i++) {
           const childEl = NodeHelpers.getElementNodeById(currentElement.childNodes[i].id)
-          const { top, left, width, height } = childEl.getBoundingClientRect()
-          droplines.push({
-            id: currentElement.childNodes[i].id,
-            top,
-            left,
-            width,
-            height
-          })
+          if (childEl) {
+            const { top, left, width, height } = childEl.getBoundingClientRect()
+            droplines.push({
+              id: currentElement.childNodes[i].id,
+              top,
+              left,
+              width,
+              height
+            })
+          }
         }
 
         const droplineY = dropline.coords.y + canvasScroll.top
