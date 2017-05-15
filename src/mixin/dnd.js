@@ -111,6 +111,7 @@ export default {
           removeEvent(this.iframeDocument, 'mouseup', this.mouseup, false)
 
           const stateElId = this.dragState.element.getAttribute(SelectorAttrId)
+          console.log(this.componentDragging)
           if (!this.componentDragging && stateElId !== id) {
             this.moveElement({
               action: MoveAction.CUT,
@@ -125,6 +126,10 @@ export default {
       }
 
       this.disableDragElement()
+      // Little hack
+      if (this.dragState.element) {
+        this.dragState.element.remove()
+      }
     },
 
     dragStart (event, type) {
