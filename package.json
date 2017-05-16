@@ -98,6 +98,8 @@
     "sinon": "^2.0.0",
     "sinon-chai": "^2.8.0",
     "style-loader": "^0.17.0",
+    "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony",
+    "uglifyjs-webpack-plugin": "^0.4.3",
     "url-loader": "^0.5.8",
     "vue-loader": "^12.0.3",
     "vue-style-loader": "^3.0.1",
@@ -106,7 +108,8 @@
     "webpack-bundle-analyzer": "^2.6.0",
     "webpack-dev-middleware": "^1.10.0",
     "webpack-hot-middleware": "^2.16.1",
-    "webpack-merge": "^4.1.0"
+    "webpack-merge": "^4.1.0",
+    "webpack-uglify-harmony-package": "^1.0.1"
   },
   "engines": {
     "node": ">= 4.0.0",
