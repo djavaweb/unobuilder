@@ -8,7 +8,7 @@
     settings: {
       "id": "map",
       "label": "Map",
-      "icon": "/example/components/icons/map.svg",
+      "icon": "/unobuilder/example/components/icons/map.svg",
       "group": "Component"
     },
     data: {},

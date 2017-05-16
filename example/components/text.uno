@@ -8,7 +8,7 @@
     settings: {
       "id": "text",
       "label": "Text",
-      "icon": "/example/components/icons/text.svg",
+      "icon": "/unobuilder/example/components/icons/text.svg",
       "group": "Component"
     },
     data: {},

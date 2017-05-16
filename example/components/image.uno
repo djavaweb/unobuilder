@@ -8,7 +8,7 @@
     settings: {
       "id": "image",
       "label": "Image",
-      "icon": "/example/components/icons/image.svg",
+      "icon": "/unobuilder/example/components/icons/image.svg",
       "group": "Component"
     },
     data: {},

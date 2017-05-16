@@ -14,7 +14,7 @@
     settings: {
       "id": "column-5",
       "label": "5 Columns",
-      "icon": "/example/components/icons/column-5.svg",
+      "icon": "/unobuilder/example/components/icons/column-5.svg",
       "group": "Grid"
     },
     data: {},

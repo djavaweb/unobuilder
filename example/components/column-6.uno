@@ -15,7 +15,7 @@
     settings: {
       "id": "column-6",
       "label": "6 Columns",
-      "icon": "/example/components/icons/column-6.svg",
+      "icon": "/unobuilder/example/components/icons/column-6.svg",
       "group": "Grid"
     },
     data: {},

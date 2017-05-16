@@ -10,7 +10,7 @@
     settings: {
       "id": "section-container",
       "label": "Section + Container",
-      "icon": "/example/blocks/icons/section-container.svg",
+      "icon": "/unobuilder/example/blocks/icons/section-container.svg",
       "group": "Structures"
     },
     data: {},
