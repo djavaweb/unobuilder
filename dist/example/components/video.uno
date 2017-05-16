@@ -10,7 +10,7 @@
     settings: {
       "id": "video",
       "label": "Video",
-      "icon": "/example/components/icons/video.svg",
+      "icon": "/unobuilder/example/components/icons/video.svg",
       "group": "Component"
     },
     data: {},

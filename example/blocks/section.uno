@@ -12,7 +12,7 @@
     settings: {
       "id": "section",
       "label": "Section",
-      "icon": "/example/blocks/icons/section.svg",
+      "icon": "/unobuilder/example/blocks/icons/section.svg",
       "group": "Structures"
     },
     data: {},

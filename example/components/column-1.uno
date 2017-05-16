@@ -11,7 +11,7 @@
   settings: {
     id: 'column-1',
     label: '1 Column',
-    icon: '/example/components/icons/column-1.svg',
+    icon: '/unobuilder/example/components/icons/column-1.svg',
     group: 'Grid'
   },
   events: {

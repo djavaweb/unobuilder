@@ -13,7 +13,7 @@
     settings: {
       "id": "column-4",
       "label": "4 Columns",
-      "icon": "/example/components/icons/column-4.svg",
+      "icon": "/unobuilder/example/components/icons/column-4.svg",
       "group": "Grid"
     },
     data: {},

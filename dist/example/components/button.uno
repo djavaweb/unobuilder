@@ -10,7 +10,7 @@
     settings: {
       "id": "button",
       "label": "Button",
-      "icon": "/example/components/icons/button.svg",
+      "icon": "/unobuilder/example/components/icons/button.svg",
       "group": "Component"
     },
     data: {},

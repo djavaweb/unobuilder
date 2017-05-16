@@ -8,7 +8,7 @@
     settings: {
       "id": "heading",
       "label": "Heading",
-      "icon": "/example/components/icons/heading.svg",
+      "icon": "/unobuilder/example/components/icons/heading.svg",
       "group": "Component",
       "kind": "heading"
     },
