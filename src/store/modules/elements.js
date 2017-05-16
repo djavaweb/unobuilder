@@ -1162,6 +1162,20 @@ const getters = {
 
   lastInsertedElement (state) {
     return state.lastInserted
+  },
+
+  textToolbarOffset (state, getters) {
+    if (state.selected && state.window) {
+      const node = NodeHelpers.getElementNodeById(state.selected.id)
+      const { left: nodeLeft, top: nodeTop } = node.getBoundingClientRect()
+
+      return {
+        left: nodeLeft + 30,
+        top: nodeTop
+      }
+    }
+
+    return {}
   }
 }
 

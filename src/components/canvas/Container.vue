@@ -8,6 +8,7 @@ import CanvasIframe from './Iframe'
 import BlockComponent from './Block'
 import ElementSelector from '../tools/ElementSelector'
 import ContextMenu from '../tools/ContextMenu'
+import TextToolbar from '../tools/TextToolbar'
 
 const canvasToolClass = `${ ClassPrefix.CANVAS }-tools`
 
@@ -18,7 +19,8 @@ export default {
       'screenSize',
       'previewMode',
       'contextMenu',
-      'canvasScroll'
+      'canvasScroll',
+      'editable'
     ]),
     canvasStyle () {
       const sizeConst = this.screenSize.toUpperCase()
@@ -59,6 +61,7 @@ export default {
     let elementSelector
     let blockComponent
     let contextMenu
+    let textToolbar
 
     if (this.screenSize !== ScreenType.LARGE) {
       mediaQueryStatus = <MediaQueryStatus />
@@ -73,6 +76,10 @@ export default {
       contextMenu = <ContextMenu />
     }
 
+    if (this.editable) {
+      textToolbar = <TextToolbar />
+    }
+
     const canvasToolStyles = {
       top: `${ this.canvasScroll.top }px`
     }
@@ -84,6 +91,7 @@ export default {
           { elementSelector }
           { blockComponent }
           { contextMenu }
+          { textToolbar }
         </div>
         <CanvasIframe />
       </div>

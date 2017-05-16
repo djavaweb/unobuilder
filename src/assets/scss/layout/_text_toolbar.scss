@@ -1,0 +1,18 @@
+.#{$prefix} {
+  &__text-toolbar {
+    background-color: $charcoal-grey;
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    z-index: 32;
+    pointer-events: all;
+    button {
+      background-color: $transparent-black;
+      border: 0;
+      padding: 10px;
+      &:hover {
+        background-color: lighten($transparent-black, 10);
+      }
+    }
+  }
+}
