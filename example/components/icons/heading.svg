@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="33px" height="17px" viewBox="0 0 33 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 40.3 (33839) - http://www.bohemiancoding.com/sketch -->
+    <title>A140B1EF-4926-4E74-832E-D8CF44A39025</title>
+    <desc>Created with sketchtool.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="All-panels-open" transform="translate(-113.000000, -479.000000)">
+            <g id="Left-panel" transform="translate(0.000000, 111.000000)">
+                <g id="Add-element" transform="translate(30.000000, 0.000000)">
+                    <g id="Component" transform="translate(11.000000, 264.000000)">
+                        <g id="component" transform="translate(1.000000, 33.000000)">
+                            <g id="heading-icon" transform="translate(71.000000, 68.000000)">
+                                <path d="M2,19 L31,19" id="Line" stroke="#FFFFFF" stroke-width="2" stroke-linecap="square"></path>
+                                <text id="ABC" font-family="AvenirNext-Bold, Avenir Next" font-size="15" font-weight="bold" fill="#FFFFFF">
+                                    <tspan x="1" y="15">ABC</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
