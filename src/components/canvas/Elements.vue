@@ -167,11 +167,13 @@ export default {
         }
       }
 
-      if (node.name) {
-        const { events } = Uno.getComponentItem(node.name) || Uno.getBlockItem(node.name)
-        dataObject.on = Object.assign(events, dataObjectEvents)
-      } else {
-        dataObject.on = dataObjectEvents
+      if (!this.previewMode) {
+        if (node.name) {
+          const { events } = Uno.getComponentItem(node.name) || Uno.getBlockItem(node.name)
+          dataObject.on = Object.assign(events, dataObjectEvents)
+        } else {
+          dataObject.on = dataObjectEvents
+        }
       }
 
       if (childNodes.length === 1 && !childNodes[0].kind) {

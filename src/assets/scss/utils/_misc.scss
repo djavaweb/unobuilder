@@ -1,9 +1,11 @@
 @mixin OpenSans {
   font-family: 'Open Sans', arial, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 @mixin Lato {
   font-family: 'Lato', arial, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 @mixin PreventSelect {

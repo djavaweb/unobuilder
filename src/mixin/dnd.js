@@ -9,7 +9,8 @@ import {
 } from '../utils'
 import {
   MoveAction,
-  ClassPrefix
+  ClassPrefix,
+  RootElementTag
 } from '../const'
 
 export default {
@@ -23,7 +24,8 @@ export default {
       'elementDragging',
       'dropline',
       'editable',
-      'elementHelpers'
+      'elementHelpers',
+      'previewMode'
     ])
   },
 
@@ -184,8 +186,8 @@ export default {
     mousedown (event) {
       const { target, currentTarget, which } = event
 
-      if (which === 3) {
-        return false
+      if (this.previewMode || which === 3 || target.hasAttribute(RootElementTag)) {
+        return
       }
 
       const element = target.getAttribute(SelectorAttrId)
