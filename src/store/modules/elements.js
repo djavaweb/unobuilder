@@ -856,8 +856,12 @@ const getters = {
   },
 
   rootElement (state) {
-    const element = state.window.document.querySelector(`[${ utils.SelectorAttrId }][${ RootElementTag }]`)
-    return NodeHelpers.getElementObjectByNode(element, state.current)
+    if (state.window && state.window.document) {
+      const element = state.window.document.querySelector(`[${ utils.SelectorAttrId }][${ RootElementTag }]`)
+      return NodeHelpers.getElementObjectByNode(element, state.current)
+    }
+
+    return {}
   },
 
   /**
