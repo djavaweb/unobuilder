@@ -1,7 +1,7 @@
 <script>
-import { Icons, Labels, ButtonType, Tooltips } from '../../const'
-
-/* eslint-disable no-unused-vars */
+import { Icons, Labels, ButtonType, Tooltips, PropertyPanelIds } from '../../const'
+import { mapActions, mapGetters } from 'vuex'
+import { srcType as ColorPickerType } from 'vue-sketch-color-picker'
 import AccordionContent from '../accordion/AccordionContent'
 import AccordionContentItem from '../accordion/AccordionContentItem'
 import Row from '../fields/Row'
@@ -15,17 +15,45 @@ const BACKGROUND_IMAGE = 'image'
 const BACKGROUND_VIDEO = 'video'
 const BACKGROUND_GRADIENT = 'gradient'
 
+const panelId = PropertyPanelIds.BACKGROUND
 export default {
   name: 'backgroundProperties',
   data () {
     return {
-      openPanel: BACKGROUND_COLOR
+      openPanel: BACKGROUND_COLOR,
+      updated: false
     }
   },
 
+  computed: {
+    ...mapGetters([
+      'mouseStatePanel'
+    ])
+  },
+
   methods: {
-    bgColorUpdate (color) {
-      console.log('background color', color)
+    ...mapActions([
+      'setStyle'
+    ]),
+
+    handleStyle (config, snapshot = false) {
+      return this.setStyle({
+        snapshot,
+        mouseState: this.mouseStatePanel[panelId],
+        styles: {
+          backgroundColor: config
+        }
+      }).then(() => {
+        this.$forceUpdate()
+      })
+    },
+
+    handleUpdate (colors) {
+      this.handleStyle(colors, colors.source !== ColorPickerType.SATURATION)
+    },
+
+    handleMouseup (colors) {
+      this.handleStyle(colors, true)
     }
   },
 
@@ -64,7 +92,7 @@ export default {
     switch (this.openPanel) {
       case BACKGROUND_COLOR:
         bgPropTitleEl = Labels.BACKGROUND_COLOR_SETTINGS
-        bgPropContentEl = <Colorpicker on-update={ this.bgColorUpdate } />
+        bgPropContentEl = <Colorpicker on-mouseup={ this.handleMouseup } on-update={ this.handleUpdate } />
         break
 
       case BACKGROUND_IMAGE:

@@ -57,6 +57,10 @@ export default {
       this.$emit('update', color)
       this.currentColor = color
     },
+    mouseup (color) {
+      this.$emit('mouseup', color)
+      // this.currentColor = color
+    },
     openPopup () {
       this.display = !this.display
     },
@@ -82,7 +86,7 @@ export default {
       boxPicker = <a class={ boxClass } style={ boxStyles } onClick={ this.openPopup }></a>
     }
 
-    const sketchColorPicker = <Colorpicker scheme='dark' on-update={ this.update } {...{ props: { colors: this.colors } } } /> // eslint-disable-line
+    const sketchColorPicker = <Colorpicker scheme='dark' on-update={ this.update } on-mouseup={ this.mouseup } {...{ props: { colors: this.colors } } } /> // eslint-disable-line
     let colorPicker
 
     if (!this.popup) {

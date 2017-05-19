@@ -36,6 +36,23 @@ class NodeUtils {
     }
   }
 
+  setElementObject (newElements, elements) {
+    elements = !elements ? this.state.current : elements
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].childNodes && elements[i].childNodes.length > 0) {
+        const elementObject = this.setElementObject(newElements, elements[i].childNodes)
+        if (elementObject) {
+          return elementObject
+        }
+      }
+
+      if (elements[i].id === newElements.id) {
+        elements[i] = newElements
+        return elements
+      }
+    }
+  }
+
   getElementDeep (id, index = 0) {
     const element = this.state.window.document.querySelector(SelectorId(id))
     if (element && element.parentElement && element.parentElement.hasAttribute(SelectorAttrId)) {

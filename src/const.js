@@ -330,7 +330,7 @@ export const Units = {
 export const ElementOffsetGap = 4
 
 export const AvailableProps = [
-  'display'
+  'display',
   // 'flexDirection',
   // 'alignContent',
   // 'alignItems',
@@ -374,6 +374,6 @@ export const AvailableProps = [
   // 'textDecoration',
   // 'textAlign',
   // 'letterSpacing',
-  // 'backgroundColor',
+  'backgroundColor'
   // 'backgroundImage'
 ]

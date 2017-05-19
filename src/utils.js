@@ -246,9 +246,15 @@ export const dragElement = (target, options) => {
   target.style.left = `${ x - (width / 2) + left }px`
 }
 
+/**
+ * Value formatter
+ * @param {Object} property
+ */
 export const valueFormatter = property => {
   const valueType = typeof property.value
   if (valueType === 'object' && 'rgba' in property.value) {
+    const { r, g, b, a } = property.value.rgba
+    return `rgba(${ r }, ${ g }, ${ b }, ${ a })`
   }
 
   if ('unit' in property) {

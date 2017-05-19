@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import Uno from 'uno'
 import HTMLParser from 'unobuilder-parser'
+import cssProps from 'unobuilder-style-to-object'
 import * as mutation from '../mutation-types'
 import * as utils from '../../utils'
 import {
@@ -345,17 +346,11 @@ const mutations = {
   },
 
   [mutation.SET_ELEMENT_STYLE] (state, { element, snapshot, screenSize, mouseState, disabled, styles }) {
-    const fromElement = snapshot ? state.snapshot : state.current
+    const fromElement = snapshot ? state.snapshot : utils.CloneObject(state.current)
     const el = element ? element.id : state.selected.id
 
     const selected = NodeHelpers.getElementObject(el, fromElement)
-    for (const key in styles) {
-      const value = styles[key]
-      selected.cssProperties[screenSize][mouseState][key] = {
-        disabled,
-        value
-      }
-    }
+    selected.cssProperties[screenSize][mouseState] = cssProps(styles)
   },
 
   [mutation.SET_ATTRS_ELEMENT] (state, payload) {
@@ -392,7 +387,6 @@ const mutations = {
     const wrapper = document.createElement(element.tagName)
     wrapper.innerHTML = editableNode.outerHTML
 
-    // console.log(wrapper.innerHTML, wrapper)
     const newChildNodes = new HTMLParser(wrapper.innerHTML)
     element.childNodes = newChildNodes.childNodes
   }
@@ -654,9 +648,16 @@ const actions = {
       snapshot: true
     }, payload)
 
-    if (object.snapshot) commit(mutation.SNAPSHOT_ELEMENT)
+    if (object.snapshot) {
+      commit(mutation.SNAPSHOT_ELEMENT)
+    }
+
     commit(mutation.SET_ELEMENT_STYLE, object)
-    if (object.snapshot) commit(mutation.APPLY_ELEMENT)
+
+    if (object.snapshot) {
+      commit(mutation.APPLY_ELEMENT)
+    }
+
     dispatch('reselectElement')
   },
 
@@ -708,9 +709,8 @@ const actions = {
                   newStyles[propName] = globalProperties[screenSize][kind].none[propName].value
                 }
               })
-              dispatch('setElementStyle', Object.assign({}, newStyle, {
-                styles: newStyles
-              }))
+              const newProps = Object.assign({}, newStyle, { styles })
+              dispatch('setElementStyle', newProps)
             } else {
               dispatch('setElementStyle', newStyle)
             }
@@ -974,6 +974,10 @@ const getters = {
 
   dropline (state, getter, rootState) {
     const dropline = Object.assign({}, state.dropline)
+    if (!state.window && state.window.frameElement) {
+      return
+    }
+
     const iframeOffset = state.window.frameElement.getBoundingClientRect()
     const canvasScroll = getter.canvasScroll
 

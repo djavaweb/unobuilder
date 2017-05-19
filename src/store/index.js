@@ -79,7 +79,7 @@ const actions = {
     dispatch('toggleInputPanel', '')
   },
 
-  setStyle ({ getters, dispatch }, { mouseState, styles = {}, element, snapshot }) {
+  setStyle ({ getters, dispatch }, { mouseState, styles = {}, element, snapshot = true }) {
     let defaultAction = 'setElementStyle'
     if (getters.isGlobalStyleActive) {
       defaultAction = 'setGlobalStyle'
@@ -89,7 +89,8 @@ const actions = {
       mouseState,
       screenSize: getters.screenSize,
       element,
-      styles
+      styles,
+      snapshot
     })
   },
 
