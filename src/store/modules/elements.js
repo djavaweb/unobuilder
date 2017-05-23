@@ -697,7 +697,7 @@ const actions = {
           element: elObject,
           screenSize,
           snapshot: false,
-          styles
+          styles: cssProps(styles)
         }
 
         dispatch('setGlobalStyle', newStyle)
