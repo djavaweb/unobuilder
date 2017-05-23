@@ -17,49 +17,69 @@ export default {
       defalut: true
     },
     colors: {
-      type: Object,
-      default: () => {
-        return {
-          hex: '#ffffff',
-          hsl: {
-            h: 0,
-            s: 0,
-            l: 0,
-            a: 1
-          },
-          hsv: {
-            h: 0,
-            s: 0,
-            v: 1,
-            a: 1
-          },
-          rgba: {
-            r: 255,
-            g: 255,
-            b: 255,
-            a: 1
-          },
-          a: 1
-        }
-      }
+      type: Object
     }
   },
 
   data () {
     return {
       display: false,
-      currentColor: ''
+      colorModel: undefined
+    }
+  },
+
+  created () {
+    const defaultColor = {
+      hex: '#000000',
+      hsl: {
+        h: 0,
+        s: 0,
+        l: 0,
+        a: 0
+      },
+      hsv: {
+        h: 0,
+        s: 0,
+        v: 1,
+        a: 0
+      },
+      rgba: {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0
+      },
+      a: 0
+    }
+    this.colorModel = (this.colors && this.colors.rgba) ? this.colors : defaultColor
+  },
+
+  computed: {
+    value: {
+      get () {
+        if (this.colorModel && this.colorModel.rgba) {
+          return this.colorModel
+        }
+
+        return this.colors
+      },
+
+      set (value) {
+        if (value && value.rgba) {
+          this.colorModel = value
+        }
+      }
     }
   },
 
   methods: {
-    update (color) {
-      this.$emit('update', color)
-      this.currentColor = color
+    update (color, oldColor) {
+      this.value = color
+      this.$emit('update', color, oldColor)
     },
-    mouseup (color) {
-      this.$emit('mouseup', color)
-      // this.currentColor = color
+    change (color) {
+      this.value = color
+      this.$emit('change', color)
     },
     openPopup () {
       this.display = !this.display
@@ -73,35 +93,28 @@ export default {
     }
   },
 
-  created () {
-    this.currentColor = this.colors
-  },
-
   render (h) {
     let boxPicker
     if (this.popup) {
       const boxStyles = {
-        backgroundColor: this.currentColor.hex
+        backgroundColor: this.colorModel.hex
       }
       boxPicker = <a class={ boxClass } style={ boxStyles } onClick={ this.openPopup }></a>
     }
 
-    const sketchColorPicker = <Colorpicker scheme='dark' on-update={ this.update } on-mouseup={ this.mouseup } {...{ props: { colors: this.colors } } } /> // eslint-disable-line
-    let colorPicker
-
-    if (!this.popup) {
-      colorPicker = sketchColorPicker
-    }
+    console.log('sdfdsf', this.colorModel)
+    const sketchColorPicker = <Colorpicker scheme='dark' on-update={ this.update } on-change={ this.change } colors={ this.value } />
+    let colorPickerWrapper = sketchColorPicker
 
     if (this.popup && this.display) {
-      colorPicker = <div class={ overlayClass } onClick={ this.closePopup }>
+      colorPickerWrapper = <div class={ overlayClass } onClick={ this.closePopup }>
         { sketchColorPicker }
         <Button nativeOnClick={ this.hidePopup } label={ Labels.OK } />
       </div>
     }
 
     return (
-      <div class={ mainClass }> { boxPicker } { colorPicker }</div>
+      <div class={ mainClass }> { boxPicker } { colorPickerWrapper }</div>
     )
   }
 }
