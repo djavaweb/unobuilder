@@ -974,7 +974,7 @@ const getters = {
 
   dropline (state, getter, rootState) {
     const dropline = Object.assign({}, state.dropline)
-    if (!state.window && state.window.frameElement) {
+    if (!state.window) {
       return
     }
 
