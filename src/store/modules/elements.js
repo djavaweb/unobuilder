@@ -346,7 +346,7 @@ const mutations = {
   },
 
   [mutation.SET_ELEMENT_STYLE] (state, { element, snapshot, screenSize, mouseState, disabled, styles }) {
-    const fromElement = snapshot ? state.snapshot : utils.CloneObject(state.current)
+    const fromElement = snapshot ? state.snapshot : state.current
     const el = element ? element.id : state.selected.id
 
     const selected = NodeHelpers.getElementObject(el, fromElement)
