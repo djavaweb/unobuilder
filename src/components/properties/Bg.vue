@@ -1,7 +1,6 @@
 <script>
 import { Icons, Labels, ButtonType, Tooltips, PropertyPanelIds } from '../../const'
 import { mapActions, mapGetters } from 'vuex'
-import { srcType as ColorPickerType } from 'vue-sketch-color-picker'
 import AccordionContent from '../accordion/AccordionContent'
 import AccordionContentItem from '../accordion/AccordionContentItem'
 import Row from '../fields/Row'
@@ -27,7 +26,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'mouseStatePanel'
+      'mouseStatePanel',
+      'styles'
     ])
   },
 
@@ -37,7 +37,7 @@ export default {
     ]),
 
     handleStyle (config, snapshot = false) {
-      return this.setStyle({
+      this.setStyle({
         snapshot,
         mouseState: this.mouseStatePanel[panelId],
         styles: {
@@ -48,16 +48,27 @@ export default {
       })
     },
 
-    handleUpdate (colors) {
-      this.handleStyle(colors, colors.source !== ColorPickerType.SATURATION)
+    handleUpdate (colors, oldColor) {
+      this.setStyle({
+        snapshot: false,
+        mouseState: this.mouseStatePanel[panelId],
+        styles: {
+          backgroundColor: oldColor
+        }
+      }).then(() => {
+        this.handleStyle(colors, true)
+      })
     },
 
-    handleMouseup (colors) {
-      this.handleStyle(colors, true)
+    handleChange (colors, oldColor) {
+      this.handleStyle(colors, false)
     }
   },
 
   render (h) {
+    const currentMouseState = this.mouseStatePanel[panelId]
+    const propStyles = this.styles[currentMouseState]
+
     const typeSelectorButtons = [
       {
         icon: Icons.CLOSE,
@@ -91,8 +102,9 @@ export default {
 
     switch (this.openPanel) {
       case BACKGROUND_COLOR:
+        const colors = typeof propStyles.backgroundColor === 'object' ? propStyles.backgroundColor : {}
         bgPropTitleEl = Labels.BACKGROUND_COLOR_SETTINGS
-        bgPropContentEl = <Colorpicker on-mouseup={ this.handleMouseup } on-update={ this.handleUpdate } />
+        bgPropContentEl = <Colorpicker on-change={ this.handleChange } on-update={ this.handleUpdate } colors={ colors } />
         break
 
       case BACKGROUND_IMAGE:
