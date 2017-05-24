@@ -62,10 +62,10 @@ export default {
       }
 
       this.selectElement(event.target).then(() => {
-        this.$forceUpdate()
         if (this.toggleBlockPanel) {
           this.hideBlockPanel()
         }
+        this.$forceUpdate()
       })
     },
 
@@ -102,15 +102,15 @@ export default {
 
       // what we do when element (from builder canvas it self) dropped
       if (this.elementDragging) {
+        removeEvent(this.iframeDocument, 'mousemove', this.mousemove, false)
+        removeEvent(this.iframeDocument, 'mouseup', this.mouseup, false)
+
         if (!this.dragState.element) return
         this.dragState.element.remove()
 
         if (target === currentTarget && target !== this.dragState.element) {
           const id = this.dropline.target
           if (!id) return false
-
-          removeEvent(this.iframeDocument, 'mousemove', this.mousemove, false)
-          removeEvent(this.iframeDocument, 'mouseup', this.mouseup, false)
 
           const stateElId = this.dragState.element.getAttribute(SelectorAttrId)
           if (!this.componentDragging && stateElId !== id) {

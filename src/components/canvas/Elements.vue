@@ -73,8 +73,19 @@ export default {
 
       let { dataObject, childNodes } = node
 
+      if (!node.kind) {
+        delete dataObject.attrs['data-uno-id']
+        delete dataObject.class
+      }
+
+      if (childNodes.length === 1 && !childNodes[0].kind) {
+        dataObject.domProps.innerHTML = childNodes[0]
+      } else {
+        dataObject.domProps = {}
+      }
+
       childNodes = childNodes.map(
-        item => typeof item === 'string' ? $.trim(item) : item
+        item => typeof item === 'string' ? $.trim(item) : renderElement(item)
       ).filter(item => item)
 
       const { tagName, selected, editable } = node
@@ -174,19 +185,6 @@ export default {
         } else {
           dataObject.on = dataObjectEvents
         }
-      }
-
-      if (childNodes.length === 1 && !childNodes[0].kind) {
-        dataObject.domProps.innerHTML = childNodes[0]
-      } else {
-        childNodes = childNodes.map(
-          item => renderElement(item)
-        )
-      }
-
-      if (!node.kind) {
-        delete dataObject.attrs['data-uno-id']
-        delete dataObject.class
       }
 
       return createElement(tagName, dataObject, childNodes)
